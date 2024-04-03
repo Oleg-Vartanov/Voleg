@@ -10,6 +10,6 @@ class HomeController
     #[Route('/')]
     public function home(): Response
     {
-        return new Response('home page');
+        return new Response('Server is running...');
     }
 }

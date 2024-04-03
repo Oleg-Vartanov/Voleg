@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -19,9 +20,36 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
-    public function __construct(ManagerRegistry $registry)
-    {
+    public function __construct(
+        ManagerRegistry $registry,
+        private readonly UserPasswordHasherInterface $passwordHasher
+    ) {
         parent::__construct($registry, User::class);
+    }
+
+    public function create(
+        string $email,
+        string $plaintextPassword,
+        array $roles = [],
+        string $displayName = ''
+    ): User {
+        $user = new User();
+        $user->setEmail($email);
+        $user->setPassword(
+            $this->passwordHasher->hashPassword($user, $plaintextPassword)
+        );
+        $user->setRoles($roles);
+        $user->setDisplayName($displayName);
+
+        return $user;
+    }
+
+    public function save(User $user): User
+    {
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
+
+        return $user;
     }
 
     /**
@@ -36,6 +64,11 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setPassword($newHashedPassword);
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
+    }
+
+    public function findOneByEmail(string $email): ?User
+    {
+        return $this->findOneBy(['email' => $email]);
     }
 
     //    /**
