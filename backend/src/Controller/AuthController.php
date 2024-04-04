@@ -4,8 +4,8 @@ namespace App\Controller;
 
 use App\DTO\Auth\UserDto;
 use App\Entity\User;
+use App\Factory\UserFactory;
 use App\Repository\UserRepository;
-use App\Service\AuthService;
 use http\Exception\InvalidArgumentException;
 use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -64,12 +64,12 @@ class AuthController extends AbstractController
         return $this->json(['message' => 'Notification was send.']);
     }
 
-    #[Route('/sign-up', name: 'sign_up', methods: ['POST'])]
+    #[Route('/sign-up/create', name: 'sign_up', methods: ['POST'])]
     public function signUp(
         Request $request,
-        UserRepository $userRepository,
         ValidatorInterface $validator,
-        AuthService $authService
+        UserFactory $userFactory,
+        UserRepository $userRepository
     ): Response {
         $userParams = $request->getPayload()->all();
 
@@ -83,7 +83,7 @@ class AuthController extends AbstractController
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $user = $authService->createUser($userDto);
+        $user = $userFactory->create($userDto);
         $userRepository->save($user);
 
         // TODO: Verify via email. Send notification to email.
@@ -91,5 +91,12 @@ class AuthController extends AbstractController
         return $this->json([
             'message' => 'User was created. Now you need to verify it via email.'
         ], Response::HTTP_CREATED);
+    }
+
+    #[Route('/sign-up/verify', name: 'sign_up_verify', methods: ['POST'])]
+    public function verifyUser(Request $request, UserRepository $userRepository): Response {
+
+        // TODO: Redirect to login by link?
+        return $this->json(['message' => 'User was verified.'], Response::HTTP_OK);
     }
 }
