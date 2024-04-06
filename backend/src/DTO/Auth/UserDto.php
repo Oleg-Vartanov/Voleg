@@ -3,6 +3,7 @@
 namespace App\DTO\Auth;
 
 use App\Entity\User;
+use App\Validator\Constraints as CustomAssert;
 use App\Trait\Arrayable;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -11,7 +12,7 @@ class UserDto
     use Arrayable;
 
     #[Assert\NotBlank, Assert\Type('string'), Assert\Email, Assert\Length(max: 180),
-        Assert\UniqueEntity(entityClass: User::class, fields: ['email'])]
+        CustomAssert\UniqueEntityField(entityClass: User::class, field: 'email')]
     public mixed $email = '';
 
     #[Assert\NotBlank, Assert\Type('string'), Assert\Length(min: 6),
