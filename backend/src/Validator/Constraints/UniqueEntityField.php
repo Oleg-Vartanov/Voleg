@@ -5,17 +5,22 @@ namespace App\Validator\Constraints;
 use Attribute;
 use Symfony\Component\Validator\Constraint;
 
-use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
-
 #[Attribute] class UniqueEntityField extends Constraint
 {
     public string $message = 'This value is already used.';
     public string $entityClass;
     public string $field;
 
-    public function __construct(string $entityClass, string $field)
-    {
-        parent::__construct(['entityClass' => $entityClass, 'field' => $field]);
+    public function __construct(
+        string $entityClass,
+        string $field,
+        array $options = [],
+        ?array $groups = null,
+        mixed $payload = null
+    ) {
+        $options = array_merge(['entityClass' => $entityClass, 'field' => $field], $options);
+
+        parent::__construct($options, $groups, $payload);
     }
 
     /** @inheritDoc */
