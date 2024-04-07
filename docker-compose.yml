@@ -57,3 +57,10 @@ services:
     env_file:
       - ./.env
       - ./.env.local
+
+  mailer:
+    container_name: ${PROJECT_NAME}_mailer
+    image: maildev/maildev
+    ports:
+      - '1080:1080'
+      - '1025:1025'
