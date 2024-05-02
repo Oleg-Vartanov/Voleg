@@ -16,6 +16,7 @@ class UserDto
     public mixed $email = '';
 
     #[Assert\NotBlank, Assert\Type('string'), Assert\Length(min: 6),
+        Assert\Regex(pattern: '/^\S+$/', message: 'The value can\'t contain spaces.'),
         Assert\Regex(pattern: '/\d+/i', message: 'Should have at least one digit.'),
         Assert\Regex(pattern: '/[#?!@$%^&*-]+/i', message: 'Should have at least one character from [#?!@$%^&*-].'),
         Assert\Regex(pattern: '/[A-Z]+/', message: 'Should have at least one upper case character.')]
