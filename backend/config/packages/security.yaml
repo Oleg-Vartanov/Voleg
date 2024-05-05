@@ -21,9 +21,11 @@ security:
                 check_path: sign_in
                 username_path: email
                 password_path: password
-            login_link:
-                check_route: sign_in_check_link
-                signature_properties: ['id', 'email']
+#            login_link:
+#                check_route: sign_in_check_link
+#                signature_properties: ['id', 'email']
+#                max_uses: 3 # https://symfony.com/doc/current/security/login_link.html#allow-a-link-to-only-be-used-once
+#                lifetime: 300 # seconds
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall

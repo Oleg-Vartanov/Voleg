@@ -4,7 +4,6 @@ namespace App\Factory;
 
 use App\DTO\Auth\UserDto;
 use App\Entity\User;
-use InvalidArgumentException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 readonly class UserFactory
@@ -14,12 +13,11 @@ readonly class UserFactory
     ) {
     }
 
-    public function create(mixed $userData): User
+    public function create(array|UserDto $userData): User
     {
         return match (true) {
             is_array($userData) => $this->createByArray($userData),
             $userData instanceof UserDto => $this->createByUserDto($userData),
-            default => throw new InvalidArgumentException('Can\'t create user by '.gettype($userData)),
         };
     }
 
