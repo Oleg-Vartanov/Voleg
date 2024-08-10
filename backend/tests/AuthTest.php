@@ -23,13 +23,18 @@ class AuthTest extends WebTestCase
         $userRepo = $this->getContainer()->get(UserRepository::class);
         $lastUserId = $userRepo->findOneBy([], ['id' => 'desc'])?->getId() ?? 1;
 
-        $response = $this->signUpRequest(json_encode([
+        $testUser = [
             'email' => 'user'.($lastUserId + 1).'@example.com',
             'password' => '!Qwerty1',
             'displayName' => 'John Doe',
-        ]));
+        ];
+
+        $response = $this->signUpRequest(json_encode($testUser));
 
         $this->assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
+
+        $email = $this->getMailerMessage();
+        $this->assertEmailHtmlBodyContains($email, $testUser['displayName']);
     }
 
     /** @test */
