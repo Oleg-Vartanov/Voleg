@@ -53,7 +53,8 @@ readonly class AuthService
         return $this->router->generate('sign_up_verify', [
             'userId' => $user->getId(),
             'code' => $user->getVerificationCode(),
-            'redirectUrl' => $this->router->generate('home'),
+            // TODO: Set a redirect link. Maybe must be passed as a parameter for a sign-up endpoint?
+            'redirectUrl' => $this->router->generate('home', referenceType: UrlGeneratorInterface::ABSOLUTE_URL),
         ], UrlGeneratorInterface::NETWORK_PATH);
     }
 

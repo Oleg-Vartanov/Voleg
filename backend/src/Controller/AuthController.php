@@ -3,18 +3,19 @@
 namespace App\Controller;
 
 use App\DTO\Auth\UserDto;
+use App\DTO\Auth\VerificationLinkDto;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\ApiService;
 use App\Service\AuthService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-
 
 class AuthController extends AbstractController
 {
@@ -34,22 +35,17 @@ class AuthController extends AbstractController
         ]);
     }
 
+    /** @throws TransportExceptionInterface */
     #[Route('/sign-up/create', name: 'sign_up', methods: ['POST'])]
     public function signUp(
         Request $request,
-        ValidatorInterface $validator,
-        AuthService $authService
+        ApiService $apiService,
+        AuthService $authService,
     ): Response {
-        $userParams = $request->getPayload()->all();
+        $userDto = UserDto::createByArray($request->getPayload()->all());
 
-        $userDto = UserDto::createByArray($userParams);
-
-        $errors = $validator->validate($userDto);
-        if ($errors->count() > 0) {
-            return $this->json([
-                'message' => 'Sign up error.',
-                'errors' => $errors
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        if ($response = $apiService->validatorErrorResponse($userDto)) {
+            return $response;
         }
 
         $authService->signUp($userDto);
@@ -62,30 +58,28 @@ class AuthController extends AbstractController
     #[Route('/sign-up/verify', name: 'sign_up_verify', methods: ['GET'])]
     public function verifyUser(
         Request $request,
-        UserRepository $userRepository,
+        ApiService $apiService,
         AuthService $authService,
         ParameterBagInterface $parameterBag,
+        UserRepository $userRepository,
     ): Response {
-        $userId = $request->query->get('userId');
-        $code = $request->query->get('code');
-        $redirectUrl = $request->query->get('redirectUrl');
+        $link = VerificationLinkDto::createByArray($request->query->all());
 
-        if (is_null($userId) || is_null($code) || is_null($redirectUrl)) {
-            return new Response('Required GET params: userId, code, redirectUrl', Response::HTTP_UNPROCESSABLE_ENTITY);
+        if (!$apiService->isValid($link)) {
+            // TODO: Add a nicer page for internal error.
+            return new Response('Invalid verification link. Please contact the support.', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $user = $userRepository->find($userId) ?? throw new NotFoundHttpException();
+        $user = $userRepository->find($link->userId) ?? throw new NotFoundHttpException();
 
-        if ($user->isVerified()) $this->redirect($redirectUrl);
+        $verified = $user->isVerified() || $authService->verifyUser($link->code, $user);
 
-        $verified = $authService->verifyUser($code, $user);
-
-        $template = $verified ? 'email/verification-success.html.twig' : 'email/verification-error.html.twig';
+        $template = $verified ? 'email/verification-success.html.twig' : 'email/verification-fail.html.twig';
 
         return $this->render($template, [
             'displayName' => $user->getDisplayName(),
             'supportEmail' => $parameterBag->get('support_email'),
-            'continueLink' => $redirectUrl,
+            'continueLink' => $link->redirectUrl,
         ]);
     }
 }
