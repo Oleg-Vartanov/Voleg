@@ -6,9 +6,7 @@ use App\DTO\Auth\UserDto;
 use App\DTO\Auth\VerificationLinkDto;
 use App\Entity\User;
 use App\Repository\UserRepository;
-use App\Service\ApiService;
 use App\Service\AuthService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +15,7 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
-class AuthController extends AbstractController
+class AuthController extends ApiController
 {
     #[Route('/sign-in/json', name: 'sign_in_json', methods: ['POST'])]
     public function signIn(#[CurrentUser] ?User $user): Response
@@ -39,12 +37,11 @@ class AuthController extends AbstractController
     #[Route('/sign-up/create', name: 'sign_up', methods: ['POST'])]
     public function signUp(
         Request $request,
-        ApiService $apiService,
         AuthService $authService,
     ): Response {
         $userDto = UserDto::createByArray($request->getPayload()->all());
 
-        if ($response = $apiService->validatorErrorResponse($userDto)) {
+        if ($response = $this->validationErrorResponse($userDto)) {
             return $response;
         }
 
@@ -58,14 +55,13 @@ class AuthController extends AbstractController
     #[Route('/sign-up/verify', name: 'sign_up_verify', methods: ['GET'])]
     public function verifyUser(
         Request $request,
-        ApiService $apiService,
         AuthService $authService,
         ParameterBagInterface $parameterBag,
         UserRepository $userRepository,
     ): Response {
         $link = VerificationLinkDto::createByArray($request->query->all());
 
-        if (!$apiService->isValid($link)) {
+        if (!$this->isValid($link)) {
             // TODO: Add a nicer page for internal error.
             return new Response('Invalid verification link. Please contact the support.', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
@@ -73,7 +69,6 @@ class AuthController extends AbstractController
         $user = $userRepository->find($link->userId) ?? throw new NotFoundHttpException();
 
         $verified = $user->isVerified() || $authService->verifyUser($link->code, $user);
-
         $template = $verified ? 'email/verification-success.html.twig' : 'email/verification-fail.html.twig';
 
         return $this->render($template, [
