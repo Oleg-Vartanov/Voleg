@@ -52,7 +52,7 @@ class AuthController extends ApiController
         ], Response::HTTP_CREATED);
     }
 
-    #[Route('/sign-up/verify', name: 'sign_up_verify', methods: ['GET'])]
+    #[Route('/sign-up/verify', name: 'sign_up_verify', methods: ['GET', 'POST'])]
     public function verifyUser(
         Request $request,
         AuthService $authService,

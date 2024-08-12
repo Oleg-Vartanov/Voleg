@@ -48,7 +48,7 @@ readonly class AuthService
         return $verified;
     }
 
-    private function createVerificationLink(User $user): string
+    public function createVerificationLink(User $user): string
     {
         return $this->router->generate('sign_up_verify', [
             'userId' => $user->getId(),
@@ -59,7 +59,7 @@ readonly class AuthService
     }
 
     /** @throws TransportExceptionInterface */
-    private function sendVerificationEmail(User $user): void
+    public function sendVerificationEmail(User $user): void
     {
         if ($user->isVerified()) {
             throw new LogicException('User is already verified.');
