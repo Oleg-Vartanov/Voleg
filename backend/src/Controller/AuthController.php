@@ -5,8 +5,11 @@ namespace App\Controller;
 use App\DTO\Auth\UserDto;
 use App\DTO\Auth\VerificationLinkDto;
 use App\Entity\User;
+use App\Factory\ApiTokenFactory;
 use App\Repository\UserRepository;
 use App\Service\AuthService;
+use Doctrine\ORM\EntityManagerInterface;
+use Random\RandomException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,24 +20,29 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 class AuthController extends ApiController
 {
-    #[Route('/sign-in/json', name: 'sign_in_json', methods: ['POST'])]
-    public function signIn(#[CurrentUser] ?User $user): Response
-    {
+    /** @throws RandomException */
+    #[Route('/auth/sign-in', name: 'sign_in', methods: ['POST'])]
+    public function signIn(
+        #[CurrentUser] ?User $user,
+        ApiTokenFactory $factory,
+        EntityManagerInterface $entityManager
+    ): Response {
         if (is_null($user)) {
             return $this->json(['message' => 'missing credentials'], Response::HTTP_UNAUTHORIZED);
         }
 
-        // TODO
-        $token = 'token'; // somehow create an API token for $user
+        $token = $factory->create($user);
+        $entityManager->persist($token);
+        $entityManager->flush();
 
         return $this->json([
             'user'  => $user->getUserIdentifier(),
-            'token' => $token,
+            'token' => $token->getValue(),
         ]);
     }
 
     /** @throws TransportExceptionInterface */
-    #[Route('/sign-up/create', name: 'sign_up', methods: ['POST'])]
+    #[Route('/auth/sign-up', name: 'sign_up', methods: ['POST'])]
     public function signUp(
         Request $request,
         AuthService $authService,
@@ -52,7 +60,7 @@ class AuthController extends ApiController
         ], Response::HTTP_CREATED);
     }
 
-    #[Route('/sign-up/verify', name: 'sign_up_verify', methods: ['GET', 'POST'])]
+    #[Route('/auth/sign-up/verify', name: 'sign_up_verify', methods: ['GET', 'POST'])]
     public function verifyUser(
         Request $request,
         AuthService $authService,
