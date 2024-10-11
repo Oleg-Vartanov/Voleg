@@ -42,11 +42,9 @@ class AuthController extends ApiController
     }
 
     /** @throws TransportExceptionInterface */
-    #[Route('/auth/sign-up', name: 'sign_up', methods: ['POST'])]
-    public function signUp(
-        Request $request,
-        AuthService $authService,
-    ): Response {
+    #[Route('/auth/sign-up', name: 'sign_up', methods: ['POST'], format: 'json')]
+    public function signUp(Request $request, AuthService $authService): Response
+    {
         $userDto = UserDto::createByArray($request->getPayload()->all());
 
         if ($response = $this->validationErrorResponse($userDto)) {
@@ -60,7 +58,7 @@ class AuthController extends ApiController
         ], Response::HTTP_CREATED);
     }
 
-    #[Route('/auth/sign-up/verify', name: 'sign_up_verify', methods: ['GET', 'POST'])]
+    #[Route('/auth/sign-up/verify', name: 'sign_up_verify', methods: ['GET'])]
     public function verifyUser(
         Request $request,
         AuthService $authService,
