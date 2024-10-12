@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\RouterInterface;
 
 class AuthTest extends WebTestCase
 {
@@ -17,6 +18,7 @@ class AuthTest extends WebTestCase
     private EntityManagerInterface $entityManager;
     private UserFactory $userFactory;
     private UserRepository $userRepository;
+    private RouterInterface $router;
 
     public function setUp(): void
     {
@@ -25,6 +27,7 @@ class AuthTest extends WebTestCase
         $this->entityManager = $this->getContainer()->get(EntityManagerInterface::class);
         $this->userFactory = $this->getContainer()->get(UserFactory::class);
         $this->userRepository = $this->getContainer()->get(UserRepository::class);
+        $this->router = $this->getContainer()->get(RouterInterface::class);
     }
 
     /** @test */
@@ -36,6 +39,7 @@ class AuthTest extends WebTestCase
             'email' => 'user'.($lastUserId + 1).'@example.com',
             'password' => '!Qwerty1',
             'displayName' => 'John Doe',
+            'verificationEmailRedirectUrl' => 'https://www.google.com',
         ];
 
         $response = $this->signUpRequest(json_encode($testUser));
@@ -57,7 +61,18 @@ class AuthTest extends WebTestCase
     }
 
     /** @test */
-    public function verifyUser(): void
+    public function verifyUserWithoutUrl()
+    {
+        $this->verifyUser();
+    }
+
+    /** @test */
+    public function verifyUserWithUrl()
+    {
+        $this->verifyUser('https://www.google.com');
+    }
+
+    private function verifyUser(?string $redirectUrl = null): void
     {
         // Create user.
         $lastUserId = $this->userRepository->findOneBy([], ['id' => 'desc'])?->getId() ?? 1;
@@ -75,7 +90,7 @@ class AuthTest extends WebTestCase
         $this->assertEmailHtmlBodyContains($email, $user->getVerificationCode());
 
         // Verify email via link from an email.
-        $verificationLink = $this->authService->createVerificationLink($user);
+        $verificationLink = $this->authService->createVerificationLink($user, $redirectUrl);
         $this->client->request(method: 'GET', uri: $verificationLink);
         $response = $this->client->getResponse();
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
@@ -85,7 +100,8 @@ class AuthTest extends WebTestCase
     private function signUpRequest(string $bodyJson): Response
     {
         $headers = ['CONTENT_TYPE' => 'application/json'];
-        $this->client->request(method: 'POST', uri: '/sign-up/create', server: $headers, content: $bodyJson);
+        $url = $this->router->generate('sign_up');
+        $this->client->request(method: 'POST', uri: $url, server: $headers, content: $bodyJson);
 
         return $this->client->getResponse();
     }
