@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\DTO\Auth\UserDto;
+use App\DTO\Auth\SignUpDto;
 use App\DTO\Auth\VerificationLinkDto;
 use App\Entity\User;
 use App\Factory\ApiTokenFactory;
@@ -10,6 +10,7 @@ use App\Repository\UserRepository;
 use App\Service\AuthService;
 use Doctrine\ORM\EntityManagerInterface;
 use Random\RandomException;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -45,13 +46,13 @@ class AuthController extends ApiController
     #[Route('/auth/sign-up', name: 'sign_up', methods: ['POST'], format: 'json')]
     public function signUp(Request $request, AuthService $authService): Response
     {
-        $userDto = UserDto::createByArray($request->getPayload()->all());
+        $dto = SignUpDto::createByArray($request->getPayload()->all());
 
-        if ($response = $this->validationErrorResponse($userDto)) {
+        if ($response = $this->validationErrorResponse($dto)) {
             return $response;
         }
 
-        $authService->signUp($userDto);
+        $authService->signUp($dto);
 
         return $this->json([
             'message' => 'User was created. Now you need to verify it via email.'
@@ -68,7 +69,6 @@ class AuthController extends ApiController
         $link = VerificationLinkDto::createByArray($request->query->all());
 
         if (!$this->isValid($link)) {
-            // TODO: Add a nicer page for internal error.
             return new Response('Invalid verification link. Please contact the support.', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
@@ -80,7 +80,23 @@ class AuthController extends ApiController
         return $this->render($template, [
             'displayName' => $user->getDisplayName(),
             'supportEmail' => $parameterBag->get('support_email'),
-            'continueLink' => $link->redirectUrl,
+            'continueLink' => $link->redirectUrl ?? null,
         ]);
+    }
+
+    #[Route('/sign-out', name: 'sign_out', methods: ['POST'])]
+    public function signOut(Request $request, Security $security, AuthService $service, EntityManagerInterface $entityManager): Response
+    {
+        $apiToken = $service->getApiToken($request);
+        if (is_null($apiToken)) {
+            throw new \LogicException();
+        }
+
+        $entityManager->remove($apiToken);
+        $entityManager->flush();
+
+        $security->logout(false);
+
+        return new Response(status: Response::HTTP_NO_CONTENT);
     }
 }

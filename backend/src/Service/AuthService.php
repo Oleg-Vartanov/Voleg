@@ -2,13 +2,16 @@
 
 namespace App\Service;
 
-use App\DTO\Auth\UserDto;
+use App\DTO\Auth\SignUpDto;
+use App\Entity\ApiToken;
 use App\Entity\User;
 use App\Factory\UserFactory;
+use App\Repository\ApiTokenRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -18,21 +21,23 @@ use Symfony\Component\Routing\RouterInterface;
 readonly class AuthService
 {
     public function __construct(
+        private ApiTokenRepository $apiTokenRepository,
+        private EntityManagerInterface $entityManager,
         private MailerInterface $mailer,
-        private UserFactory $userFactory,
         private ParameterBagInterface $parameterBag,
         private RouterInterface $router,
-        private EntityManagerInterface $entityManager
+        private UserFactory $userFactory,
     ) {
     }
 
     /** @throws TransportExceptionInterface */
-    public function signUp(UserDto $userDto): void
+    public function signUp(SignUpDto $dto): void
     {
-        $user = $this->userFactory->create($userDto);
+        $user = $this->userFactory->create($dto);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
-        $this->sendVerificationEmail($user);
+
+        $this->sendVerificationEmail($user, $dto->verificationEmailRedirectUrl ?? null);
     }
 
     public function verifyUser(string $code, User $user): bool
@@ -48,18 +53,17 @@ readonly class AuthService
         return $verified;
     }
 
-    public function createVerificationLink(User $user): string
+    public function createVerificationLink(User $user, ?string $redirectUrl = null): string
     {
         return $this->router->generate('sign_up_verify', [
             'userId' => $user->getId(),
             'code' => $user->getVerificationCode(),
-            // TODO: Set a redirect link. Maybe must be passed as a parameter for a sign-up endpoint?
-            'redirectUrl' => $this->router->generate('home', referenceType: UrlGeneratorInterface::ABSOLUTE_URL),
+            'redirectUrl' => $redirectUrl,
         ], UrlGeneratorInterface::NETWORK_PATH);
     }
 
     /** @throws TransportExceptionInterface */
-    public function sendVerificationEmail(User $user): void
+    public function sendVerificationEmail(User $user, ?string $redirectUrl = null): void
     {
         if ($user->isVerified()) {
             throw new LogicException('User is already verified.');
@@ -71,12 +75,24 @@ readonly class AuthService
             ->subject('Verify Sign Up')
             ->htmlTemplate('email/sign-up.html.twig')
             ->context([
-                'verifyLink' => $this->createVerificationLink($user),
+                'verifyLink' => $this->createVerificationLink($user, $redirectUrl),
                 'displayName' => $user->getDisplayName(),
                 'supportEmail' => $this->parameterBag->get('support_email'),
             ])
         ;
 
         $this->mailer->send($email);
+    }
+
+    public function getApiToken(Request $request): ?ApiToken
+    {
+        $authorizationHeader = $request->headers->get('Authorization');
+        if (is_null($authorizationHeader) || !str_contains($authorizationHeader, 'Bearer')) {
+            return null;
+        }
+
+        $tokenValue = substr($authorizationHeader, 7); // Remove "Bearer ".
+
+        return $this->apiTokenRepository->findOneByValue($tokenValue);
     }
 }

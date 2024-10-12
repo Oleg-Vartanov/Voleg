@@ -7,21 +7,24 @@ use App\Validator\Constraints as CustomAssert;
 use App\Trait\Arrayable;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class UserDto
+class SignUpDto
 {
     use Arrayable;
 
     #[Assert\NotBlank, Assert\Type('string'), Assert\Email, Assert\Length(max: 180),
         CustomAssert\UniqueEntityField(entityClass: User::class, field: 'email')]
-    public mixed $email = '';
+    public mixed $email;
 
     #[Assert\NotBlank, Assert\Type('string'), Assert\Length(min: 6),
         Assert\Regex(pattern: '/^\S+$/', message: 'The value can\'t contain spaces.'),
         Assert\Regex(pattern: '/\d+/i', message: 'Should have at least one digit.'),
         Assert\Regex(pattern: '/[#?!@$%^&*-]+/i', message: 'Should have at least one character from [#?!@$%^&*-].'),
         Assert\Regex(pattern: '/[A-Z]+/', message: 'Should have at least one upper case character.')]
-    public mixed $password = '';
+    public mixed $password;
 
     #[Assert\NotBlank, Assert\Type('string'), Assert\Length(max: 255)]
-    public mixed $displayName = '';
+    public mixed $displayName;
+
+    #[Assert\Type('string'), Assert\Url]
+    public mixed $verificationEmailRedirectUrl;
 }

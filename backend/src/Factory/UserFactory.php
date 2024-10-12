@@ -2,7 +2,7 @@
 
 namespace App\Factory;
 
-use App\DTO\Auth\UserDto;
+use App\DTO\Auth\SignUpDto;
 use App\Entity\User;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -13,11 +13,11 @@ readonly class UserFactory
     ) {
     }
 
-    public function create(array|UserDto $userData): User
+    public function create(array|SignUpDto $userData): User
     {
         return match (true) {
             is_array($userData) => $this->createByArray($userData),
-            $userData instanceof UserDto => $this->createByUserDto($userData),
+            $userData instanceof SignUpDto => $this->createByUserDto($userData),
         };
     }
 
@@ -41,8 +41,12 @@ readonly class UserFactory
         return call_user_func_array([$this, 'createByParams'], $params);
     }
 
-    private function createByUserDto(UserDto $userDto): User
+    private function createByUserDto(SignUpDto $dto): User
     {
-        return $this->createByArray($userDto->toArray());
+        return $this->createByParams(
+            email: $dto->email,
+            password: $dto->password,
+            displayName: $dto->displayName,
+        );
     }
 }

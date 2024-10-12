@@ -10,11 +10,11 @@ class VerificationLinkDto
     use Arrayable;
 
     #[Assert\NotBlank, Assert\Type('digit'), Assert\Positive]
-    public mixed $userId = '';
+    public mixed $userId;
 
     #[Assert\NotBlank, Assert\Type('string')]
-    public mixed $code = '';
+    public mixed $code;
 
-    #[Assert\NotBlank, Assert\Url]
-    public mixed $redirectUrl = '';
+    #[Assert\Type('string'), Assert\Url]
+    public mixed $redirectUrl;
 }
