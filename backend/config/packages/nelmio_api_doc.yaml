@@ -1,0 +1,24 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Project
+            description: THERE IS NO TOMORROW!
+            version: 1.0.0
+        servers:
+            - url: '%app.url%'
+              description: API over HTTP
+#            - url: https://api.example.com/secured
+#              description: API over HTTPS
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+#                    bearerFormat: JWT
+            security:
+                - Bearer: [ ]
+    areas: # to filter documented areas
+        path_patterns:
+#            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+            - ^/auth
+            - ^/sign-out

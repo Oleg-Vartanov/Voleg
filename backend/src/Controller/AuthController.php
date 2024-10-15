@@ -9,6 +9,8 @@ use App\Factory\ApiTokenFactory;
 use App\Repository\UserRepository;
 use App\Service\AuthService;
 use Doctrine\ORM\EntityManagerInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Attributes as OA;
 use Random\RandomException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -19,8 +21,26 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
+#[OA\Tag(name: 'Authorization')]
 class AuthController extends ApiController
 {
+    /* OpenAi Documentation */
+    #[OA\RequestBody(
+        content: new OA\JsonContent(properties: [
+            new OA\Property(property: 'email', type: 'string'),
+            new OA\Property(property: 'password', type: 'string'),
+        ])
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Sign in successful',
+        content: new OA\JsonContent(properties: [
+            new OA\Property(property: 'email', type: 'string'),
+            new OA\Property(property: 'token', type: 'string'),
+        ])
+    )]
+    #[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Missing credentials')]
+
     /** @throws RandomException */
     #[Route('/auth/sign-in', name: 'sign_in', methods: ['POST'])]
     public function signIn(
@@ -42,6 +62,11 @@ class AuthController extends ApiController
         ]);
     }
 
+    /* OpenAi Documentation */
+    #[OA\RequestBody(content: new Model(type: SignUpDto::class, groups: ['documentation']))]
+    #[OA\Response(response: Response::HTTP_CREATED, description: 'Sign up successful')]
+    #[OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Validation errors')]
+
     /** @throws TransportExceptionInterface */
     #[Route('/auth/sign-up', name: 'sign_up', methods: ['POST'], format: 'json')]
     public function signUp(Request $request, AuthService $authService): Response
@@ -58,6 +83,12 @@ class AuthController extends ApiController
             'message' => 'User was created. Now you need to verify it via email.'
         ], Response::HTTP_CREATED);
     }
+
+    /* OpenAi Documentation */
+    #[OA\RequestBody(content: new Model(type: VerificationLinkDto::class, groups: ['documentation']))]
+    #[OA\Response(response: Response::HTTP_OK, description: 'Verified page')]
+    #[OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Invalid link')]
+    #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'Invalid link')]
 
     #[Route('/auth/sign-up/verify', name: 'sign_up_verify', methods: ['GET'])]
     public function verifyUser(
@@ -83,6 +114,10 @@ class AuthController extends ApiController
             'continueLink' => $link->redirectUrl ?? null,
         ]);
     }
+
+    /* OpenAi Documentation */
+    #[OA\Response(response: Response::HTTP_NO_CONTENT, description: 'Successfully signed out')]
+    #[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
 
     #[Route('/sign-out', name: 'sign_out', methods: ['POST'])]
     public function signOut(Request $request, Security $security, AuthService $service, EntityManagerInterface $entityManager): Response
