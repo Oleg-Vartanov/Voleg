@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\DTO\Auth\SignUpDto;
 use App\DTO\Auth\VerificationLinkDto;
+use App\DTO\Validator\ValidationErrorResponse;
 use App\Entity\User;
 use App\Factory\ApiTokenFactory;
 use App\Repository\UserRepository;
@@ -65,7 +66,11 @@ class AuthController extends ApiController
     /* OpenAi Documentation */
     #[OA\RequestBody(content: new Model(type: SignUpDto::class, groups: ['documentation']))]
     #[OA\Response(response: Response::HTTP_CREATED, description: 'Sign up successful')]
-    #[OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Validation errors')]
+    #[OA\Response(
+        response: Response::HTTP_UNPROCESSABLE_ENTITY,
+        description: 'Validation errors',
+        content: new Model(type: ValidationErrorResponse::class)
+    )]
 
     /** @throws TransportExceptionInterface */
     #[Route('/auth/sign-up', name: 'sign_up', methods: ['POST'], format: 'json')]
@@ -88,7 +93,7 @@ class AuthController extends ApiController
     #[OA\RequestBody(content: new Model(type: VerificationLinkDto::class, groups: ['documentation']))]
     #[OA\Response(response: Response::HTTP_OK, description: 'Verified page')]
     #[OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Invalid link')]
-    #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'Invalid link')]
+    #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'Invalid user')]
 
     #[Route('/auth/sign-up/verify', name: 'sign_up_verify', methods: ['GET'])]
     public function verifyUser(

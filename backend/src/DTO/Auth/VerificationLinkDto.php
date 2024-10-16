@@ -23,7 +23,7 @@ class VerificationLinkDto
     public mixed $code;
 
     #[Groups(['documentation'])]
-    #[OA\Property(type: 'string')]
+    #[OA\Property(type: 'string', example: 'https://www.google.com')]
     #[Assert\Type('string'), Assert\Url]
     public mixed $redirectUrl;
 }

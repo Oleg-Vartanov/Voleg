@@ -17,7 +17,7 @@ class SignUpDto
     #[Groups(['documentation'])]
     #[Assert\NotBlank, Assert\Type('string'), Assert\Email, Assert\Length(max: 180),
         CustomAssert\UniqueEntityField(entityClass: User::class, field: 'email')]
-    #[OA\Property(description: 'User\'s unique identifier.', type: 'string')]
+    #[OA\Property(description: 'User\'s unique identifier.', type: 'string', example: 'name@mail.com')]
     public mixed $email;
 
     #[Groups(['documentation'])]
@@ -26,16 +26,16 @@ class SignUpDto
         Assert\Regex(pattern: '/\d+/i', message: 'Should have at least one digit.'),
         Assert\Regex(pattern: '/[#?!@$%^&*-]+/i', message: 'Should have at least one character from [#?!@$%^&*-].'),
         Assert\Regex(pattern: '/[A-Z]+/', message: 'Should have at least one upper case character.')]
-    #[OA\Property(type: 'string')]
+    #[OA\Property(type: 'string', example: 'StrongPassword!1')]
     public mixed $password;
 
     #[Groups(['documentation'])]
     #[Assert\NotBlank, Assert\Type('string'), Assert\Length(max: 255)]
-    #[OA\Property(type: 'string')]
+    #[OA\Property(type: 'string', example: 'Cool Name')]
     public mixed $displayName;
 
     #[Groups(['documentation'])]
     #[Assert\Type('string'), Assert\Url]
-    #[OA\Property(type: 'string')]
+    #[OA\Property(type: 'string', example: 'https://www.google.com')]
     public mixed $verificationEmailRedirectUrl;
 }
