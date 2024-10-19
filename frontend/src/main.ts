@@ -1,6 +1,5 @@
-import './assets/main.css'
-
-console.log('asd2w');
+import './assets/scss/index.scss';
+// import 'bootstrap/dist/js/bootstrap.bundle';
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
