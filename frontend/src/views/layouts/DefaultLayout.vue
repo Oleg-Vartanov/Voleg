@@ -11,10 +11,6 @@ import NavBar from '../../components/NavBar.vue';
 
 <style>
 body {
-  background-color: #d9d8d8;
-}
-
-.main-container {
-  margin: 80px 10px 132px;
+  background-color: #b7ccb7;
 }
 </style>

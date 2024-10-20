@@ -2,5 +2,7 @@
 </script>
 
 <template>
-  Home Page
+  <div class="ov-center">
+    Home Page
+  </div>
 </template>
