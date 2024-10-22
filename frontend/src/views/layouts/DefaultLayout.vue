@@ -3,8 +3,8 @@ import NavBar from '../../components/NavBar.vue';
 </script>
 
 <template>
-  <NavBar></NavBar>
   <div class="main-container">
+    <NavBar></NavBar>
     <router-view></router-view>
   </div>
 </template>

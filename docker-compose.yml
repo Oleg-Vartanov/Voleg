@@ -50,8 +50,8 @@ services:
     container_name: ${PROJECT_NAME}_node
     image: node:latest
     working_dir: /var/www/html/frontend
-    command: tail -f /dev/null
-#    command: npm run dev -- --host
+#    command: tail -f /dev/null
+    command: npm run dev -- --host
     ports:
       - '8012:5173'
     volumes:
