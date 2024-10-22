@@ -19,6 +19,11 @@ const index = createRouter({
           component: () => import('../views/AboutView.vue'),
         },
         {
+          path: '/pricing',
+          name: 'pricing',
+          component: () => import('../views/PricingView.vue'),
+        },
+        {
           path: '/sign-in',
           name: 'signIn',
           component: () => import('../views/SignInView.vue'),

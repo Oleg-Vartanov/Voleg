@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import ColorThemeToggle from './ColorThemeToggle.vue';
+import {useRoute} from 'vue-router'
 
 let centerRoutes: { name: string, title: string }[] = [
   {name: 'home', title: 'Home'},
   {name: 'about', title: 'About'},
+  {name: 'pricing', title: 'Pricing'},
 ];
+
+const route = useRoute();
+
+function routerLinkClass(routeName: string) {
+  return routeName === route.name ? 'active text-white' : '';
+}
 </script>
 
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
 
       <button
@@ -28,12 +36,12 @@ let centerRoutes: { name: string, title: string }[] = [
           <img src="/vue-logo.svg" width="35" height="25" alt="logo">
         </a>
 
-        <ul class="navbar-nav col-lg-6 justify-content-lg-center">
+        <ul class="navbar-nav col-lg-6 justify-content-lg-center nav-pills">
           <li v-for="route in centerRoutes" class="nav-item">
             <router-link
                 class="nav-link"
                 :to="{ name: route.name }"
-                :class="this.$route.name === route.name ? 'text-white' : 'link-success'"
+                :class="routerLinkClass(route.name)"
             >
               {{ route.title }}
             </router-link>
@@ -49,7 +57,7 @@ let centerRoutes: { name: string, title: string }[] = [
         </ul>
 
         <div class="d-lg-flex col-lg-3 justify-content-lg-end">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav nav-pills">
             <li class="nav-item nav-link">
               <ColorThemeToggle></ColorThemeToggle>
             </li>
@@ -57,7 +65,7 @@ let centerRoutes: { name: string, title: string }[] = [
               <router-link
                   class="nav-link"
                   :to="{ name: 'signIn' }"
-                  :class="this.$route.name === 'signIn' ? 'text-white' : 'link-success'"
+                  :class="routerLinkClass('signIn')"
               >
                 Sign In
               </router-link>
