@@ -10,14 +10,26 @@ define include_env_file
 endef
 $(foreach env_file,$(ENV_FILES),$(eval $(call include_env_file,$(env_file))))
 
+PHP_CONTAINER = docker exec $(PROJECT_NAME)_php
+NODE_CONTAINER = docker exec $(PROJECT_NAME)_node
+
 init:
 	docker compose build
 	docker compose up -d
-	docker exec -it $(PROJECT_NAME)_php composer install
-	#docker exec -it $(PROJECT_NAME)_php chmod -R 777 var
-	docker exec -it $(PROJECT_NAME)_node npm install
-	docker exec -it $(PROJECT_NAME)_node npm run build
+	$(PHP_CONTAINER) composer install --no-interaction
+	#$(PHP_CONTAINER) chmod -R 777 var
+	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate --no-interaction
+	$(NODE_CONTAINER) npm install
+	$(NODE_CONTAINER) npm run build
 
-# Run frontend dev
+# Run frontend dev.
 watch:
-	docker exec -it $(PROJECT_NAME)_node npm run dev -- --host
+	$(NODE_CONTAINER) npm run dev -- --host
+
+# Run backend migrations.
+migrate:
+	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate
+
+# Start mail consumer.
+mailer:
+	$(PHP_CONTAINER) php bin/console messenger:consume async
