@@ -30,6 +30,11 @@ watch:
 migrate:
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate
 
+# Run backend tests.
+test:
+	$(PHP_CONTAINER) php bin/phpunit
+
 # Start mail consumer.
 mailer:
 	$(PHP_CONTAINER) php bin/console messenger:consume async
+

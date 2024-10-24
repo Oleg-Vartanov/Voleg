@@ -12,7 +12,7 @@ security:
             security: false
         public:
             pattern:
-                - ^/auth
+                - ^/auth/sign-up
             security: false
         secured:
             lazy: true
@@ -29,7 +29,7 @@ security:
 #                lifetime: 300 # seconds
     access_control:
 #        - { path: ^/test, roles: ROLE_USER }
-        - { path: ^/auth, roles: PUBLIC_ACCESS }
+        - { path: ^/auth/sign-up, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: PUBLIC_ACCESS }
 when@test:
     security:
