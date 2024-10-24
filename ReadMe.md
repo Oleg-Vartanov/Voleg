@@ -2,7 +2,9 @@
 Em, it's just my personal site. Nothing to see here for now ;)<br />
 
 <h3>Deploy project locally:</h3>
-- Just run `make init` from the root directory.
+- Open root directory.
+- Create `.env.local` from `.env` and setup variables there.
+- Run `make init` command.
 
 Run `make watch` to develop frontend on http://localhost:8012
 (dev build http://localhost:8011).
