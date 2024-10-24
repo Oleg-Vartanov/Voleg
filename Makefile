@@ -32,6 +32,9 @@ migrate:
 
 # Run backend tests.
 test:
+	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:drop --force
+	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:create
+	$(PHP_CONTAINER) php bin/console --env=test doctrine:schema:create
 	$(PHP_CONTAINER) php bin/phpunit
 
 # Start mail consumer.

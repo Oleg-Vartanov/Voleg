@@ -33,7 +33,7 @@ class AuthTest extends WebTestCase
     /** @test */
     public function signUpSuccess(): void
     {
-        $lastUserId = $this->userRepository->findOneBy([], ['id' => 'desc'])?->getId() ?? 1;
+        $lastUserId = $this->userRepository->findOneBy([], ['id' => 'desc'])?->getId() ?? 0;
 
         $testUser = [
             'email' => 'user'.($lastUserId + 1).'@example.com',
@@ -72,10 +72,50 @@ class AuthTest extends WebTestCase
         $this->verifyUser('https://www.google.com');
     }
 
+    /** @test */
+    public function signInSuccess(): void
+    {
+        $lastUserId = $this->userRepository->findOneBy([], ['id' => 'desc'])?->getId() ?? 0;
+
+        $user = $this->userFactory->create([
+            'email' => 'user'.($lastUserId + 1).'@example.com',
+            'password' => '!Qwerty1',
+            'displayName' => 'John Doe',
+        ]);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        $this->authService->verifyUser($user->getVerificationCode(), $user);
+
+        $headers = ['CONTENT_TYPE' => 'application/json'];
+        $url = $this->router->generate('sign_in');
+        $this->client->request(method: 'POST', uri: $url, server: $headers, content: json_encode([
+            'email' => $user->getEmail(),
+            'password' => '!Qwerty1',
+        ]));
+        $response = $this->client->getResponse();
+
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+    }
+
+    /** @test */
+    public function signInFail(): void
+    {
+        $headers = ['CONTENT_TYPE' => 'application/json'];
+        $url = $this->router->generate('sign_in');
+        $this->client->request(method: 'POST', uri: $url, server: $headers, content: json_encode([
+            'email' => 'fail',
+            'password' => 'fail',
+        ]));
+        $response = $this->client->getResponse();
+
+        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
+    }
+
     private function verifyUser(?string $redirectUrl = null): void
     {
         // Create user.
-        $lastUserId = $this->userRepository->findOneBy([], ['id' => 'desc'])?->getId() ?? 1;
+        $lastUserId = $this->userRepository->findOneBy([], ['id' => 'desc'])?->getId() ?? 0;
         $user = $this->userFactory->create([
             'email' => 'user'.($lastUserId + 1).'@example.com',
             'password' => '!Qwerty1',
