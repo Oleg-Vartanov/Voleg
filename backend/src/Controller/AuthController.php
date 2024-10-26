@@ -38,6 +38,7 @@ class AuthController extends ApiController
         content: new OA\JsonContent(properties: [
             new OA\Property(property: 'email', type: 'string'),
             new OA\Property(property: 'token', type: 'string'),
+            new OA\Property(property: 'expiresAtTimestamp', type: 'int'),
         ])
     )]
     #[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Missing credentials')]
@@ -60,6 +61,7 @@ class AuthController extends ApiController
         return $this->json([
             'user'  => $user->getUserIdentifier(),
             'token' => $token->getValue(),
+            'expiresAtTimestamp' => $token->getExpiresAt()->getTimestamp(),
         ]);
     }
 

@@ -1,35 +1,48 @@
+<script setup lang="ts">
+import client from '../modules/api-client';
+import { useAuth } from '@/modules/auth';
+import { ref } from 'vue';
+
+const auth = useAuth();
+
+const is401 = ref(false);
+const isLoading = ref(false);
+
+const signIn = (event: SubmitEvent) => {
+  isLoading.value = true;
+  is401.value = false;
+
+  const formData = new FormData(event.target as HTMLFormElement);
+  const formValues = Object.fromEntries(formData.entries());
+
+  client.signIn(formValues)
+    .then((response) => {
+      auth.signIn(response.data)
+    })
+    .catch((response) => {
+      is401.value = true;
+      }
+    )
+    .finally(() => {
+      isLoading.value = false;
+    });
+}
+</script>
+
 <template>
-  <div class="ov-center">
-    <main class="form-signin w-100 m-auto">
-      <form>
-        <h1 class="h3 mb-3 fw-normal">Sign In</h1>
-
-        <div class="form-floating mb-3">
-          <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-          <label for="floatingInput">Email address</label>
-        </div>
-        <div class="form-floating">
-          <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-          <label for="floatingPassword">Password</label>
-        </div>
-
-        <button class="btn btn-primary w-100 py-2 my-3" type="submit">Sign in</button>
-      </form>
-    </main>
-  </div>
+  <form @submit.prevent="signIn">
+    <div class="form-floating mb-3">
+      <input name="email" type="email" class="form-control" id="floatingInput" placeholder="">
+      <label for="floatingInput">Email address</label>
+    </div>
+    <div class="form-floating mb-3">
+      <input name="password" type="password" class="form-control" id="floatingPassword" placeholder="">
+      <label for="floatingPassword">Password</label>
+    </div>
+    <button class="btn btn-primary w-100 py-2 mb-3" type="submit">Submit</button>
+    <div v-if="is401" class="alert alert-danger mb-3" role="alert">Invalid credentials</div>
+    <div v-if="isLoading" class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </form>
 </template>
-
-<style>
-html, body {
-  height: 100%;
-}
-
-.form-signin {
-  max-width: 330px;
-  padding: 1rem;
-}
-
-.form-signin .form-floating:focus-within {
-  z-index: 2;
-}
-</style>

@@ -24,9 +24,21 @@ const index = createRouter({
           component: () => import('../views/PricingView.vue'),
         },
         {
-          path: '/sign-in',
-          name: 'signIn',
-          component: () => import('../views/SignInView.vue'),
+          path: '/auth-forms',
+          name: 'authForms',
+          component: () => import('../components/AuthForms.vue'),
+          children: [
+            {
+              path: '/sign-in',
+              name: 'signIn',
+              component: () => import('../views/SignInView.vue'),
+            },
+            {
+              path: '/sign-up',
+              name: 'signUp',
+              component: () => import('../views/SignUpView.vue'),
+            },
+          ]
         },
       ],
     },

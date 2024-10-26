@@ -14,12 +14,15 @@ security:
             pattern:
                 - ^/auth/sign-up
             security: false
-        secured:
-            lazy: true
+        login:
+            pattern:
+                - ^/auth/sign-in
             json_login:
                 check_path: sign_in
                 username_path: email
                 password_path: password
+        secured:
+            lazy: true
             access_token:
                 token_handler: App\Security\AccessTokenHandler
 #            login_link:
@@ -29,7 +32,7 @@ security:
 #                lifetime: 300 # seconds
     access_control:
 #        - { path: ^/test, roles: ROLE_USER }
-        - { path: ^/auth/sign-up, roles: PUBLIC_ACCESS }
+        - { path: ^/auth, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: PUBLIC_ACCESS }
 when@test:
     security:
