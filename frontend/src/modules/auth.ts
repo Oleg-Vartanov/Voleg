@@ -1,22 +1,20 @@
-import type { Ref, UnwrapRef } from 'vue';
-import type { Router } from 'vue-router';
-import { ApiToken } from '@/models/api-token';
-import { useRouter } from 'vue-router';
-import { ref, readonly } from 'vue';
+import type {Ref, UnwrapRef} from 'vue';
+import type {Router} from 'vue-router';
+import {ApiToken} from '@/models/api-token';
+import {Alert} from "@/models/alert";
+import {ref, readonly} from 'vue';
+import {useRouter} from 'vue-router';
+import {useTopAlerts} from '@/modules/top-alerts';
 
-// const token: Ref<UnwrapRef<ApiToken>> = ref(new ApiToken());
+const topAlerts = useTopAlerts();
+const token: Ref<UnwrapRef<ApiToken>> = ref(new ApiToken());
 
 export const useAuth = () => {
   const router: Router = useRouter();
-  const token: Ref<UnwrapRef<ApiToken>> = ref(new ApiToken());
 
   const signIn = (params: object): void => {
-    token.value.value = params.token;
-    token.value.expiresAtTimestamp = params.expiresAtTimestamp;
-
-    console.log(token.value);
-
-    // TODO: View info message.
+    token.value = new ApiToken(params.token, params.expiresAtTimestamp);
+    topAlerts.add(new Alert('Successfully signed in. Welcome!', 'success', 15));
     router.push({ name: 'home' });
   }
 
@@ -30,9 +28,7 @@ export const useAuth = () => {
   }
 
   return {
-    authState: readonly({
-      token: token,
-    }),
+    token: readonly(token),
     signIn,
     signOut,
   };

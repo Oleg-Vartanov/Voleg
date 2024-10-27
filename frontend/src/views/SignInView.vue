@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import client from '../modules/api-client';
-import { useAuth } from '@/modules/auth';
-import { ref } from 'vue';
+import client from '@/modules/api-client';
+import {useAuth} from '@/modules/auth';
+import {ref} from 'vue';
 
 const auth = useAuth();
 
@@ -39,7 +39,7 @@ const signIn = (event: SubmitEvent) => {
       <input name="password" type="password" class="form-control" id="floatingPassword" placeholder="">
       <label for="floatingPassword">Password</label>
     </div>
-    <button class="btn btn-primary w-100 py-2 mb-3" type="submit">Submit</button>
+    <button :disabled="isLoading" class="btn btn-primary w-100 py-2 mb-3" type="submit">Submit</button>
     <div v-if="is401" class="alert alert-danger mb-3" role="alert">Invalid credentials</div>
     <div v-if="isLoading" class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>

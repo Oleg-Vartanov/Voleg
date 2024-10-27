@@ -1,11 +1,15 @@
-import ClassHelper from '@/helpers/class-helper';
-
 export class ApiToken {
-  public value = '';
-  public expiresAtTimestamp = 0;
-  public type = 'Bearer';
+  public value: string;
+  public expiresAtTimestamp: number;
+  public type: string;
 
-  public setByObject(properties: object) {
-    ClassHelper.setByObject(this, properties)
+  public constructor(
+    value: string = '',
+    expiresAtTimestamp: number = 0,
+    type: string = 'Bearer'
+  ) {
+    this.value = value;
+    this.expiresAtTimestamp = expiresAtTimestamp;
+    this.type = type;
   }
 }
