@@ -2,6 +2,7 @@ import type {Ref, UnwrapRef} from "vue";
 import {ref} from "vue";
 
 export class Alert {
+  public id: number = 0;
   public text: string;
   public type: string;
   public timeout: number; // Seconds.
