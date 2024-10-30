@@ -1,19 +1,15 @@
-import type {Ref, UnwrapRef} from 'vue';
 import type {Router} from 'vue-router';
-import {ApiToken} from '@/models/api-token';
 import {Alert} from "@/models/alert";
-import {ref, readonly} from 'vue';
 import {useRouter} from 'vue-router';
 import {useTopAlerts} from '@/modules/top-alerts';
 
 const topAlerts = useTopAlerts();
-const token: Ref<UnwrapRef<ApiToken>> = ref(new ApiToken());
 
 export const useAuth = () => {
   const router: Router = useRouter();
 
   const signIn = (params: object): void => {
-    token.value = new ApiToken(params.token, params.expiresAtTimestamp);
+    setToken(params.token);
     topAlerts.add(new Alert('Successfully signed in. Welcome!', 'success', 15));
     router.push({ name: 'home' });
   }
@@ -23,13 +19,21 @@ export const useAuth = () => {
     router.push({ name: 'signIn' });
   };
 
+  const getToken = (): string => {
+    return window.localStorage.getItem('voleg-jwt');
+  }
+
+  const setToken = (token: string): void => {
+    window.localStorage.setItem('voleg-jwt', token);
+  }
+
   const resetToken = (): void => {
-    token.value = new ApiToken();
+    window.localStorage.removeItem('voleg-jwt');
   }
 
   return {
-    token: readonly(token),
     signIn,
     signOut,
+    getToken,
   };
 };

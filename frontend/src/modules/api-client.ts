@@ -1,11 +1,14 @@
 import axios from 'axios';
+import {useAuth} from "@/modules/auth";
+
+const auth = useAuth();
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-// const apiVersion = 'v1';
+const authType: string = 'Bearer';
 
-const authType = 'Bearer';
-const accessToken = 'value123';
-const headers = {Authorization: `${authType} ${accessToken}`,};
+const getHeader = () => {
+  return {Authorization: `${authType} ${auth.getToken()}`};
+}
 
 export default {
   signIn(params: object): Promise<axios.AxiosResponse> {
@@ -16,7 +19,7 @@ export default {
     return axios.post(`${apiBaseUrl}/auth/sign-up`, params);
   },
 
-  // test() {
-  //   return axios.get(`${apiBaseUrl}/auth/test`, { headers: headers });
-  // },
+  test() {
+    return axios.get(`${apiBaseUrl}/test`, { headers: getHeader() });
+  },
 };

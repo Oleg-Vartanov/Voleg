@@ -13,4 +13,10 @@ class HomeController extends AbstractController
     {
         return new Response('Server is running...');
     }
+
+    #[Route('/test', name: 'test', methods: ['GET'])]
+    public function test(): \Symfony\Component\HttpFoundation\JsonResponse
+    {
+        return $this->json(['message' => 'ok']);
+    }
 }

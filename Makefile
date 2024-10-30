@@ -17,7 +17,8 @@ init:
 	docker compose build
 	docker compose up -d
 	$(PHP_CONTAINER) composer install --no-interaction
-	#$(PHP_CONTAINER) chmod -R 777 var
+	$(PHP_CONTAINER) php bin/console lexik:jwt:generate-keypair --skip-if-exists # Generate JWT keys.
+	$(PHP_CONTAINER) chmod -R 777 var
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate --no-interaction
 	$(NODE_CONTAINER) npm install
 	$(NODE_CONTAINER) npm run build

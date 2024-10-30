@@ -17,21 +17,26 @@ security:
         login:
             pattern:
                 - ^/auth/sign-in
+            stateless: true
             json_login:
                 check_path: sign_in
                 username_path: email
                 password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
         secured:
-            lazy: true
-            access_token:
-                token_handler: App\Security\AccessTokenHandler
+#            lazy: true
+#            access_token: TODO remove
+#                token_handler: App\Security\AccessTokenHandler
+            stateless: true
+            jwt: ~
 #            login_link:
 #                check_route: sign_in_check_link
 #                signature_properties: ['id', 'email']
 #                max_uses: 3 # https://symfony.com/doc/current/security/login_link.html#allow-a-link-to-only-be-used-once
 #                lifetime: 300 # seconds
     access_control:
-#        - { path: ^/test, roles: ROLE_USER }
+        - { path: ^/test, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/auth, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: PUBLIC_ACCESS }
 when@test:

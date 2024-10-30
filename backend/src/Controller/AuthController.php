@@ -131,6 +131,7 @@ class AuthController extends ApiController
     {
         $apiToken = $service->getApiToken($request);
         if (is_null($apiToken)) {
+            // TODO: Return informative response
             throw new \LogicException();
         }
 

@@ -21,8 +21,7 @@ const signIn = (event: SubmitEvent) => {
     })
     .catch((response) => {
       is401.value = true;
-      }
-    )
+    })
     .finally(() => {
       isLoading.value = false;
     });
