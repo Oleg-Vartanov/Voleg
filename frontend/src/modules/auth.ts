@@ -6,19 +6,20 @@ import {useRouter} from 'vue-router';
 import {useTopAlerts} from '@/modules/top-alerts';
 import {jwtDecode} from 'jwt-decode';
 
+const localStorageKey = 'voleg-jwt'
 const topAlerts = useTopAlerts();
 const isSignedIn: Ref<UnwrapRef<boolean>> = ref(isTokenValid());
 
 function getToken(): string | null {
-  return window.localStorage.getItem('voleg-jwt');
+  return window.localStorage.getItem(localStorageKey);
 }
 
 function setToken(token: string): void {
-  window.localStorage.setItem('voleg-jwt', token);
+  window.localStorage.setItem(localStorageKey, token);
 }
 
 function resetToken(): void {
-  window.localStorage.removeItem('voleg-jwt');
+  window.localStorage.removeItem(localStorageKey);
 }
 
 function isTokenValid(): boolean {
@@ -52,7 +53,7 @@ export const useAuth = () => {
     topAlerts.add(new Alert('Signed out.', 'success', 5));
     router.push({ name: 'signIn' });
   }
-  
+
   function reset(): void {
     isSignedIn.value = false;
     resetToken();
