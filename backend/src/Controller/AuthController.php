@@ -5,22 +5,16 @@ namespace App\Controller;
 use App\DTO\Auth\SignUpDto;
 use App\DTO\Auth\VerificationLinkDto;
 use App\DTO\Validator\ValidationErrorResponse;
-use App\Entity\User;
-use App\Factory\ApiTokenFactory;
 use App\Repository\UserRepository;
 use App\Service\AuthService;
-use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
-use Random\RandomException;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[OA\Tag(name: 'Authorization')]
 class AuthController extends ApiController
@@ -36,33 +30,14 @@ class AuthController extends ApiController
         response: Response::HTTP_OK,
         description: 'Sign in successful',
         content: new OA\JsonContent(properties: [
-            new OA\Property(property: 'email', type: 'string'),
             new OA\Property(property: 'token', type: 'string'),
-            new OA\Property(property: 'expiresAtTimestamp', type: 'int'),
         ])
     )]
     #[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Missing credentials')]
 
-    /** @throws RandomException */
     #[Route('/auth/sign-in', name: 'sign_in', methods: ['POST'])]
-    public function signIn(
-        #[CurrentUser] ?User $user,
-        ApiTokenFactory $factory,
-        EntityManagerInterface $entityManager
-    ): Response {
-        if (is_null($user)) {
-            return $this->json(['message' => 'missing credentials'], Response::HTTP_UNAUTHORIZED);
-        }
-
-        $token = $factory->create($user);
-        $entityManager->persist($token);
-        $entityManager->flush();
-
-        return $this->json([
-            'user'  => $user->getUserIdentifier(),
-            'token' => $token->getValue(),
-            'expiresAtTimestamp' => $token->getExpiresAt()->getTimestamp(),
-        ]);
+    public function signIn() {
+        throw new \LogicException('Route should be intercepted and should not enter here.');
     }
 
     /* OpenAi Documentation */
@@ -120,26 +95,5 @@ class AuthController extends ApiController
             'supportEmail' => $parameterBag->get('support_email'),
             'continueLink' => $link->redirectUrl ?? null,
         ]);
-    }
-
-    /* OpenAi Documentation */
-    #[OA\Response(response: Response::HTTP_NO_CONTENT, description: 'Successfully signed out')]
-    #[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
-
-    #[Route('/sign-out', name: 'sign_out', methods: ['POST'])]
-    public function signOut(Request $request, Security $security, AuthService $service, EntityManagerInterface $entityManager): Response
-    {
-        $apiToken = $service->getApiToken($request);
-        if (is_null($apiToken)) {
-            // TODO: Return informative response
-            throw new \LogicException();
-        }
-
-        $entityManager->remove($apiToken);
-        $entityManager->flush();
-
-        $security->logout(false);
-
-        return new Response(status: Response::HTTP_NO_CONTENT);
     }
 }

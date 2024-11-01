@@ -25,11 +25,9 @@ security:
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
         secured:
-#            lazy: true
-#            access_token: TODO remove
-#                token_handler: App\Security\AccessTokenHandler
             stateless: true
             jwt: ~
+#            lazy: true
 #            login_link:
 #                check_route: sign_in_check_link
 #                signature_properties: ['id', 'email']

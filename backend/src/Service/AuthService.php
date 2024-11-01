@@ -3,15 +3,12 @@
 namespace App\Service;
 
 use App\DTO\Auth\SignUpDto;
-use App\Entity\ApiToken;
 use App\Entity\User;
 use App\Factory\UserFactory;
-use App\Repository\ApiTokenRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -21,7 +18,6 @@ use Symfony\Component\Routing\RouterInterface;
 readonly class AuthService
 {
     public function __construct(
-        private ApiTokenRepository $apiTokenRepository,
         private EntityManagerInterface $entityManager,
         private MailerInterface $mailer,
         private ParameterBagInterface $parameterBag,
@@ -82,17 +78,5 @@ readonly class AuthService
         ;
 
         $this->mailer->send($email);
-    }
-
-    public function getApiToken(Request $request): ?ApiToken
-    {
-        $authorizationHeader = $request->headers->get('Authorization');
-        if (is_null($authorizationHeader) || !str_contains($authorizationHeader, 'Bearer')) {
-            return null;
-        }
-
-        $tokenValue = substr($authorizationHeader, 7); // Remove "Bearer ".
-
-        return $this->apiTokenRepository->findOneByValue($tokenValue);
     }
 }
