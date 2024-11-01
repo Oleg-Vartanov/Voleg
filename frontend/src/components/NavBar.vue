@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ColorThemeToggle from './ColorThemeToggle.vue';
 import {useRoute} from 'vue-router'
+import {useAuth} from "@/modules/auth";
 
 let centerRoutes: { name: string, title: string }[] = [
   {name: 'home', title: 'Home'},
@@ -9,6 +10,7 @@ let centerRoutes: { name: string, title: string }[] = [
 ];
 
 const route = useRoute();
+const auth = useAuth();
 
 function routerLinkClass(routeName: string) {
   return routeName === route.name ? 'active text-white' : '';
@@ -46,14 +48,6 @@ function routerLinkClass(routeName: string) {
               {{ route.title }}
             </router-link>
           </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
-            </ul>
-          </li>
         </ul>
 
         <div class="d-lg-flex col-lg-3 justify-content-lg-end">
@@ -61,7 +55,7 @@ function routerLinkClass(routeName: string) {
             <li class="nav-item nav-link">
               <ColorThemeToggle></ColorThemeToggle>
             </li>
-            <li class="nav-item">
+            <li v-if="!auth.state.isSignedIn" class="nav-item">
               <router-link
                   class="nav-link"
                   :to="{ name: 'signIn' }"
@@ -70,8 +64,14 @@ function routerLinkClass(routeName: string) {
                 Sign In
               </router-link>
             </li>
+            <li v-if="auth.state.isSignedIn" class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">User Name</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Profile</a></li>
+                <li><a @click="auth.signOut()" class="dropdown-item" href="#">Sign Out</a></li>
+              </ul>
+            </li>
           </ul>
-<!--          <button class="btn btn-primary">Button</button>-->
         </div>
 
       </div>

@@ -16,5 +16,8 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  optimizeDeps: {
+    exclude: ['jwt-decode'] // Fixes 504 (Outdated Optimize Dep) error.
   }
 })
