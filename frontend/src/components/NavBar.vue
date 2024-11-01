@@ -34,9 +34,9 @@ function routerLinkClass(routeName: string) {
 
       <div class="collapse navbar-collapse d-lg-flex" id="navbarNav">
 
-        <a class="navbar-brand col-lg-3 me-0" href="#">
+        <router-link class="navbar-brand col-lg-3 me-0" :to="{ name: 'home' }">
           <img src="/vue-logo.svg" width="35" height="25" alt="logo">
-        </a>
+        </router-link>
 
         <ul class="navbar-nav col-lg-6 justify-content-lg-center nav-pills">
           <li v-for="route in centerRoutes" class="nav-item">
@@ -67,7 +67,7 @@ function routerLinkClass(routeName: string) {
             <li v-if="auth.state.isSignedIn" class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">User Name</a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Profile</a></li>
+                <router-link class="dropdown-item" :to="{ name: 'profile' }">Profile</router-link>
                 <li><a @click="auth.signOut()" class="dropdown-item" href="#">Sign Out</a></li>
               </ul>
             </li>

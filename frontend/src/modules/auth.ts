@@ -48,10 +48,14 @@ export const useAuth = () => {
   }
 
   function signOut(): void {
-    isSignedIn.value = false;
-    resetToken();
+    reset();
     topAlerts.add(new Alert('Signed out.', 'success', 5));
     router.push({ name: 'signIn' });
+  }
+  
+  function reset(): void {
+    isSignedIn.value = false;
+    resetToken();
   }
 
   return {
@@ -60,6 +64,8 @@ export const useAuth = () => {
     }),
     signIn,
     signOut,
+    reset,
     getToken,
+    isTokenValid,
   };
 };
