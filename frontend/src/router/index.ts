@@ -40,6 +40,10 @@ const index = createRouter({
             },
           ]
         },
+        {
+          path: "/:notFound",
+          component: () => import('../views/NotFoundView.vue'),
+        },
       ],
     },
   ]
