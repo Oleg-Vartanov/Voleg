@@ -25,16 +25,14 @@ security:
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
         secured:
+            lazy: true
             stateless: true
             jwt: ~
-#            lazy: true
-#            login_link:
-#                check_route: sign_in_check_link
-#                signature_properties: ['id', 'email']
-#                max_uses: 3 # https://symfony.com/doc/current/security/login_link.html#allow-a-link-to-only-be-used-once
-#                lifetime: 300 # seconds
     access_control:
         - { path: ^/test, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/users, roles: ROLE_ADMIN, methods: [DELETE, PATCH] }
+#        - { path: ^/users, roles: IS_AUTHENTICATED_FULLY, methods: [DELETE, PATCH] }
+        - { path: ^/users, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/auth, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: PUBLIC_ACCESS }
 when@test:

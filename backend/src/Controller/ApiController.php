@@ -9,8 +9,4 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class ApiController extends AbstractController
 {
     use ControllerValidator;
-
-    public function __construct(protected ValidatorInterface $validator)
-    {
-    }
 }

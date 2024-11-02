@@ -17,7 +17,7 @@ readonly class UserFactory
     {
         return match (true) {
             is_array($userData) => $this->createByArray($userData),
-            $userData instanceof SignUpDto => $this->createByUserDto($userData),
+            $userData instanceof SignUpDto => $this->createBySignUpDto($userData),
         };
     }
 
@@ -41,7 +41,7 @@ readonly class UserFactory
         return call_user_func_array([$this, 'createByParams'], $params);
     }
 
-    private function createByUserDto(SignUpDto $dto): User
+    private function createBySignUpDto(SignUpDto $dto): User
     {
         return $this->createByParams(
             email: $dto->email,

@@ -15,10 +15,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[OA\Tag(name: 'Authorization')]
 class AuthController extends ApiController
 {
+    public function __construct(protected ValidatorInterface $validator)
+    {
+    }
+    
     /* OpenAi Documentation */
     #[OA\RequestBody(
         content: new OA\JsonContent(properties: [

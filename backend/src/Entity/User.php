@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\DTO\UserDto;
+use App\Enum\Roles;
 use App\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
@@ -89,8 +91,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        $roles[] = Roles::ROLE_USER->value; // guarantee every user at least has ROLE_USER
 
         return array_unique($roles);
     }
@@ -103,6 +104,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->roles = $roles;
 
         return $this;
+    }
+
+    public function hasRoles(array $roles): bool
+    {
+        return in_array($roles, $this->getRoles(), true);
     }
 
     /**
@@ -209,5 +215,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function prePersist(): void
     {
         $this->setCreatedAt(new DateTimeImmutable());
+    }
+
+    public function patch(UserDto $dto): self
+    {
+        $dto->displayName ?: $this->setDisplayName($dto->displayName);
+
+        return $this;
     }
 }

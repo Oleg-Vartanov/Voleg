@@ -64,8 +64,8 @@
         <tr>
           <th style="width: 34%;"></th>
           <th style="width: 22%;">Free</th>
-          <th style="width: 22%;">Pro</th>
-          <th style="width: 22%;">Enterprise</th>
+          <th style="width: 22%;">I want to pay</th>
+          <th style="width: 22%;">Filthy rich</th>
         </tr>
         </thead>
         <tbody>
