@@ -15,9 +15,9 @@ trait ControllerValidator
         return $this->validator->validate($value)->count() === 0;
     }
 
-    public function validationErrorResponse(mixed $value): ?JsonResponse
+    public function validationErrorResponse(mixed $value, $groups): ?JsonResponse
     {
-        $errors = $this->validator->validate($value);
+        $errors = $this->validator->validate($value, groups: $groups);
         if ($errors->count() > 0) {
             return $this->json($errors, Response::HTTP_UNPROCESSABLE_ENTITY);
         }

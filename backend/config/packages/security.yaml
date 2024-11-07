@@ -6,6 +6,9 @@ security:
             entity:
                 class: App\Entity\User
                 property: email
+#    role_hierarchy:
+#        ROLE_ADMIN: [ ROLE_USER ]
+#        ROLE_SUPER_ADMIN: [ ROLE_ADMIN ]
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -30,8 +33,7 @@ security:
             jwt: ~
     access_control:
         - { path: ^/test, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/users, roles: ROLE_ADMIN, methods: [DELETE, PATCH] }
-#        - { path: ^/users, roles: IS_AUTHENTICATED_FULLY, methods: [DELETE, PATCH] }
+        - { path: ^/users, roles: IS_AUTHENTICATED_FULLY, methods: [DELETE, PATCH] }
         - { path: ^/users, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/auth, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: PUBLIC_ACCESS }

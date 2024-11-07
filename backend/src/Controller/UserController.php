@@ -3,9 +3,7 @@
 namespace App\Controller;
 
 use App\DTO\UserDto;
-use App\Enum\Roles;
 use App\Repository\UserRepository;
-use App\Service\AttributeReader;
 use Doctrine\ORM\EntityManagerInterface;
 use ReflectionException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,69 +27,75 @@ class UserController extends ApiController
     }
 
     #[Route('/', name: 'list', methods: ['GET'])]
-    public function list(AttributeReader $attributeReader): JsonResponse
+    public function list(): JsonResponse
     {
-        $roles = $this->getUser()?->getRoles() ?? [];
         $users = $this->userRepository->findAll();
 
-        $data = [];
-        foreach ($users as $user) {
-            $data[] = UserDto::createByUser($user);
+        $groups = ['show'];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $groups[] = 'show:admin';
         }
 
-        return $this->json($data, context: [
-            'groups' => ['GET'],
-            'ignored_attributes' => $attributeReader->getDisallowedProperties(UserDto::class, $roles),
-        ]);
+        return $this->json($users, context: ['groups' => $groups]);
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(int $id, AttributeReader $attributeReader): JsonResponse
+    public function show(int $id): JsonResponse
     {
         $user = $this->userRepository->find($id) ?? throw new NotFoundHttpException();
 
-        $roles = [];
-        if ($currentUser = $this->getUser()) {
-            $roles = $currentUser->getRoles();
-            if ($currentUser->getId() === $id) {
-                $roles[] = Roles::OWNER->value;
-            }
+        $groups = ['show'];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $groups[] = 'show:admin';
+        }
+        if ($this->getUser()?->getId() === $id) {
+            $groups[] = 'show:owner';
         }
 
-        return $this->json(
-            UserDto::createByUser($user),
-            context: [
-                'groups' => ['GET'],
-                'ignored_attributes' => $attributeReader->getDisallowedProperties(UserDto::class, $roles),
-            ]
-        );
+        return $this->json($user, context: ['groups' => $groups]);
     }
 
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(int $id): Response
     {
-        $this->canModifyOr403($id);
+        $isOwner =  $this->getUser()?->getId() === $id;
+        if (!$isOwner && !$this->isGranted('ROLE_ADMIN')) {
+            throw new AccessDeniedHttpException();
+        }
 
         $user = $this->userRepository->find($id) ?? throw new NotFoundHttpException();
 
         $this->entityManager->remove($user);
         $this->entityManager->flush();
 
-        return new Response(Response::HTTP_NO_CONTENT);
+        return new Response(status: Response::HTTP_NO_CONTENT);
     }
 
     /** @throws ReflectionException */
     #[Route('/{id}', name: 'patch', methods: ['PATCH'])]
-    public function patch(int $id, Request $request, AttributeReader $attributeReader): Response
+    public function patch(int $id, Request $request): Response
     {
-        $this->canModifyOr403($id);
+        $groups = [];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $groups = array_merge($groups, ['show:admin', 'edit:admin']);
+        }
+        if ($this->getUser()?->getId() === $id) {
+            $groups = array_merge($groups, ['show:owner', 'edit:owner']);
+        }
+
+        if (empty($groups)) {
+            throw new AccessDeniedHttpException();
+        }
 
         $user = $this->userRepository->find($id) ?? throw new NotFoundHttpException();
 
-        $dto = UserDto::createByArray($request->getPayload()->all());
-        $dto = $this->serializer->normalize($dto, context: ['groups' => ['PATCH']]);
+        $dto = $this->serializer->denormalize(
+            $request->getPayload()->all(),
+            UserDto::class,
+            context: ['groups' => $groups],
+        );
 
-        if ($response = $this->validationErrorResponse($dto)) {
+        if ($response = $this->validationErrorResponse($dto, $groups)) {
             return $response;
         }
 
@@ -99,14 +103,6 @@ class UserController extends ApiController
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        return new Response(Response::HTTP_OK);
-    }
-
-    private function canModifyOr403(int $id): void
-    {
-        $user = $this->getUser();
-        if (!$user->hasRoles(['ROLE_ADMIN']) && $user->getId() != $id) {
-            throw new AccessDeniedHttpException();
-        }
+        return $this->json($user, context: ['groups' => array_merge($groups, ['show'])]);
     }
 }

@@ -3,13 +3,14 @@
 namespace App\Entity;
 
 use App\DTO\UserDto;
-use App\Enum\Roles;
+use App\Enum\RolesEnum;
 use App\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -19,11 +20,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     const VERIFICATION_EXPIRATION_TIME = 24 * 60 * 60;
 
+    #[Groups(['show'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private int $id;
 
+    #[Groups(['show:admin', 'show:owner'])]
     #[ORM\Column(length: 180)]
     private string $email;
 
@@ -35,6 +38,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private string $password;
 
+    #[Groups(['show'])]
     #[ORM\Column(length: 255)]
     private string $displayName;
 
@@ -47,6 +51,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(options: ['default' => '1970-01-01 00:00:00'])]
     private DateTimeImmutable $verificationCodeExpireAt;
 
+    #[Groups(['show'])]
     #[ORM\Column(options: ['default' => '1970-01-01 00:00:00'])]
     private DateTimeImmutable $createdAt;
 
@@ -91,7 +96,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        $roles[] = Roles::ROLE_USER->value; // guarantee every user at least has ROLE_USER
+        $roles[] = RolesEnum::ROLE_USER->value; // guarantee every user at least has ROLE_USER
 
         return array_unique($roles);
     }
@@ -219,7 +224,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function patch(UserDto $dto): self
     {
-        $dto->displayName ?: $this->setDisplayName($dto->displayName);
+        if (isset($dto->email)) {
+            $this->setEmail($dto->email);
+        }
+        if (isset($dto->displayName)) {
+            $this->setDisplayName($dto->displayName);
+        }
 
         return $this;
     }
