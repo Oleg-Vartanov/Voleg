@@ -2,15 +2,19 @@
 
 namespace App\Entity;
 
-use App\DTO\UserDto;
+use App\DTO\User\UserDto;
 use App\Enum\RolesEnum;
 use App\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use OpenApi\Attributes as OA;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
+
+/* OpenAi Documentation */
+#[OA\Schema(title: 'User')]
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -20,13 +24,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     const VERIFICATION_EXPIRATION_TIME = 24 * 60 * 60;
 
-    #[Groups(['show'])]
+    const SHOW = 'show';
+    const SHOW_ADMIN = 'show:admin';
+    const SHOW_OWNER = 'show:owner';
+
+    #[Groups([self::SHOW])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private int $id;
 
-    #[Groups(['show:admin', 'show:owner'])]
+    #[Groups([self::SHOW_ADMIN, self::SHOW_OWNER])]
     #[ORM\Column(length: 180)]
     private string $email;
 
@@ -38,7 +46,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private string $password;
 
-    #[Groups(['show'])]
+    #[Groups([self::SHOW])]
     #[ORM\Column(length: 255)]
     private string $displayName;
 
@@ -51,7 +59,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(options: ['default' => '1970-01-01 00:00:00'])]
     private DateTimeImmutable $verificationCodeExpireAt;
 
-    #[Groups(['show'])]
+    #[Groups([self::SHOW])]
     #[ORM\Column(options: ['default' => '1970-01-01 00:00:00'])]
     private DateTimeImmutable $createdAt;
 

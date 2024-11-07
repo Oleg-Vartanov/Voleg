@@ -2,10 +2,14 @@
 
 namespace App\Controller;
 
-use App\DTO\UserDto;
+use App\DTO\User\UpdateDto;
+use App\DTO\User\UserDto;
+use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use ReflectionException;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,6 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+#[OA\Tag(name: 'User')]
 #[Route('/users', name: 'user_')]
 class UserController extends ApiController
 {
@@ -26,34 +31,57 @@ class UserController extends ApiController
     ) {
     }
 
+    /* OpenAi Documentation */
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Users',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: User::class, groups: [User::SHOW]))
+        )
+    )]
+
     #[Route('/', name: 'list', methods: ['GET'])]
     public function list(): JsonResponse
     {
         $users = $this->userRepository->findAll();
 
-        $groups = ['show'];
+        $groups = [User::SHOW];
         if ($this->isGranted('ROLE_ADMIN')) {
-            $groups[] = 'show:admin';
+            $groups[] = User::SHOW_ADMIN;
         }
 
         return $this->json($users, context: ['groups' => $groups]);
     }
+
+    /* OpenAi Documentation */
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'User',
+        content: new Model(type: User::class, groups: [User::SHOW, User::SHOW_ADMIN, User::SHOW_OWNER])
+    )]
+    #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User Not Found')]
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(int $id): JsonResponse
     {
         $user = $this->userRepository->find($id) ?? throw new NotFoundHttpException();
 
-        $groups = ['show'];
+        $groups = [User::SHOW];
         if ($this->isGranted('ROLE_ADMIN')) {
-            $groups[] = 'show:admin';
+            $groups[] = User::SHOW_ADMIN;
         }
         if ($this->getUser()?->getId() === $id) {
-            $groups[] = 'show:owner';
+            $groups[] = User::SHOW_OWNER;
         }
 
         return $this->json($user, context: ['groups' => $groups]);
     }
+
+    /* OpenAi Documentation */
+    #[OA\Response(response: Response::HTTP_NO_CONTENT, description: 'Deleted')]
+    #[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access Denied')]
+    #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User Not Found')]
 
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(int $id): Response
@@ -71,16 +99,25 @@ class UserController extends ApiController
         return new Response(status: Response::HTTP_NO_CONTENT);
     }
 
+    /* OpenAi Documentation */
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'User Updated',
+        content: new Model(type: UpdateDto::class, groups: [UserDto::UPDATE_ADMIN, UserDto::UPDATE_OWNER])
+    )]
+    #[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access Denied')]
+    #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User Not Found')]
+
     /** @throws ReflectionException */
     #[Route('/{id}', name: 'patch', methods: ['PATCH'])]
     public function patch(int $id, Request $request): Response
     {
         $groups = [];
         if ($this->isGranted('ROLE_ADMIN')) {
-            $groups = array_merge($groups, ['show:admin', 'edit:admin']);
+            $groups = array_merge($groups, [User::SHOW_ADMIN, UserDto::UPDATE_ADMIN]);
         }
         if ($this->getUser()?->getId() === $id) {
-            $groups = array_merge($groups, ['show:owner', 'edit:owner']);
+            $groups = array_merge($groups, [User::SHOW_OWNER, UserDto::UPDATE_OWNER]);
         }
 
         if (empty($groups)) {
@@ -91,7 +128,7 @@ class UserController extends ApiController
 
         $dto = $this->serializer->denormalize(
             $request->getPayload()->all(),
-            UserDto::class,
+            UpdateDto::class,
             context: ['groups' => $groups],
         );
 
@@ -103,6 +140,6 @@ class UserController extends ApiController
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        return $this->json($user, context: ['groups' => array_merge($groups, ['show'])]);
+        return $this->json($user, context: ['groups' => array_merge($groups, [User::SHOW])]);
     }
 }

@@ -2,8 +2,9 @@
 
 namespace App\Controller;
 
-use App\DTO\Auth\SignUpDto;
-use App\DTO\Auth\VerificationLinkDto;
+use App\DTO\User\SignUpDto;
+use App\DTO\User\UserDto;
+use App\DTO\User\VerificationLinkDto;
 use App\DTO\Validator\ValidationErrorResponse;
 use App\Repository\UserRepository;
 use App\Service\AuthService;
@@ -15,38 +16,42 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[OA\Tag(name: 'Authorization')]
+#[Route('/auth',)]
 class AuthController extends ApiController
 {
-    public function __construct(protected ValidatorInterface $validator)
-    {
+    public function __construct(
+        protected ValidatorInterface $validator,
+        private SerializerInterface $serializer,
+    ) {
     }
     
     /* OpenAi Documentation */
     #[OA\RequestBody(
         content: new OA\JsonContent(properties: [
-            new OA\Property(property: 'email', type: 'string'),
-            new OA\Property(property: 'password', type: 'string'),
+            new OA\Property(property: 'email', type: 'string', example: 'name@mail.com'),
+            new OA\Property(property: 'password', type: 'string', example: 'Password!1'),
         ])
     )]
     #[OA\Response(
         response: Response::HTTP_OK,
         description: 'Sign in successful',
         content: new OA\JsonContent(properties: [
-            new OA\Property(property: 'token', type: 'string'),
+            new OA\Property(property: 'token', type: 'string', example: 'jwt-token-string'),
         ])
     )]
     #[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Missing credentials')]
 
-    #[Route('/auth/sign-in', name: 'sign_in', methods: ['POST'])]
+    #[Route('/sign-in', name: 'sign_in', methods: ['POST'])]
     public function signIn() {
         throw new \LogicException('Route should be intercepted and should not enter here.');
     }
 
     /* OpenAi Documentation */
-    #[OA\RequestBody(content: new Model(type: SignUpDto::class, groups: ['documentation']))]
+    #[OA\RequestBody(content: new Model(type: SignUpDto::class, groups: [UserDto::SIGN_UP]))]
     #[OA\Response(response: Response::HTTP_CREATED, description: 'Sign up successful')]
     #[OA\Response(
         response: Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -55,12 +60,18 @@ class AuthController extends ApiController
     )]
 
     /** @throws TransportExceptionInterface */
-    #[Route('/auth/sign-up', name: 'sign_up', methods: ['POST'], format: 'json')]
+    #[Route('/sign-up', name: 'sign_up', methods: ['POST'], format: 'json')]
     public function signUp(Request $request, AuthService $authService): Response
     {
-        $dto = SignUpDto::createByArray($request->getPayload()->all());
+        $groups = [UserDto::SIGN_UP];
 
-        if ($response = $this->validationErrorResponse($dto)) {
+        $dto = $this->serializer->denormalize(
+            $request->getPayload()->all(),
+            SignUpDto::class,
+            context: ['groups' => $groups]
+        );
+
+        if ($response = $this->validationErrorResponse($dto, $groups)) {
             return $response;
         }
 
@@ -72,19 +83,20 @@ class AuthController extends ApiController
     }
 
     /* OpenAi Documentation */
-    #[OA\RequestBody(content: new Model(type: VerificationLinkDto::class, groups: ['documentation']))]
+    #[OA\RequestBody(content: new Model(type: VerificationLinkDto::class, groups: [VerificationLinkDto::DOCUMENTATION]))]
+
     #[OA\Response(response: Response::HTTP_OK, description: 'Verified page')]
     #[OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Invalid link')]
     #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'Invalid user')]
 
-    #[Route('/auth/sign-up/verify', name: 'sign_up_verify', methods: ['GET'])]
+    #[Route('/sign-up/verify', name: 'sign_up_verify', methods: ['GET'])]
     public function verifyUser(
         Request $request,
         AuthService $authService,
         ParameterBagInterface $parameterBag,
         UserRepository $userRepository,
     ): Response {
-        $link = VerificationLinkDto::createByArray($request->query->all());
+        $link = $this->serializer->denormalize($request->query->all(), VerificationLinkDto::class);
 
         if (!$this->isValid($link)) {
             return new Response('Invalid verification link. Please contact the support.', Response::HTTP_UNPROCESSABLE_ENTITY);

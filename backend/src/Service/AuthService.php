@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\DTO\Auth\SignUpDto;
+use App\DTO\User\SignUpDto;
 use App\Entity\User;
 use App\Factory\UserFactory;
 use Doctrine\ORM\EntityManagerInterface;
