@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\DTO\User\UpdateDto;
 use App\DTO\User\UserDto;
+use App\DTO\Validator\ValidationErrorResponse;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use ReflectionException;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -58,7 +60,7 @@ class UserController extends ApiController
     #[OA\Response(
         response: Response::HTTP_OK,
         description: 'User',
-        content: new Model(type: User::class, groups: [User::SHOW, User::SHOW_ADMIN, User::SHOW_OWNER])
+        content: new Model(type: User::class, groups: User::SHOW_ALL)
     )]
     #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User Not Found')]
 
@@ -79,6 +81,7 @@ class UserController extends ApiController
     }
 
     /* OpenAi Documentation */
+    #[Security(name: 'Bearer')]
     #[OA\Response(response: Response::HTTP_NO_CONTENT, description: 'Deleted')]
     #[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access Denied')]
     #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User Not Found')]
@@ -100,13 +103,20 @@ class UserController extends ApiController
     }
 
     /* OpenAi Documentation */
+    #[Security(name: 'Bearer')]
+    #[OA\RequestBody(content: new Model(type: UpdateDto::class, groups: UserDto::UPDATE_ALL))]
     #[OA\Response(
         response: Response::HTTP_OK,
         description: 'User Updated',
-        content: new Model(type: UpdateDto::class, groups: [UserDto::UPDATE_ADMIN, UserDto::UPDATE_OWNER])
+        content: new Model(type: UpdateDto::class, groups: UserDto::UPDATE_ALL)
     )]
     #[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access Denied')]
     #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User Not Found')]
+    #[OA\Response(
+        response: Response::HTTP_UNPROCESSABLE_ENTITY,
+        description: 'Validation errors',
+        content: new Model(type: ValidationErrorResponse::class))
+    ]
 
     /** @throws ReflectionException */
     #[Route('/{id}', name: 'patch', methods: ['PATCH'])]
@@ -127,9 +137,7 @@ class UserController extends ApiController
         $user = $this->userRepository->find($id) ?? throw new NotFoundHttpException();
 
         $dto = $this->serializer->denormalize(
-            $request->getPayload()->all(),
-            UpdateDto::class,
-            context: ['groups' => $groups],
+            $request->getPayload()->all(), UpdateDto::class, context: ['groups' => $groups],
         );
 
         if ($response = $this->validationErrorResponse($dto, $groups)) {

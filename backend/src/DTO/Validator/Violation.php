@@ -10,8 +10,6 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(title: 'Violation')]
 final class Violation
 {
-    private function __construct() {}
-
     #[OA\Property(example: 'password')]
     public string $propertyPath;
 

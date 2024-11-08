@@ -11,8 +11,6 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(title: 'Validation Error Response')]
 final class ValidationErrorResponse
 {
-    private function __construct() {}
-
     #[OA\Property(type: 'string', example: 'https://symfony.com/errors/validation')]
     public string $type;
 

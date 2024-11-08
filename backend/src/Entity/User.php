@@ -27,6 +27,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     const SHOW = 'show';
     const SHOW_ADMIN = 'show:admin';
     const SHOW_OWNER = 'show:owner';
+    const SHOW_ALL = [self::SHOW, self::SHOW_ADMIN, self::SHOW_OWNER];
 
     #[Groups([self::SHOW])]
     #[ORM\Id]

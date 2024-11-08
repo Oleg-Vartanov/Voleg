@@ -13,6 +13,7 @@ class UserDto
     const SIGN_UP = 'sign-up';
     const UPDATE_ADMIN = 'update:admin';
     const UPDATE_OWNER = 'update:owner';
+    const UPDATE_ALL = [self::UPDATE_ADMIN, self::UPDATE_OWNER];
     
     #[Groups([self::SIGN_UP, self::UPDATE_ADMIN])]
     #[

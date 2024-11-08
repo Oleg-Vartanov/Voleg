@@ -20,7 +20,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[OA\Tag(name: 'Authorization')]
-#[Route('/auth',)]
+#[Route('/auth')]
 class AuthController extends ApiController
 {
     public function __construct(
@@ -53,11 +53,8 @@ class AuthController extends ApiController
     /* OpenAi Documentation */
     #[OA\RequestBody(content: new Model(type: SignUpDto::class, groups: [UserDto::SIGN_UP]))]
     #[OA\Response(response: Response::HTTP_CREATED, description: 'Sign up successful')]
-    #[OA\Response(
-        response: Response::HTTP_UNPROCESSABLE_ENTITY,
-        description: 'Validation errors',
-        content: new Model(type: ValidationErrorResponse::class)
-    )]
+    #[OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Validation errors',
+        content: new Model(type: ValidationErrorResponse::class))]
 
     /** @throws TransportExceptionInterface */
     #[Route('/sign-up', name: 'sign_up', methods: ['POST'], format: 'json')]
@@ -66,9 +63,7 @@ class AuthController extends ApiController
         $groups = [UserDto::SIGN_UP];
 
         $dto = $this->serializer->denormalize(
-            $request->getPayload()->all(),
-            SignUpDto::class,
-            context: ['groups' => $groups]
+            $request->getPayload()->all(), SignUpDto::class, context: ['groups' => $groups]
         );
 
         if ($response = $this->validationErrorResponse($dto, $groups)) {
@@ -84,7 +79,6 @@ class AuthController extends ApiController
 
     /* OpenAi Documentation */
     #[OA\RequestBody(content: new Model(type: VerificationLinkDto::class, groups: [VerificationLinkDto::DOCUMENTATION]))]
-
     #[OA\Response(response: Response::HTTP_OK, description: 'Verified page')]
     #[OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Invalid link')]
     #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'Invalid user')]
