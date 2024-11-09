@@ -233,10 +233,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function patch(UserDto $dto): self
     {
-        if (isset($dto->email)) {
+        if ($dto->isPropertyInitialized('email')) {
             $this->setEmail($dto->email);
         }
-        if (isset($dto->displayName)) {
+        if ($dto->isPropertyInitialized('displayName')) {
             $this->setDisplayName($dto->displayName);
         }
 

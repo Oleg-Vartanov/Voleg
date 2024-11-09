@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class SignUpDto extends UserDto
 {
     #[Groups([self::SIGN_UP])]
-    #[Assert\Type('string'), Assert\Url]
+    #[Assert\Type('string', groups: [self::SIGN_UP]), Assert\Url(groups: [self::SIGN_UP])]
     #[OA\Property(type: 'string', example: 'https://www.google.com')]
     public mixed $verificationEmailRedirectUrl;
 }
