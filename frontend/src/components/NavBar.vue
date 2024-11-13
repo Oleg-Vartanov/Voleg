@@ -35,7 +35,7 @@ function routerLinkClass(routeName: string) {
       <div class="collapse navbar-collapse d-lg-flex" id="navbarNav">
 
         <router-link class="navbar-brand col-lg-3 me-0" :to="{ name: 'home' }">
-          <img src="/vue-logo.svg" width="35" height="25" alt="logo">
+          <img src="/logo-voleg.svg" width="100" height="40" alt="logo">
         </router-link>
 
         <ul class="navbar-nav col-lg-6 justify-content-lg-center nav-pills">
