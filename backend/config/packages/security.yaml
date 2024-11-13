@@ -21,6 +21,7 @@ security:
             pattern:
                 - ^/auth/sign-in
             stateless: true
+            user_checker: App\Security\UserChecker
             json_login:
                 check_path: sign_in
                 username_path: email
