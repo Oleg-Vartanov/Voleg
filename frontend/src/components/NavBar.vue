@@ -55,7 +55,7 @@ function routerLinkClass(routeName: string) {
             <li class="nav-item nav-link">
               <ColorThemeToggle></ColorThemeToggle>
             </li>
-            <li v-if="!auth.state.isSignedIn" class="nav-item">
+            <li v-if="!auth.user.isSignedIn" class="nav-item">
               <router-link
                   class="nav-link"
                   :to="{ name: 'signIn' }"
@@ -64,9 +64,9 @@ function routerLinkClass(routeName: string) {
                 Sign In
               </router-link>
             </li>
-            <li v-if="auth.state.isSignedIn" class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">User Name</a>
-              <ul class="dropdown-menu">
+            <li v-if="auth.user.isSignedIn" class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">{{ auth.user.displayName ?? 'User' }}</a>
+              <ul class="dropdown-menu dropdown-menu-end">
                 <router-link class="dropdown-item" :to="{ name: 'profile' }">Profile</router-link>
                 <li><a @click="auth.signOut()" class="dropdown-item" href="#">Sign Out</a></li>
               </ul>

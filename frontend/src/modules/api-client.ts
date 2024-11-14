@@ -6,7 +6,7 @@ const authType: string = 'Bearer';
 
 const getHeader = () => {
   const auth = useAuth();
-  return auth.state.isSignedIn ? {Authorization: `${authType} ${auth.getToken()}`} : {};
+  return auth.user.isSignedIn ? {Authorization: `${authType} ${auth.getToken()}`} : {};
 }
 
 export default {

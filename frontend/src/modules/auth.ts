@@ -1,14 +1,29 @@
 import type {Router} from 'vue-router';
-import type {Ref, UnwrapRef} from 'vue';
 import {Alert} from '@/models/alert';
-import {readonly, ref} from 'vue';
+import {reactive, readonly} from 'vue';
 import {useRouter} from 'vue-router';
 import {useTopAlerts} from '@/modules/top-alerts';
 import {jwtDecode} from 'jwt-decode';
 
 const localStorageKey = 'voleg-jwt'
 const topAlerts = useTopAlerts();
-const isSignedIn: Ref<UnwrapRef<boolean>> = ref(isTokenValid());
+
+const user = reactive({
+  isSignedIn: false,
+  id: null,
+  displayName: null,
+});
+setUserByToken();
+
+function setUserByToken(): void {
+  const token: string | null = getToken();
+  if (token !== null) {
+    const decodedToken = jwtDecode(token);
+    user.isSignedIn = isTokenValid();
+    user.id = decodedToken['id'] ?? null;
+    user.displayName = decodedToken['displayName'] ?? null;
+  }
+}
 
 function getToken(): string | null {
   return window.localStorage.getItem(localStorageKey);
@@ -42,8 +57,8 @@ export const useAuth = () => {
   const router: Router = useRouter();
 
   function signIn(params: object): void {
-    isSignedIn.value = true;
     setToken(params.token);
+    setUserByToken();
     topAlerts.add(new Alert('Successfully signed in. Welcome!', 'success', 10));
     router.push({ name: 'home' });
   }
@@ -55,14 +70,12 @@ export const useAuth = () => {
   }
 
   function reset(): void {
-    isSignedIn.value = false;
+    user.isSignedIn = false;
     resetToken();
   }
 
   return {
-    state: readonly({
-      isSignedIn: isSignedIn,
-    }),
+    user: readonly(user),
     signIn,
     signOut,
     reset,
