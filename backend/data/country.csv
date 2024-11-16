@@ -75,7 +75,7 @@ Micronesia (Federated States of),FM,FSM,583,FM-TRK
 Faroe Islands,FO,FRO,234,
 France,FR,FRA,250,FR-ARA
 Gabon,GA,GAB,266,GA-1
-United Kingdom of Great Britain and Northern Ireland,GB,GBR,826,GB-ENG
+United Kingdom of Great Britain and Northern Ireland,GB,GBR,826,
 Grenada,GD,GRD,308,GD-01
 Georgia,GE,GEO,268,GE-AB
 French Guiana,GF,GUF,254,
@@ -248,3 +248,7 @@ Mayotte,YT,MYT,175,
 South Africa,ZA,ZAF,710,ZA-EC
 Zambia,ZM,ZMB,894,ZM-02
 Zimbabwe,ZW,ZWE,716,ZW-BU
+England,GB,GBR,826,GB-ENG
+Northern Ireland,GB,GBR,826,GB-NIR
+Scotland,GB,GBR,826,GB-SCT
+Wales,GB,GBR,826,GB-WLS

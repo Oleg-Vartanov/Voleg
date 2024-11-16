@@ -25,4 +25,9 @@ class CountryRepository extends ServiceEntityRepository
 
         return $count > 0;
     }
+
+    public function findOneByName(string $name): ?Country
+    {
+        return $this->findOneBy(['name' => $name]);
+    }
 }
