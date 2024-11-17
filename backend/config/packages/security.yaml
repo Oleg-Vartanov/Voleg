@@ -33,6 +33,7 @@ security:
             stateless: true
             jwt: ~
     access_control:
+        - { path: ^/fixtures/sync, roles: ROLE_ADMIN }
         - { path: ^/test, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/users, roles: IS_AUTHENTICATED_FULLY, methods: [DELETE, PATCH] }
         - { path: ^/users, roles: PUBLIC_ACCESS, methods: [GET] }
