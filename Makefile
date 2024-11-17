@@ -31,6 +31,10 @@ watch:
 migrate:
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate
 
+cclear:
+	$(PHP_CONTAINER) php bin/console cache:clear
+	$(PHP_CONTAINER) php bin/console cache:warmup
+
 # Run backend tests.
 test:
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:drop --force

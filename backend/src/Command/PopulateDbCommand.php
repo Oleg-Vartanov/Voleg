@@ -4,8 +4,10 @@ namespace App\Command;
 
 use App\Entity\Competition;
 use App\Entity\Country;
+use App\Entity\Season;
 use App\Repository\CompetitionRepository;
 use App\Repository\CountryRepository;
+use App\Repository\SeasonRepository;
 use App\Service\CsvReader;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -24,6 +26,7 @@ class PopulateDbCommand extends Command
         private KernelInterface $kernel,
         private CountryRepository $countryRepository,
         private CompetitionRepository $competitionRepository,
+        private SeasonRepository $seasonRepository,
         private EntityManagerInterface $entityManager,
     ) {
         parent::__construct();
@@ -36,6 +39,7 @@ class PopulateDbCommand extends Command
     {
         $this->populateCountry($output);
         $this->populateCompetition($output);
+        $this->populateSeason($output);
 
         return Command::SUCCESS;
     }
@@ -107,5 +111,29 @@ class PopulateDbCommand extends Command
         $this->entityManager->flush();
         $progressBar->finish();
         $output->writeln(' Populated competition table');
+    }
+
+    private function populateSeason(OutputInterface $output): void
+    {
+        $years = range(1992, 2100);
+
+        $progressBar = new ProgressBar($output, count($years));
+        $progressBar->start();
+
+        foreach ($years as $year) {
+            if ($this->seasonRepository->findOneByYear($year) !== null) {
+                continue;
+            }
+
+            $season = new Season();
+            $season->setYear($year);
+
+            $this->entityManager->persist($season);
+            $progressBar->advance();
+        }
+
+        $this->entityManager->flush();
+        $progressBar->finish();
+        $output->writeln(' Populated season table');
     }
 }
