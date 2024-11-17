@@ -26,7 +26,7 @@ class Country
     #[ORM\Column(name: 'iso_3166_1_numeric', type: Types::SMALLINT)]
     private int $Iso31661Numeric;
 
-    #[ORM\Column(name: 'iso_3166_2', length: 6)]
+    #[ORM\Column(name: 'iso_3166_2', length: 6, nullable: true)]
     private ?string $iso31662;
 
     public function getId(): int
