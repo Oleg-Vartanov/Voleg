@@ -18,7 +18,11 @@ export default {
     return axios.post(`${apiBaseUrl}/auth/sign-up`, params);
   },
 
-  test() {
-    return axios.get(`${apiBaseUrl}/test`, { headers: getHeader() });
+  syncFixtures(competitionCode: string, seasonYear: number) {
+    return axios.post(
+      `${apiBaseUrl}/fixtures/sync`,
+      { competitionCode, seasonYear },
+      { headers: getHeader() }
+    );
   },
 };

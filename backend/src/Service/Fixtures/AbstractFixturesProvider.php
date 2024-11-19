@@ -8,12 +8,13 @@ use App\Entity\Competition;
 use App\Entity\Fixture;
 use App\Entity\Season;
 use App\Entity\Team;
+use App\Interface\FixturesProviderInterface;
 use App\Repository\FixtureRepository;
 use App\Repository\TeamRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
-abstract readonly class AbstractFixturesProvider
+abstract readonly class AbstractFixturesProvider implements FixturesProviderInterface
 {
     public function __construct(
         protected TeamRepository $teamRepository,

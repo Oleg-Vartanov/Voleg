@@ -7,6 +7,7 @@ let centerRoutes: { name: string, title: string }[] = [
   {name: 'home', title: 'Home'},
   {name: 'about', title: 'About'},
   {name: 'pricing', title: 'Pricing'},
+  {name: 'admin', title: 'Admin', roles: ['ROLE_ADMIN']},
 ];
 
 const route = useRoute();
@@ -41,6 +42,7 @@ function routerLinkClass(routeName: string) {
         <ul class="navbar-nav col-lg-6 justify-content-lg-center nav-pills">
           <li v-for="route in centerRoutes" class="nav-item">
             <router-link
+                v-if="!route.hasOwnProperty('roles') || auth.hasRole(route.roles)"
                 class="nav-link"
                 :to="{ name: route.name }"
                 :class="routerLinkClass(route.name)"

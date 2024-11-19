@@ -4,15 +4,18 @@ import {reactive, readonly} from 'vue';
 import {useRouter} from 'vue-router';
 import {useTopAlerts} from '@/modules/top-alerts';
 import {jwtDecode} from 'jwt-decode';
+import ArrayHelper from '@/helpers/array-helper';
 
 const localStorageKey = 'voleg-jwt'
 const topAlerts = useTopAlerts();
 
-const user = reactive({
+const defaultUser = {
   isSignedIn: false,
   id: null,
   displayName: null,
-});
+  roles: [],
+};
+const user = reactive({...defaultUser});
 setUserByToken();
 
 function setUserByToken(): void {
@@ -22,6 +25,7 @@ function setUserByToken(): void {
     user.isSignedIn = isTokenValid();
     user.id = decodedToken['id'] ?? null;
     user.displayName = decodedToken['displayName'] ?? null;
+    user.roles = decodedToken['roles'] ?? [];
   }
 }
 
@@ -70,12 +74,17 @@ export const useAuth = () => {
   }
 
   function reset(): void {
-    user.isSignedIn = false;
+    Object.assign(user, defaultUser);
     resetToken();
+  }
+
+  function hasRole(roles: string[]): boolean {
+    return ArrayHelper.intersects(user.roles, roles);
   }
 
   return {
     user: readonly(user),
+    hasRole,
     signIn,
     signOut,
     reset,

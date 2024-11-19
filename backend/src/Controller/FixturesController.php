@@ -4,9 +4,9 @@ namespace App\Controller;
 
 use App\DTO\Fixtures\SyncRequestDto;
 use App\DTO\Validator\ValidationErrorResponse;
+use App\Interface\FixturesProviderInterface;
 use App\Repository\CompetitionRepository;
 use App\Repository\SeasonRepository;
-use App\Service\Fixtures\AbstractFixturesProvider;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,13 +29,14 @@ class FixturesController extends ApiController
     /* OpenAi Documentation */
     #[OA\RequestBody(content: new Model(type: SyncRequestDto::class))]
     #[OA\Response(response: Response::HTTP_OK, description: 'Fixtures synced')]
+    #[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Dont have rights')]
     #[OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Validation errors',
         content: new Model(type: ValidationErrorResponse::class))]
 
     #[Route('/sync', name: 'sync', methods: ['POST'])]
     public function sync(
         Request $request,
-        AbstractFixturesProvider $fixturesProvider,
+        FixturesProviderInterface $fixturesProvider,
         CompetitionRepository $competitionRepository,
         SeasonRepository $seasonRepository,
     ): Response {
