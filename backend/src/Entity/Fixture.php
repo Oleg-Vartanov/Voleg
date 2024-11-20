@@ -6,7 +6,10 @@ use App\Enum\Fixtures\FixtureStatusEnum;
 use App\Repository\FixtureRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\PersistentCollection;
+use Symfony\Component\Serializer\Attribute\Groups;
 
+#[Groups([FixturePrediction::SHOW_PREDICTIONS])]
 #[ORM\Entity(repositoryClass: FixtureRepository::class)]
 class Fixture
 {
@@ -48,6 +51,10 @@ class Fixture
 
     #[ORM\Column(nullable: true)]
     private ?int $providerFixtureId = null;
+
+    /** @var array|Fixture[]|PersistentCollection */
+    #[ORM\OneToMany(targetEntity: FixturePrediction::class, mappedBy: 'fixture')]
+    private PersistentCollection|array $fixturePredictions;
 
     public function getId(): int
     {
@@ -162,15 +169,21 @@ class Fixture
         return $this;
     }
 
-    public function getproviderFixtureId(): ?int
+    public function getProviderFixtureId(): ?int
     {
         return $this->providerFixtureId;
     }
 
-    public function setproviderFixtureId(?int $providerFixtureId): static
+    public function setProviderFixtureId(?int $providerFixtureId): static
     {
         $this->providerFixtureId = $providerFixtureId;
 
         return $this;
+    }
+
+    /** @return array|Fixture[]|PersistentCollection */
+    public function getFixturePredictions(): array|PersistentCollection
+    {
+        return $this->fixturePredictions;
     }
 }

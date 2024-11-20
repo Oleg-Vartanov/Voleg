@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTO\Fixtures;
+namespace App\DTO\Fixtures\Provider;
 
 class TeamDto
 {

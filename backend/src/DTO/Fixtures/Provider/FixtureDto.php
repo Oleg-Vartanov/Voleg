@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTO\Fixtures;
+namespace App\DTO\Fixtures\Provider;
 
 use App\Entity\Team;
 use App\Enum\Fixtures\FixtureStatusEnum;

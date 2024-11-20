@@ -4,11 +4,14 @@ namespace App\Controller;
 
 use App\DTO\Fixtures\SyncRequestDto;
 use App\DTO\Validator\ValidationErrorResponse;
+use App\Enum\Fixtures\CompetitionCodeEnum;
 use App\Interface\FixturesProviderInterface;
 use App\Repository\CompetitionRepository;
+use App\Repository\FixtureRepository;
 use App\Repository\SeasonRepository;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -23,6 +26,10 @@ class FixturesController extends ApiController
     public function __construct(
         protected ValidatorInterface $validator,
         private readonly SerializerInterface $serializer,
+        private readonly FixturesProviderInterface $fixturesProvider,
+        private readonly CompetitionRepository $competitionRepository,
+        private readonly SeasonRepository $seasonRepository,
+        private readonly FixtureRepository $fixtureRepository,
     ) {
     }
 
@@ -34,12 +41,7 @@ class FixturesController extends ApiController
         content: new Model(type: ValidationErrorResponse::class))]
 
     #[Route('/sync', name: 'sync', methods: ['POST'])]
-    public function sync(
-        Request $request,
-        FixturesProviderInterface $fixturesProvider,
-        CompetitionRepository $competitionRepository,
-        SeasonRepository $seasonRepository,
-    ): Response {
+    public function sync(Request $request): Response {
         /** @var SyncRequestDto $dto */
         $dto = $this->serializer->denormalize(
             $request->getPayload()->all(), SyncRequestDto::class
@@ -49,12 +51,26 @@ class FixturesController extends ApiController
             return $response;
         }
 
-        $competition = $competitionRepository->findOneByCode($dto->competitionCode) ?? throw new NotFoundHttpException();
-        $season = $seasonRepository->findOneByYear($dto->seasonYear) ?? throw new NotFoundHttpException();
+        $competition = $this->competitionRepository->findOneByCode($dto->competitionCode) ?? throw new NotFoundHttpException();
+        $season = $this->seasonRepository->findOneByYear($dto->seasonYear) ?? throw new NotFoundHttpException();
 
-        $fixturesProvider->syncTeams($competition, $season);
-        $fixturesProvider->syncFixtures($competition, $season);
+        $this->fixturesProvider->syncTeams($competition, $season);
+        $this->fixturesProvider->syncFixtures($competition, $season);
 
         return new Response('Synced');
+    }
+
+    #[Route('/predictions', name: 'predictions', methods: ['GET'])]
+    public function fixtures(): JsonResponse
+    {
+        // TODO: Remove hardcore and create some functionality.
+        $season = $this->seasonRepository->findOneByYear(2024);
+        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
+
+        $fixtures = $this->fixtureRepository->filter($this->getUser(), $competition, $season);
+
+        // TODO: Filter by matchday?
+        
+        return $this->json($fixtures, context: ['groups' => ['ShowPredictions']]);
     }
 }

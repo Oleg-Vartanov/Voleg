@@ -25,4 +25,8 @@ export default {
       { headers: getHeader() }
     );
   },
+
+  showFixtures() {
+    return axios.get(`${apiBaseUrl}/fixtures/predictions`, { headers: getHeader() });
+  },
 };

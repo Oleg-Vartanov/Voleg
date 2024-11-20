@@ -34,6 +34,7 @@ security:
             jwt: ~
     access_control:
         - { path: ^/fixtures/sync, roles: ROLE_ADMIN }
+        - { path: ^/fixtures, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/test, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/users, roles: IS_AUTHENTICATED_FULLY, methods: [DELETE, PATCH] }
         - { path: ^/users, roles: PUBLIC_ACCESS, methods: [GET] }

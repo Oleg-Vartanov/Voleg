@@ -2,8 +2,8 @@
 
 namespace App\Service\Fixtures;
 
-use App\DTO\Fixtures\FixtureDto;
-use App\DTO\Fixtures\TeamDto;
+use App\DTO\Fixtures\Provider\FixtureDto;
+use App\DTO\Fixtures\Provider\TeamDto;
 use App\Entity\Competition;
 use App\Entity\Season;
 use App\Enum\Fixtures\FixtureStatusEnum;

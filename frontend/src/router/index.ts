@@ -18,6 +18,18 @@ const index = createRouter({
           component: () => import('../views/Home.vue'),
         },
         {
+          path: '/games',
+          name: 'games',
+          meta: { title: 'Games' },
+          component: () => import('../views/Games.vue'),
+        },
+        {
+          path: '/games/football-predictions',
+          name: 'football-predictions',
+          meta: { title: 'Predictions' },
+          component: () => import('../views/games/FootballPredictions.vue'),
+        },
+        {
           path: '/about',
           name: 'about',
           meta: { title: 'About' },
