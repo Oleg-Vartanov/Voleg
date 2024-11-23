@@ -20,6 +20,7 @@ abstract readonly class AbstractFixturesProvider implements FixturesProviderInte
         protected TeamRepository $teamRepository,
         protected FixtureRepository $fixtureRepository,
         protected EntityManagerInterface $entityManager,
+        protected PredictionsService $predictionsService,
     ) {
     }
 
@@ -82,6 +83,13 @@ abstract readonly class AbstractFixturesProvider implements FixturesProviderInte
             $fixture->setStartAt($fixtureDto->startAt);
 
             $this->entityManager->persist($fixture);
+
+            // TODO: Move to subscriber/dispatcher?
+            foreach ($fixture->getFixturePredictions() as $prediction) {
+                $points = $this->predictionsService->calculatePoints($prediction);
+                $prediction->setPoints($points);
+                $this->entityManager->persist($prediction);
+            }
         }
 
         $this->entityManager->flush();

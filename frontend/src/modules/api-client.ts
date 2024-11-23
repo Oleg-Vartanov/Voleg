@@ -32,4 +32,11 @@ export default {
       params: { start: start, end: end }
     });
   },
+
+  leaderboard(start: null|string = null, end: null|string = null) {
+    return axios.get(`${apiBaseUrl}/fixtures/leaderboard`, {
+      headers: getHeader(),
+      params: { start: start, end: end }
+    });
+  },
 };

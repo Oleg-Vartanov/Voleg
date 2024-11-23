@@ -26,9 +26,10 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
         TeamRepository $teamRepository,
         FixtureRepository $fixtureRepository,
         EntityManagerInterface $entityManager,
+        PredictionsService $predictionsService,
         protected FootballDataOrgClient $client,
     ) {
-        parent::__construct($teamRepository, $fixtureRepository, $entityManager);
+        parent::__construct($teamRepository, $fixtureRepository, $entityManager, $predictionsService);
     }
 
     /**

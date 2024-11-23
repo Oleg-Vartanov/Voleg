@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Controller\FixturesController;
 use App\Enum\Fixtures\FixtureStatusEnum;
 use App\Repository\FixtureRepository;
 use DateTimeImmutable;
@@ -9,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-#[Groups([FixturePrediction::SHOW_PREDICTIONS])]
+#[Groups([FixturesController::SHOW_PREDICTIONS])]
 #[ORM\Entity(repositoryClass: FixtureRepository::class)]
 class Fixture
 {
@@ -54,7 +55,7 @@ class Fixture
 
     #[ORM\OneToMany(targetEntity: FixturePrediction::class, mappedBy: 'fixture')]
     /**
-     * @var $fixturePredictions Fixture[]|array|PersistentCollection
+     * @var $fixturePredictions FixturePrediction[]|array|PersistentCollection
      */
     private PersistentCollection|array $fixturePredictions;
 
@@ -183,7 +184,7 @@ class Fixture
         return $this;
     }
 
-    /** @return array|Fixture[]|PersistentCollection */
+    /** @return FixturePrediction[]|array|PersistentCollection */
     public function getFixturePredictions(): array|PersistentCollection
     {
         return $this->fixturePredictions;

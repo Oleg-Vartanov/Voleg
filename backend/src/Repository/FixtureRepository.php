@@ -28,7 +28,7 @@ class FixtureRepository extends ServiceEntityRepository
     public function filter(
         ?User $user = null,
         ?Competition $competition = null,
-        ?Season $season  = null,
+        ?Season $season = null,
         ?int $round = null,
         ?DateTime $start = null,
         ?DateTime $end = null,
@@ -65,7 +65,7 @@ class FixtureRepository extends ServiceEntityRepository
                ->setParameter('end', $end);
         }
 
-        return $qb->orderBy('f.matchday', 'ASC')
+        return $qb->orderBy('f.startAt', 'ASC')
                   ->getQuery()
                   ->getResult();
     }

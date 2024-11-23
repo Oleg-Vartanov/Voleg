@@ -8,6 +8,7 @@ use App\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use Doctrine\ORM\PersistentCollection;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -63,6 +64,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups([self::SHOW])]
     #[ORM\Column(options: ['default' => '1970-01-01 00:00:00'])]
     private DateTimeImmutable $createdAt;
+
+    #[ORM\OneToMany(targetEntity: FixturePrediction::class, mappedBy: 'user')]
+    /**
+     * @var $fixturePredictions FixturePrediction[]|array|PersistentCollection
+     */
+    private PersistentCollection|array $fixturePredictions;
 
     public function __construct()
     {
@@ -241,5 +248,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @return FixturePrediction[]|array|PersistentCollection
+     */
+    public function getFixturePredictions(): array|PersistentCollection
+    {
+        return $this->fixturePredictions;
     }
 }

@@ -15,6 +15,9 @@ class FixturesRequestDto
     #[Assert\Date]
     public mixed $end = null;
 
+    #[Assert\Type('digit')]
+    public mixed $limit;
+
     #[Assert\NotBlank, Assert\Type('integer')]
     public mixed $year = 2024;
 
