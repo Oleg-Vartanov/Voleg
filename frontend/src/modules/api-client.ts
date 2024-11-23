@@ -26,7 +26,10 @@ export default {
     );
   },
 
-  showFixtures() {
-    return axios.get(`${apiBaseUrl}/fixtures/predictions`, { headers: getHeader() });
+  showFixtures(start: null|string = null, end: null|string = null) {
+    return axios.get(`${apiBaseUrl}/fixtures/predictions`, {
+      headers: getHeader(),
+      params: { start: start, end: end }
+    });
   },
 };

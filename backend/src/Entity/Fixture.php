@@ -52,8 +52,10 @@ class Fixture
     #[ORM\Column(nullable: true)]
     private ?int $providerFixtureId = null;
 
-    /** @var array|Fixture[]|PersistentCollection */
     #[ORM\OneToMany(targetEntity: FixturePrediction::class, mappedBy: 'fixture')]
+    /**
+     * @var $fixturePredictions Fixture[]|array|PersistentCollection
+     */
     private PersistentCollection|array $fixturePredictions;
 
     public function getId(): int

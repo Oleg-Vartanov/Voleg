@@ -2,18 +2,21 @@
 
 namespace App\Controller;
 
+use App\DTO\Fixtures\FixturesRequestDto;
 use App\DTO\Fixtures\SyncRequestDto;
 use App\DTO\Validator\ValidationErrorResponse;
-use App\Enum\Fixtures\CompetitionCodeEnum;
+use App\Entity\FixturePrediction;
 use App\Interface\FixturesProviderInterface;
 use App\Repository\CompetitionRepository;
 use App\Repository\FixtureRepository;
 use App\Repository\SeasonRepository;
+use DateTime;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -60,17 +63,29 @@ class FixturesController extends ApiController
         return new Response('Synced');
     }
 
-    #[Route('/predictions', name: 'predictions', methods: ['GET'])]
-    public function fixtures(): JsonResponse
-    {
-        // TODO: Remove hardcore and create some functionality.
-        $season = $this->seasonRepository->findOneByYear(2024);
-        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
+    #[Route('/predictions', name: 'predictions', methods: ['GET'], format: 'json')]
+    public function fixtures(
+        #[MapQueryString(
+            validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY
+        )] FixturesRequestDto $dto = new FixturesRequestDto()
+    ): JsonResponse {
+        $start = $dto->start === null ? (new DateTime())->modify('-5 days') : new DateTime($dto->start);
+        $end = $dto->end === null ? (new DateTime())->modify('+5 days') : new DateTime($dto->end);
 
-        $fixtures = $this->fixtureRepository->filter($this->getUser(), $competition, $season);
+        $fixtures = $this->fixtureRepository->filter(
+            user: $this->getUser(),
+            competition: $this->competitionRepository->findOneByCode($dto->countryCode),
+            season: $this->seasonRepository->findOneByYear($dto->year),
+            start: $start,
+            end: $end,
+        );
 
-        // TODO: Filter by matchday?
-        
-        return $this->json($fixtures, context: ['groups' => ['ShowPredictions']]);
+        return $this->json([
+            'filters' => [
+                'start' => $start->format('Y-m-d'),
+                'end' => $end->format('Y-m-d'),
+            ],
+            'fixtures' => $fixtures,
+        ], context: ['groups' => [FixturePrediction::SHOW_PREDICTIONS]]);
     }
 }

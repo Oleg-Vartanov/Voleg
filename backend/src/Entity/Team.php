@@ -4,15 +4,18 @@ namespace App\Entity;
 
 use App\Repository\TeamRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
 class Team
 {
+    #[Groups([FixturePrediction::SHOW_PREDICTIONS])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private int $id;
 
+    #[Groups([FixturePrediction::SHOW_PREDICTIONS])]
     #[ORM\Column(length: 100)]
     private string $name;
 

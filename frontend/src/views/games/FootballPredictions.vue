@@ -6,46 +6,91 @@ import { Alert } from "@/models/alert";
 
 const topAlerts = useTopAlerts();
 const isLoading = ref(true);
-
 const fixtures = ref({});
+const start = ref(null);
+const end = ref(null);
 
-Client.showFixtures()
-  .then((response) => {
-    fixtures.value = response.data;
-  })
-  .catch((axiosError) => {
-    topAlerts.add(new Alert('Error during obtaining data.', 'danger', 10));
-  })
-  .finally(() => {
-    isLoading.value = false;
-  })
+function updateFixturesTable() {
+  Client.showFixtures(start.value, end.value)
+    .then((response) => {
+      fixtures.value = response.data.fixtures;
+      start.value = response.data.filters.start;
+      end.value = response.data.filters.end;
+    })
+    .catch((axiosError) => {
+      topAlerts.add(new Alert('Error during obtaining data.', 'danger', 10));
+    })
+    .finally(() => {
+      isLoading.value = false;
+    })
+}
+updateFixturesTable();
 
-const matchdays = [...Array(38).keys()].map(i => i + 1);
+function predictionHomeScore(fixture: object|null) {
+  return fixture?.fixturePredictions?.homeScore == null ? '-' : fixture.fixturePredictions.homeScore;
+}
+function predictionAwayScore(fixture: object|null) {
+  return fixture?.fixturePredictions?.awayScore == null ? '-' : fixture.fixturePredictions.awayScore;
+}
+function getHomeScore(fixture: object|null) {
+  return fixture.homeScore === null ? '-' : fixture.homeScore;
+}
+function getAwayScore(fixture: object|null) {
+  return fixture?.fixturePredictions?.awayScore == null ? '-' : fixture.fixturePredictions.awayScore;
+}
+
+// TODO: Move this calculation to a backend fixtures endpoint.
+function calcPoints(fixture: object|null) {
+  const pHomeScore = predictionHomeScore(fixture);
+  const homeScore = getHomeScore(fixture);
+  const pAwayScore = predictionAwayScore(fixture);
+  const awayScore = getAwayScore(fixture);
+
+  if (pHomeScore === '-') {
+    return '-';
+  }
+  if (pHomeScore === homeScore(fixture) && pAwayScore === awayScore(fixture)) {
+    return 3;
+  }
+  if (
+    (pHomeScore > pAwayScore && homeScore > awayScore)
+    || (pHomeScore < pAwayScore && homeScore < awayScore)
+    || (pHomeScore === pAwayScore && homeScore === awayScore)
+  ) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
 
 </script>
 
 <template>
   <div class="ov-center">
-    <div v-if="isLoading" class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-
     <div class="container text-center">
-      <div class="row align-items-start">
 
-        <div class="col">
-          <div class="accordion" id="accordion">
-            <div v-for="matchday in matchdays" class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapse-'+matchday" aria-expanded="true" :aria-controls="'#collapse-'+matchday">
-                  Matchday {{ matchday }}
-                </button>
-              </h2>
-              <div :id="'collapse-'+matchday" class="accordion-collapse collapse" data-bs-parent="#accordion">
-                <div class="accordion-body">
-                  <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-                </div>
+      <div v-if="isLoading" class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+
+      <div v-if="!isLoading" class="row align-items-start">
+
+        <div class="d-flex justify-content-center">
+          <div class="row align-items-center">
+            <div class="col-auto mb-2 p-1">
+              <div class="input-group">
+                <span class="input-group-text">Start</span>
+                <input id="start" class="form-control" type="date" v-model="start"/>
               </div>
+            </div>
+            <div class="col-auto mb-2 p-1">
+              <div class="input-group">
+                <span class="input-group-text">End</span>
+                <input id="end" class="form-control" type="date" v-model="end"/>
+              </div>
+            </div>
+            <div class="col-auto mb-2 p-1">
+              <button @click="updateFixturesTable" class="btn btn-outline-primary" type="button">Filter</button>
             </div>
           </div>
         </div>
@@ -54,28 +99,52 @@ const matchdays = [...Array(38).keys()].map(i => i + 1);
           <table class="table">
             <thead>
             <tr>
-              <th scope="col">#</th>
-              <th scope="col">Name</th>
+              <th scope="col">Match</th>
+              <th scope="col">Prediction</th>
+              <th scope="col">Score</th>
               <th scope="col">Points</th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td>Mark</td>
-              <td>13</td>
-            </tr>
-            <tr>
-              <th scope="row">2</th>
-              <td>Jacob</td>
-              <td>25</td>
+            <tr v-for="fixture in fixtures">
+              <td>{{ fixture.homeTeam.name }}<br>{{ fixture.awayTeam.name }}</td>
+              <td>{{ predictionHomeScore(fixture) }}<br>{{ predictionAwayScore(fixture) }}</td>
+              <td>{{ getHomeScore(fixture) }}<br>{{ getAwayScore(fixture) }}</td>
+              <td>{{ calcPoints(fixture) }}</td>
             </tr>
             </tbody>
           </table>
         </div>
 
+        <div class="col">
+          <table class="table">
+            <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Round Points</th>
+              <th scope="col">Total Points</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <th scope="row">1</th>
+              <td>Ole</td>
+              <td>5</td>
+              <td>13</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Arti</td>
+              <td>2</td>
+              <td>25</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        
       </div>
+      
     </div>
-
   </div>
 </template>
