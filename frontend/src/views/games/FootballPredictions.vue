@@ -10,9 +10,8 @@ const start = ref(null);
 const end = ref(null);
 
 const fixtures = ref({});
-const isLoadingFixtures = ref(true);
-
 const leaderboard = ref({});
+const isLoadingFixtures = ref(true);
 const isLoadingLeaderboard = ref(true);
 
 function updateFixturesTable() {
