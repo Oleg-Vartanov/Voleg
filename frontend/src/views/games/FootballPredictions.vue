@@ -188,7 +188,7 @@ function predictionAwayScore(fixture) {
               </thead>
               <tbody>
               <template v-for="fixture in fixtures">
-                <tr v-if="fixture.status !== 'finished'">
+                <tr v-if="new Date(fixture.startAt) > new Date()">
                   <td class="text-start">
                     <span>
                       <TeamLogo :teamName="fixture.homeTeam.name"></TeamLogo>
