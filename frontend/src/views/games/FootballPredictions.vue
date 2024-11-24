@@ -34,7 +34,6 @@ function updateFixturesTable() {
 
   Client.leaderboard(start.value, end.value)
     .then((response) => {
-      console.log(response.data);
       leaderboard.value = response.data.users;
       start.value = response.data.filters.start;
       end.value = response.data.filters.end;
