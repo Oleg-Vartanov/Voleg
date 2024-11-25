@@ -85,10 +85,12 @@ abstract readonly class AbstractFixturesProvider implements FixturesProviderInte
             $this->entityManager->persist($fixture);
 
             // TODO: Move to subscriber/dispatcher?
-            foreach ($fixture->getFixturePredictions() as $prediction) {
-                $points = $this->predictionsService->calculatePoints($prediction);
-                $prediction->setPoints($points);
-                $this->entityManager->persist($prediction);
+            if ($fixture->hasStarted()) {
+                foreach ($fixture->getFixturePredictions() as $prediction) {
+                    $points = $this->predictionsService->calculatePoints($prediction);
+                    $prediction->setPoints($points);
+                    $this->entityManager->persist($prediction);
+                }
             }
         }
 

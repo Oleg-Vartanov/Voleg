@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Controller\FixturesController;
 use App\Enum\Fixtures\FixtureStatusEnum;
 use App\Repository\FixtureRepository;
+use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\PersistentCollection;
@@ -188,5 +189,10 @@ class Fixture
     public function getFixturePredictions(): array|PersistentCollection
     {
         return $this->fixturePredictions;
+    }
+
+    public function hasStarted(): bool
+    {
+        return $this->getStartAt() <= new DateTime();
     }
 }
