@@ -39,4 +39,10 @@ export default {
       params: { start: start, end: end }
     });
   },
+
+  makePredictions(params: object) {
+    return axios.post(`${apiBaseUrl}/fixtures/make-predictions`, params, {
+      headers: getHeader()
+    });
+  },
 };

@@ -12,12 +12,22 @@ const end = ref(null);
 
 const fixtures = ref({});
 const leaderboard = ref({});
-const isLoadingFixtures = ref(true);
-const isLoadingLeaderboard = ref(true);
+
+const isLoading = ref({
+  fixtures: true,
+  leaderboard: true,
+  predictions: false,
+});
+
+updateTables();
+
+function updateTables() {
+  updateFixturesTable();
+  updateLeaderboardTable();
+}
 
 function updateFixturesTable() {
-  isLoadingFixtures.value = true;
-  isLoadingLeaderboard.value = true;
+  isLoading.value.fixtures = true;
 
   Client.showFixtures(start.value, end.value)
     .then((response) => {
@@ -29,8 +39,12 @@ function updateFixturesTable() {
       topAlerts.add(new Alert('Error during obtaining data.', 'danger', 10));
     })
     .finally(() => {
-      isLoadingFixtures.value = false;
+      isLoading.value.fixtures = false;
     })
+}
+
+function updateLeaderboardTable() {
+  isLoading.value.leaderboard = true;
 
   Client.leaderboard(start.value, end.value)
     .then((response) => {
@@ -42,16 +56,79 @@ function updateFixturesTable() {
       topAlerts.add(new Alert('Error during obtaining data.', 'danger', 10));
     })
     .finally(() => {
-      isLoadingLeaderboard.value = false;
+      isLoading.value.leaderboard = false;
     })
 }
-updateFixturesTable();
+
+function makePredictions(event: SubmitEvent) {
+  isLoading.value.predictions = true;
+  const form = event.target as HTMLFormElement;
+  const elements = form.elements;
+
+  const predictions = {};
+  for (let element of elements) {
+    if (element instanceof HTMLInputElement) {
+      const fixtureId = element.dataset.id || null;
+      const side = element.dataset.side || null;
+      const value = element.value;
+
+      if (fixtureId === null || side === null) {
+        continue;
+      }
+
+      if (!predictions[fixtureId]) {
+        predictions[fixtureId] = {
+          fixtureId: fixtureId,
+          homeScore: null,
+          awayScore: null,
+        };
+      }
+
+      if (side === 'home') {
+        predictions[fixtureId].homeScore = value;
+      }
+      if (side === 'away') {
+        predictions[fixtureId].awayScore = value;
+      }
+    }
+  }
+
+  // Exclude not filled fixtures.
+  Object.entries(predictions).forEach(([index, prediction]) => {
+    if (prediction.homeScore === '' || prediction.awayScore === '') {
+      delete predictions[index]
+    }
+  });
+
+  Client.makePredictions(Object.values(predictions))
+    .then((response) => {
+      updateFixturesTable();
+      topAlerts.add(new Alert('Updated.', 'success', 10));
+    })
+    .catch((axiosError) => {
+      switch (axiosError.response.status) {
+        case 409:
+          topAlerts.add(new Alert('Some fixtures has already started. Try to reload a page.', 'danger', 10));
+          break;
+        default:
+          topAlerts.add(new Alert('Error. Try again later. Or contact support.', 'danger', 10));
+      }
+    })
+    .finally(() => {
+      isLoading.value.predictions = false;
+      closeModal();
+    })
+}
+
+function closeModal() {
+  document.getElementById('closeModal').click();
+}
 
 function predictionHomeScore(fixture) {
-  return fixture?.fixturePredictions?.homeScore == null ? '-' : fixture.fixturePredictions.homeScore;
+  return fixture?.fixturePredictions[0]?.homeScore == null ? '-' : fixture.fixturePredictions[0].homeScore;
 }
 function predictionAwayScore(fixture) {
-  return fixture?.fixturePredictions?.awayScore == null ? '-' : fixture.fixturePredictions.awayScore;
+  return fixture?.fixturePredictions[0]?.awayScore == null ? '-' : fixture.fixturePredictions[0].awayScore;
 }
 </script>
 
@@ -63,7 +140,7 @@ function predictionAwayScore(fixture) {
         <div class="row">
 
           <div class="col-auto mb-2 p-1">
-            <button v-if="!isLoadingFixtures"
+            <button v-if="!isLoading.fixtures"
                     type="button"
                     class="btn btn-primary"
                     data-bs-toggle="modal"
@@ -86,19 +163,19 @@ function predictionAwayScore(fixture) {
           </div>
 
           <div class="col-auto mb-2 p-1">
-            <button @click="updateFixturesTable" class="btn btn-outline-primary" type="button">Filter</button>
+            <button @click="updateTables" class="btn btn-outline-primary" type="button">Filter</button>
           </div>
         </div>
 
       </div>
 
-      <div v-if="isLoadingFixtures || isLoadingLeaderboard" class="spinner-border text-primary mt-3" role="status">
+      <div v-if="isLoading.fixtures || isLoading.leaderboard" class="spinner-border text-primary mt-3" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
 
       <div class="row">
         <div class="col">
-          <table v-if="!isLoadingFixtures" class="table">
+          <table v-if="!isLoading.fixtures" class="table">
             <thead>
             <tr>
               <th scope="col">Match</th>
@@ -112,7 +189,7 @@ function predictionAwayScore(fixture) {
               <td class="text-start">
                 <span>
                   <TeamLogo :teamName="fixture.homeTeam.name"></TeamLogo>
-                {{ fixture.homeTeam.name }}
+                  {{ fixture.homeTeam.name }}
                 </span>
                 <br>
                 <span>
@@ -131,7 +208,7 @@ function predictionAwayScore(fixture) {
                 {{ fixture.awayScore === null ? '-' : fixture.awayScore }}
               </td>
               <td>
-                {{ fixture?.fixturePredictions?.points ?? '-' }}
+                {{ fixture?.fixturePredictions[0]?.points ?? '-' }}
               </td>
             </tr>
             </tbody>
@@ -139,7 +216,7 @@ function predictionAwayScore(fixture) {
         </div>
 
         <div class="col">
-          <table v-if="!isLoadingLeaderboard" class="table">
+          <table v-if="!isLoading.leaderboard" class="table">
             <thead>
             <tr>
               <th scope="col">#</th>
@@ -162,7 +239,7 @@ function predictionAwayScore(fixture) {
       </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Predictions Modal -->
     <div
       class="modal fade"
       id="predictionsModal"
@@ -171,60 +248,68 @@ function predictionAwayScore(fixture) {
       aria-labelledby="predictionsModalLabel"
       aria-hidden="true"
     >
+      <form @submit.prevent="makePredictions">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="predictionsModalLabel">Predictions</h1>
           </div>
           <div class="modal-body">
-
-            <table v-if="!isLoadingFixtures" class="table">
-              <thead>
-              <tr>
-                <th scope="col">Match</th>
-                <th scope="col" style="width: 20%; min-width: 80px;">Home</th>
-                <th scope="col" style="width: 20%; min-width: 80px;">Away</th>
-              </tr>
-              </thead>
-              <tbody>
-              <template v-for="fixture in fixtures">
-                <tr v-if="new Date(fixture.startAt) > new Date()">
-                  <td class="text-start">
-                    <span>
-                      <TeamLogo :teamName="fixture.homeTeam.name"></TeamLogo>
-                    {{ fixture.homeTeam.name }}
-                    {{ fixture.status }}
-                    </span>
-                    <br>
-                    <span>
-                      <TeamLogo :teamName="fixture.awayTeam.name"></TeamLogo>
-                    {{ fixture.awayTeam.name }}
-                    </span>
-                  </td>
-                  <td>
-                    <input type="number"
-                           min="0" max="99"
-                           class="form-control"
-                           :value="predictionHomeScore(fixture)">
-                  </td>
-                  <td>
-                    <input type="number"
-                           min="0" max="99"
-                           class="form-control"
-                           :value="predictionAwayScore(fixture)">
-                  </td>
+              <table v-if="!isLoading.fixtures" class="table">
+                <thead>
+                <tr>
+                  <th scope="col">Match</th>
+                  <th scope="col" style="width: 20%; min-width: 80px;">Home</th>
+                  <th scope="col" style="width: 20%; min-width: 80px;">Away</th>
                 </tr>
-              </template>
-              </tbody>
-            </table>
-
+                </thead>
+                <tbody>
+                <template v-for="fixture in fixtures">
+                  <tr v-if="new Date(fixture.startAt) > new Date()">
+                    <td class="text-start">
+                      <span>
+                        <TeamLogo :teamName="fixture.homeTeam.name"></TeamLogo>
+                      {{ fixture.homeTeam.name }}
+                      </span>
+                      <br>
+                      <span>
+                        <TeamLogo :teamName="fixture.awayTeam.name"></TeamLogo>
+                      {{ fixture.awayTeam.name }}
+                      </span>
+                    </td>
+                    <td>
+                      <input class="form-control"
+                             type="number"
+                             min="0" max="99"
+                             :name="'home-fixture-prediction-'+fixture.id"
+                             :data-id="fixture.id"
+                             data-side="home"
+                             :value="predictionHomeScore(fixture)">
+                    </td>
+                    <td>
+                      <input class="form-control"
+                             type="number"
+                             min="0" max="99"
+                             :name="'away-fixture-prediction-'+fixture.id"
+                             :data-id="fixture.id"
+                             data-side="away"
+                             :value="predictionAwayScore(fixture)">
+                    </td>
+                  </tr>
+                </template>
+                </tbody>
+              </table>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-secondary" id="closeModal" data-bs-dismiss="modal">Close</button>
+            <button :disabled="isLoading.predictions" type="submit" class="btn btn-primary">Save</button>
+            <div v-if="isLoading.predictions" class="spinner-border text-primary mt-3" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
           </div>
         </div>
       </div>
+      </form>
     </div>
 
   </div>

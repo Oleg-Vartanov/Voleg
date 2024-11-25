@@ -3,14 +3,17 @@
 namespace App\Controller;
 
 use App\DTO\Fixtures\FixturesRequestDto;
+use App\DTO\Fixtures\PredictionDto;
 use App\DTO\Fixtures\SyncRequestDto;
 use App\DTO\Validator\ValidationErrorResponse;
 use App\Entity\User;
+use App\Exception\FixtureHasStartedException;
 use App\Interface\FixturesProviderInterface;
 use App\Repository\CompetitionRepository;
 use App\Repository\FixtureRepository;
 use App\Repository\SeasonRepository;
 use App\Repository\UserRepository;
+use App\Service\Fixtures\PredictionsService;
 use DateTime;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
@@ -18,6 +21,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -37,6 +41,7 @@ class FixturesController extends ApiController
         private readonly SeasonRepository $seasonRepository,
         private readonly FixtureRepository $fixtureRepository,
         private readonly UserRepository $userRepository,
+        private readonly PredictionsService $predictionsService,
     ) {
     }
 
@@ -75,6 +80,8 @@ class FixturesController extends ApiController
     ): JsonResponse {
         $start = $dto->start === null ? (new DateTime())->modify('-5 days') : new DateTime($dto->start);
         $end = $dto->end === null ? (new DateTime())->modify('+5 days') : new DateTime($dto->end);
+        $start->setTime(0, 0, 0);
+        $end->setTime(0, 0, 0);
 
         $fixtures = $this->fixtureRepository->filter(
             user: $this->getUser(),
@@ -101,6 +108,8 @@ class FixturesController extends ApiController
     ): JsonResponse {
         $start = $dto->start === null ? (new DateTime())->modify('-5 days') : new DateTime($dto->start);
         $end = $dto->end === null ? (new DateTime())->modify('+5 days') : new DateTime($dto->end);
+        $start->setTime(0, 0, 0);
+        $end->setTime(0, 0, 0);
 
         $users = $this->userRepository->fixturesLeaderboard(
             competition: $this->competitionRepository->findOneByCode($dto->countryCode),
@@ -117,5 +126,17 @@ class FixturesController extends ApiController
             ],
             'users' => $users,
         ], context: ['groups' => [self::SHOW_PREDICTIONS, User::SHOW]]);
+    }
+
+    #[Route('/make-predictions', name: 'makePredictions', methods: ['POST'], format: 'json')]
+    public function makePredictions(#[MapRequestPayload(type: PredictionDto::class)] array $dtos): JsonResponse
+    {
+        try {
+            $this->predictionsService->makePredictions($dtos, $this->getUser());
+        } catch (FixtureHasStartedException $e) {
+            return $this->json(['message' => 'Fixture has already started'], Response::HTTP_CONFLICT);
+        }
+
+        return $this->json(['message' => 'Success'], Response::HTTP_CREATED);
     }
 }
