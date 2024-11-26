@@ -1,6 +1,5 @@
 parameters:
     app.url: '%env(APP_URL)%'
-    fixtures:
-      football-data-org:
-        api.url: '%env(FOOTBALL_DATA_ORG_URL)%'
-        api.key: '%env(FOOTBALL_DATA_ORG_KEY)%'
+    auth.sign.up.code: '%env(SIGN_UP_CODE)%'
+    fixtures.football-data-org.api.url: '%env(FOOTBALL_DATA_ORG_URL)%'
+    fixtures.football-data-org.api.key: '%env(FOOTBALL_DATA_ORG_KEY)%'

@@ -5,7 +5,6 @@ namespace App\Service\Fixtures;
 use App\Entity\Competition;
 use App\Entity\Season;
 use Exception;
-use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -26,13 +25,8 @@ class FootballDataOrgClient
         private readonly HttpClientInterface $client,
         private readonly ParameterBagInterface $params,
     ) {
-        $config = $this->params->get('fixtures')['football-data-org'];
-        $url = $config['api.url'] ?? null;
-        $key = $config['api.key'] ?? null;
-
-        if (empty($url) || empty($key)) {
-            throw new InvalidArgumentException('Configs must be provided');
-        }
+        $url = $this->params->get('fixtures.football-data-org.api.url');
+        $key = $this->params->get('fixtures.football-data-org.api.key');
 
         $this->apiUrl = $url;
         $this->headers['X-Auth-Token'] = $key;

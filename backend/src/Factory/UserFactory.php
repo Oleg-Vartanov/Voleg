@@ -13,40 +13,27 @@ readonly class UserFactory
     ) {
     }
 
-    public function create(array|UserDto $userData): User
-    {
-        return match (true) {
-            is_array($userData) => $this->createByArray($userData),
-            $userData instanceof UserDto => $this->createByDto($userData),
-        };
-    }
-
-    public function createByParams(
-        string $email,
-        string $password, // Plaintext password.
-        array $roles = [],
-        string $displayName = ''
-    ): User {
-        $user = new User();
-        $user->setEmail($email);
-        $user->setPassword($this->passwordHasher->hashPassword($user, $password));
-        $user->setRoles($roles);
-        $user->setDisplayName($displayName);
-
-        return $user;
-    }
-
-    private function createByArray(array $params): User
-    {
-        return call_user_func_array([$this, 'createByParams'], $params);
-    }
-
-    private function createByDto(UserDto $dto): User
+    public function create(UserDto $dto): User
     {
         return $this->createByParams(
             email: $dto->email,
             password: $dto->password,
             displayName: $dto->displayName,
         );
+    }
+
+    public function createByParams(
+        string $email,
+        string $password, // Plaintext password.
+        string $displayName,
+        array $roles = [],
+    ): User {
+        $user = new User();
+        $user->setEmail($email);
+        $user->setPassword($this->passwordHasher->hashPassword($user, $password));
+        $user->setDisplayName($displayName);
+        $user->setRoles($roles);
+
+        return $user;
     }
 }
