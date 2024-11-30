@@ -15,7 +15,7 @@ use App\Repository\SeasonRepository;
 use App\Repository\UserRepository;
 use App\Service\Fixtures\PredictionsService;
 use DateTime;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

@@ -8,7 +8,7 @@ use App\DTO\User\VerificationLinkDto;
 use App\DTO\Validator\ValidationErrorResponse;
 use App\Repository\UserRepository;
 use App\Service\AuthService;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
