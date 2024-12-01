@@ -25,7 +25,7 @@ class TestEmailCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $email = (new Email())
-            ->from('trial-jpzkmgqr1ov4059v.mlsender.net')
+            ->from('no-reply@trial-jpzkmgqr1ov4059v.mlsender.net')
             ->to('olegvartanov1997@gmail.com')
             ->subject('Test Email Subject')
             ->text('Test Text')
