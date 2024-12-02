@@ -103,7 +103,7 @@ class AuthController extends ApiController
 
         return $this->render($template, [
             'displayName' => $user->getDisplayName(),
-            'supportEmail' => $parameterBag->get('support_email'),
+            'supportEmail' => $parameterBag->get('app.support.email'),
             'continueLink' => $link->redirectUrl ?? null,
         ]);
     }

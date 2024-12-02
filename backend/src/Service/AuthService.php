@@ -66,14 +66,14 @@ readonly class AuthService
         }
 
         $email = (new TemplatedEmail())
-            ->from('no-reply@project.com')
+            ->from('no-reply@'.$this->parameterBag->get('app.mail.domain'))
             ->to(new Address($user->getEmail()))
             ->subject('Verify Sign Up')
             ->htmlTemplate('email/sign-up.html.twig')
             ->context([
                 'verifyLink' => $this->createVerificationLink($user, $redirectUrl),
                 'displayName' => $user->getDisplayName(),
-                'supportEmail' => $this->parameterBag->get('support_email'),
+                'supportEmail' => $this->parameterBag->get('app.support.email'),
             ])
         ;
 
