@@ -60,7 +60,7 @@ class Fixture
      */
     private PersistentCollection|array $fixturePredictions;
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
