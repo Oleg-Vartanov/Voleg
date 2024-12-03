@@ -9,6 +9,7 @@ use App\Entity\Season;
 use App\Enum\Fixtures\FixtureStatusEnum;
 use App\Repository\FixtureRepository;
 use App\Repository\TeamRepository;
+use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -65,9 +66,13 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
      * @inheritDoc
      * @throws Exception|TransportExceptionInterface
      */
-    protected function getFixtures(Competition $competition, Season $season): array
-    {
-        $responseData = $this->client->getMatches($competition, $season);
+    protected function getFixtures(
+        Competition $competition,
+        Season $season,
+        ?DateTime $from = null,
+        ?DateTime $to = null,
+    ): array {
+        $responseData = $this->client->getMatches($competition, $season, $from, $to);
 
         try {
             $fixturesDtos = [];
@@ -98,9 +103,9 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
     private function transformStatus($providerStatus): FixtureStatusEnum
     {
         return match ($providerStatus) {
-            'SCHEDULED' => FixtureStatusEnum::Scheduled,
-            'IN_PLAY' => FixtureStatusEnum::InPlay,
-            'FINISHED' => FixtureStatusEnum::Finished,
+            'SCHEDULED', 'TIMED', 'CANCELLED', 'POSTPONED', 'SUSPENDED' => FixtureStatusEnum::Scheduled,
+            'IN_PLAY', 'PAUSED' => FixtureStatusEnum::InPlay,
+            'FINISHED', 'AWARDED' => FixtureStatusEnum::Finished,
             default => FixtureStatusEnum::Unknown,
         };
     }

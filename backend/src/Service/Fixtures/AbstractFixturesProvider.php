@@ -11,6 +11,7 @@ use App\Entity\Team;
 use App\Interface\FixturesProviderInterface;
 use App\Repository\FixtureRepository;
 use App\Repository\TeamRepository;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
@@ -32,7 +33,12 @@ abstract readonly class AbstractFixturesProvider implements FixturesProviderInte
     /**
      * @return FixtureDto[]
      */
-    abstract protected function getFixtures(Competition $competition, Season $season): array;
+    abstract protected function getFixtures(
+        Competition $competition,
+        Season $season,
+        ?DateTime $from = null,
+        ?DateTime $to = null,
+    ): array;
 
     /**
      * @throws Exception
@@ -61,9 +67,13 @@ abstract readonly class AbstractFixturesProvider implements FixturesProviderInte
     /**
      * @throws Exception
      */
-    public function syncFixtures(Competition $competition, Season $season): void
-    {
-        $fixturesDtos = $this->getFixtures($competition, $season);
+    public function syncFixtures(
+        Competition $competition,
+        Season $season,
+        ?DateTime $from = null,
+        ?DateTime $to = null,
+    ): void {
+        $fixturesDtos = $this->getFixtures($competition, $season, $from, $to);
 
         foreach ($fixturesDtos as $fixtureDto) {
             $fixture = $this->fixtureRepository->findOneByProviderFixtureId($fixtureDto->providerFixtureId);

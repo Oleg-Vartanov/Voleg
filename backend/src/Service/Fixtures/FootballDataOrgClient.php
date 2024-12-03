@@ -4,6 +4,7 @@ namespace App\Service\Fixtures;
 
 use App\Entity\Competition;
 use App\Entity\Season;
+use DateTime;
 use Exception;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,22 +57,32 @@ class FootballDataOrgClient
     /**
      * @throws Exception|TransportExceptionInterface|ServerExceptionInterface|RedirectionExceptionInterface|ClientExceptionInterface
      */
-    public function getMatches(Competition $competition, Season $season): array
-        {
-            $code = $competition->getCode();
-            $response = $this->client->request('GET', $this->url('/competitions/'.$code.'/matches'), [
-                'headers' => $this->headers,
-                'query' => [
-                    'season' => $season->getYear()
-                ]
-            ]);
-
-            if ($response->getStatusCode() !== Response::HTTP_OK) {
-                throw new Exception('Failed to fetch teams');
-            }
-
-            return json_decode($response->getContent(), true);
+    public function getMatches(
+        Competition $competition,
+        Season $season,
+        ?DateTime $from = null,
+        ?DateTime $to = null,
+    ): array {
+        $filters = ['season' => $season->getYear()];
+        if (!is_null($from)) {
+            $filters['dateFrom'] = $from->format('Y-m-d');
         }
+        if (!is_null($to)) {
+            $filters['dateTo'] = $to->format('Y-m-d');
+        }
+
+        $code = $competition->getCode();
+        $response = $this->client->request('GET', $this->url('/competitions/'.$code.'/matches'), [
+            'headers' => $this->headers,
+            'query' => $filters
+        ]);
+
+        if ($response->getStatusCode() !== Response::HTTP_OK) {
+            throw new Exception('Failed to fetch teams');
+        }
+
+        return json_decode($response->getContent(), true);
+    }
 
     private function url(string $path): string
     {

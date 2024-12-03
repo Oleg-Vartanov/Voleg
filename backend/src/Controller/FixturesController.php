@@ -67,7 +67,12 @@ class FixturesController extends ApiController
         $season = $this->seasonRepository->findOneByYear($dto->seasonYear) ?? throw new NotFoundHttpException();
 
         $this->fixturesProvider->syncTeams($competition, $season);
-        $this->fixturesProvider->syncFixtures($competition, $season);
+        $this->fixturesProvider->syncFixtures(
+            $competition, 
+            $season,
+            (new DateTime())->modify('-10 days'),
+            (new DateTime())->modify('+10 days'),
+        );
 
         return new Response('Synced');
     }
