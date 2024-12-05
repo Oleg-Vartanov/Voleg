@@ -8,6 +8,7 @@ use App\Entity\Season;
 use App\Entity\User;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -26,7 +27,7 @@ class FixtureRepository extends ServiceEntityRepository
     }
 
     public function filter(
-        ?User $user = null,
+        User $user,
         ?Competition $competition = null,
         ?Season $season = null,
         ?int $round = null,
@@ -35,15 +36,12 @@ class FixtureRepository extends ServiceEntityRepository
     ) {
         $qb = $this->createQueryBuilder('f')
             ->addSelect('fp', 'ht', 'at')
-            ->leftJoin('f.fixturePredictions', 'fp')
+            ->leftJoin('f.fixturePredictions', 'fp', Join::WITH, 'fp.user = :user')
+                ->setParameter('user', $user)
             ->leftJoin('f.homeTeam', 'ht')
             ->leftJoin('f.awayTeam', 'at')
         ;
 
-        if ($user !== null) {
-            $qb->andWhere('fp.user IS NULL OR fp.user = :user')
-               ->setParameter('user', $user);
-        }
         if ($competition !== null) {
             $qb->andWhere('f.competition = :competition')
                ->setParameter('competition', $competition);

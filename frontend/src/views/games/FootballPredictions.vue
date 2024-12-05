@@ -315,4 +315,8 @@ function predictionAwayScore(fixture) {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.col {
+  padding: 0;
+}
+</style>
