@@ -6,7 +6,7 @@ use App\Entity\Competition;
 use App\Entity\Fixture;
 use App\Entity\Season;
 use App\Entity\User;
-use DateTime;
+use DateTimeInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
@@ -31,8 +31,8 @@ class FixtureRepository extends ServiceEntityRepository
         ?Competition $competition = null,
         ?Season $season = null,
         ?int $round = null,
-        ?DateTime $start = null,
-        ?DateTime $end = null,
+        ?DateTimeInterface $start = null,
+        ?DateTimeInterface $end = null,
     ) {
         $qb = $this->createQueryBuilder('f')
             ->addSelect('fp', 'ht', 'at')

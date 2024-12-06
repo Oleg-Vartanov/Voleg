@@ -11,7 +11,6 @@ use App\Entity\Team;
 use App\Interface\FixturesProviderInterface;
 use App\Repository\FixtureRepository;
 use App\Repository\TeamRepository;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
@@ -25,20 +24,12 @@ abstract readonly class AbstractFixturesProvider implements FixturesProviderInte
     ) {
     }
 
+    abstract public function syncFixtures(Competition $competition, Season $season): void;
+
     /**
      * @return TeamDto[]
      */
     abstract protected function getTeams(Competition $competition, Season $season): array;
-
-    /**
-     * @return FixtureDto[]
-     */
-    abstract protected function getFixtures(
-        Competition $competition,
-        Season $season,
-        ?DateTime $from = null,
-        ?DateTime $to = null,
-    ): array;
 
     /**
      * @throws Exception
@@ -48,17 +39,7 @@ abstract readonly class AbstractFixturesProvider implements FixturesProviderInte
         $teamsDtos = $this->getTeams($competition, $season);
 
         foreach ($teamsDtos as $teamDto) {
-            $team = $this->teamRepository->findOneByProviderTeamId($teamDto->providerTeamId);
-
-            if ($team !== null) {
-                continue;
-            }
-
-            $team = new Team();
-            $team->setName($teamDto->name);
-            $team->setProviderTeamId($teamDto->providerTeamId);
-
-            $this->entityManager->persist($team);
+            $this->persistTeam($teamDto);
         }
 
         $this->entityManager->flush();
@@ -67,43 +48,51 @@ abstract readonly class AbstractFixturesProvider implements FixturesProviderInte
     /**
      * @throws Exception
      */
-    public function syncFixtures(
-        Competition $competition,
-        Season $season,
-        ?DateTime $from = null,
-        ?DateTime $to = null,
-    ): void {
-        $fixturesDtos = $this->getFixtures($competition, $season, $from, $to);
+    protected function persistFixture(FixtureDto $dto, Competition $competition, Season $season): void
+    {
+        $fixture = $this->fixtureRepository->findOneByProviderFixtureId($dto->providerFixtureId);
 
-        foreach ($fixturesDtos as $fixtureDto) {
-            $fixture = $this->fixtureRepository->findOneByProviderFixtureId($fixtureDto->providerFixtureId);
+        if ($fixture === null) {
+            $fixture = new Fixture();
+            $fixture->setProviderFixtureId($dto->providerFixtureId);
+        }
+        $fixture->setCompetition($competition);
+        $fixture->setSeason($season);
+        $fixture->setStatus($dto->status);
+        $fixture->setMatchday($dto->matchday);
+        $fixture->setHomeTeam($dto->homeTeam);
+        $fixture->setAwayTeam($dto->awayTeam);
+        $fixture->setHomeScore($dto->homeScore);
+        $fixture->setAwayScore($dto->awayScore);
+        $fixture->setStartAt($dto->startAt);
 
-            if ($fixture === null) {
-                $fixture = new Fixture();
-                $fixture->setProviderFixtureId($fixtureDto->providerFixtureId);
-            }
-            $fixture->setCompetition($competition);
-            $fixture->setSeason($season);
-            $fixture->setStatus($fixtureDto->status);
-            $fixture->setMatchday($fixtureDto->matchday);
-            $fixture->setHomeTeam($fixtureDto->homeTeam);
-            $fixture->setAwayTeam($fixtureDto->awayTeam);
-            $fixture->setHomeScore($fixtureDto->homeScore);
-            $fixture->setAwayScore($fixtureDto->awayScore);
-            $fixture->setStartAt($fixtureDto->startAt);
+        $this->entityManager->persist($fixture);
 
-            $this->entityManager->persist($fixture);
-
-            // TODO: Move to subscriber/dispatcher?
-            if ($fixture->getId() !== null && $fixture->hasStarted()) {
-                foreach ($fixture->getFixturePredictions() as $prediction) {
-                    $points = $this->predictionsService->calculatePoints($prediction);
-                    $prediction->setPoints($points);
-                    $this->entityManager->persist($prediction);
-                }
+        // TODO: Move to subscriber/dispatcher?
+        if ($fixture->getId() !== null && $fixture->hasStarted()) {
+            foreach ($fixture->getFixturePredictions() as $prediction) {
+                $points = $this->predictionsService->calculatePoints($prediction);
+                $prediction->setPoints($points);
+                $this->entityManager->persist($prediction);
             }
         }
+    }
 
-        $this->entityManager->flush();
+    /**
+     * @throws Exception
+     */
+    private function persistTeam(TeamDto $dto): void
+    {
+        $team = $this->teamRepository->findOneByProviderTeamId($dto->providerTeamId);
+
+        if ($team !== null) {
+            return;
+        }
+
+        $team = new Team();
+        $team->setName($dto->name);
+        $team->setProviderTeamId($dto->providerTeamId);
+
+        $this->entityManager->persist($team);
     }
 }

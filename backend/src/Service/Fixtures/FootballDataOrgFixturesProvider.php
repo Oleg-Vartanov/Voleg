@@ -3,14 +3,18 @@
 namespace App\Service\Fixtures;
 
 use App\DTO\Fixtures\Provider\FixtureDto;
+use App\DTO\Fixtures\Provider\SeasonDto;
 use App\DTO\Fixtures\Provider\TeamDto;
 use App\Entity\Competition;
 use App\Entity\Season;
 use App\Enum\Fixtures\FixtureStatusEnum;
 use App\Repository\FixtureRepository;
 use App\Repository\TeamRepository;
+use DateInterval;
+use DatePeriod;
 use DateTime;
 use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -31,6 +35,25 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
         protected FootballDataOrgClient $client,
     ) {
         parent::__construct($teamRepository, $fixtureRepository, $entityManager, $predictionsService);
+    }
+
+    /**
+     * @throws Exception|TransportExceptionInterface
+     */
+    public function syncFixtures(Competition $competition, Season $season): void
+    {
+        $providerSeason = $this->getSeason($competition, $season) ?? throw new Exception('Provider season not found.');
+        $batchPeriods = $this->batchSeasonPeriods($providerSeason);
+
+        foreach ($batchPeriods as $period) {
+            $fixturesDtos = $this->getFixtures($competition, $season, $period['start'], $period['end']);
+
+            foreach ($fixturesDtos as $fixtureDto) {
+                $this->persistFixture($fixtureDto, $competition, $season);
+            }
+        }
+
+        $this->entityManager->flush();
     }
 
     /**
@@ -61,6 +84,27 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
     }
 
     /**
+     * https://docs.football-data.org/general/v4/competition.html#_overview
+     *
+     * @throws Exception|TransportExceptionInterface|ServerExceptionInterface|RedirectionExceptionInterface|ClientExceptionInterface
+     */
+    public function getSeason(Competition $competition, Season $season): ?SeasonDto
+    {
+        $response = $this->client->getSeasons($competition);
+        foreach ($response['seasons'] as $providerSeason) {
+            if (substr($providerSeason['startDate'], 0, 4) == $season->getYear()) {
+                return new SeasonDto(
+                    $competition,
+                    new DateTimeImmutable($providerSeason['startDate']),
+                    new DateTimeImmutable($providerSeason['endDate']),
+                );
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * https://docs.football-data.org/general/v4/match.html
      *
      * @inheritDoc
@@ -69,8 +113,8 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
     protected function getFixtures(
         Competition $competition,
         Season $season,
-        ?DateTime $from = null,
-        ?DateTime $to = null,
+        ?DateTimeInterface $from = null,
+        ?DateTimeInterface $to = null,
     ): array {
         $responseData = $this->client->getMatches($competition, $season, $from, $to);
 
@@ -108,5 +152,28 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
             'FINISHED', 'AWARDED' => FixtureStatusEnum::Finished,
             default => FixtureStatusEnum::Unknown,
         };
+    }
+
+    private function batchSeasonPeriods(SeasonDto $dto): array
+    {
+        $startDate = $dto->startDate;
+        $endDate = $dto->endDate;
+        $interval = new DateInterval('P3M'); // 3 months.
+        $period = new DatePeriod($startDate, $interval, $endDate);
+        $dates = iterator_to_array($period);
+
+        if (end($dates) != $endDate) {
+            $dates[] = $endDate;
+        }
+
+        $batchPeriods = [];
+        for ($i = 0; $i < count($dates) - 1; $i++) {
+            $batchPeriods[] = [
+                'start' => $dates[$i],
+                'end' => $dates[$i + 1],
+            ];
+        }
+
+        return $batchPeriods;
     }
 }

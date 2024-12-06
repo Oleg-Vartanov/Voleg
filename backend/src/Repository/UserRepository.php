@@ -5,7 +5,7 @@ namespace App\Repository;
 use App\Entity\Competition;
 use App\Entity\Season;
 use App\Entity\User;
-use DateTime;
+use DateTimeInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -49,8 +49,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function fixturesLeaderboard(
         ?Competition $competition = null,
         ?Season $season = null,
-        ?DateTime $start = null,
-        ?DateTime $end = null,
+        ?DateTimeInterface $start = null,
+        ?DateTimeInterface $end = null,
         ?int $limit = null,
     ): array {
         $qb = $this->createQueryBuilder('u')

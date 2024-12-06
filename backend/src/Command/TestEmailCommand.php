@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 
-#[AsCommand(name: 'app:test-email')]
+#[AsCommand(name: 'email:test')]
 class TestEmailCommand extends Command
 {
     public function __construct(
