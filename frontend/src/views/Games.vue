@@ -30,7 +30,7 @@ function checkRequirements(game) {
 </script>
 
 <template>
-  <div class="ov-center">
+  <div class="ov-center ps-2 pe-2">
     <div class="row row-cols-1 row-cols-md-6 g-4">
       <div class="col" v-for="game in games">
         <a class="text-decoration-none" @click="checkRequirements(game)" href="javascript:void(0)">

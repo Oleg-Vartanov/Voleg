@@ -20,49 +20,48 @@ function routerLinkClass(routeName: string) {
 </script>
 
 <template>
-  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <nav class="navbar navbar-expand-md bg-body-tertiary" aria-label="Navbar">
     <div class="container-fluid">
 
-      <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation">
+      <div class="navbar-brand col-3">
+        <img src="/logo-voleg.svg" width="100" height="40" alt="logo">
+      </div>
+
+      <button class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbars"
+              aria-controls="navbars"
+              aria-expanded="false"
+              aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <div class="collapse navbar-collapse d-lg-flex" id="navbarNav">
+      <div class="collapse navbar-collapse col-9" id="navbars">
 
-        <router-link class="navbar-brand col-lg-3 me-0" :to="{ name: 'home' }">
-          <img src="/logo-voleg.svg" width="100" height="40" alt="logo">
-        </router-link>
-
-        <ul class="navbar-nav col-lg-6 justify-content-lg-center nav-pills">
+        <ul class="navbar-nav col-8 justify-content-center nav-pills">
           <li v-for="route in centerRoutes" class="nav-item">
             <router-link
-                v-if="!route.hasOwnProperty('roles') || auth.hasRole(route.roles)"
-                class="nav-link"
-                :to="{ name: route.name }"
-                :class="routerLinkClass(route.name)"
+              v-if="!route.hasOwnProperty('roles') || auth.hasRole(route.roles)"
+              class="nav-link"
+              :to="{ name: route.name }"
+              :class="routerLinkClass(route.name)"
             >
               {{ route.title }}
             </router-link>
           </li>
         </ul>
 
-        <div class="d-lg-flex col-lg-3 justify-content-lg-end">
-          <ul class="navbar-nav nav-pills">
+        <div class="d-md-flex d-lg-flex col-4 justify-content-end">
+          <ul class="navbar-nav nav-pills me-2">
             <li class="nav-item nav-link">
               <ColorThemeToggle></ColorThemeToggle>
             </li>
             <li v-if="!auth.user.isSignedIn" class="nav-item">
               <router-link
-                  class="nav-link"
-                  :to="{ name: 'signIn' }"
-                  :class="routerLinkClass('signIn')"
+                class="nav-link"
+                :to="{ name: 'signIn' }"
+                :class="routerLinkClass('signIn')"
               >
                 Sign In
               </router-link>
@@ -78,6 +77,7 @@ function routerLinkClass(routeName: string) {
         </div>
 
       </div>
+
     </div>
   </nav>
 </template>
