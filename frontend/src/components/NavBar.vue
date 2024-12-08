@@ -4,9 +4,8 @@ import {useRoute} from 'vue-router'
 import {useAuth} from "@/modules/auth";
 
 let centerRoutes: { name: string, title: string }[] = [
-  {name: 'home', title: 'Home'},
-  {name: 'games', title: 'Games'},
   {name: 'about', title: 'About'},
+  {name: 'games', title: 'Games'},
   {name: 'pricing', title: 'Pricing'},
   {name: 'admin', title: 'Admin', roles: ['ROLE_ADMIN']},
 ];

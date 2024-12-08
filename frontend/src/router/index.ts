@@ -15,7 +15,7 @@ const index = createRouter({
           path: '/',
           name: 'home',
           meta: { title: 'Home' },
-          component: () => import('@/views/Home.vue'),
+          redirect: { name: 'about' },
         },
         {
           path: '/games',
