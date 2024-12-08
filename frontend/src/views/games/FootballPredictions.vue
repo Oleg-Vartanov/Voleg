@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import Client from '@/modules/api-client.ts';
+import Client from '@/modules/api-client';
 import { useTopAlerts } from "@/modules/top-alerts";
 import { Alert } from "@/models/alert";
 import TeamLogo from "@/components/games/fooball-predictions/TeamLogo.vue";
@@ -9,21 +9,32 @@ const topAlerts = useTopAlerts();
 
 const start = ref(null);
 const end = ref(null);
-
-const fixtures = ref({});
-const leaderboard = ref({});
-
+const fixtures = ref(null);
+const leaderboard = ref(null);
 const isLoading = ref({
-  fixtures: true,
-  leaderboard: true,
+  fixtures: false,
+  leaderboard: false,
   predictions: false,
 });
 
-updateTables();
+updateFixturesTable();
 
-function updateTables() {
-  updateFixturesTable();
-  updateLeaderboardTable();
+function initTable(tab: string) {
+  if (tab === 'matches' && fixtures.value === null) {
+    updateFixturesTable();
+  }
+  if (tab === 'leaderboard' && leaderboard.value === null) {
+    updateLeaderboardTable();
+  }
+}
+
+function updateLoadedTables() {
+  if (fixtures.value !== null) {
+    updateFixturesTable();
+  }
+  if (leaderboard.value !== null) {
+    updateLeaderboardTable();
+  }
 }
 
 function updateFixturesTable() {
@@ -102,7 +113,7 @@ function makePredictions(event: SubmitEvent) {
 
   Client.makePredictions(Object.values(predictions))
     .then((response) => {
-      updateTables();
+      updateLoadedTables();
       topAlerts.add(new Alert('Updated.', 'success', 10));
     })
     .catch((axiosError) => {
@@ -163,7 +174,7 @@ function predictionAwayScore(fixture) {
           </div>
 
           <div class="col-auto mb-2 p-1">
-            <button @click="updateTables" class="btn btn-outline-primary" type="button">Filter</button>
+            <button @click="updateLoadedTables" class="btn btn-outline-primary" type="button">Filter</button>
           </div>
         </div>
 
@@ -175,12 +186,16 @@ function predictionAwayScore(fixture) {
 
       <nav>
         <div class="nav nav-tabs justify-content-center" id="nav-tab" role="tablist">
-          <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Matches</button>
-          <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Leaderboard</button>
+          <button @click="initTable('matches')" class="nav-link active" id="nav-matches-tab" type="button" role="tab"
+            data-bs-toggle="tab" data-bs-target="#nav-matches" aria-controls="nav-matches" aria-selected="true">Matches
+          </button>
+          <button @click="initTable('leaderboard')" class="nav-link" id="nav-leaderboard-tab" role="tab" type="button"
+            data-bs-toggle="tab" data-bs-target="#nav-leaderboard" aria-controls="nav-leaderboard" aria-selected="false">Leaderboard
+          </button>
         </div>
       </nav>
       <div class="tab-content">
-        <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
+        <div class="tab-pane fade show active" id="nav-matches" role="tabpanel" aria-labelledby="nav-matches-tab" tabindex="0">
           <table v-if="!isLoading.fixtures" class="table table-sm">
             <thead>
             <tr>
@@ -220,7 +235,7 @@ function predictionAwayScore(fixture) {
             </tbody>
           </table>
         </div>
-        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab" tabindex="0">
+        <div class="tab-pane fade" id="nav-leaderboard" role="tabpanel" aria-labelledby="nav-leaderboard-tab" tabindex="0">
           <table v-if="!isLoading.leaderboard" class="table table-sm">
             <thead>
             <tr>
