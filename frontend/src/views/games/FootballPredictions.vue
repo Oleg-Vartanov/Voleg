@@ -234,7 +234,7 @@ function predictionAwayScore(fixture) {
             <tr v-for="(user, index) in leaderboard">
               <th scope="row">{{ index + 1 }}</th>
               <td>{{ user[0].displayName }}</td>
-              <td>{{ user.totalPoints ?? '-' }}</td>
+              <td>{{ user.periodPoints ?? '-' }}</td>
               <td>{{ user.totalPoints ?? '-' }}</td>
             </tr>
             </tbody>

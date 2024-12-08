@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Competition;
 use App\Entity\Season;
 use App\Entity\User;
+use DateTime;
 use DateTimeInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -54,9 +55,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ?int $limit = null,
     ): array {
         $qb = $this->createQueryBuilder('u')
-                   ->addSelect('u as user','SUM(fp.points) AS totalPoints')
-                   ->leftJoin('u.fixturePredictions', 'fp')
-                   ->leftJoin('fp.fixture', 'f');
+            ->addSelect('u as user','SUM(fp.points) AS totalPoints')
+            ->addSelect('SUM(CASE WHEN f.startAt >= :start AND f.startAt <= :end THEN fp.points ELSE 0 END) AS periodPoints')
+            ->leftJoin('u.fixturePredictions', 'fp')
+            ->leftJoin('fp.fixture', 'f');
 
         if ($competition !== null) {
             $qb->andWhere('f.competition = :competition')
@@ -66,14 +68,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             $qb->andWhere('f.season = :season')
                ->setParameter('season', $season);
         }
-        if ($start !== null) {
-            $qb->andWhere('f.startAt >= :start')
-               ->setParameter('start', $start);
-        }
-        if ($end !== null) {
-            $qb->andWhere('f.startAt <= :end')
-               ->setParameter('end', $end);
-        }
+
+        $qb->setParameter('start', $start ?? new DateTime('0001-01-01'));
+        $qb->setParameter('end', $end ?? new DateTime('9999-12-31'));
+
         if ($limit !== null) {
             $qb->setMaxResults($limit);
         }
