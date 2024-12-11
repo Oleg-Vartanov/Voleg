@@ -167,11 +167,9 @@ function closeModal() {
 }
 
 function getPrediction(fixture, user = null) {
-  if (user === null) {
-    return fixture?.fixturePredictions[0];
-  } else {
-    return fixture?.fixturePredictions.find(prediction => prediction.user.id === user.id);
-  }
+  const userId = user === null ? auth.user.id : user.id;
+
+  return fixture?.fixturePredictions.find(prediction => prediction.user.id === userId);
 }
 
 function predictionHomeScore(fixture, user = null) {
