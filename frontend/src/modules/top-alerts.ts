@@ -15,7 +15,7 @@ export const useTopAlerts = ()  => {
   const remove = (alert: Alert): void => {
     const index: number = alerts.indexOf(alert);
     if (index !== -1) {
-      ArrayHelper.remove(alerts, index);
+      ArrayHelper.removeIndex(alerts, index);
     }
   };
 

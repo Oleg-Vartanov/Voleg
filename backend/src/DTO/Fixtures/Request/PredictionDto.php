@@ -1,8 +1,7 @@
 <?php
 
-namespace App\DTO\Fixtures;
+namespace App\DTO\Fixtures\Request;
 
-use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class PredictionDto

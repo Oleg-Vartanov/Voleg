@@ -26,10 +26,10 @@ export default {
     );
   },
 
-  showFixtures(start: null|string = null, end: null|string = null) {
+  showFixtures(start: null|string = null, end: null|string = null, userIds: null|number[] = null) {
     return axios.get(`${apiBaseUrl}/fixtures/predictions`, {
       headers: getHeader(),
-      params: { start: start, end: end }
+      params: { start: start, end: end, userIds: userIds }
     });
   },
 
@@ -37,6 +37,13 @@ export default {
     return axios.get(`${apiBaseUrl}/fixtures/leaderboard`, {
       headers: getHeader(),
       params: { start: start, end: end }
+    });
+  },
+
+  listUsers(displayName: null|string = null) {
+    return axios.get(`${apiBaseUrl}/users`, {
+      headers: getHeader(),
+      params: { displayName: displayName }
     });
   },
 

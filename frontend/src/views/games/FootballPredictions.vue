@@ -1,21 +1,26 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Client from '@/modules/api-client';
+import ArrayHelper from "@/helpers/array-helper";
 import { useTopAlerts } from "@/modules/top-alerts";
+import { useAuth } from "@/modules/auth";
 import { Alert } from "@/models/alert";
 import TeamLogo from "@/components/games/fooball-predictions/TeamLogo.vue";
 
 const topAlerts = useTopAlerts();
+const auth = useAuth();
 
 const start = ref(null);
 const end = ref(null);
+
 const fixtures = ref(null);
 const leaderboard = ref(null);
-const isLoading = ref({
-  fixtures: false,
-  leaderboard: false,
-  predictions: false,
-});
+
+const searchUsers = ref([]);
+const h2hUsers = ref([]);
+const h2hInput = ref({ value: '', error: '' });
+
+const isLoading = ref({ fixtures: false, leaderboard: false, predictions: false, headToHead: false });
 
 updateFixturesTable();
 
@@ -39,8 +44,9 @@ function updateLoadedTables() {
 
 function updateFixturesTable() {
   isLoading.value.fixtures = true;
+  let userIds = h2hUsers.value.map(object => object.id);
 
-  Client.showFixtures(start.value, end.value)
+  Client.showFixtures(start.value, end.value, userIds)
     .then((response) => {
       fixtures.value = response.data.fixtures;
       start.value = response.data.filters.start;
@@ -69,6 +75,31 @@ function updateLeaderboardTable() {
     .finally(() => {
       isLoading.value.leaderboard = false;
     })
+}
+
+function searchUser() {
+  isLoading.value.headToHead = true;
+
+  Client.listUsers(h2hInput.value.value)
+    .then((response) => {
+      h2hInput.value.error = '';
+      searchUsers.value = response.data;
+    })
+    .catch((axiosError) => {
+      h2hInput.value.error = 'Unexpected error :(';
+    })
+    .finally(() => {
+      isLoading.value.headToHead = false;
+    })
+}
+
+function addH2hUser(user: object) {
+  if (!h2hUsers.value.includes(user)) {
+    h2hUsers.value.push(user);
+  }
+}
+function removeH2hUser(user: object) {
+  ArrayHelper.removeItem(h2hUsers.value, user);
 }
 
 function makePredictions(event: SubmitEvent) {
@@ -135,11 +166,38 @@ function closeModal() {
   document.getElementById('closeModal').click();
 }
 
-function predictionHomeScore(fixture) {
-  return fixture?.fixturePredictions[0]?.homeScore == null ? '-' : fixture.fixturePredictions[0].homeScore;
+function getPrediction(fixture, user = null) {
+  if (user === null) {
+    return fixture?.fixturePredictions[0];
+  } else {
+    return fixture?.fixturePredictions.find(prediction => prediction.user.id === user.id);
+  }
 }
-function predictionAwayScore(fixture) {
-  return fixture?.fixturePredictions[0]?.awayScore == null ? '-' : fixture.fixturePredictions[0].awayScore;
+
+function predictionHomeScore(fixture, user = null) {
+  const prediction = getPrediction(fixture, user);
+
+  return prediction?.homeScore == null ? '-' : prediction.homeScore;
+}
+function predictionAwayScore(fixture, user = null) {
+  const prediction = getPrediction(fixture, user);
+
+  return prediction?.awayScore == null ? '-' : prediction.awayScore;
+}
+
+function colorClass(fixture, user = null) {
+  const prediction = getPrediction(fixture, user);
+
+  switch (prediction?.points) {
+    case 3:
+      return 'table-success';
+    case 1:
+      return 'table-warning';
+    case 0:
+      return 'table-danger';
+    default:
+      return '';
+  }
 }
 </script>
 
@@ -152,11 +210,17 @@ function predictionAwayScore(fixture) {
 
           <div class="col-auto mb-2 p-1">
             <button v-if="!isLoading.fixtures"
-                    type="button"
                     class="btn btn-primary"
                     data-bs-toggle="modal"
                     data-bs-target="#predictionsModal"
             >Make Predictions</button>
+          </div>
+
+          <div class="col-auto mb-2 p-1">
+            <button class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#go"
+            >H2H</button>
           </div>
 
           <div class="col-auto mb-2 p-1">
@@ -180,10 +244,11 @@ function predictionAwayScore(fixture) {
 
       </div>
 
-      <div v-if="isLoading.fixtures || isLoading.leaderboard" class="spinner-border text-primary mt-3" role="status">
+      <div v-if="isLoading.fixtures || isLoading.leaderboard || isLoading.headToHead" class="spinner-border text-primary mt-3" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
 
+      <!-- Nav -->
       <nav>
         <div class="nav nav-tabs justify-content-center" id="nav-tab" role="tablist">
           <button @click="initTable('matches')" class="nav-link active" id="nav-matches-tab" type="button" role="tab"
@@ -194,15 +259,20 @@ function predictionAwayScore(fixture) {
           </button>
         </div>
       </nav>
+
+      <!-- Nav Tabs -->
       <div class="tab-content">
+
+        <!-- Matches -->
         <div class="tab-pane fade show active" id="nav-matches" role="tabpanel" aria-labelledby="nav-matches-tab" tabindex="0">
           <table v-if="!isLoading.fixtures" class="table table-sm">
             <thead>
             <tr>
               <th scope="col">Match</th>
-              <th scope="col">Prediction</th>
               <th scope="col">Score</th>
-              <th scope="col">Points</th>
+              <th scope="col">{{ h2hUsers.length === 0 ? 'Prediction' : auth.user.displayName }}</th>
+              <th scope="col" v-if="h2hUsers.length === 0">Points</th>
+              <th scope="col" v-for="h2hUser in h2hUsers">{{ h2hUser.displayName }}</th>
             </tr>
             </thead>
             <tbody>
@@ -219,22 +289,29 @@ function predictionAwayScore(fixture) {
                 </span>
               </td>
               <td>
-                {{ predictionHomeScore(fixture) }}
-                <br>
-                {{ predictionAwayScore(fixture) }}
-              </td>
-              <td>
                 {{ fixture.homeScore === null ? '-' : fixture.homeScore }}
                 <br>
                 {{ fixture.awayScore === null ? '-' : fixture.awayScore }}
               </td>
-              <td>
-                {{ fixture?.fixturePredictions[0]?.points ?? '-' }}
+              <td :class="colorClass(fixture)">
+                {{ predictionHomeScore(fixture) }}
+                <br>
+                {{ predictionAwayScore(fixture) }}
+              </td>
+              <td v-for="h2hUser in h2hUsers" :class="colorClass(fixture, h2hUser)">
+                {{ predictionHomeScore(fixture, h2hUser) }}
+                <br>
+                {{ predictionAwayScore(fixture, h2hUser) }}
+              </td>
+              <td v-if="h2hUsers.length === 0">
+                {{ getPrediction(fixture, null)?.points ?? '-' }}
               </td>
             </tr>
             </tbody>
           </table>
         </div>
+
+        <!-- Leaderboard -->
         <div class="tab-pane fade" id="nav-leaderboard" role="tabpanel" aria-labelledby="nav-leaderboard-tab" tabindex="0">
           <table v-if="!isLoading.leaderboard" class="table table-sm">
             <thead>
@@ -255,6 +332,7 @@ function predictionAwayScore(fixture) {
             </tbody>
           </table>
         </div>
+
       </div>
 
     </div>
@@ -264,9 +342,8 @@ function predictionAwayScore(fixture) {
       class="modal fade"
       id="predictionsModal"
       tabindex="-1"
-      data-bs-backdrop="static" data-bs-keyboard="false"
+      data-bs-backdrop="static"
       aria-labelledby="predictionsModalLabel"
-      aria-hidden="true"
     >
       <form @submit.prevent="makePredictions">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -275,50 +352,50 @@ function predictionAwayScore(fixture) {
             <h1 class="modal-title fs-5" id="predictionsModalLabel">Predictions</h1>
           </div>
           <div class="modal-body">
-              <table v-if="!isLoading.fixtures" class="table">
-                <thead>
-                <tr>
-                  <th scope="col">Match</th>
-                  <th scope="col" style="width: 20%; min-width: 80px;">Home</th>
-                  <th scope="col" style="width: 20%; min-width: 80px;">Away</th>
+            <table v-if="!isLoading.fixtures" class="table">
+              <thead>
+              <tr>
+                <th scope="col">Match</th>
+                <th scope="col" style="width: 20%; min-width: 80px;">Home</th>
+                <th scope="col" style="width: 20%; min-width: 80px;">Away</th>
+              </tr>
+              </thead>
+              <tbody>
+              <template v-for="fixture in fixtures">
+                <tr v-if="new Date(fixture.startAt) > new Date()">
+                  <td class="text-start">
+                    <span>
+                      <TeamLogo :teamName="fixture.homeTeam.name"></TeamLogo>
+                    {{ fixture.homeTeam.name }}
+                    </span>
+                    <br>
+                    <span>
+                      <TeamLogo :teamName="fixture.awayTeam.name"></TeamLogo>
+                    {{ fixture.awayTeam.name }}
+                    </span>
+                  </td>
+                  <td>
+                    <input class="form-control"
+                           type="number"
+                           min="0" max="99"
+                           :name="'home-fixture-prediction-'+fixture.id"
+                           :data-id="fixture.id"
+                           data-side="home"
+                           :value="predictionHomeScore(fixture)">
+                  </td>
+                  <td>
+                    <input class="form-control"
+                           type="number"
+                           min="0" max="99"
+                           :name="'away-fixture-prediction-'+fixture.id"
+                           :data-id="fixture.id"
+                           data-side="away"
+                           :value="predictionAwayScore(fixture)">
+                  </td>
                 </tr>
-                </thead>
-                <tbody>
-                <template v-for="fixture in fixtures">
-                  <tr v-if="new Date(fixture.startAt) > new Date()">
-                    <td class="text-start">
-                      <span>
-                        <TeamLogo :teamName="fixture.homeTeam.name"></TeamLogo>
-                      {{ fixture.homeTeam.name }}
-                      </span>
-                      <br>
-                      <span>
-                        <TeamLogo :teamName="fixture.awayTeam.name"></TeamLogo>
-                      {{ fixture.awayTeam.name }}
-                      </span>
-                    </td>
-                    <td>
-                      <input class="form-control"
-                             type="number"
-                             min="0" max="99"
-                             :name="'home-fixture-prediction-'+fixture.id"
-                             :data-id="fixture.id"
-                             data-side="home"
-                             :value="predictionHomeScore(fixture)">
-                    </td>
-                    <td>
-                      <input class="form-control"
-                             type="number"
-                             min="0" max="99"
-                             :name="'away-fixture-prediction-'+fixture.id"
-                             :data-id="fixture.id"
-                             data-side="away"
-                             :value="predictionAwayScore(fixture)">
-                    </td>
-                  </tr>
-                </template>
-                </tbody>
-              </table>
+              </template>
+              </tbody>
+            </table>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeModal" data-bs-dismiss="modal">Close</button>
@@ -331,7 +408,60 @@ function predictionAwayScore(fixture) {
       </div>
       </form>
     </div>
+
+    <!-- H2H Modal -->
+    <div
+      class="modal fade"
+      id="go"
+      tabindex="-1"
+      aria-labelledby="h2hModalLabel"
+      data-bs-backdrop="static"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="h2hModalLabel">Head To Head</h1>
+          </div>
+          <div class="modal-body">
+
+            <ul class="list-group list-group-flush mb-3">
+              <li v-for="user in h2hUsers" class="h2h-user list-group-item list-group-item-action" @click="removeH2hUser(user)">
+                {{ user.displayName }} <i class="bi bi-x-lg text-danger" style="font-size: 20px;"></i>
+              </li>
+            </ul>
+
+            <div class="input-group mb-3 has-validation">
+              <span class="input-group-text rounded-0" id="addon-wrapping">Name</span>
+              <input v-model="h2hInput.value" type="text" :class="[h2hInput.error === '' ? '' : 'is-invalid']" class="form-control" aria-describedby="go-h2h validation-go-h2h">
+              <button @click="searchUser" :disabled="h2hInput.value === ''" class="btn btn btn-outline-primary rounded-0" type="button" id="go-h2h">Search</button>
+              <div id="validation-go-h2h" class="invalid-feedback">
+                {{ h2hInput.error }}
+              </div>
+            </div>
+
+            <div v-if="isLoading.headToHead" class="spinner-border text-primary mt-3" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+
+            <ul class="list-group list-group-flush">
+              <li v-for="user in searchUsers" class="h2h-user list-group-item list-group-item-action" @click="addH2hUser(user)">
+                {{ user.displayName }} <i class="bi bi-person-plus text-primary" style="font-size: 20px;"></i>
+              </li>
+            </ul>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeModal" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.h2h-user {
+  cursor: pointer;
+}
+</style>

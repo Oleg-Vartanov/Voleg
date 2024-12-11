@@ -1,13 +1,13 @@
 <?php
 
-namespace App\DTO\Fixtures;
+namespace App\DTO\Fixtures\Request;
 
 use App\Enum\Fixtures\CompetitionCodeEnum;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[OA\Schema(title: 'Sync request')]
-class SyncRequestDto
+class SyncDto
 {
     #[Assert\NotBlank,
         Assert\Type('string'),

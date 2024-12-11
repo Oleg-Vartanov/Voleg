@@ -2,7 +2,7 @@
 
 namespace App\Service\Fixtures;
 
-use App\DTO\Fixtures\PredictionDto;
+use App\DTO\Fixtures\Request\PredictionDto;
 use App\Entity\FixturePrediction;
 use App\Entity\User;
 use App\Exception\FixtureHasStartedException;

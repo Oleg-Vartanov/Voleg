@@ -15,6 +15,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
@@ -44,9 +45,14 @@ class UserController extends ApiController
     )]
 
     #[Route('/', name: 'list', methods: ['GET'])]
-    public function list(): JsonResponse
+    public function list(#[MapQueryParameter] ?string $displayName): JsonResponse
     {
-        $users = $this->userRepository->findAll();
+        $filters = [];
+        if ($displayName !== null) {
+            $filters['displayName'] = $displayName;
+        }
+
+        $users = empty($filters) ? $this->userRepository->findAll() : $this->userRepository->findBy($filters);
 
         return $this->json($users, context: ['groups' => $this->showGroups()]);
     }

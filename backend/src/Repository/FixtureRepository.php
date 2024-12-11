@@ -26,18 +26,21 @@ class FixtureRepository extends ServiceEntityRepository
         return $this->findOneBy(['providerFixtureId' => $id]);
     }
 
+    /**
+     * @param User[] $users
+     */
     public function filter(
-        User $user,
+        array $users,
         ?Competition $competition = null,
         ?Season $season = null,
         ?int $round = null,
         ?DateTimeInterface $start = null,
         ?DateTimeInterface $end = null,
-    ) {
+    ): mixed {
         $qb = $this->createQueryBuilder('f')
             ->addSelect('fp', 'ht', 'at')
-            ->leftJoin('f.fixturePredictions', 'fp', Join::WITH, 'fp.user = :user')
-                ->setParameter('user', $user)
+            ->leftJoin('f.fixturePredictions', 'fp', Join::WITH, 'fp.user IN (:users) ')
+                ->setParameter('users', $users)
             ->leftJoin('f.homeTeam', 'ht')
             ->leftJoin('f.awayTeam', 'at')
         ;

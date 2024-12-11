@@ -21,6 +21,7 @@ class FixturePrediction
     #[ORM\JoinColumn(nullable: false)]
     private Fixture $fixture;
 
+    #[Groups([FixturesController::SHOW_PREDICTIONS])]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private User $user;

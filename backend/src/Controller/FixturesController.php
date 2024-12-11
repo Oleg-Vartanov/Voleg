@@ -2,9 +2,9 @@
 
 namespace App\Controller;
 
-use App\DTO\Fixtures\FixturesRequestDto;
-use App\DTO\Fixtures\PredictionDto;
-use App\DTO\Fixtures\SyncRequestDto;
+use App\DTO\Fixtures\Request\FixturesDto;
+use App\DTO\Fixtures\Request\PredictionDto;
+use App\DTO\Fixtures\Request\SyncDto;
 use App\DTO\Validator\ValidationErrorResponse;
 use App\Entity\User;
 use App\Exception\FixtureHasStartedException;
@@ -14,7 +14,6 @@ use App\Repository\FixtureRepository;
 use App\Repository\SeasonRepository;
 use App\Repository\UserRepository;
 use App\Service\Fixtures\PredictionsService;
-use DateTime;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -46,7 +45,7 @@ class FixturesController extends ApiController
     }
 
     /* OpenAi Documentation */
-    #[OA\RequestBody(content: new Model(type: SyncRequestDto::class))]
+    #[OA\RequestBody(content: new Model(type: SyncDto::class))]
     #[OA\Response(response: Response::HTTP_OK, description: 'Fixtures synced')]
     #[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Dont have rights')]
     #[OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Validation errors',
@@ -54,9 +53,9 @@ class FixturesController extends ApiController
 
     #[Route('/sync', name: 'sync', methods: ['POST'])]
     public function sync(Request $request): Response {
-        /** @var SyncRequestDto $dto */
+        /** @var SyncDto $dto */
         $dto = $this->serializer->denormalize(
-            $request->getPayload()->all(), SyncRequestDto::class
+            $request->getPayload()->all(), SyncDto::class
         );
 
         if ($response = $this->validationErrorResponse($dto)) {
@@ -76,53 +75,50 @@ class FixturesController extends ApiController
     public function fixtures(
         #[MapQueryString(
             validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY
-        )] FixturesRequestDto $dto = new FixturesRequestDto()
+        )] FixturesDto $dto = new FixturesDto()
     ): JsonResponse {
-        $start = $dto->start === null ? (new DateTime())->modify('-5 days') : new DateTime($dto->start);
-        $end = $dto->end === null ? (new DateTime())->modify('+5 days') : new DateTime($dto->end);
-        $start->setTime(0, 0, 0);
-        $end->setTime(0, 0, 0);
+        $dto->transform();
+
+        $users = empty($dto->userIds) ? [] : $this->userRepository->findBy(['id' => $dto->userIds]);
+        array_unshift($users, $this->getUser());
 
         $fixtures = $this->fixtureRepository->filter(
-            user: $this->getUser(),
-            competition: $this->competitionRepository->findOneByCode($dto->countryCode),
+            users: $users,
+            competition: $this->competitionRepository->findOneByCode($dto->competitionCode),
             season: $this->seasonRepository->findOneByYear($dto->year),
-            start: $start,
-            end: $end,
+            start: $dto->start,
+            end: $dto->end,
         );
 
         return $this->json([
             'filters' => [
-                'start' => $start->format('Y-m-d'),
-                'end' => $end->format('Y-m-d'),
+                'start' => $dto->start->format('Y-m-d'),
+                'end' => $dto->end->format('Y-m-d'),
             ],
             'fixtures' => $fixtures,
-        ], context: ['groups' => [self::SHOW_PREDICTIONS]]);
+        ], context: ['groups' => [self::SHOW_PREDICTIONS, User::SHOW]]);
     }
 
     #[Route('/leaderboard', name: 'leaderboard', methods: ['GET'], format: 'json')]
-    public function users(
+    public function leaderboard(
         #[MapQueryString(
             validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY
-        )] FixturesRequestDto $dto = new FixturesRequestDto()
+        )] FixturesDto $dto = new FixturesDto()
     ): JsonResponse {
-        $start = $dto->start === null ? (new DateTime())->modify('-5 days') : new DateTime($dto->start);
-        $end = $dto->end === null ? (new DateTime())->modify('+5 days') : new DateTime($dto->end);
-        $start->setTime(0, 0, 0);
-        $end->setTime(0, 0, 0);
+        $dto->transform();
 
         $users = $this->userRepository->fixturesLeaderboard(
-            competition: $this->competitionRepository->findOneByCode($dto->countryCode),
+            competition: $this->competitionRepository->findOneByCode($dto->competitionCode),
             season: $this->seasonRepository->findOneByYear($dto->year),
-            start: $start,
-            end: $end,
+            start: $dto->start,
+            end: $dto->end,
             limit: $dto->limit ?? 50,
         );
 
         return $this->json([
             'filters' => [
-                'start' => $start->format('Y-m-d'),
-                'end' => $end->format('Y-m-d'),
+                'start' => $dto->start->format('Y-m-d'),
+                'end' => $dto->end->format('Y-m-d'),
             ],
             'users' => $users,
         ], context: ['groups' => [self::SHOW_PREDICTIONS, User::SHOW]]);
