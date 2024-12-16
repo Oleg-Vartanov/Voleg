@@ -172,20 +172,14 @@ function getPrediction(fixture, user = null) {
   return fixture?.fixturePredictions.find(prediction => prediction.user.id === userId);
 }
 
-function predictionHomeScore(fixture, user = null) {
-  const prediction = getPrediction(fixture, user);
-
+function predictionHomeScore(prediction) {
   return prediction?.homeScore == null ? '-' : prediction.homeScore;
 }
-function predictionAwayScore(fixture, user = null) {
-  const prediction = getPrediction(fixture, user);
-
+function predictionAwayScore(prediction) {
   return prediction?.awayScore == null ? '-' : prediction.awayScore;
 }
 
-function colorClass(fixture, user = null) {
-  const prediction = getPrediction(fixture, user);
-
+function colorClass(prediction) {
   switch (prediction?.points) {
     case 3:
       return 'text-success';
@@ -287,38 +281,40 @@ function fixtureDate(fixture) {
             </thead>
             <tbody>
             <tr v-for="fixture in fixtures">
-              <td class="text-start">
-                <span>
-                  <TeamLogo :teamName="fixture.homeTeam.name"></TeamLogo>
-                  {{ fixture.homeTeam.name }}
-                </span>
-                <br>
-                <span>
-                  <TeamLogo :teamName="fixture.awayTeam.name"></TeamLogo>
-                  {{ fixture.awayTeam.name }}
-                </span>
-              </td>
-              <td>
-                {{ fixture.homeScore === null ? '-' : fixture.homeScore }}
-                <br>
-                {{ fixture.awayScore === null ? '-' : fixture.awayScore }}
-              </td>
-              <td :class="colorClass(fixture)">
-                {{ predictionHomeScore(fixture) }}
-                <br>
-                {{ predictionAwayScore(fixture) }}
-              </td>
-              <td v-for="h2hUser in h2hUsers" :class="colorClass(fixture, h2hUser)">
-                {{ predictionHomeScore(fixture, h2hUser) }}
-                <br>
-                {{ predictionAwayScore(fixture, h2hUser) }}
-              </td>
-              <td v-if="h2hUsers.length === 0">
-                {{ getPrediction(fixture, null)?.points ?? '-' }}
-              </td>
-              <td v-for="{date, time} of [fixtureDate(fixture)]">
-                {{ time }}<br>{{ date }}
-              </td>
+              <template v-for="prediction of [getPrediction(fixture)]">
+                <td class="text-start">
+                  <span>
+                    <TeamLogo :teamName="fixture.homeTeam.name"></TeamLogo>
+                    {{ fixture.homeTeam.name }}
+                  </span><br>
+                  <span>
+                    <TeamLogo :teamName="fixture.awayTeam.name"></TeamLogo>
+                    {{ fixture.awayTeam.name }}
+                  </span>
+                </td>
+                <td>
+                  {{ fixture.homeScore === null ? '-' : fixture.homeScore }}<br>
+                  {{ fixture.awayScore === null ? '-' : fixture.awayScore }}
+                </td>
+                <td :class="colorClass(prediction)">
+                  {{ predictionHomeScore(prediction) }}<br>
+                  {{ predictionAwayScore(prediction) }}
+                </td>
+                <template v-for="h2hUser in h2hUsers">
+                  <template v-for="h2hUserPrediction of [getPrediction(fixture, h2hUser)]">
+                    <td :class="colorClass(h2hUserPrediction)">
+                      {{ predictionHomeScore(h2hUserPrediction) }}<br>
+                      {{ predictionAwayScore(h2hUserPrediction) }}
+                    </td>
+                  </template>
+                </template>
+                <td v-if="h2hUsers.length === 0">
+                  {{ prediction?.points ?? '-' }}
+                </td>
+                <td v-for="{date, time} of [fixtureDate(fixture)]">
+                  {{ time }}<br>{{ date }}
+                </td>
+              </template>
             </tr>
             </tbody>
           </table>
@@ -375,37 +371,39 @@ function fixtureDate(fixture) {
               </thead>
               <tbody>
               <template v-for="fixture in fixtures">
-                <tr v-if="new Date(fixture.startAt) > new Date()">
-                  <td class="text-start">
-                    <span>
-                      <TeamLogo :teamName="fixture.homeTeam.name"></TeamLogo>
-                    {{ fixture.homeTeam.name }}
-                    </span>
-                    <br>
-                    <span>
-                      <TeamLogo :teamName="fixture.awayTeam.name"></TeamLogo>
-                    {{ fixture.awayTeam.name }}
-                    </span>
-                  </td>
-                  <td>
-                    <input class="form-control"
-                           type="number"
-                           min="0" max="99"
-                           :name="'home-fixture-prediction-'+fixture.id"
-                           :data-id="fixture.id"
-                           data-side="home"
-                           :value="predictionHomeScore(fixture)">
-                  </td>
-                  <td>
-                    <input class="form-control"
-                           type="number"
-                           min="0" max="99"
-                           :name="'away-fixture-prediction-'+fixture.id"
-                           :data-id="fixture.id"
-                           data-side="away"
-                           :value="predictionAwayScore(fixture)">
-                  </td>
-                </tr>
+                <template v-for="prediction of [getPrediction(fixture)]">
+                  <tr v-if="new Date(fixture.startAt) > new Date()">
+                    <td class="text-start">
+                      <span>
+                        <TeamLogo :teamName="fixture.homeTeam.name"></TeamLogo>
+                      {{ fixture.homeTeam.name }}
+                      </span>
+                      <br>
+                      <span>
+                        <TeamLogo :teamName="fixture.awayTeam.name"></TeamLogo>
+                      {{ fixture.awayTeam.name }}
+                      </span>
+                    </td>
+                    <td>
+                      <input class="form-control"
+                             type="number"
+                             min="0" max="99"
+                             :name="'home-fixture-prediction-'+fixture.id"
+                             :data-id="fixture.id"
+                             data-side="home"
+                             :value="predictionHomeScore(prediction)">
+                    </td>
+                    <td>
+                      <input class="form-control"
+                             type="number"
+                             min="0" max="99"
+                             :name="'away-fixture-prediction-'+fixture.id"
+                             :data-id="fixture.id"
+                             data-side="away"
+                             :value="predictionAwayScore(prediction)">
+                    </td>
+                  </tr>
+                </template>
               </template>
               </tbody>
             </table>
