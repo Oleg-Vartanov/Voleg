@@ -33,6 +33,6 @@ class FixturesDto
         $this->start = $this->start === null ? (new DateTime())->modify('-5 days') : new DateTime($this->start);
         $this->end = $this->end === null ? (new DateTime())->modify('+5 days') : new DateTime($this->end);
         $this->start->setTime(0, 0, 0);
-        $this->end->setTime(0, 0, 0);
+        $this->end->setTime(23, 59, 59);
     }
 }
