@@ -197,6 +197,17 @@ function colorClass(fixture, user = null) {
       return '';
   }
 }
+
+function fixtureDate(fixture) {
+  const date = new Date(fixture.startAt);
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const hour = String(date.getHours()).padStart(2, '0');
+  const minute = String(date.getMinutes()).padStart(2, '0');
+
+  return { date: `${day}/${month}`, time: `${hour}:${minute}` };
+}
 </script>
 
 <template>
@@ -271,6 +282,7 @@ function colorClass(fixture, user = null) {
               <th scope="col">{{ h2hUsers.length === 0 ? 'Prediction' : auth.user.displayName }}</th>
               <th scope="col" v-if="h2hUsers.length === 0">Points</th>
               <th scope="col" v-for="h2hUser in h2hUsers">{{ h2hUser.displayName }}</th>
+              <th scope="col">Start</th>
             </tr>
             </thead>
             <tbody>
@@ -303,6 +315,9 @@ function colorClass(fixture, user = null) {
               </td>
               <td v-if="h2hUsers.length === 0">
                 {{ getPrediction(fixture, null)?.points ?? '-' }}
+              </td>
+              <td v-for="{date, time} of [fixtureDate(fixture)]">
+                {{ time }}<br>{{ date }}
               </td>
             </tr>
             </tbody>
