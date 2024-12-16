@@ -188,11 +188,11 @@ function colorClass(fixture, user = null) {
 
   switch (prediction?.points) {
     case 3:
-      return 'table-success';
+      return 'text-success';
     case 1:
-      return 'table-warning';
+      return 'text-warning';
     case 0:
-      return 'table-danger';
+      return 'text-danger';
     default:
       return '';
   }
