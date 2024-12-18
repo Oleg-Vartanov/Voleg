@@ -63,6 +63,7 @@ services:
 
   mailer:
     container_name: ${PROJECT_NAME}_mailer
+    profiles: [dev]
     image: maildev/maildev
     ports:
       - 1080:1080

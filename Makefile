@@ -25,6 +25,10 @@ init:
 	$(NODE_CONTAINER) npm install
 	$(NODE_CONTAINER) npm run build
 
+# Docker up dev.
+up:
+	docker compose --profile dev up -d
+
 # Run frontend dev.
 watch:
 	$(NODE_CONTAINER) npm run dev -- --host
