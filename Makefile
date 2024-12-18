@@ -23,7 +23,7 @@ init:
 	$(PHP_CONTAINER) php bin/console app:populate-db
 	$(PHP_CONTAINER) php bin/console asset-map:compile
 	$(NODE_CONTAINER) npm install
-	$(NODE_CONTAINER) npm run build
+	$(NODE_CONTAINER) npm run build-only
 
 # Docker up dev.
 up:
