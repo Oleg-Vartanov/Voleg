@@ -210,38 +210,38 @@ function fixtureDate(fixture) {
 
       <div class="d-flex justify-content-center">
         <div class="row">
+          <div class="col-auto mb-2 p-1">
+            <div class="input-group">
+              <span class="input-group-text filter-date-text">Start</span>
+              <input id="start" class="form-control filter-date-input" type="date" v-model="start"/>
+            </div>
+          </div>
 
           <div class="col-auto mb-2 p-1">
-            <button v-if="!isLoading.fixtures"
-                    class="btn btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#predictionsModal"
-            >Make Predictions</button>
+            <div class="input-group">
+              <span class="input-group-text filter-date-text">End</span>
+              <input id="end" class="form-control filter-date-input" type="date" v-model="end"/>
+            </div>
+          </div>
+
+          <div class="col-auto mb-2 p-1">
+            <button @click="updateLoadedTables" class="btn btn-outline-primary" type="button">
+              <i class="bi bi-funnel"></i> Filter</button>
           </div>
 
           <div class="col-auto mb-2 p-1">
             <button class="btn btn-primary"
                     data-bs-toggle="modal"
                     data-bs-target="#go"
-            >H2H</button>
+            ><i class="bi bi-people-fill"></i> H2H</button>
           </div>
 
           <div class="col-auto mb-2 p-1">
-            <div class="input-group">
-              <span class="input-group-text">Start</span>
-              <input id="start" class="form-control" type="date" v-model="start"/>
-            </div>
-          </div>
-
-          <div class="col-auto mb-2 p-1">
-            <div class="input-group">
-              <span class="input-group-text">End</span>
-              <input id="end" class="form-control" type="date" v-model="end"/>
-            </div>
-          </div>
-
-          <div class="col-auto mb-2 p-1">
-            <button @click="updateLoadedTables" class="btn btn-outline-primary" type="button">Filter</button>
+            <button v-if="!isLoading.fixtures"
+                    class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#predictionsModal"
+            ><i class="bi bi-magic"></i> Predict</button>
           </div>
         </div>
 
@@ -474,5 +474,15 @@ function fixtureDate(fixture) {
 <style scoped>
 .h2h-user {
   cursor: pointer;
+}
+
+.filter-date-input {
+  width: 125px;
+  padding-left: 6px;
+}
+.filter-date-text {
+  padding: 0 5px 0 5px;
+  min-width: 45px;
+  display: flex; justify-content: center;
 }
 </style>
