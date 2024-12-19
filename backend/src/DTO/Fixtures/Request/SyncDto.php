@@ -9,15 +9,15 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[OA\Schema(title: 'Sync request')]
 class SyncDto
 {
+    #[OA\Property(example: CompetitionCodeEnum::EPL->value)]
     #[Assert\NotBlank,
         Assert\Type('string'),
         Assert\Choice(callback: [CompetitionCodeEnum::class, 'values'])]
-    #[OA\Property(type: 'string', example: CompetitionCodeEnum::EPL->value)]
-    public mixed $competitionCode;
+    public string $competitionCode;
 
+    #[OA\Property(example: '2024')]
     #[Assert\NotBlank,
         Assert\Type('integer'),
         Assert\Range(min: 1970, max: 2100)]
-    #[OA\Property(type: 'integer', example: '2024')]
-    public mixed $seasonYear;
+    public int $seasonYear;
 }

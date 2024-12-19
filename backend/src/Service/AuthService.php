@@ -33,7 +33,7 @@ readonly class AuthService
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        $this->sendVerificationEmail($user, $dto->verificationEmailRedirectUrl ?? null);
+        $this->sendVerificationEmail($user, $dto->verificationEmailRedirectUrl);
     }
 
     public function verifyUser(string $code, User $user): bool

@@ -16,76 +16,68 @@ use App\Repository\UserRepository;
 use App\Service\Fixtures\PredictionsService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[OA\Tag(name: 'Fixtures')]
 #[Route('/fixtures', name: 'fixtures_')]
-class FixturesController extends ApiController
+class FixturesController extends AbstractController
 {
     const SHOW_PREDICTIONS = 'ShowPredictions';
 
-    public function __construct(
-        protected ValidatorInterface $validator,
-        private readonly SerializerInterface $serializer,
-        private readonly FixturesProviderInterface $fixturesProvider,
-        private readonly CompetitionRepository $competitionRepository,
-        private readonly SeasonRepository $seasonRepository,
-        private readonly FixtureRepository $fixtureRepository,
-        private readonly UserRepository $userRepository,
-        private readonly PredictionsService $predictionsService,
-    ) {
-    }
-
-    /* OpenAi Documentation */
-    #[OA\RequestBody(content: new Model(type: SyncDto::class))]
     #[OA\Response(response: Response::HTTP_OK, description: 'Fixtures synced')]
     #[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Dont have rights')]
-    #[OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Validation errors',
-        content: new Model(type: ValidationErrorResponse::class))]
-
+    #[OA\Response(
+        response: Response::HTTP_UNPROCESSABLE_ENTITY,
+        description: 'Validation errors',
+        content: new Model(type: ValidationErrorResponse::class)
+    )]
     #[Route('/sync', name: 'sync', methods: ['POST'])]
-    public function sync(Request $request): Response {
-        /** @var SyncDto $dto */
-        $dto = $this->serializer->denormalize(
-            $request->getPayload()->all(), SyncDto::class
-        );
+    public function sync(
+        #[MapRequestPayload] SyncDto $dto,
+        CompetitionRepository $competitionRepository,
+        SeasonRepository $seasonRepository,
+        FixturesProviderInterface $fixturesProvider,
+    ): Response {
+        $competition = $competitionRepository->findOneByCode($dto->competitionCode) ?? throw new NotFoundHttpException();
+        $season = $seasonRepository->findOneByYear($dto->seasonYear) ?? throw new NotFoundHttpException();
 
-        if ($response = $this->validationErrorResponse($dto)) {
-            return $response;
-        }
-
-        $competition = $this->competitionRepository->findOneByCode($dto->competitionCode) ?? throw new NotFoundHttpException();
-        $season = $this->seasonRepository->findOneByYear($dto->seasonYear) ?? throw new NotFoundHttpException();
-
-        $this->fixturesProvider->syncTeams($competition, $season);
-        $this->fixturesProvider->syncFixtures($competition, $season);
+        $fixturesProvider->syncTeams($competition, $season);
+        $fixturesProvider->syncFixtures($competition, $season);
 
         return new Response('Synced');
     }
 
+    #[OA\Response(response: Response::HTTP_OK, description: 'OK')]
+    #[OA\Response(
+        response: Response::HTTP_UNPROCESSABLE_ENTITY,
+        description: 'Validation errors',
+        content: new Model(type: ValidationErrorResponse::class)
+    )]
     #[Route('/predictions', name: 'predictions', methods: ['GET'], format: 'json')]
     public function fixtures(
+        CompetitionRepository $competitionRepository,
+        SeasonRepository $seasonRepository,
+        FixtureRepository $fixtureRepository,
+        UserRepository $userRepository,
         #[MapQueryString(
             validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY
-        )] FixturesDto $dto = new FixturesDto()
+        )] FixturesDto $dto = new FixturesDto(),
     ): JsonResponse {
         $dto->transform();
 
-        $users = empty($dto->userIds) ? [] : $this->userRepository->findBy(['id' => $dto->userIds]);
+        $users = empty($dto->userIds) ? [] : $userRepository->findBy(['id' => $dto->userIds]);
         array_unshift($users, $this->getUser());
 
-        $fixtures = $this->fixtureRepository->filter(
+        $fixtures = $fixtureRepository->filter(
             users: $users,
-            competition: $this->competitionRepository->findOneByCode($dto->competitionCode),
-            season: $this->seasonRepository->findOneByYear($dto->year),
+            competition: $competitionRepository->findOneByCode($dto->competitionCode),
+            season: $seasonRepository->findOneByYear($dto->year),
             start: $dto->start,
             end: $dto->end,
         );
@@ -99,17 +91,26 @@ class FixturesController extends ApiController
         ], context: ['groups' => [self::SHOW_PREDICTIONS, User::SHOW]]);
     }
 
+    #[OA\Response(response: Response::HTTP_OK, description: 'OK')]
+    #[OA\Response(
+        response: Response::HTTP_UNPROCESSABLE_ENTITY,
+        description: 'Validation errors',
+        content: new Model(type: ValidationErrorResponse::class)
+    )]
     #[Route('/leaderboard', name: 'leaderboard', methods: ['GET'], format: 'json')]
     public function leaderboard(
+        CompetitionRepository $competitionRepository,
+        SeasonRepository $seasonRepository,
+        UserRepository $userRepository,
         #[MapQueryString(
             validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY
         )] FixturesDto $dto = new FixturesDto()
     ): JsonResponse {
         $dto->transform();
 
-        $users = $this->userRepository->fixturesLeaderboard(
-            competition: $this->competitionRepository->findOneByCode($dto->competitionCode),
-            season: $this->seasonRepository->findOneByYear($dto->year),
+        $users = $userRepository->fixturesLeaderboard(
+            competition: $competitionRepository->findOneByCode($dto->competitionCode),
+            season: $seasonRepository->findOneByYear($dto->year),
             start: $dto->start,
             end: $dto->end,
             limit: $dto->limit ?? 50,
@@ -124,11 +125,20 @@ class FixturesController extends ApiController
         ], context: ['groups' => [self::SHOW_PREDICTIONS, User::SHOW]]);
     }
 
+    #[OA\Response(response: Response::HTTP_CREATED, description: 'Success')]
+    #[OA\Response(response: Response::HTTP_CONFLICT, description: 'Fixture has already started')]
+    #[OA\Response(
+        response: Response::HTTP_UNPROCESSABLE_ENTITY,
+        description: 'Validation errors',
+        content: new Model(type: ValidationErrorResponse::class)
+    )]
     #[Route('/make-predictions', name: 'makePredictions', methods: ['POST'], format: 'json')]
-    public function makePredictions(#[MapRequestPayload(type: PredictionDto::class)] array $dtos): JsonResponse
-    {
+    public function makePredictions(
+        #[MapRequestPayload(type: PredictionDto::class)] array $dtos,
+        PredictionsService $predictionsService
+    ): JsonResponse {
         try {
-            $this->predictionsService->makePredictions($dtos, $this->getUser());
+            $predictionsService->makePredictions($dtos, $this->getUser());
         } catch (FixtureHasStartedException $e) {
             return $this->json(['message' => 'Fixture has already started'], Response::HTTP_CONFLICT);
         }

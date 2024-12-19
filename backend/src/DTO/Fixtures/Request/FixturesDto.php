@@ -10,23 +10,28 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[OA\Schema(title: 'Fixtures Request')]
 class FixturesDto
 {
+    #[OA\Property(example: '2024-12-31')]
     #[Assert\Date]
-    public mixed $start = null;
+    public ?string $start = null;
 
+    #[OA\Property(example: '2024-12-31')]
     #[Assert\Date]
-    public mixed $end = null;
+    public ?string $end = null;
 
     #[Assert\Type('digit')]
-    public mixed $limit;
+    public int $limit;
 
+    #[OA\Property(example: '2024')]
     #[Assert\NotBlank, Assert\Type('integer')]
-    public mixed $year = 2024;
+    public int $year = 2024;
 
+    #[OA\Property(example: CompetitionCodeEnum::EPL->value)]
     #[Assert\NotBlank, Assert\Type('string')]
-    public mixed $competitionCode = CompetitionCodeEnum::EPL->value;
+    public string $competitionCode = CompetitionCodeEnum::EPL->value;
 
+    #[OA\Property(type: 'array', items: new OA\Items(type: 'integer'))]
     #[Assert\All([new Assert\Type('digit')])]
-    public mixed $userIds = [];
+    public array $userIds = [];
 
     public function transform(): void
     {

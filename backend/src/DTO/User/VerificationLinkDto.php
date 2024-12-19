@@ -12,15 +12,13 @@ class VerificationLinkDto
 {
     const DOCUMENTATION = 'documentation';
 
-    #[OA\Property(type: 'integer')]
     #[Assert\NotBlank, Assert\Type('digit'), Assert\Positive]
-    public mixed $userId;
+    public int $userId;
 
-    #[OA\Property(type: 'string')]
     #[Assert\NotBlank, Assert\Type('string')]
-    public mixed $code;
+    public string $code;
 
-    #[OA\Property(type: 'string', example: 'https://www.google.com')]
+    #[OA\Property(example: 'https://www.google.com')]
     #[Assert\Type('string'), Assert\Url]
-    public mixed $redirectUrl;
+    public ?string $redirectUrl = null;
 }

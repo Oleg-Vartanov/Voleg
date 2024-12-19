@@ -11,13 +11,14 @@ use App\Validator\Constraints as CustomAssert;
 class SignUpDto extends UserDto
 {
     #[Groups([self::SIGN_UP])]
+    #[OA\Property(example: 'https://www.google.com')]
     #[Assert\Type('string', groups: [self::SIGN_UP]), Assert\Url(groups: [self::SIGN_UP])]
-    #[OA\Property(type: 'string', example: 'https://www.google.com')]
-    public mixed $verificationEmailRedirectUrl;
+    public ?string $verificationEmailRedirectUrl = null;
 
     #[Groups([self::SIGN_UP])]
+    #[OA\Property(example: 'super-duper-code')]
     #[Assert\NotBlank,
         Assert\Type('string', groups: [self::SIGN_UP]),
         CustomAssert\EqualParamConfig('auth.sign.up.code', groups: [self::SIGN_UP])]
-    public mixed $code;
+    public string $code;
 }
