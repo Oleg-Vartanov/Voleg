@@ -2,7 +2,7 @@ lexik_jwt_authentication:
   secret_key: '%kernel.project_dir%/config/jwt/private.pem'
   public_key: '%kernel.project_dir%/config/jwt/public.pem'
   pass_phrase: '%env(JWT_PASSPHRASE)%'
-  token_ttl: 86400 # in seconds, default is 3600
+  token_ttl: 604800 # 7 days. TODO: Add a refresh token.
 
 when@test:
   lexik_jwt_authentication:
