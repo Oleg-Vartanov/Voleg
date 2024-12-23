@@ -93,7 +93,7 @@ class FootballDataOrgClient
         ]);
 
         if ($response->getStatusCode() !== Response::HTTP_OK) {
-            throw new Exception('Failed to fetch teams');
+            throw new Exception('Failed to fetch teams. Response code: '.$response->getStatusCode());
         }
 
         return json_decode($response->getContent(), true);

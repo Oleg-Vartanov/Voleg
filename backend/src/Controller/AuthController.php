@@ -2,10 +2,10 @@
 
 namespace App\Controller;
 
+use App\DTO\Documentation\Validator\ValidationErrorResponse;
 use App\DTO\User\SignUpDto;
 use App\DTO\User\UserDto;
 use App\DTO\User\VerificationLinkDto;
-use App\DTO\Validator\ValidationErrorResponse;
 use App\Repository\UserRepository;
 use App\Service\AuthService;
 use Nelmio\ApiDocBundle\Attribute\Model;

@@ -120,24 +120,24 @@ function makePredictions(event: SubmitEvent) {
 
       if (!predictions[fixtureId]) {
         predictions[fixtureId] = {
-          fixtureId: fixtureId,
+          fixtureId: parseInt(fixtureId, 10),
           homeScore: null,
           awayScore: null,
         };
       }
 
       if (side === 'home') {
-        predictions[fixtureId].homeScore = value;
+        predictions[fixtureId].homeScore = parseInt(value, 10) || null;
       }
       if (side === 'away') {
-        predictions[fixtureId].awayScore = value;
+        predictions[fixtureId].awayScore = parseInt(value, 10) || null;
       }
     }
   }
 
   // Exclude not filled fixtures.
   Object.entries(predictions).forEach(([index, prediction]) => {
-    if (prediction.homeScore === '' || prediction.awayScore === '') {
+    if (prediction.homeScore === null || prediction.awayScore === null) {
       delete predictions[index]
     }
   });

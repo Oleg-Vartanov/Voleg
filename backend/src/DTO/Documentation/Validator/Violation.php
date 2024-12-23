@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTO\Validator;
+namespace App\DTO\Documentation\Validator;
 
 use OpenApi\Attributes as OA;
 

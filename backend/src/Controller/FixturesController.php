@@ -2,10 +2,10 @@
 
 namespace App\Controller;
 
+use App\DTO\Documentation\Validator\ValidationErrorResponse;
 use App\DTO\Fixtures\Request\FixturesDto;
 use App\DTO\Fixtures\Request\PredictionDto;
 use App\DTO\Fixtures\Request\SyncDto;
-use App\DTO\Validator\ValidationErrorResponse;
 use App\Entity\User;
 use App\Exception\FixtureHasStartedException;
 use App\Interface\FixturesProviderInterface;
@@ -15,6 +15,7 @@ use App\Repository\SeasonRepository;
 use App\Repository\UserRepository;
 use App\Service\Fixtures\PredictionsService;
 use Nelmio\ApiDocBundle\Attribute\Model;
+use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,6 +26,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Tag(name: 'Fixtures')]
+#[Security(name: 'Bearer')]
 #[Route('/fixtures', name: 'fixtures_')]
 class FixturesController extends AbstractController
 {
@@ -39,10 +41,10 @@ class FixturesController extends AbstractController
     )]
     #[Route('/sync', name: 'sync', methods: ['POST'])]
     public function sync(
-        #[MapRequestPayload] SyncDto $dto,
         CompetitionRepository $competitionRepository,
         SeasonRepository $seasonRepository,
         FixturesProviderInterface $fixturesProvider,
+        #[MapRequestPayload] SyncDto $dto,
     ): Response {
         $competition = $competitionRepository->findOneByCode($dto->competitionCode) ?? throw new NotFoundHttpException();
         $season = $seasonRepository->findOneByYear($dto->seasonYear) ?? throw new NotFoundHttpException();
@@ -66,11 +68,9 @@ class FixturesController extends AbstractController
         FixtureRepository $fixtureRepository,
         UserRepository $userRepository,
         #[MapQueryString(
-            validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY
+            validationFailedStatusCode:Response::HTTP_UNPROCESSABLE_ENTITY
         )] FixturesDto $dto = new FixturesDto(),
     ): JsonResponse {
-        $dto->transform();
-
         $users = empty($dto->userIds) ? [] : $userRepository->findBy(['id' => $dto->userIds]);
         array_unshift($users, $this->getUser());
 
@@ -106,8 +106,6 @@ class FixturesController extends AbstractController
             validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY
         )] FixturesDto $dto = new FixturesDto()
     ): JsonResponse {
-        $dto->transform();
-
         $users = $userRepository->fixturesLeaderboard(
             competition: $competitionRepository->findOneByCode($dto->competitionCode),
             season: $seasonRepository->findOneByYear($dto->year),
@@ -134,8 +132,8 @@ class FixturesController extends AbstractController
     )]
     #[Route('/make-predictions', name: 'makePredictions', methods: ['POST'], format: 'json')]
     public function makePredictions(
-        #[MapRequestPayload(type: PredictionDto::class)] array $dtos,
-        PredictionsService $predictionsService
+        PredictionsService $predictionsService,
+        #[MapRequestPayload(type: PredictionDto::class)] array $dtos
     ): JsonResponse {
         try {
             $predictionsService->makePredictions($dtos, $this->getUser());
