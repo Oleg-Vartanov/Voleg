@@ -1,11 +1,11 @@
 <?php
 
-namespace App\DTO\User;
+namespace App\DTO\User\Request;
 
+use App\Validator\Constraints as CustomAssert;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Validator\Constraints as CustomAssert;
 
 #[OA\Schema(title: 'User Sign Up')]
 class SignUpDto extends UserDto

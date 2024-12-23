@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\DTO\User\UserDto;
+use App\DTO\User\Request\UserDto;
 use App\Enum\RolesEnum;
 use App\Repository\UserRepository;
 use DateTimeImmutable;

@@ -1,9 +1,8 @@
 <?php
 
-namespace App\DTO\User;
+namespace App\DTO\User\Request;
 
 use OpenApi\Attributes as OA;
-use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[OA\Schema(title: 'Verification Link')]

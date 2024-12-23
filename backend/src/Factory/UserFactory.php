@@ -2,7 +2,7 @@
 
 namespace App\Factory;
 
-use App\DTO\User\UserDto;
+use App\DTO\User\Request\UserDto;
 use App\Entity\User;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTO\User;
+namespace App\DTO\User\Request;
 
 use OpenApi\Attributes as OA;
 

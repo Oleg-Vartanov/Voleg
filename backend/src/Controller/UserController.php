@@ -3,8 +3,8 @@
 namespace App\Controller;
 
 use App\DTO\Documentation\Validator\ValidationErrorResponse;
-use App\DTO\User\UpdateDto;
-use App\DTO\User\UserDto;
+use App\DTO\User\Request\UpdateDto;
+use App\DTO\User\Request\UserDto;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
