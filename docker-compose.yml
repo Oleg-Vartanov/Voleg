@@ -54,7 +54,7 @@ services:
     working_dir: /var/www/html/frontend
     command: tail -f /dev/null
     ports:
-      - 8012:5173
+      - 8011:5173
     volumes:
       - ./frontend:/var/www/html/frontend
     env_file:
