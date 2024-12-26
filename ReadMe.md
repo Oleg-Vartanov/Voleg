@@ -1,10 +1,12 @@
 <h3>About:</h3>
+
 Welcome to my site!<br />
 Currently there is only a Football Predictions game.
 Maybe there will be more to come, who knows. So stay tuned ;)<br />
 Check it out at [voleg.me](http://www.voleg.me)
 
 <h3>Deploy project locally:</h3>
+
 - Open root directory.
 - Setup environment variables.
   - Create `.env.local` from `.env` and setup variables there as you like.
