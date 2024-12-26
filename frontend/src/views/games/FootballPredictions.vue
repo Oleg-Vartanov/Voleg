@@ -112,7 +112,9 @@ function makePredictions(event: SubmitEvent) {
     if (element instanceof HTMLInputElement) {
       const fixtureId = element.dataset.id || null;
       const side = element.dataset.side || null;
-      const value = element.value;
+
+      const parsedValue = parseInt(element.value, 10);
+      const score = isNaN(parsedValue) ? null : parsedValue;
 
       if (fixtureId === null || side === null) {
         continue;
@@ -127,10 +129,10 @@ function makePredictions(event: SubmitEvent) {
       }
 
       if (side === 'home') {
-        predictions[fixtureId].homeScore = parseInt(value, 10) || null;
+        predictions[fixtureId].homeScore = score;
       }
       if (side === 'away') {
-        predictions[fixtureId].awayScore = parseInt(value, 10) || null;
+        predictions[fixtureId].awayScore = score;
       }
     }
   }
