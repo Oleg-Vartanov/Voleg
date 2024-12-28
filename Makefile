@@ -66,4 +66,7 @@ test:
 watch:
 	$(NODE_CONTAINER) npm run dev -- --host
 
+front-build:
+	$(NODE_CONTAINER) npm run build-only
+
 
