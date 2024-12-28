@@ -249,10 +249,6 @@ function fixtureDate(fixture) {
 
       </div>
 
-      <div v-if="isLoading.fixtures || isLoading.leaderboard || isLoading.headToHead" class="spinner-border text-primary mt-3" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-
       <!-- Nav -->
       <nav>
         <div class="nav nav-tabs justify-content-center" id="nav-tab" role="tablist">
@@ -267,6 +263,10 @@ function fixtureDate(fixture) {
 
       <!-- Nav Tabs -->
       <div class="tab-content">
+
+        <div v-if="isLoading.fixtures || isLoading.leaderboard" class="spinner-border text-primary mt-3" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
 
         <!-- Matches -->
         <div class="tab-pane fade show active" id="nav-matches" role="tabpanel" aria-labelledby="nav-matches-tab" tabindex="0">
