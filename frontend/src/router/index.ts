@@ -76,7 +76,8 @@ const index = createRouter({
           ]
         },
         {
-          path: "/:notFound",
+          path: '/:pathMatch(.*)*',
+          name: 'notFound',
           meta: { title: 'Not Found' },
           component: () => import('@/views/NotFound.vue'),
         },
