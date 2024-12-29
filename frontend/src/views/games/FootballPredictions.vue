@@ -96,6 +96,7 @@ function searchUser() {
 function addH2hUser(user: object) {
   if (!h2hUsers.value.includes(user)) {
     h2hUsers.value.push(user);
+    updateLoadedTables();
   }
 }
 function removeH2hUser(user: object) {
@@ -227,8 +228,11 @@ function fixtureDate(fixture) {
           </div>
 
           <div class="col-auto mb-2 p-1">
-            <button @click="updateLoadedTables" class="btn btn-outline-primary" type="button">
-              <i class="bi bi-funnel"></i> Filter</button>
+            <button @click="updateLoadedTables"
+                    class="btn btn-outline-primary"
+                    type="button"
+                    :disabled="isLoading.fixtures || isLoading.leaderboard"
+            ><i class="bi bi-funnel"></i> Filter</button>
           </div>
 
           <div class="col-auto mb-2 p-1">
@@ -239,10 +243,10 @@ function fixtureDate(fixture) {
           </div>
 
           <div class="col-auto mb-2 p-1">
-            <button v-if="!isLoading.fixtures"
-                    class="btn btn-primary"
+            <button class="btn btn-primary"
                     data-bs-toggle="modal"
                     data-bs-target="#predictionsModal"
+                    :disabled="isLoading.fixtures || isLoading.predictions"
             ><i class="bi bi-magic"></i> Predict</button>
           </div>
         </div>

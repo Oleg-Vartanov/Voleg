@@ -68,5 +68,3 @@ watch:
 
 front-build:
 	$(NODE_CONTAINER) npm run build-only
-
-
