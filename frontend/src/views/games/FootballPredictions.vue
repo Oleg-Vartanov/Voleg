@@ -449,11 +449,18 @@ function fixtureDate(fixture) {
 
             <div class="input-group mb-3 has-validation">
               <span class="input-group-text rounded-0" id="addon-wrapping">Name</span>
-              <input v-model="h2hInput.value" type="text" :class="[h2hInput.error === '' ? '' : 'is-invalid']" class="form-control" aria-describedby="go-h2h validation-go-h2h">
-              <button @click="searchUser" :disabled="h2hInput.value === ''" class="btn btn btn-outline-primary rounded-0" type="button" id="go-h2h">Search</button>
-              <div id="validation-go-h2h" class="invalid-feedback">
-                {{ h2hInput.error }}
-              </div>
+              <input v-model="h2hInput.value"
+                     type="text"
+                     :class="[h2hInput.error === '' ? '' : 'is-invalid']"
+                     class="form-control"
+                     aria-describedby="go-h2h validation-go-h2h"
+                     @keyup.enter="h2hInput.value === '' || isLoading.headToHead ? '' : searchUser()">
+              <button @click="searchUser"
+                      :disabled="h2hInput.value === '' || isLoading.headToHead"
+                      class="btn btn btn-outline-primary rounded-0"
+                      type="button"
+                      id="go-h2h">Search</button>
+              <div id="validation-go-h2h" class="invalid-feedback">{{ h2hInput.error }}</div>
             </div>
 
             <div v-if="isLoading.headToHead" class="spinner-border text-primary mt-3" role="status">
