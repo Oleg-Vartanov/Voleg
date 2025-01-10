@@ -211,46 +211,21 @@ function fixtureDate(fixture) {
   <div class="ov-center">
     <div class="container">
 
-      <div class="d-flex justify-content-center">
-        <div class="row">
-          <div class="col-auto mb-2 p-1">
-            <div class="input-group">
-              <span class="input-group-text filter-date-text">Start</span>
-              <input id="start" class="form-control filter-date-input" type="date" v-model="start"/>
-            </div>
-          </div>
-
-          <div class="col-auto mb-2 p-1">
-            <div class="input-group">
-              <span class="input-group-text filter-date-text">End</span>
-              <input id="end" class="form-control filter-date-input" type="date" v-model="end"/>
-            </div>
-          </div>
-
-          <div class="col-auto mb-2 p-1">
-            <button @click="updateLoadedTables"
-                    class="btn btn-outline-primary"
-                    type="button"
-                    :disabled="isLoading.fixtures || isLoading.leaderboard"
-            ><i class="bi bi-funnel"></i> Filter</button>
-          </div>
-
-          <div class="col-auto mb-2 p-1">
-            <button class="btn btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#go"
-            ><i class="bi bi-people-fill"></i> H2H</button>
-          </div>
-
-          <div class="col-auto mb-2 p-1">
-            <button class="btn btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#predictionsModal"
-                    :disabled="isLoading.fixtures || isLoading.predictions"
-            ><i class="bi bi-magic"></i> Predict</button>
-          </div>
+      <!-- Top Buttons -->
+      <div class="d-flex justify-content-center mb-3">
+        <div class="btn-group" role="group" aria-label="Top buttons">
+          <button class="btn btn-outline-primary"
+                  type="button"
+                  data-bs-toggle="offcanvas"
+                  data-bs-target="#offcanvasFilters"
+                  aria-controls="offcanvasFilters"
+          ><i class="bi bi-funnel"></i> Filters</button>
+          <button class="btn btn-outline-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#predictionsModal"
+                  :disabled="isLoading.fixtures || isLoading.predictions"
+          ><i class="bi bi-magic"></i> Predict</button>
         </div>
-
       </div>
 
       <!-- Nav -->
@@ -365,6 +340,7 @@ function fixtureDate(fixture) {
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="predictionsModalLabel">Predictions</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <table v-if="!isLoading.fixtures" class="table">
@@ -438,6 +414,7 @@ function fixtureDate(fixture) {
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="h2hModalLabel">Head To Head</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
 
@@ -478,6 +455,54 @@ function fixtureDate(fixture) {
             <button type="button" class="btn btn-secondary" id="closeModal" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="offcanvas offcanvas-top"
+         tabindex="-1"
+         id="offcanvasFilters"
+         aria-labelledby="offcanvas-filters-label"
+    >
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvas-filters-label">Filters</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+
+        <div class="d-flex justify-content-center">
+          <div class="row">
+            <div class="col-auto mb-2 p-1">
+              <div class="input-group">
+                <span class="input-group-text filter-date-text">Start</span>
+                <input id="start" class="form-control filter-date-input" type="date" v-model="start"/>
+              </div>
+            </div>
+
+            <div class="col-auto mb-2 p-1">
+              <div class="input-group">
+                <span class="input-group-text filter-date-text">End</span>
+                <input id="end" class="form-control filter-date-input" type="date" v-model="end"/>
+              </div>
+            </div>
+
+            <div class="col-auto mb-2 p-1">
+              <button class="btn btn-primary"
+                      data-bs-toggle="modal"
+                      data-bs-target="#go"
+              ><i class="bi bi-people-fill"></i> H2H</button>
+            </div>
+
+            <div class="col-auto mb-2 p-1">
+              <button @click="updateLoadedTables"
+                      class="btn btn-outline-primary"
+                      type="button"
+                      :disabled="isLoading.fixtures || isLoading.leaderboard"
+                      data-bs-dismiss="offcanvas"
+              ><i class="bi bi-funnel"></i> Filter</button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
