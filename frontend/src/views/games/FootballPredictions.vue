@@ -12,6 +12,7 @@ const auth = useAuth();
 
 const start = ref(null);
 const end = ref(null);
+const competition = ref('PL');
 
 const fixtures = ref(null);
 const leaderboard = ref(null);
@@ -46,11 +47,12 @@ function updateFixturesTable() {
   isLoading.value.fixtures = true;
   let userIds = h2hUsers.value.map(object => object.id);
 
-  Client.showFixtures(start.value, end.value, userIds)
+  Client.showFixtures(start.value, end.value, competition.value, userIds)
     .then((response) => {
       fixtures.value = response.data.fixtures;
       start.value = response.data.filters.start;
       end.value = response.data.filters.end;
+      competition.value = response.data.filters.competition;
     })
     .catch((axiosError) => {
       topAlerts.add(new Alert('Error during obtaining data.', 'danger', 10));
@@ -63,11 +65,12 @@ function updateFixturesTable() {
 function updateLeaderboardTable() {
   isLoading.value.leaderboard = true;
 
-  Client.leaderboard(start.value, end.value)
+  Client.leaderboard(start.value, end.value, competition.value)
     .then((response) => {
       leaderboard.value = response.data.users;
       start.value = response.data.filters.start;
       end.value = response.data.filters.end;
+      competition.value = response.data.filters.competition;
     })
     .catch((axiosError) => {
       topAlerts.add(new Alert('Error during obtaining data.', 'danger', 10));
@@ -458,7 +461,7 @@ function fixtureDate(fixture) {
       </div>
     </div>
 
-    <div class="offcanvas offcanvas-top"
+    <div class="offcanvas offcanvas-start"
          tabindex="-1"
          id="offcanvasFilters"
          aria-labelledby="offcanvas-filters-label"
@@ -482,6 +485,15 @@ function fixtureDate(fixture) {
               <div class="input-group">
                 <span class="input-group-text filter-date-text">End</span>
                 <input id="end" class="form-control filter-date-input" type="date" v-model="end"/>
+              </div>
+            </div>
+
+            <div class="col-auto mb-2 p-1">
+              <div class="input-group">
+                <span class="input-group-text filter-date-text">Competition</span>
+                <select class="form-select" aria-label="Default select example" v-model="competition">
+                  <option value="PL">English Premier League</option>
+                </select>
               </div>
             </div>
 

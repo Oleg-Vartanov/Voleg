@@ -74,9 +74,11 @@ class FixturesController extends AbstractController
         $users = empty($dto->userIds) ? [] : $userRepository->findBy(['id' => $dto->userIds]);
         array_unshift($users, $this->getUser());
 
+        $competition = $competitionRepository->findOneByCode($dto->competitionCode);
+
         $fixtures = $fixtureRepository->filter(
             users: $users,
-            competition: $competitionRepository->findOneByCode($dto->competitionCode),
+            competition: $competition,
             season: $seasonRepository->findOneByYear($dto->year),
             start: $dto->start,
             end: $dto->end,
@@ -86,6 +88,7 @@ class FixturesController extends AbstractController
             'filters' => [
                 'start' => $dto->start->format('Y-m-d'),
                 'end' => $dto->end->format('Y-m-d'),
+                'competition' => $competition?->getCode(),
             ],
             'fixtures' => $fixtures,
         ], context: ['groups' => [self::SHOW_PREDICTIONS, User::SHOW]]);
@@ -106,8 +109,10 @@ class FixturesController extends AbstractController
             validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY
         )] FixturesDto $dto = new FixturesDto()
     ): JsonResponse {
+        $competition = $competitionRepository->findOneByCode($dto->competitionCode);
+
         $users = $userRepository->fixturesLeaderboard(
-            competition: $competitionRepository->findOneByCode($dto->competitionCode),
+            competition: $competition,
             season: $seasonRepository->findOneByYear($dto->year),
             start: $dto->start,
             end: $dto->end,
@@ -118,6 +123,7 @@ class FixturesController extends AbstractController
             'filters' => [
                 'start' => $dto->start->format('Y-m-d'),
                 'end' => $dto->end->format('Y-m-d'),
+                'competition' => $competition?->getCode(),
             ],
             'users' => $users,
         ], context: ['groups' => [self::SHOW_PREDICTIONS, User::SHOW]]);

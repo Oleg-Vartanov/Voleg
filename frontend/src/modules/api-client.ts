@@ -26,17 +26,26 @@ export default {
     );
   },
 
-  showFixtures(start: null|string = null, end: null|string = null, userIds: null|number[] = null) {
+  showFixtures(
+    start: null|string = null,
+    end: null|string = null,
+    competition: null|string = null,
+    userIds: null|number[] = null
+  ) {
     return axios.get(`${apiBaseUrl}/fixtures/predictions`, {
       headers: getHeader(),
-      params: { start: start, end: end, userIds: userIds }
+      params: { start: start, end: end, competition: competition, userIds: userIds }
     });
   },
 
-  leaderboard(start: null|string = null, end: null|string = null) {
+  leaderboard(
+    start: null|string = null,
+    end: null|string = null,
+    competition: null|string = null
+  ) {
     return axios.get(`${apiBaseUrl}/fixtures/leaderboard`, {
       headers: getHeader(),
-      params: { start: start, end: end }
+      params: { start: start, end: end, competition: competition }
     });
   },
 
