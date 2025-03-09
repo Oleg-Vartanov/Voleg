@@ -229,6 +229,17 @@ function fixtureDate(fixture) {
                   :disabled="isLoading.fixtures || isLoading.predictions"
           ><i class="bi bi-magic"></i> Predict</button>
         </div>
+        <a tabindex="0" class="btn btn-outline-info" role="button"
+           data-bs-toggle="popover" data-bs-trigger="focus" data-bs-html="true"
+           data-bs-title="About"
+           data-bs-content="<strong>Points:</strong><br>
+                            - Exact Score: 3<br>
+                            - Correct Result (Win/Draw/Loss): 1<br>
+                            - No Prediction: 0<br><br>
+                            <i>Good luck!</i>"
+        >
+          <i class="bi bi-question-lg"></i>
+        </a>
       </div>
 
       <!-- Nav -->
