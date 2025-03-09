@@ -49,10 +49,10 @@ export default {
     });
   },
 
-  listUsers(displayName: null|string = null) {
+  listUsers(userTag: null|string = null) {
     return axios.get(`${apiBaseUrl}/users`, {
       headers: getHeader(),
-      params: { displayName: displayName }
+      params: { tag: userTag }
     });
   },
 

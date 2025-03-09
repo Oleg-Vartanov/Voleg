@@ -16,16 +16,17 @@ class UserDto implements PropertyAccessorInterface
 
     const SIGN_UP = 'SignUp';
     const UPDATE = 'Update';
+    const ALL = [self::SIGN_UP, self::UPDATE];
 
-    #[Groups([self::SIGN_UP, self::UPDATE])]
+    #[Groups(self::ALL)]
     #[OA\Property(example: 'name@mail.com')]
     #[
         Assert\NotBlank(groups: [self::SIGN_UP]),
-        Assert\Type('string', groups: [self::SIGN_UP, self::UPDATE]),
-        Assert\Email(groups: [self::SIGN_UP, self::UPDATE]),
-        Assert\Length(max: 180, groups: [self::SIGN_UP, self::UPDATE]),
+        Assert\Type('string', groups: self::ALL),
+        Assert\Email(groups: self::ALL),
+        Assert\Length(max: 180, groups: self::ALL),
         CustomAssert\InitializedAndNotNull(groups: [self::UPDATE]),
-        CustomAssert\UniqueEntityField(entityClass: User::class, field: 'email', groups: [self::SIGN_UP, self::UPDATE]),
+        CustomAssert\UniqueEntityField(entityClass: User::class, field: 'email', groups: self::ALL),
     ]
     public string $email;
 
@@ -42,14 +43,28 @@ class UserDto implements PropertyAccessorInterface
     ]
     public string $password;
 
-    #[Groups([self::SIGN_UP, self::UPDATE])]
+    #[Groups(self::ALL)]
     #[OA\Property(example: 'Cool Name')]
     #[
         Assert\NotBlank(groups: [self::SIGN_UP]),
         CustomAssert\InitializedAndNotNull(groups: [self::UPDATE]),
-        Assert\Length(min: 1, groups: [self::SIGN_UP, self::UPDATE]),
-        Assert\Type('string', groups: [self::SIGN_UP, self::UPDATE]),
-        Assert\Length(max: 255, groups: [self::SIGN_UP, self::UPDATE]),
+        Assert\Type('string', groups: self::ALL),
+        Assert\Length(min: 1, groups: self::ALL),
+        Assert\Length(max: 255, groups: self::ALL),
     ]
     public string $displayName;
+
+    #[Groups(self::ALL)]
+    #[OA\Property(example: 'cool-name')]
+    #[
+        Assert\NotBlank(groups: [self::SIGN_UP]),
+        CustomAssert\InitializedAndNotNull(groups: [self::UPDATE]),
+        Assert\Type('string', groups: self::ALL),
+        Assert\Length(min: 1, groups: self::ALL),
+        Assert\Length(max: 255, groups: self::ALL),
+        Assert\Regex(pattern: '/^\S+$/', message: 'The value can\'t contain spaces.', groups: self::ALL),
+        Assert\Regex(pattern: '/^[^A-Z]*$/', message: 'All the letters must be lowercase.', groups: self::ALL),
+        CustomAssert\UniqueEntityField(entityClass: User::class, field: 'tag', groups: self::ALL),
+    ]
+    public string $tag;
 }

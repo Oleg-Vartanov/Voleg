@@ -216,7 +216,7 @@ function fixtureDate(fixture) {
 
       <!-- Top Buttons -->
       <div class="d-flex justify-content-center mb-3">
-        <div class="btn-group" role="group" aria-label="Top buttons">
+        <div class="btn-group me-2" role="group" aria-label="Top buttons">
           <button class="btn btn-outline-primary"
                   type="button"
                   data-bs-toggle="offcanvas"
@@ -423,12 +423,12 @@ function fixtureDate(fixture) {
 
             <ul class="list-group list-group-flush mb-3">
               <li v-for="user in h2hUsers" class="h2h-user list-group-item list-group-item-action" @click="removeH2hUser(user)">
-                {{ user.displayName }} <i class="bi bi-x-lg text-danger" style="font-size: 20px;"></i>
+                {{ user.displayName }} (@{{ user.tag }}) <i class="bi bi-x-lg text-danger" style="font-size: 20px;"></i>
               </li>
             </ul>
 
             <div class="input-group mb-3 has-validation">
-              <span class="input-group-text rounded-0" id="addon-wrapping">Name</span>
+              <span class="input-group-text rounded-0" id="addon-wrapping">User Tag</span>
               <input v-model="h2hInput.value"
                      type="text"
                      :class="[h2hInput.error === '' ? '' : 'is-invalid']"
@@ -449,7 +449,7 @@ function fixtureDate(fixture) {
 
             <ul class="list-group list-group-flush">
               <li v-for="user in searchUsers" class="h2h-user list-group-item list-group-item-action" @click="addH2hUser(user)">
-                {{ user.displayName }} <i class="bi bi-person-plus text-primary" style="font-size: 20px;"></i>
+                {{ user.displayName }} (@{{ user.tag }}) <i class="bi bi-person-plus text-primary" style="font-size: 20px;"></i>
               </li>
             </ul>
 

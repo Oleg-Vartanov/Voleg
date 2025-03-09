@@ -29,7 +29,7 @@ readonly class AuthService
     /** @throws TransportExceptionInterface */
     public function signUp(SignUpDto $dto): void
     {
-        $user = $this->userFactory->create($dto);
+        $user = $this->userFactory->createByDto($dto);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 

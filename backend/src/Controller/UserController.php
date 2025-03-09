@@ -36,17 +36,15 @@ class UserController extends AbstractController
 
     #[Route('/', name: 'list', methods: ['GET'])]
     public function list(
-        #[MapQueryParameter] ?string $displayName,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        #[MapQueryParameter] ?string $tag,
+        #[MapQueryParameter] int $offset = 0,
+        #[MapQueryParameter] int $limit = 100,
     ): JsonResponse {
-        $filters = [];
-        if ($displayName !== null) {
-            $filters['displayName'] = $displayName;
-        }
-
-        $users = empty($filters) ? $userRepository->findAll() : $userRepository->findBy($filters);
-
-        return $this->json($users, context: ['groups' => $this->showGroups()]);
+        return $this->json(
+            $userRepository->list($tag, $offset, $limit),
+            context: ['groups' => $this->showGroups()]
+        );
     }
 
     /* OpenAi Documentation */

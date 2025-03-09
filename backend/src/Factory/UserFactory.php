@@ -9,31 +9,35 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 readonly class UserFactory
 {
     public function __construct(
-        private UserPasswordHasherInterface $passwordHasher
+        private UserPasswordHasherInterface $passwordHasher,
     ) {
     }
 
-    public function create(UserDto $dto): User
-    {
-        return $this->createByParams(
-            email: $dto->email,
-            password: $dto->password,
-            displayName: $dto->displayName,
-        );
-    }
-
-    public function createByParams(
+    public function create(
         string $email,
-        string $password, // Plaintext password.
+        string $plaintextPassword,
         string $displayName,
+        ?string $tag = null,
         array $roles = [],
     ): User {
         $user = new User();
+
         $user->setEmail($email);
-        $user->setPassword($this->passwordHasher->hashPassword($user, $password));
+        $user->setPassword($this->passwordHasher->hashPassword($user, $plaintextPassword));
         $user->setDisplayName($displayName);
+        $user->setTag($tag);
         $user->setRoles($roles);
 
         return $user;
+    }
+
+    public function createByDto(UserDto $dto): User
+    {
+        return $this->create(
+            email: $dto->email,
+            plaintextPassword: $dto->password,
+            displayName: $dto->displayName,
+            tag: $dto->tag,
+        );
     }
 }

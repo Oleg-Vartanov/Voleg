@@ -18,8 +18,8 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  *
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
  * @method User|null findOneBy(array $criteria, array $orderBy = null)
- * @method User[]    findAll()
- * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method User[] findAll()
+ * @method User[] findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
@@ -39,9 +39,18 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
-    public function findOneByEmail(string $email): ?User
+    public function list(?string $tag, int $offset = 0, int $limit = 100): array
     {
-        return $this->findOneBy(['email' => $email]);
+        $qb = $this->createQueryBuilder('u');
+
+        if ($tag !== null) {
+            $qb->where('u.tag = :tag')->setParameter('tag', $tag);
+        }
+
+        return $qb->setFirstResult($offset)
+                  ->setMaxResults($limit)
+                  ->getQuery()
+                  ->getResult();
     }
 
     /**
@@ -80,5 +89,26 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                   ->orderBy('totalPoints', 'DESC')
                   ->getQuery()
                   ->getResult();
+    }
+
+    public function tagExist(string $tag): bool
+    {
+        return (bool)$this->findOneBy(['tag' => $tag]);
+    }
+
+    public function findUserTagWithHighestNumber(string $baseTag): ?string
+    {
+        $result = $this->createQueryBuilder('u')
+            ->addSelect('u.tag')
+            ->where('u.tag LIKE :tag')
+            ->andWhere('REGEXP(u.tag, :regexp) = true')
+            ->setParameter('tag', $baseTag . '%')
+            ->setParameter('regexp', $baseTag . '[0-9]+$')
+            ->orderBy('u.tag', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $result['tag'] ?? null;
     }
 }

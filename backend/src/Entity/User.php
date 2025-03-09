@@ -71,6 +71,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private PersistentCollection|array $fixturePredictions;
 
+    #[Groups([self::SHOW])]
+    #[ORM\Column(length: 255)]
+    private ?string $tag = null;
+
     public function __construct()
     {
         $this->updateVerificationCode();
@@ -163,7 +167,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setDisplayName(string $displayName): static
     {
-        $this->displayName = $displayName;
+        $this->displayName = trim($displayName);
 
         return $this;
     }
@@ -246,6 +250,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if ($dto->isPropertyInitialized('displayName')) {
             $this->setDisplayName($dto->displayName);
         }
+        if ($dto->isPropertyInitialized('tag')) {
+            $this->setTag($dto->tag);
+        }
 
         return $this;
     }
@@ -256,5 +263,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getFixturePredictions(): array|PersistentCollection
     {
         return $this->fixturePredictions;
+    }
+
+    public function getTag(): ?string
+    {
+        return $this->tag;
+    }
+
+    public function setTag(string $tag): static
+    {
+        $this->tag = trim($tag);
+
+        return $this;
     }
 }

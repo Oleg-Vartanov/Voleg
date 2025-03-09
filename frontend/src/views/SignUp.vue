@@ -11,6 +11,7 @@ const router: Router = useRouter();
 
 const fields = reactive({
   'displayName': { 'isValid': null, 'errorMessage': ''},
+  'tag': { 'isValid': null, 'errorMessage': ''},
   'email': { 'isValid': null, 'errorMessage': ''},
   'password': { 'isValid': null, 'errorMessage': ''},
   'code': { 'isValid': null, 'errorMessage': ''},
@@ -79,7 +80,7 @@ const signUp = (event: SubmitEvent) => {
         class="invalid-feedback"
         v-html="fields.code.errorMessage">
       </div>
-      <div id="codeHelp" class="form-text">While site is in development sign-up is restricted and requires this code.</div>
+      <div class="form-text">While site is in development sign-up is restricted and requires this code.</div>
     </div>
 
     <div class="form-floating mb-3">
@@ -99,6 +100,27 @@ const signUp = (event: SubmitEvent) => {
         class="invalid-feedback"
         v-html="fields.displayName.errorMessage">
       </div>
+      <div class="form-text">Your public name displayed on the platform.</div>
+    </div>
+
+    <div class="form-floating mb-3">
+      <input
+        name="tag"
+        type="text"
+        class="form-control"
+        :class="[ fields.tag.isValid === null ? '' : (fields.tag.isValid ? 'is-valid' : 'is-invalid') ]"
+        aria-describedby="tag-validation-feedback"
+        placeholder=""
+        required
+      >
+      <label for="tag">Tag</label>
+      <div
+        v-if="fields.tag.isValid === false"
+        id="tag-validation-feedback"
+        class="invalid-feedback"
+        v-html="fields.tag.errorMessage">
+      </div>
+      <div class="form-text">A unique tag used for search purposes.</div>
     </div>
 
     <div class="form-floating mb-3">
