@@ -229,17 +229,9 @@ function fixtureDate(fixture) {
                   :disabled="isLoading.fixtures || isLoading.predictions"
           ><i class="bi bi-magic"></i> Predict</button>
         </div>
-        <a tabindex="0" class="btn btn-outline-info" role="button"
-           data-bs-toggle="popover" data-bs-trigger="focus" data-bs-html="true"
-           data-bs-title="About"
-           data-bs-content="<strong>Points:</strong><br>
-                            - Exact Score: 3<br>
-                            - Correct Result (Win/Draw/Loss): 1<br>
-                            - No Prediction: 0<br><br>
-                            <i>Good luck!</i>"
-        >
+        <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#aboutModal">
           <i class="bi bi-question-lg"></i>
-        </a>
+        </button>
       </div>
 
       <!-- Nav -->
@@ -341,6 +333,33 @@ function fixtureDate(fixture) {
 
     </div>
 
+    <!-- About Modal -->
+    <div
+      class="modal fade"
+      id="aboutModal"
+      tabindex="-1"
+      aria-labelledby="aboutModalLabel"
+    >
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="aboutModalLabel">About</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <strong>Points:</strong><br>
+              Exact Score: 3<br>
+              Correct Result (Win/Draw/Loss): 1<br>
+              No Prediction: 0<br><br>
+              <i>Good luck!</i>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" id="closeModal" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+    </div>
+
     <!-- Predictions Modal -->
     <div
       class="modal fade"
@@ -349,71 +368,71 @@ function fixtureDate(fixture) {
       data-bs-backdrop="static"
       aria-labelledby="predictionsModalLabel"
     >
-      <form @submit.prevent="makePredictions">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-          <div class="modal-header">
-            <h1 class="modal-title fs-5" id="predictionsModalLabel">Predictions</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <table v-if="!isLoading.fixtures" class="table">
-              <thead>
-              <tr>
-                <th scope="col">Match</th>
-                <th scope="col" style="width: 20%; min-width: 80px;">Home</th>
-                <th scope="col" style="width: 20%; min-width: 80px;">Away</th>
-              </tr>
-              </thead>
-              <tbody>
-              <template v-for="fixture in fixtures">
-                <template v-for="prediction of [getPrediction(fixture)]">
-                  <tr v-if="new Date(fixture.startAt) > new Date()">
-                    <td class="text-start">
-                      <span>
-                        <TeamLogo :teamName="fixture.homeTeam.name"></TeamLogo>
-                      {{ fixture.homeTeam.name }}
-                      </span>
-                      <br>
-                      <span>
-                        <TeamLogo :teamName="fixture.awayTeam.name"></TeamLogo>
-                      {{ fixture.awayTeam.name }}
-                      </span>
-                    </td>
-                    <td>
-                      <input class="form-control"
-                             type="number"
-                             min="0" max="99"
-                             :name="'home-fixture-prediction-'+fixture.id"
-                             :data-id="fixture.id"
-                             data-side="home"
-                             :value="predictionHomeScore(prediction)">
-                    </td>
-                    <td>
-                      <input class="form-control"
-                             type="number"
-                             min="0" max="99"
-                             :name="'away-fixture-prediction-'+fixture.id"
-                             :data-id="fixture.id"
-                             data-side="away"
-                             :value="predictionAwayScore(prediction)">
-                    </td>
-                  </tr>
-                </template>
-              </template>
-              </tbody>
-            </table>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" id="closeModal" data-bs-dismiss="modal">Close</button>
-            <button :disabled="isLoading.predictions" type="submit" class="btn btn-primary">Save</button>
-            <div v-if="isLoading.predictions" class="spinner-border text-primary mt-3" role="status">
-              <span class="visually-hidden">Loading...</span>
+          <form @submit.prevent="makePredictions">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="predictionsModalLabel">Predictions</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-          </div>
+            <div class="modal-body">
+              <table v-if="!isLoading.fixtures" class="table">
+                <thead>
+                <tr>
+                  <th scope="col">Match</th>
+                  <th scope="col" style="width: 20%; min-width: 80px;">Home</th>
+                  <th scope="col" style="width: 20%; min-width: 80px;">Away</th>
+                </tr>
+                </thead>
+                <tbody>
+                <template v-for="fixture in fixtures">
+                  <template v-for="prediction of [getPrediction(fixture)]">
+                    <tr v-if="new Date(fixture.startAt) > new Date()">
+                      <td class="text-start">
+                        <span>
+                          <TeamLogo :teamName="fixture.homeTeam.name"></TeamLogo>
+                        {{ fixture.homeTeam.name }}
+                        </span>
+                        <br>
+                        <span>
+                          <TeamLogo :teamName="fixture.awayTeam.name"></TeamLogo>
+                        {{ fixture.awayTeam.name }}
+                        </span>
+                      </td>
+                      <td>
+                        <input class="form-control"
+                               type="number"
+                               min="0" max="99"
+                               :name="'home-fixture-prediction-'+fixture.id"
+                               :data-id="fixture.id"
+                               data-side="home"
+                               :value="predictionHomeScore(prediction)">
+                      </td>
+                      <td>
+                        <input class="form-control"
+                               type="number"
+                               min="0" max="99"
+                               :name="'away-fixture-prediction-'+fixture.id"
+                               :data-id="fixture.id"
+                               data-side="away"
+                               :value="predictionAwayScore(prediction)">
+                      </td>
+                    </tr>
+                  </template>
+                </template>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" id="closeModal" data-bs-dismiss="modal">Close</button>
+              <button :disabled="isLoading.predictions" type="submit" class="btn btn-primary">Save</button>
+              <div v-if="isLoading.predictions" class="spinner-border text-primary mt-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
-      </form>
     </div>
 
     <!-- H2H Modal -->
@@ -472,6 +491,7 @@ function fixtureDate(fixture) {
       </div>
     </div>
 
+    <!-- Filters Offcanvas -->
     <div class="offcanvas offcanvas-start"
          tabindex="-1"
          id="offcanvasFilters"
