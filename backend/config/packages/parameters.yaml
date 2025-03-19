@@ -1,5 +1,5 @@
 parameters:
-    app.url: '%env(APP_URL)%'
+    app.url: 'https://%env(DOMAIN_API)%'
     app.support.email: '%env(APP_SUPPORT_EMAIL)%'
     app.mail.domain: '%env(APP_MAIL_DOMAIN)%'
     auth.sign.up.code: '%env(SIGN_UP_CODE)%'
