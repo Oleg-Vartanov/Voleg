@@ -4,4 +4,4 @@ RUN apk --no-cache add \
   certbot \
   certbot-nginx \
   bash \
-  cron
+  cronie

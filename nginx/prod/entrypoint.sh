@@ -4,7 +4,7 @@
 set -e
 
 # Starting crone
-crond
+crond -b
 
 if [ ! -f /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ]; then
   echo "Generating SSL certificate for ${DOMAIN}..."
