@@ -21,12 +21,15 @@ DOCKER_COMPOSE_PROD = docker compose -f docker-compose.prod.yml
 # ========== General ==========
 
 init-dev:
+	$(MAKE) init-permissions
 	$(DOCKER_COMPOSE_DEV) build
 	$(DOCKER_COMPOSE_DEV) down
+	$(MAKE) init-permissions
 	$(DOCKER_COMPOSE_DEV) up -d
 	$(MAKE) init-containers
 
 init-prod:
+	$(MAKE) init-permissions
 	$(DOCKER_COMPOSE_PROD) build
 	$(DOCKER_COMPOSE_PROD) down
 	$(DOCKER_COMPOSE_PROD) up -d
@@ -41,6 +44,13 @@ init-containers:
 	$(PHP_CONTAINER) php bin/console asset-map:compile
 	$(NODE_CONTAINER) npm install
 	$(NODE_CONTAINER) npm run build-only
+
+init-permissions:
+	chmod +x \
+      ./node/command.sh \
+      ./nginx/prod/entrypoint.sh \
+      ./nginx/prod/renew-certificates.sh \
+      ./nginx/prod/renew-certificates.cron
 
 deploy:
 	git pull origin main
