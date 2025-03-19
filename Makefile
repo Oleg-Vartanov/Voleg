@@ -48,6 +48,7 @@ init-containers:
 init-permissions:
 	chmod +x \
       ./node/command.sh \
+      ./nginx/dev/entrypoint.sh \
       ./nginx/prod/entrypoint.sh \
       ./nginx/prod/renew-certificates.sh \
       ./nginx/prod/renew-certificates.cron
