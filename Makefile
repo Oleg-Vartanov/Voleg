@@ -45,6 +45,7 @@ init-containers:
 	$(NODE_CONTAINER) npm install
 	$(NODE_CONTAINER) npm run build-only
 
+# Permissions were lost with git for some reason. TODO: Check this.
 init-permissions:
 	chmod +x \
       ./node/command.sh \

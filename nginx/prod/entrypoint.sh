@@ -8,6 +8,7 @@ crond
 
 if [ ! -f /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ]; then
   echo "Generating SSL certificate for ${DOMAIN}..."
+  mkdir -p /var/www/certbot
   certbot certonly --webroot -w /var/www/certbot -d ${DOMAIN} -d ${DOMAIN_API} --email ${CERTBOT_EMAIL} --agree-tos --non-interactive;
 fi;
 
