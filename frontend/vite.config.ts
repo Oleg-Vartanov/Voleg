@@ -24,12 +24,12 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: {
       exclude: ['jwt-decode'] // Fixes 504 (Outdated Optimize Dep) error.
     },
-    server: {
+    server: mode === 'development' ? {
       host: true, // Allow external access
       https: {
         key: fs.readFileSync('/certificates/'+env.VITE_DOMAIN+'.key'),
         cert: fs.readFileSync('/certificates/'+env.VITE_DOMAIN+'.crt'),
       },
-    },
+    } : {},
   }
 })

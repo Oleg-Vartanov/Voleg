@@ -25,7 +25,6 @@ if [ ! -f /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ]; then
   done
 
   mkdir -p /var/www/certbot
-  chown -R www-data:www-data /var/www/certbot
   certbot certonly --webroot -w /var/www/certbot -d ${DOMAIN} -d ${DOMAIN_API} --email ${CERTBOT_EMAIL} --agree-tos --non-interactive;
 
   nginx -s stop
