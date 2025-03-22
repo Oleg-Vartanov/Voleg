@@ -9,7 +9,7 @@ if [ ! -f /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ]; then
 
   # Add ACME challenge location to the default config before template is used.
   echo "server {
-    listen 80; server_name ${DOMAIN} ${DOMAIN_API};
+    listen 80; listen [::]:80; server_name ${DOMAIN} ${DOMAIN_API};
     location /.well-known/acme-challenge/ { root /var/www/certbot; allow all; }
     location / { return 404; }
   }" > /etc/nginx/conf.d/default.conf

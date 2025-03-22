@@ -24,7 +24,6 @@ init-dev:
 	$(MAKE) init-permissions
 	$(DOCKER_COMPOSE_DEV) build
 	$(DOCKER_COMPOSE_DEV) down
-	$(MAKE) init-permissions
 	$(DOCKER_COMPOSE_DEV) up -d
 	$(MAKE) init-containers
 
