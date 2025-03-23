@@ -21,17 +21,17 @@ if [ ! -f /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ]; then
   # Start Nginx in the background
   nginx -g "daemon off;" &
 
-  # Wait for Nginx to be ready by checking port 80
-  until nc -z ${DOMAIN} 80; do
+  touch /var/www/certbot/testfile
+  while ! curl -fsS "http://${DOMAIN}/.well-known/acme-challenge/testfile" > /dev/null; do
     echo "Waiting for Nginx to be ready..."
     sleep 2
   done
+  rm -f /var/www/certbot/testfile  # Clean up the test file
 
-  certbot certonly --webroot -w /var/www/certbot -d ${DOMAIN} -d ${DOMAIN_API} --email ${CERTBOT_EMAIL} --agree-tos --non-interactive;
+  certbot certonly --webroot -w /var/www/certbot -d ${DOMAIN} -d ${DOMAIN_API} --email ${CERTBOT_EMAIL} --agree-tos --non-interactive --staging;
 
   nginx -s stop
 
-  # Wait for Nginx to stop completely
   while pgrep -x nginx >/dev/null; do
     echo "Waiting for Nginx to stop..."
     sleep 2
