@@ -25,10 +25,10 @@ services:
     volumes:
       - ./backend:/var/www/html/backend
       - ./frontend:/var/www/html/frontend
+      - ./nginx/prod/cron.d:/etc/cron.d
       - ./nginx/prod/letsencrypt:/etc/letsencrypt
       - ./nginx/prod/templates:/etc/nginx/templates
       - ./nginx/prod/entrypoint.sh:/entrypoint.sh
-      - ./nginx/prod/renew-certificates.cron:/etc/cron.d/renew-certificates.cron
       - ./nginx/prod/renew-certificates.sh:/renew-certificates.sh
     depends_on:
       - php
