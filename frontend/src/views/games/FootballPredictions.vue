@@ -370,12 +370,12 @@ function fixtureDate(fixture) {
     >
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-          <form @submit.prevent="makePredictions">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="predictionsModalLabel">Predictions</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="predictionsModalLabel">Predictions</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="makePredictionsForm" @submit.prevent="makePredictions">
               <table v-if="!isLoading.fixtures" class="table">
                 <thead>
                 <tr>
@@ -422,15 +422,15 @@ function fixtureDate(fixture) {
                 </template>
                 </tbody>
               </table>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeModal" data-bs-dismiss="modal">Close</button>
+            <button :disabled="isLoading.predictions" type="submit" form="makePredictionsForm" class="btn btn-primary">Save</button>
+            <div v-if="isLoading.predictions" class="spinner-border text-primary mt-3" role="status">
+              <span class="visually-hidden">Loading...</span>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" id="closeModal" data-bs-dismiss="modal">Close</button>
-              <button :disabled="isLoading.predictions" type="submit" class="btn btn-primary">Save</button>
-              <div v-if="isLoading.predictions" class="spinner-border text-primary mt-3" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
