@@ -20,6 +20,11 @@ DOCKER_COMPOSE_PROD = docker compose -f docker-compose.prod.yml
 
 # ========== General ==========
 
+down-dev:
+	$(DOCKER_COMPOSE_DEV) down
+down-prod:
+	$(DOCKER_COMPOSE_PROD) down
+
 init-dev:
 	$(DOCKER_COMPOSE_DEV) build
 	$(DOCKER_COMPOSE_DEV) down
