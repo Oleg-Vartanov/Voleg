@@ -2,9 +2,9 @@
 
 namespace App\Tests;
 
-use App\Factory\UserFactory;
-use App\Repository\UserRepository;
-use App\Service\AuthService;
+use App\User\Factory\UserFactory;
+use App\User\Repository\UserRepository;
+use App\User\Service\AuthService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;

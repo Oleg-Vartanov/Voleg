@@ -4,7 +4,7 @@ security:
     providers:
         app_user_provider:
             entity:
-                class: App\Entity\User
+                class: App\User\Entity\User
                 property: email
     role_hierarchy:
         ROLE_ADMIN: ROLE_USER
@@ -21,7 +21,7 @@ security:
             pattern:
                 - ^/auth/sign-in
             stateless: true
-            user_checker: App\Security\UserChecker
+            user_checker: App\User\Security\UserChecker
             json_login:
                 check_path: sign_in
                 username_path: email

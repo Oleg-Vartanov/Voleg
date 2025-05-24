@@ -16,12 +16,21 @@ doctrine:
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         auto_mapping: true
         mappings:
-            App:
-                type: attribute
+            Core:
                 is_bundle: false
-                dir: '%kernel.project_dir%/src/Entity'
-                prefix: 'App\Entity'
-                alias: App
+                type: attribute
+                dir: '%kernel.project_dir%/src/Core/Entity'
+                prefix: 'App\Core\Entity'
+            FixturePredictions:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/FixturePredictions/Entity'
+                prefix: 'App\FixturePredictions\Entity'
+            User:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/User/Entity'
+                prefix: 'App\User\Entity'
         dql:
             string_functions:
                 regexp: DoctrineExtensions\Query\Mysql\Regexp
