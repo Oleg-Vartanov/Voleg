@@ -14,6 +14,7 @@ $(foreach env_file,$(ENV_FILES),$(eval $(call include_env_file,$(env_file))))
 
 PHP_CONTAINER = docker exec $(PROJECT_NAME)_php
 NODE_CONTAINER = docker exec $(PROJECT_NAME)_node
+DB_CONTAINER = docker exec $(PROJECT_NAME)_database
 
 DOCKER_COMPOSE_DEV = docker compose -f docker-compose.dev.yml
 DOCKER_COMPOSE_PROD = docker compose -f docker-compose.prod.yml
@@ -69,6 +70,9 @@ test:
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:create
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:schema:create
 	$(PHP_CONTAINER) php bin/phpunit
+
+backup-db:
+	$(DB_CONTAINER) sh -c 'exec mysqldump -u $(MYSQL_USER) -p"$(MYSQL_PASSWORD)" $(MYSQL_DATABASE)' > backup_$$(date +%F_%H-%M-%S).sql
 
 # ========== Frontend ==========
 
