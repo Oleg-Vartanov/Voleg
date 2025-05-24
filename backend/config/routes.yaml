@@ -1,3 +1,4 @@
 app:
     resource: ../src/
     type: attribute
+    prefix: /api

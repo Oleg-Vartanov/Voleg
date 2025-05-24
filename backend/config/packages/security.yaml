@@ -15,11 +15,11 @@ security:
             security: false
         public:
             pattern:
-                - ^/auth/sign-up
+                - ^/api/auth/sign-up
             security: false
         login:
             pattern:
-                - ^/auth/sign-in
+                - ^/api/auth/sign-in
             stateless: true
             user_checker: App\User\Security\UserChecker
             json_login:
