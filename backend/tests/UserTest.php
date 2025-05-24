@@ -22,9 +22,7 @@ class UserTest extends WebTestCase
 
     public function setUp(): void
     {
-        $this->client = static::createClient([
-
-        ]);
+        $this->client = static::createClient();
         $this->authService = $this->getContainer()->get(AuthService::class);
         $this->entityManager = $this->getContainer()->get(EntityManagerInterface::class);
         $this->userFactory = $this->getContainer()->get(UserFactory::class);

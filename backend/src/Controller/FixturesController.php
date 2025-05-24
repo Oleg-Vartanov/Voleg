@@ -68,7 +68,7 @@ class FixturesController extends AbstractController
         FixtureRepository $fixtureRepository,
         UserRepository $userRepository,
         #[MapQueryString(
-            validationFailedStatusCode:Response::HTTP_UNPROCESSABLE_ENTITY
+            validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY
         )] FixturesDto $dto = new FixturesDto(),
     ): JsonResponse {
         $users = empty($dto->userIds) ? [] : $userRepository->findBy(['id' => $dto->userIds]);
