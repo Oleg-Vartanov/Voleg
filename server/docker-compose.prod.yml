@@ -5,33 +5,36 @@ services:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password
     ports:
-      - ${DATABASE_PORT}:3306
+      - 3306:3306
     volumes:
       - ./database/config:/etc/mysql/conf.d
       - ./database/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - ./database/mysql:/var/lib/mysql
     env_file:
       - ./.env
-      - ./.env.dev
+      - ./.env.prod
       - ./.env.local
 
   webserver:
     container_name: ${PROJECT_NAME}_nginx
     build:
-      context: ./nginx/dev
+      context: ./nginx/prod
     ports:
-      - ${APP_PORT}:80
+      - 80:80
       - 443:443
     volumes:
-      - ./backend:/var/www/html/backend
-      - ./frontend:/var/www/html/frontend
-      - ./nginx/dev/templates:/etc/nginx/templates
-      - ./nginx/dev/entrypoint.sh:/entrypoint.sh
+      - ../backend:/var/www/html/backend
+      - ../frontend:/var/www/html/frontend
+      - ./nginx/prod/cron.d:/etc/cron.d
+      - ./nginx/prod/letsencrypt:/etc/letsencrypt
+      - ./nginx/prod/templates:/etc/nginx/templates
+      - ./nginx/prod/entrypoint.sh:/entrypoint.sh
+      - ./nginx/prod/renew-certificates.sh:/renew-certificates.sh
     depends_on:
       - php
     env_file:
       - ./.env
-      - ./.env.dev
+      - ./.env.prod
       - ./.env.local
     environment:
       NGINX_ENVSUBST_TEMPLATE_SUFFIX: ".conf" # Set to file extension, to keep it instead of ".template".
@@ -43,35 +46,23 @@ services:
     build:
       context: ./php
     volumes:
-      - ./backend:/var/www/html/backend
+      - ../backend:/var/www/html/backend
       - ./php/php.ini:/usr/local/etc/php/php.ini
-      - ./php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-      - ./php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
     depends_on:
       - database
     env_file:
       - ./.env
-      - ./.env.dev
+      - ./.env.prod
       - ./.env.local
 
   node:
     container_name: ${PROJECT_NAME}_node
     image: node:latest
     working_dir: /var/www/html/frontend
-    ports:
-      - 5173:5173
     volumes:
-      - ./frontend:/var/www/html/frontend
-      - ./node/command.sh:/command.sh
+      - ../frontend:/var/www/html/frontend
     env_file:
       - ./.env
-      - ./.env.dev
+      - ./.env.prod
       - ./.env.local
-    command: [ "/command.sh" ]
-
-  mailer:
-    container_name: ${PROJECT_NAME}_mailer
-    image: maildev/maildev
-    ports:
-      - 1080:1080
-      - 1025:1025
+    command: tail -f /dev/null
