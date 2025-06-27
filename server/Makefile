@@ -21,6 +21,8 @@ DOCKER_COMPOSE_PROD = docker compose -f docker-compose.prod.yml
 
 # ========== General ==========
 
+up-dev:
+	$(DOCKER_COMPOSE_DEV) up -d
 down-dev:
 	$(DOCKER_COMPOSE_DEV) down
 down-prod:
