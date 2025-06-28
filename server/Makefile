@@ -51,7 +51,7 @@ init-containers:
 	$(NODE_CONTAINER) npm run build-only
 
 deploy:
-	git pull origin main
+	git -C .. pull origin main
 	$(MAKE) init-prod
 
 # ========== Backend ==========
@@ -68,10 +68,10 @@ cclear:
 	$(PHP_CONTAINER) php bin/console cache:warmup
 
 test:
-	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:drop --force
+	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:drop --force || true
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:create
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:schema:create
-	$(PHP_CONTAINER) php bin/phpunit
+	$(PHP_CONTAINER) php bin/phpunit --colors=always
 
 backup-db:
 	$(DB_CONTAINER) sh -c 'exec mysqldump -u $(MYSQL_USER) -p"$(MYSQL_PASSWORD)" $(MYSQL_DATABASE)' > backup_$$(date +%F_%H-%M-%S).sql
