@@ -17,7 +17,7 @@ class UserCheckerTest extends TestCase
     /**
      * @throws Exception
      */
-    #[TestDox('Pre auth verified user')]
+    #[TestDox('Pre auth: verified user')]
     public function testPreAuthVerifiedUser(): void
     {
         $checker = new UserChecker();
@@ -35,7 +35,7 @@ class UserCheckerTest extends TestCase
     /**
      * @throws Exception
      */
-    #[TestDox('Pre auth unverified user')]
+    #[TestDox('Pre auth: unverified user')]
     public function testPreAuthUnverifiedUser(): void
     {
         $checker = new UserChecker();
@@ -49,7 +49,7 @@ class UserCheckerTest extends TestCase
     /**
      * @throws Exception
      */
-    #[TestDox('Pre auth incorrect user')]
+    #[TestDox('Pre auth: incorrect user')]
     public function testPreAuthIncorrectUser(): void
     {
         $checker = new UserChecker();

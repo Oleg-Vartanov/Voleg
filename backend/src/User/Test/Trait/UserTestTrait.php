@@ -40,6 +40,7 @@ trait UserTestTrait
             'password' => self::DEFAULT_PASSWORD,
             'displayName' => 'John Doe '.$index,
             'tag' => 'john-doe-'.$index,
+            'roles' => [],
         ];
         $userData = array_merge($defaults, $userData);
 
@@ -48,6 +49,7 @@ trait UserTestTrait
             $userData['password'],
             $userData['displayName'],
             $userData['tag'],
+            $userData['roles'],
         );
 
         $this->entityManager->persist($user);

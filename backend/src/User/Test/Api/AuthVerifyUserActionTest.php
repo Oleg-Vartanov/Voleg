@@ -19,7 +19,7 @@ class AuthVerifyUserActionTest extends ApiTestCase
         $this->bootUserTest();
     }
 
-    #[TestDox('Verify user success')]
+    #[TestDox('Verify user: success')]
     public function testVerifyUserSuccess(): void
     {
         $user = $this->createUser(verified: false);
@@ -40,7 +40,7 @@ class AuthVerifyUserActionTest extends ApiTestCase
         $this->assertSelectorExists('a[href="https://example.com"]');
     }
 
-    #[TestDox('Verify user fail')]
+    #[TestDox('Verify user: fail')]
     public function testVerifyUserFail(): void
     {
         $user = $this->createUser(verified: false);
@@ -60,7 +60,7 @@ class AuthVerifyUserActionTest extends ApiTestCase
         $this->assertSelectorTextContains('#support-email', 'support@mail.com');
     }
 
-    #[TestDox('Verify user not found')]
+    #[TestDox('Verify user: not found')]
     public function testVerifyUserNotFound(): void
     {
         $this->sendRequest([
@@ -72,7 +72,7 @@ class AuthVerifyUserActionTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
 
-    #[TestDox('Verify user invalid link')]
+    #[TestDox('Verify user: invalid link')]
     public function testVerifyUserInvalidLink(): void
     {
         $this->sendRequest([

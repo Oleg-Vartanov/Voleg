@@ -21,7 +21,7 @@ class AuthSignInActionTest extends ApiTestCase
         $this->bootUserTest();
     }
 
-    #[TestDox('Sign in action success')]
+    #[TestDox('Sign in action: success')]
     public function testSignInSuccess(): void
     {
         $user = $this->createUser();
@@ -37,7 +37,7 @@ class AuthSignInActionTest extends ApiTestCase
         $this->assertNotEmpty($data['token']);
     }
 
-    #[TestDox('Sign in action invalid credentials')]
+    #[TestDox('Sign in action: invalid credentials')]
     public function testSignInInvalidCredentials(): void
     {
         $response = $this->sendRequest([
@@ -48,7 +48,7 @@ class AuthSignInActionTest extends ApiTestCase
         $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
     }
 
-    #[TestDox('Sign in action unverified')]
+    #[TestDox('Sign in action: unverified')]
     public function testSignInUnverified(): void
     {
         $user = $this->createUser(verified: false);
@@ -61,7 +61,7 @@ class AuthSignInActionTest extends ApiTestCase
         $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
     }
 
-    #[TestDox('Sign in action logic exception')]
+    #[TestDox('Sign in action: logic exception')]
     public function testSignInLogicException(): void
     {
         $controller = new AuthSignInAction();
