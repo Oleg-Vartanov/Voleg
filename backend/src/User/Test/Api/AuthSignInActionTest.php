@@ -4,7 +4,7 @@ namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
 use App\User\Controller\AuthSignInAction;
-use App\User\Test\UserTestTrait;
+use App\User\Test\Trait\UserTestTrait;
 use LogicException;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,7 +31,10 @@ class AuthSignInActionTest extends ApiTestCase
             'password' => self::DEFAULT_PASSWORD,
         ]);
 
+        $data = json_decode($response->getContent(), true);
+
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertNotEmpty($data['token']);
     }
 
     #[TestDox('Sign in action invalid credentials')]

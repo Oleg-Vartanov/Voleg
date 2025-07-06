@@ -72,10 +72,7 @@ test:
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:drop --force || true
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:create
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:schema:create
-	$(PHP_CONTAINER) php bin/phpunit --colors=always --display-deprecations
-test-coverage:
-	$(PHP_CONTAINER) php bin/console cache:clear
-	docker exec -e XDEBUG_MODE=develop,debug,coverage $(PROJECT_NAME)_php php bin/phpunit --coverage-html var/test-coverage
+	docker exec -e XDEBUG_MODE=develop,debug,coverage $(PROJECT_NAME)_php php bin/phpunit --colors=always --display-deprecations
 
 backup-db:
 	$(DB_CONTAINER) sh -c 'exec mysqldump -u $(MYSQL_USER) -p"$(MYSQL_PASSWORD)" $(MYSQL_DATABASE)' > backup_$$(date +%F_%H-%M-%S).sql

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\User\Test;
+namespace App\User\Test\Trait;
 
 use App\User\Entity\User;
 use App\User\Factory\UserFactory;
@@ -34,11 +34,12 @@ trait UserTestTrait
     ): User {
         $lastUserId = $this->userRepository->findOneBy([], ['id' => 'desc'])?->getId() ?? 0;
 
+        $index = $lastUserId + 1;
         $defaults = [
-            'email' => 'user' . ($lastUserId + 1) . '@example.com',
+            'email' => 'user'.$index.'@example.com',
             'password' => self::DEFAULT_PASSWORD,
-            'displayName' => 'John Doe',
-            'tag' => 'john-doe-1',
+            'displayName' => 'John Doe '.$index,
+            'tag' => 'john-doe-'.$index,
         ];
         $userData = array_merge($defaults, $userData);
 
