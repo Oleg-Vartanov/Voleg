@@ -90,25 +90,4 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                   ->getQuery()
                   ->getResult();
     }
-
-    public function tagExist(string $tag): bool
-    {
-        return (bool)$this->findOneBy(['tag' => $tag]);
-    }
-
-    public function findUserTagWithHighestNumber(string $baseTag): ?string
-    {
-        $result = $this->createQueryBuilder('u')
-            ->addSelect('u.tag')
-            ->where('u.tag LIKE :tag')
-            ->andWhere('REGEXP(u.tag, :regexp) = true')
-            ->setParameter('tag', $baseTag . '%')
-            ->setParameter('regexp', $baseTag . '[0-9]+$')
-            ->orderBy('u.tag', 'DESC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
-
-        return $result['tag'] ?? null;
-    }
 }
