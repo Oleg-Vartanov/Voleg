@@ -74,7 +74,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[Groups([self::SHOW])]
     #[ORM\Column(length: 255)]
-    private ?string $tag = null;
+    private string $tag;
 
     public function __construct()
     {
@@ -266,7 +266,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->fixturePredictions;
     }
 
-    public function getTag(): ?string
+    public function getTag(): string
     {
         return $this->tag;
     }

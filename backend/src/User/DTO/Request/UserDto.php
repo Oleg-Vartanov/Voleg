@@ -4,8 +4,8 @@ namespace App\User\DTO\Request;
 
 use App\Core\Interface\PropertyAccessorInterface;
 use App\Core\Trait\PropertyAccessor;
+use App\Core\Validator\Constraints as CustomAssert;
 use App\User\Entity\User;
-use App\Validator\Constraints as CustomAssert;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -25,8 +25,8 @@ class UserDto implements PropertyAccessorInterface
         Assert\Type('string', groups: self::ALL),
         Assert\Email(groups: self::ALL),
         Assert\Length(max: 180, groups: self::ALL),
-        \App\Core\Validator\Constraints\InitializedAndNotNull(groups: [self::UPDATE]),
-        \App\Core\Validator\Constraints\UniqueEntityField(entityClass: User::class, field: 'email', groups: self::ALL),
+        CustomAssert\InitializedAndNotNull(groups: [self::UPDATE]),
+        CustomAssert\UniqueEntityField(entityClass: User::class, field: 'email', groups: self::ALL),
     ]
     public string $email;
 
@@ -47,7 +47,7 @@ class UserDto implements PropertyAccessorInterface
     #[OA\Property(example: 'Cool Name')]
     #[
         Assert\NotBlank(groups: [self::SIGN_UP]),
-        \App\Core\Validator\Constraints\InitializedAndNotNull(groups: [self::UPDATE]),
+        CustomAssert\InitializedAndNotNull(groups: [self::UPDATE]),
         Assert\Type('string', groups: self::ALL),
         Assert\Length(min: 1, groups: self::ALL),
         Assert\Length(max: 255, groups: self::ALL),
@@ -58,13 +58,13 @@ class UserDto implements PropertyAccessorInterface
     #[OA\Property(example: 'cool-name')]
     #[
         Assert\NotBlank(groups: [self::SIGN_UP]),
-        \App\Core\Validator\Constraints\InitializedAndNotNull(groups: [self::UPDATE]),
+        CustomAssert\InitializedAndNotNull(groups: [self::UPDATE]),
         Assert\Type('string', groups: self::ALL),
         Assert\Length(min: 1, groups: self::ALL),
         Assert\Length(max: 255, groups: self::ALL),
         Assert\Regex(pattern: '/^\S+$/', message: 'The value can\'t contain spaces.', groups: self::ALL),
         Assert\Regex(pattern: '/^[^A-Z]*$/', message: 'All the letters must be lowercase.', groups: self::ALL),
-        \App\Core\Validator\Constraints\UniqueEntityField(entityClass: User::class, field: 'tag', groups: self::ALL),
+        CustomAssert\UniqueEntityField(entityClass: User::class, field: 'tag', groups: self::ALL),
     ]
     public string $tag;
 }

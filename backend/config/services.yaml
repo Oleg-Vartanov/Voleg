@@ -18,9 +18,9 @@ services:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
-            - '../src/**/Entity/'
-            - '../src/**/Test/'
             - '../src/Kernel.php'
+            - '../src/**/Entity/'
+            - '../src/**/Test/**'
 
     #<<< Listeners
     App\User\EventListener\JWTCreatedListener:

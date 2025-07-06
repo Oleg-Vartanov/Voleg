@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- TEMPLATE: verify_fail -->
 <html>
 <head><title>Verification</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -119,7 +120,7 @@
                 <tr>
                     <td bgcolor="#ffffff" align="center"
                         style="padding: 20px 20px 20px 20px; color: #111111; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">
-                        <p style="margin: 0;">Display Name: {{ displayName }}</p>
+                        <p id="display-name" style="margin: 0;">Display Name: {{ displayName }}</p>
                     </td>
                 </tr>
                 <tr>
@@ -136,7 +137,7 @@
                 <tr>
                     <td bgcolor="#e1e1e1" align="center" style="padding: 0px 30px 30px 30px; color: #111111; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; line-height: 18px;">
                         <br>
-                        <p style="margin: 0;">If something is wrong, you can contact the support email: <span style="font-weight: bold">{{ supportEmail }}</span>
+                        <p id="support-email" style="margin: 0;">If something is wrong, you can contact the support email: <span style="font-weight: bold">{{ supportEmail }}</span>
                         </p></td>
                 </tr>
             </table>

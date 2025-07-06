@@ -1,18 +1,22 @@
 <?php
 
-namespace App\Tests;
+namespace App\User\Test;
 
 use App\User\Entity\User;
 use App\User\Factory\UserFactory;
 use App\User\Repository\UserRepository;
 use App\User\Service\AuthService;
 use Doctrine\ORM\EntityManagerInterface;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 
-class UserTest extends WebTestCase
+// TODO
+#[TestDox('User Controller')]
+class UserTestTemp extends WebTestCase
 {
     private KernelBrowser $client;
     private EntityManagerInterface $entityManager;
@@ -30,7 +34,8 @@ class UserTest extends WebTestCase
         $this->router = $this->getContainer()->get(RouterInterface::class);
     }
 
-    /** @test */
+
+    #[TestDox('User list action')]
     public function list(): void
     {
         $url = $this->router->generate('user_list');
@@ -38,7 +43,8 @@ class UserTest extends WebTestCase
         $this->assertResponseIsSuccessful();
     }
 
-    /** @test */
+
+    #[TestDox('User show action')]
     public function show(): void
     {
         $user = $this->createUser();
@@ -47,7 +53,8 @@ class UserTest extends WebTestCase
         $this->assertResponseIsSuccessful();
     }
 
-    /** @test */
+
+    #[TestDox('User controller forbidden')]
     public function forbidden(): void
     {
         $userToProcess = $this->createUser();
@@ -63,7 +70,8 @@ class UserTest extends WebTestCase
         $this->assertEquals(Response::HTTP_FORBIDDEN, $this->client->getResponse()->getStatusCode());
     }
 
-    /** @test */
+
+    #[TestDox('User delete action')]
     public function delete():void
     {
         $user = $this->createUser(true);
@@ -74,7 +82,8 @@ class UserTest extends WebTestCase
         $this->assertEquals(Response::HTTP_NO_CONTENT, $this->client->getResponse()->getStatusCode());
     }
 
-    /** @test */
+
+    #[TestDox('User patch action')]
     public function patch():void
     {
         $user = $this->createUser(true);
@@ -85,7 +94,9 @@ class UserTest extends WebTestCase
         $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
     }
 
-    protected function signIn(User $user)
+
+    #[TestDox('User sign in action')]
+    protected function signIn(UserTestTemp $user)
     {
         $this->client->jsonRequest(
             'POST',
@@ -101,7 +112,7 @@ class UserTest extends WebTestCase
         return $data['token'];
     }
 
-    private function createUser(bool $isAdmin = false): User
+    private function createUser(bool $isAdmin = false): UserTestTemp
     {
         $lastUserId = $this->userRepository->findOneBy([], ['id' => 'desc'])?->getId() ?? 0;
 
