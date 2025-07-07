@@ -14,9 +14,11 @@ class UserDto implements PropertyAccessorInterface
 {
     use PropertyAccessor;
 
-    const SIGN_UP = 'SignUp';
-    const UPDATE = 'Update';
-    const ALL = [self::SIGN_UP, self::UPDATE];
+    const string SIGN_UP = 'SignUp';
+    const string UPDATE = 'Update';
+
+    /** @var string[]  */
+    const array ALL = [self::SIGN_UP, self::UPDATE];
 
     #[Groups(self::ALL)]
     #[OA\Property(example: 'name@mail.com')]

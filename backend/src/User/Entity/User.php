@@ -4,7 +4,7 @@ namespace App\User\Entity;
 
 use App\FixturePredictions\Entity\FixturePrediction;
 use App\User\DTO\Request\UserDto;
-use App\User\Enum\RolesEnum;
+use App\User\Enum\RoleEnum;
 use App\User\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
@@ -31,12 +31,14 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    const VERIFICATION_EXPIRATION_TIME = 24 * 60 * 60;
+    const int VERIFICATION_EXPIRATION_TIME = 24 * 60 * 60;
 
-    const SHOW = 'show';
-    const SHOW_ADMIN = 'show:admin';
-    const SHOW_OWNER = 'show:owner';
-    const SHOW_ALL = [self::SHOW, self::SHOW_ADMIN, self::SHOW_OWNER];
+    const string SHOW = 'show';
+    const string SHOW_ADMIN = 'show:admin';
+    const string SHOW_OWNER = 'show:owner';
+
+    /** @var string[] */
+    const array SHOW_ALL = [self::SHOW, self::SHOW_ADMIN, self::SHOW_OWNER];
 
     #[Groups([self::SHOW])]
     #[ORM\Id]
@@ -124,7 +126,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        $roles[] = RolesEnum::ROLE_USER->value; // guarantee every user at least has ROLE_USER
+        $roles[] = RoleEnum::ROLE_USER->value; // guarantee every user at least has ROLE_USER
 
         return array_unique($roles);
     }

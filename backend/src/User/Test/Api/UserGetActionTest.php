@@ -3,6 +3,7 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
+use App\User\Enum\RoleEnum;
 use App\User\Test\Trait\UserTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,7 +35,7 @@ class UserGetActionTest extends ApiTestCase
     #[TestDox('User GET: success admin')]
     public function testUserGetSuccessAdmin(): void
     {
-        $user = $this->createUser(['roles' => ['ROLE_ADMIN']]);
+        $user = $this->createUser(['roles' => [RoleEnum::ROLE_ADMIN->value]]);
         $this->signIn($user);
 
         $response = $this->sendRequest($user->getId());

@@ -4,6 +4,7 @@ namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
 use App\User\Entity\User;
+use App\User\Enum\RoleEnum;
 use App\User\Test\Trait\UserTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,7 +48,7 @@ class UserDeleteActionTest extends ApiTestCase
     #[TestDox('User DELETE: not found')]
     public function testUserDeleteNotFound(): void
     {
-        $user = $this->createUser(['roles' => ['ROLE_ADMIN']]);
+        $user = $this->createUser(['roles' => [RoleEnum::ROLE_ADMIN->value]]);
         $this->signIn($user);
         $this->sendRequest(0);
 

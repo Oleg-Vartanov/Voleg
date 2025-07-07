@@ -19,8 +19,8 @@ class AuthSignUpActionTest extends ApiTestCase
         $this->bootUserTest();
     }
 
-    #[TestDox('Sign up action success')]
-    public function testSignInSuccess(): void
+    #[TestDox('Sign up action: success')]
+    public function testSignUpActionSuccess(): void
     {
         $lastUserId = $this->userRepository->findOneBy([], ['id' => 'desc'])?->getId() ?? 0;
 
@@ -38,8 +38,8 @@ class AuthSignUpActionTest extends ApiTestCase
         $this->assertEmailHtmlBodyContains($this->getMailerMessage(), $testUser['displayName']);
     }
 
-    #[TestDox('Sign up action validation error')]
-    public function testSignInFail(): void
+    #[TestDox('Sign up action: validation error')]
+    public function testSignUpActionValidationError(): void
     {
         $response = $this->signUpRequest([
             'email' => 'john.doe',
