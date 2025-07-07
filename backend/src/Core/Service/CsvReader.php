@@ -16,7 +16,7 @@ readonly class CsvReader
         }
 
         $csvData = [];
-        while (($data = fgetcsv($resource, 1000, ',')) !== false) {
+        while (($data = fgetcsv($resource, 1000, ',', '"', '\\')) !== false) {
             $csvData[] = $data;
         }
         fclose($resource);

@@ -22,12 +22,12 @@ use Symfony\Component\HttpKernel\KernelInterface;
 class PopulateDbCommand extends Command
 {
     public function __construct(
-        private CsvReader $csvReader,
-        private KernelInterface $kernel,
-        private CountryRepository $countryRepository,
-        private CompetitionRepository $competitionRepository,
-        private SeasonRepository $seasonRepository,
-        private EntityManagerInterface $entityManager,
+        private readonly CsvReader $csvReader,
+        private readonly KernelInterface $kernel,
+        private readonly CountryRepository $countryRepository,
+        private readonly CompetitionRepository $competitionRepository,
+        private readonly SeasonRepository $seasonRepository,
+        private readonly EntityManagerInterface $entityManager,
     ) {
         parent::__construct();
     }

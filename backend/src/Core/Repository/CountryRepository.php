@@ -16,16 +16,6 @@ class CountryRepository extends ServiceEntityRepository
         parent::__construct($registry, Country::class);
     }
 
-    public function hasRecords(): bool
-    {
-        $count = $this->createQueryBuilder('c')
-            ->select('count(c.id)')
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        return $count > 0;
-    }
-
     public function findOneByName(string $name): ?Country
     {
         return $this->findOneBy(['name' => $name]);

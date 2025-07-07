@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Core')]
 class HomeActionTest extends ApiTestCase
 {
+    #[TestDox('Home action')]
     public function testHomeAction(): void
     {
         $url = $this->router->generate('home');
