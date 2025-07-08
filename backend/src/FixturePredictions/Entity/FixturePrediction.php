@@ -2,7 +2,6 @@
 
 namespace App\FixturePredictions\Entity;
 
-use App\FixturePredictions\Controller\FixturesController;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\User\Entity\User;
 use Doctrine\DBAL\Types\Types;
@@ -12,7 +11,9 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: FixturePredictionRepository::class)]
 class FixturePrediction
 {
-    #[Groups([FixturesController::SHOW_PREDICTIONS])]
+    const string SHOW_PREDICTIONS = 'ShowPredictions';
+
+    #[Groups([self::SHOW_PREDICTIONS])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -22,20 +23,20 @@ class FixturePrediction
     #[ORM\JoinColumn(nullable: false)]
     private Fixture $fixture;
 
-    #[Groups([FixturesController::SHOW_PREDICTIONS])]
+    #[Groups([self::SHOW_PREDICTIONS])]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
 
-    #[Groups([FixturesController::SHOW_PREDICTIONS])]
+    #[Groups([self::SHOW_PREDICTIONS])]
     #[ORM\Column(nullable: false)]
     private int $homeScore;
 
-    #[Groups([FixturesController::SHOW_PREDICTIONS])]
+    #[Groups([self::SHOW_PREDICTIONS])]
     #[ORM\Column(nullable: false)]
     private int $awayScore;
 
-    #[Groups([FixturesController::SHOW_PREDICTIONS])]
+    #[Groups([self::SHOW_PREDICTIONS])]
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $points = null;
 

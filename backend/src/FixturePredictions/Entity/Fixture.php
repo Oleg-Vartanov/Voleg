@@ -2,7 +2,6 @@
 
 namespace App\FixturePredictions\Entity;
 
-use App\FixturePredictions\Controller\FixturesController;
 use App\FixturePredictions\Enum\FixtureStatusEnum;
 use App\FixturePredictions\Repository\FixtureRepository;
 use DateTime;
@@ -11,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-#[Groups([FixturesController::SHOW_PREDICTIONS])]
+#[Groups([FixturePrediction::SHOW_PREDICTIONS])]
 #[ORM\Entity(repositoryClass: FixtureRepository::class)]
 class Fixture
 {

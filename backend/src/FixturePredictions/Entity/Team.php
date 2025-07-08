@@ -2,7 +2,6 @@
 
 namespace App\FixturePredictions\Entity;
 
-use App\FixturePredictions\Controller\FixturesController;
 use App\FixturePredictions\Repository\TeamRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -10,13 +9,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
 class Team
 {
-    #[Groups([FixturesController::SHOW_PREDICTIONS])]
+    #[Groups([FixturePrediction::SHOW_PREDICTIONS])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private int $id;
 
-    #[Groups([FixturesController::SHOW_PREDICTIONS])]
+    #[Groups([FixturePrediction::SHOW_PREDICTIONS])]
     #[ORM\Column(length: 100)]
     private string $name;
 
