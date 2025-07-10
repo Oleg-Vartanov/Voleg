@@ -30,6 +30,7 @@
         </include>
         <exclude>
             <directory>./src/*/Test</directory>
+            <directory>./src/*/DataFixture</directory>
             <file>./src/Kernel.php</file>
             <file>./src/Core/Test/bootstrap.php</file>
         </exclude>
