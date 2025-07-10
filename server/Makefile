@@ -72,6 +72,7 @@ test:
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:drop --force || true
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:create
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:schema:create
+	$(PHP_CONTAINER) php bin/console --env=test doctrine:fixtures:load --no-interaction
 	docker exec -e XDEBUG_MODE=develop,debug,coverage $(PROJECT_NAME)_php php bin/phpunit --colors=always --display-deprecations
 
 backup-db:
