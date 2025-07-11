@@ -22,12 +22,12 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: 'Fixtures')]
 #[Security(name: 'Bearer')]
 #[OA\Response(response: Response::HTTP_OK, description: 'OK')]
+#[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
 #[OA\Response(
     response: Response::HTTP_UNPROCESSABLE_ENTITY,
     description: 'Validation errors',
     content: new Model(type: ValidationErrorResponse::class)
 )]
-#[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
 
 #[Route(
     path: '/fixtures/leaderboard',

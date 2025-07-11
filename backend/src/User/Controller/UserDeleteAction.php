@@ -16,8 +16,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: 'User')]
 #[Security(name: 'Bearer')]
 #[OA\Response(response: Response::HTTP_NO_CONTENT, description: 'Deleted')]
-#[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access Denied')]
-#[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User Not Found')]
+#[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access denied')]
+#[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User not found')]
 
 #[Route('/users/{id}', name: 'user_delete', methods: [Request::METHOD_DELETE])]
 class UserDeleteAction extends AbstractController

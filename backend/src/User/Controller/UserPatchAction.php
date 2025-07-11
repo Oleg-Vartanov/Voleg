@@ -26,8 +26,8 @@ use Symfony\Component\Routing\Attribute\Route;
     description: 'User Updated',
     content: new Model(type: User::class, groups: [User::SHOW_ALL])
 )]
-#[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access Denied')]
-#[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User Not Found')]
+#[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access denied')]
+#[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User not found')]
 #[OA\Response(
     response: Response::HTTP_UNPROCESSABLE_ENTITY,
     description: 'Validation errors',

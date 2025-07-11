@@ -11,7 +11,7 @@ use App\User\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class PredictionsService
+readonly class PredictionsService
 {
     public function __construct(
         private FixtureRepository $fixtureRepository,

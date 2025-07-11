@@ -20,7 +20,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: 'Fixtures')]
 #[Security(name: 'Bearer')]
 #[OA\Response(response: Response::HTTP_OK, description: 'Fixtures synced')]
-#[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Dont have rights')]
+#[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
+#[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access denied')]
 #[OA\Response(
     response: Response::HTTP_UNPROCESSABLE_ENTITY,
     description: 'Validation errors',

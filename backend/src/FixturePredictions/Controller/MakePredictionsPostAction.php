@@ -20,6 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: 'Fixtures')]
 #[Security(name: 'Bearer')]
 #[OA\Response(response: Response::HTTP_CREATED, description: 'Success')]
+#[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
 #[OA\Response(response: Response::HTTP_CONFLICT, description: 'Fixture has already started')]
 #[OA\Response(
     response: Response::HTTP_UNPROCESSABLE_ENTITY,

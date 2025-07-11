@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
     description: 'User',
     content: new Model(type: User::class, groups: User::SHOW_ALL)
 )]
-#[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User Not Found')]
+#[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User not found')]
 
 #[Route('/users/{id}', name: 'user_get', methods: [Request::METHOD_GET])]
 class UserGetAction extends AbstractController
