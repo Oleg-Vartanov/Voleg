@@ -14,9 +14,12 @@ class SeasonFixture extends Fixture
             $s = new Season();
             $s->setYear($year);
             $manager->persist($s);
+
+            if ($year === 2024) {
+                $this->addReference('season', $s);
+            }
         }
 
-        $this->addReference('season', $s);
 
         $manager->flush();
     }

@@ -7,6 +7,7 @@ use App\FixturePredictions\Entity\Fixture as FpFixture;
 use App\FixturePredictions\Entity\Season;
 use App\FixturePredictions\Entity\Team;
 use App\FixturePredictions\Enum\FixtureStatusEnum;
+use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
@@ -39,7 +40,7 @@ class FixtureFixture extends Fixture implements DependentFixtureInterface
                 $f->setStatus(FixtureStatusEnum::Unknown);
                 $f->setMatchday(1);
                 $f->setProviderFixtureId(1);
-                $f->setStartAt(new \DateTimeImmutable('+2 days'));
+                $f->setStartAt(new DateTimeImmutable('2025-01-01'));
 
                 $manager->persist($f);
 

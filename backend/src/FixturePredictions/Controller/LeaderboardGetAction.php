@@ -27,6 +27,7 @@ use Symfony\Component\Routing\Attribute\Route;
     description: 'Validation errors',
     content: new Model(type: ValidationErrorResponse::class)
 )]
+#[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
 
 #[Route(
     path: '/fixtures/leaderboard',
