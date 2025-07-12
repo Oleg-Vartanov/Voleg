@@ -4,11 +4,10 @@ namespace App\FixturePredictions\Controller;
 
 use App\Core\DTO\Documentation\Validator\ValidationErrorResponse;
 use App\FixturePredictions\DTO\Request\FixturesDto;
-use App\FixturePredictions\Entity\FixturePrediction;
 use App\FixturePredictions\Repository\CompetitionRepository;
+use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
 use App\User\Entity\User;
-use App\User\Repository\UserRepository;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
@@ -21,7 +20,20 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Tag(name: 'Fixtures')]
 #[Security(name: 'Bearer')]
-#[OA\Response(response: Response::HTTP_OK, description: 'OK')]
+#[OA\Response(
+    response: Response::HTTP_OK,
+    description: 'OK',
+    content: new OA\JsonContent(properties: [
+        new OA\Property(
+            property: 'users',
+            properties: [
+                new OA\Property(property: 'user', ref: new Model(type: User::class, groups: [User::SHOW])),
+                new OA\Property(property: 'totalPoints', type: 'int'),
+                new OA\Property(property: 'periodPoints', type: 'int'),
+            ]
+        ),
+    ]),
+)]
 #[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
 #[OA\Response(
     response: Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -40,7 +52,7 @@ class LeaderboardGetAction extends AbstractController
     public function __construct(
         private readonly CompetitionRepository $competitionRepository,
         private readonly SeasonRepository $seasonRepository,
-        private readonly UserRepository $userRepository,
+        private readonly FixturePredictionRepository $fpRepository,
     ) {
     }
 
@@ -50,7 +62,7 @@ class LeaderboardGetAction extends AbstractController
     ): JsonResponse {
         $competition = $this->competitionRepository->findOneByCode($dto->competitionCode);
 
-        $users = $this->userRepository->fixturesLeaderboard(
+        $users = $this->fpRepository->leaderboard(
             competition: $competition,
             season: $this->seasonRepository->findOneByYear($dto->year),
             start: $dto->start,
@@ -65,6 +77,6 @@ class LeaderboardGetAction extends AbstractController
                 'competition' => $competition?->getCode(),
             ],
             'users' => $users,
-        ], context: ['groups' => [FixturePrediction::SHOW_PREDICTIONS, User::SHOW]]);
+        ], context: ['groups' => [User::SHOW]]);
     }
 }

@@ -2,11 +2,7 @@
 
 namespace App\User\Repository;
 
-use App\FixturePredictions\Entity\Competition;
-use App\FixturePredictions\Entity\Season;
 use App\User\Entity\User;
-use DateTime;
-use DateTimeInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -49,44 +45,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         return $qb->setFirstResult($offset)
                   ->setMaxResults($limit)
-                  ->getQuery()
-                  ->getResult();
-    }
-
-    /**
-     * @return User[]
-     */
-    public function fixturesLeaderboard(
-        ?Competition $competition = null,
-        ?Season $season = null,
-        ?DateTimeInterface $start = null,
-        ?DateTimeInterface $end = null,
-        ?int $limit = null,
-    ): array {
-        $qb = $this->createQueryBuilder('u')
-            ->addSelect('u as user','SUM(fp.points) AS totalPoints')
-            ->addSelect('SUM(CASE WHEN f.startAt >= :start AND f.startAt <= :end THEN fp.points ELSE 0 END) AS periodPoints')
-            ->leftJoin('u.fixturePredictions', 'fp')
-            ->leftJoin('fp.fixture', 'f');
-
-        if ($competition !== null) {
-            $qb->andWhere('f.competition = :competition')
-               ->setParameter('competition', $competition);
-        }
-        if ($season !== null) {
-            $qb->andWhere('f.season = :season')
-               ->setParameter('season', $season);
-        }
-
-        $qb->setParameter('start', $start ?? new DateTime('0001-01-01'));
-        $qb->setParameter('end', $end ?? new DateTime('9999-12-31'));
-
-        if ($limit !== null) {
-            $qb->setMaxResults($limit);
-        }
-
-        return $qb->groupBy('u.id')
-                  ->orderBy('totalPoints', 'DESC')
                   ->getQuery()
                   ->getResult();
     }
