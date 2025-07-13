@@ -4,6 +4,7 @@ namespace App\FixturePredictions\Controller;
 
 use App\Core\DTO\Documentation\Validator\ValidationErrorResponse;
 use App\FixturePredictions\DTO\Request\FixturesDto;
+use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\FixturePrediction;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\FixtureRepository;
@@ -22,7 +23,21 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Tag(name: 'Fixtures')]
 #[Security(name: 'Bearer')]
-#[OA\Response(response: Response::HTTP_OK, description: 'OK')]
+#[OA\Response(
+    response: Response::HTTP_OK,
+    description: 'OK',
+    content: new OA\JsonContent(properties: [
+        new OA\Property(
+            property: 'filters',
+            properties: [
+                new OA\Property(property: 'start', description: 'Y-m-d', type: 'string'),
+                new OA\Property(property: 'end', description: 'Y-m-d', type: 'string'),
+                new OA\Property(property: 'competition', type: 'string'),
+            ]
+        ),
+        new OA\Property(property: 'fixtures', ref: new Model(type: Fixture::class)),
+    ]),
+)]
 #[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
 #[OA\Response(
     response: Response::HTTP_UNPROCESSABLE_ENTITY,

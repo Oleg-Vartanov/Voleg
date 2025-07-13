@@ -25,6 +25,14 @@ use Symfony\Component\Routing\Attribute\Route;
     description: 'OK',
     content: new OA\JsonContent(properties: [
         new OA\Property(
+            property: 'filters',
+            properties: [
+                new OA\Property(property: 'start', description: 'Y-m-d', type: 'string'),
+                new OA\Property(property: 'end', description: 'Y-m-d', type: 'string'),
+                new OA\Property(property: 'competition', type: 'string'),
+            ]
+        ),
+        new OA\Property(
             property: 'users',
             properties: [
                 new OA\Property(property: 'user', ref: new Model(type: User::class, groups: [User::SHOW])),
