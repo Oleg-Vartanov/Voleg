@@ -17,7 +17,7 @@ class SignUpDto extends UserDto
 
     #[Groups([self::SIGN_UP])]
     #[OA\Property(example: 'super-duper-code')]
-    #[Assert\NotBlank,
+    #[Assert\NotBlank(groups: [self::SIGN_UP]),
         Assert\Type('string', groups: [self::SIGN_UP]),
         CustomAssert\EqualParamConfig('auth.sign.up.code', groups: [self::SIGN_UP])]
     public string $code;

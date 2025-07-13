@@ -30,6 +30,7 @@ class AuthSignUpActionTest extends ApiTestCase
             'displayName' => 'John Doe',
             'tag' => 'user'.($lastUserId + 1),
             'verificationEmailRedirectUrl' => 'https://example.com',
+            'code' => 'sign-up-code',
         ];
 
         $response = $this->signUpRequest($testUser);
