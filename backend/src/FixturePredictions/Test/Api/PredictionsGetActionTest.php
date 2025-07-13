@@ -60,8 +60,7 @@ class PredictionsGetActionTest extends ApiTestCase
         string $start = '2025-01-01',
         string $end = '2025-01-02',
         int $year = 2024,
-    ): Response
-    {
+    ): Response {
         $this->client->request(
             method: Request::METHOD_GET,
             uri: $this->router->generate('fixtures_predictions', [
