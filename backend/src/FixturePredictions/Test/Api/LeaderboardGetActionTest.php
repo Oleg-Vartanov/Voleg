@@ -35,6 +35,8 @@ class LeaderboardGetActionTest extends ApiTestCase
             'start' => '2025-01-01',
             'end' => '2025-01-02',
             'competition' => CompetitionCodeEnum::EPL->value,
+            'season' => 2024,
+            'limit' => 20,
         ], $content['filters']);
         self::assertNotEmpty($content['users']);
     }
@@ -59,15 +61,15 @@ class LeaderboardGetActionTest extends ApiTestCase
     private function sendRequest(
         string $start = '2025-01-01',
         string $end = '2025-01-02',
-        int $year = 2024,
-    ): Response
-    {
+        int $season = 2024,
+    ): Response {
         $this->client->request(
             method: Request::METHOD_GET,
             uri: $this->router->generate('fixtures_leaderboard', [
                 'start' => $start,
                 'end' => $end,
-                'year' => $year,
+                'season' => $season,
+                'limit' => 20,
             ]),
         );
 

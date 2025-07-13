@@ -13,6 +13,7 @@ const auth = useAuth();
 const start = ref(null);
 const end = ref(null);
 const competition = ref('PL');
+const season = ref(new Date().getFullYear());
 
 const fixtures = ref(null);
 const leaderboard = ref(null);
@@ -47,12 +48,13 @@ function updateFixturesTable() {
   isLoading.value.fixtures = true;
   let userIds = h2hUsers.value.map(object => object.id);
 
-  Client.showFixtures(start.value, end.value, competition.value, userIds)
+  Client.showFixtures(start.value, end.value, competition.value, userIds, season.value)
     .then((response) => {
       fixtures.value = response.data.fixtures;
       start.value = response.data.filters.start;
       end.value = response.data.filters.end;
       competition.value = response.data.filters.competition;
+      season.value = response.data.filters.season;
     })
     .catch((axiosError) => {
       topAlerts.add(new Alert('Error during obtaining data.', 'danger', 10));
@@ -65,12 +67,13 @@ function updateFixturesTable() {
 function updateLeaderboardTable() {
   isLoading.value.leaderboard = true;
 
-  Client.leaderboard(start.value, end.value, competition.value)
+  Client.leaderboard(start.value, end.value, competition.value, season.value)
     .then((response) => {
       leaderboard.value = response.data.users;
       start.value = response.data.filters.start;
       end.value = response.data.filters.end;
       competition.value = response.data.filters.competition;
+      season.value = response.data.filters.season;
     })
     .catch((axiosError) => {
       topAlerts.add(new Alert('Error during obtaining data.', 'danger', 10));
@@ -524,6 +527,17 @@ function fixtureDate(fixture) {
                 <span class="input-group-text filter-date-text">Competition</span>
                 <select class="form-select" aria-label="Default select example" v-model="competition">
                   <option value="PL">English Premier League</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-auto mb-2 p-1">
+              <div class="input-group">
+                <span class="input-group-text filter-date-text">Season</span>
+                <select class="form-select" v-model="season">
+                  <option v-for="year in ArrayHelper.range(2023, 2100)" :key="year" :value="year">
+                    {{ year }}
+                  </option>
                 </select>
               </div>
             </div>

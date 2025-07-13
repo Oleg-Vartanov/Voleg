@@ -10,4 +10,10 @@ export default {
   intersects(array1, array2) {
     return array1.some(element => array2.includes(element));
   },
+  range(start: number, stop: number, step: number = 1): number[] {
+    return Array.from(
+      {length: Math.ceil((stop - start) / step)},
+      (_, i) => start + i * step,
+    );
+  }
 }

@@ -36,6 +36,7 @@ class FixtureRepository extends ServiceEntityRepository
         ?int $round = null,
         ?DateTimeInterface $start = null,
         ?DateTimeInterface $end = null,
+        ?int $limit = null,
     ): mixed {
         $qb = $this->createQueryBuilder('f')
             ->addSelect('fp', 'ht', 'at')
@@ -64,6 +65,10 @@ class FixtureRepository extends ServiceEntityRepository
         if ($end !== null) {
             $qb->andWhere('f.startAt <= :end')
                ->setParameter('end', $end);
+        }
+
+        if ($limit !== null) {
+            $qb->setMaxResults($limit);
         }
 
         return $qb->orderBy('f.startAt', 'ASC')

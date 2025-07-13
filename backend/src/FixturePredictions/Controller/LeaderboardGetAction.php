@@ -30,6 +30,8 @@ use Symfony\Component\Routing\Attribute\Route;
                 new OA\Property(property: 'start', description: 'Y-m-d', type: 'string'),
                 new OA\Property(property: 'end', description: 'Y-m-d', type: 'string'),
                 new OA\Property(property: 'competition', type: 'string'),
+                new OA\Property(property: 'season', type: 'int'),
+                new OA\Property(property: 'limit', type: 'int'),
             ]
         ),
         new OA\Property(
@@ -72,10 +74,10 @@ class LeaderboardGetAction extends AbstractController
 
         $users = $this->fpRepository->leaderboard(
             competition: $competition,
-            season: $this->seasonRepository->findOneByYear($dto->year),
+            season: $this->seasonRepository->findOneByYear($dto->season),
             start: $dto->start,
             end: $dto->end,
-            limit: $dto->limit ?? 50,
+            limit: $dto->limit,
         );
 
         return $this->json([
@@ -83,6 +85,8 @@ class LeaderboardGetAction extends AbstractController
                 'start' => $dto->start->format('Y-m-d'),
                 'end' => $dto->end->format('Y-m-d'),
                 'competition' => $competition?->getCode(),
+                'season' => $dto->season,
+                'limit' => $dto->limit,
             ],
             'users' => $users,
         ], context: ['groups' => [User::SHOW]]);

@@ -19,10 +19,10 @@ class FixturesDto
         public ?DateTime $end = null,
 
         #[Assert\Positive]
-        public ?int $limit = null,
+        public int $limit = 50,
 
         #[Assert\NotBlank, Assert\Positive]
-        public int $year = 2024,
+        public ?int $season = null,
 
         #[Assert\NotBlank, Assert\Choice(callback: [CompetitionCodeEnum::class, 'values'])]
         public string $competitionCode = CompetitionCodeEnum::EPL->value,

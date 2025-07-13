@@ -33,6 +33,8 @@ use Symfony\Component\Routing\Attribute\Route;
                 new OA\Property(property: 'start', description: 'Y-m-d', type: 'string'),
                 new OA\Property(property: 'end', description: 'Y-m-d', type: 'string'),
                 new OA\Property(property: 'competition', type: 'string'),
+                new OA\Property(property: 'season', type: 'int'),
+                new OA\Property(property: 'limit', type: 'int'),
             ]
         ),
         new OA\Property(property: 'fixtures', ref: new Model(type: Fixture::class)),
@@ -73,9 +75,10 @@ class PredictionsGetAction extends AbstractController
         $fixtures = $this->fixtureRepository->filter(
             users: $users,
             competition: $competition,
-            season: $this->seasonRepository->findOneByYear($dto->year),
+            season: $this->seasonRepository->findOneByYear($dto->season),
             start: $dto->start,
             end: $dto->end,
+            limit: $dto->limit,
         );
 
         return $this->json([
@@ -83,6 +86,8 @@ class PredictionsGetAction extends AbstractController
                 'start' => $dto->start->format('Y-m-d'),
                 'end' => $dto->end->format('Y-m-d'),
                 'competition' => $competition?->getCode(),
+                'season' => $dto->season,
+                'limit' => $dto->limit,
             ],
             'fixtures' => $fixtures,
         ], context: ['groups' => [FixturePrediction::SHOW_PREDICTIONS, User::SHOW]]);
