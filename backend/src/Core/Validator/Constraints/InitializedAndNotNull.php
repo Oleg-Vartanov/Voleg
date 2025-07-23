@@ -9,8 +9,12 @@ use Symfony\Component\Validator\Constraint;
 {
     public string $message = 'This value should not be null if it was initialized.';
 
-    public function __construct(?array $options = null, ?string $message = null, ?array $groups = null, mixed $payload = null)
-    {
+    public function __construct(
+        ?array $options = null,
+        ?string $message = null,
+        ?array $groups = null,
+        mixed $payload = null
+    ) {
         parent::__construct($options ?? [], $groups, $payload);
 
         $this->message = $message ?? $this->message;

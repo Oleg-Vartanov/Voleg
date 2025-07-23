@@ -15,4 +15,6 @@
     <file>public/</file>
     <file>src/</file>
 
+    <exclude-pattern>src/Core/Test/bootstrap.php</exclude-pattern>
+
 </ruleset>

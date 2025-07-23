@@ -11,7 +11,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: FixturePredictionRepository::class)]
 class FixturePrediction
 {
-    const string SHOW_PREDICTIONS = 'ShowPredictions';
+    public const string SHOW_PREDICTIONS = 'ShowPredictions';
 
     #[Groups([self::SHOW_PREDICTIONS])]
     #[ORM\Id]

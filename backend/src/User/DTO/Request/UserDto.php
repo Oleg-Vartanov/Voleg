@@ -14,11 +14,10 @@ class UserDto implements PropertyAccessorInterface
 {
     use PropertyAccessor;
 
-    const string SIGN_UP = 'SignUp';
-    const string UPDATE = 'Update';
-
+    public const string SIGN_UP = 'SignUp';
+    public const string UPDATE = 'Update';
     /** @var string[]  */
-    const array ALL = [self::SIGN_UP, self::UPDATE];
+    public const array ALL = [self::SIGN_UP, self::UPDATE];
 
     #[Groups(self::ALL)]
     #[OA\Property(example: 'name@mail.com')]
@@ -40,8 +39,16 @@ class UserDto implements PropertyAccessorInterface
         Assert\Length(min: 6, groups: [self::SIGN_UP]),
         Assert\Regex(pattern: '/^\S+$/', message: 'The value can\'t contain spaces.', groups: [self::SIGN_UP]),
         Assert\Regex(pattern: '/\d+/i', message: 'Should have at least one digit.', groups: [self::SIGN_UP]),
-        Assert\Regex(pattern: '/[#?!@$%^&*-]+/i', message: 'Should have at least one character from [#?!@$%^&*-].', groups: [self::SIGN_UP]),
-        Assert\Regex(pattern: '/[A-Z]+/', message: 'Should have at least one upper case character.', groups: [self::SIGN_UP])
+        Assert\Regex(
+            pattern: '/[#?!@$%^&*-]+/i',
+            message: 'Should have at least one character from [#?!@$%^&*-].',
+            groups: [self::SIGN_UP]
+        ),
+        Assert\Regex(
+            pattern: '/[A-Z]+/',
+            message: 'Should have at least one upper case character.',
+            groups: [self::SIGN_UP]
+        ),
     ]
     public string $password;
 

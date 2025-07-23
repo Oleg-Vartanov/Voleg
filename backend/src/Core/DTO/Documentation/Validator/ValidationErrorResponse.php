@@ -17,7 +17,8 @@ final class ValidationErrorResponse
     #[OA\Property(type: 'string', example: 'Validation Failed')]
     public string $title;
 
-    #[OA\Property(type: 'string', example: 'password: This value is too short. It should have 6 characters or more.\npassword: Should have at least one digit.')]
+    #[OA\Property(type: 'string', example: 'password: This value is too short. It should have 6'
+        . ' characters or more.\npassword: Should have at least one digit.')]
     public string $detail;
 
     #[OA\Property(type: 'array', items: new OA\Items(ref: new Model(type: Violation::class)))]

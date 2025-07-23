@@ -31,14 +31,12 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    const int VERIFICATION_EXPIRATION_TIME = 24 * 60 * 60;
-
-    const string SHOW = 'show';
-    const string SHOW_ADMIN = 'show:admin';
-    const string SHOW_OWNER = 'show:owner';
-
+    public const string SHOW = 'show';
+    public const string SHOW_ADMIN = 'show:admin';
+    public const string SHOW_OWNER = 'show:owner';
     /** @var string[] */
-    const array SHOW_ALL = [self::SHOW, self::SHOW_ADMIN, self::SHOW_OWNER];
+    public const array SHOW_ALL = [self::SHOW, self::SHOW_ADMIN, self::SHOW_OWNER];
+    private const int VERIFICATION_EXPIRATION_TIME = 24 * 60 * 60;
 
     #[Groups([self::SHOW])]
     #[ORM\Id]

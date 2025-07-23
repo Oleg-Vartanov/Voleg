@@ -16,7 +16,8 @@ final class Violation
     #[OA\Property(example: 'This value is too short. It should have 6 characters or more.')]
     public string $title;
 
-    #[OA\Property(example: 'This value is too short. It should have {{ limit }} character or more.|This value is too short. It should have {{ limit }} characters or more.')]
+    #[OA\Property(example: 'This value is too short. It should have {{ limit }} character or'
+        . ' more.|This value is too short. It should have {{ limit }} characters or more.')]
     public string $template;
 
     #[OA\Property(example: ['{{ value }}' => "\"Str\"", '{{ limit }}' => '6', '{{ value_length }}' => '3'])]
