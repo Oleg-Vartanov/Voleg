@@ -75,6 +75,9 @@ test:
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:fixtures:load --no-interaction
 	docker exec -e XDEBUG_MODE=develop,debug,coverage $(PROJECT_NAME)_php php bin/phpunit --colors=always --display-deprecations
 
+linter:
+	$(PHP_CONTAINER) vendor/bin/phpcs
+
 backup-db:
 	$(DB_CONTAINER) sh -c 'exec mysqldump -u $(MYSQL_USER) -p"$(MYSQL_PASSWORD)" $(MYSQL_DATABASE)' > backup_$$(date +%F_%H-%M-%S).sql
 
