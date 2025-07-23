@@ -34,9 +34,9 @@ class FixturePredictionRepository extends ServiceEntityRepository
         $qb = $this->getEntityManager()
             ->createQueryBuilder()
             ->select(
-               'u AS user',
-               'SUM(fp.points) AS totalPoints',
-               'SUM(CASE WHEN f.startAt >= :start AND f.startAt <= :end THEN fp.points ELSE 0 END) AS periodPoints'
+                'u AS user',
+                'SUM(fp.points) AS totalPoints',
+                'SUM(CASE WHEN f.startAt >= :start AND f.startAt <= :end THEN fp.points ELSE 0 END) AS periodPoints'
             )
             ->from(User::class, 'u')
             ->join('u.fixturePredictions', 'fp')

@@ -49,8 +49,8 @@ class PopulateDbCommand extends Command
      */
     private function populateCountry(OutputInterface $output): void
     {
-        $folder = $this->kernel->getProjectDir().'/data/';
-        $rows = $this->csvReader->read($folder.'country.csv');
+        $folder = $this->kernel->getProjectDir() . '/data/';
+        $rows = $this->csvReader->read($folder . 'country.csv');
         $headers = [
             'name' => 0,
             'iso_3166_1_alpha_2' => 1,

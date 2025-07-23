@@ -38,7 +38,7 @@ class FootballDataOrgClient
      */
     public function getSeasons(Competition $competition): array
     {
-        $response = $this->client->request('GET', $this->url('/competitions/'.$competition->getCode()), [
+        $response = $this->client->request('GET', $this->url('/competitions/' . $competition->getCode()), [
             'headers' => $this->headers,
         ]);
 
@@ -55,7 +55,7 @@ class FootballDataOrgClient
     public function getTeams(Competition $competition, Season $season): array
     {
         $code = $competition->getCode();
-        $response = $this->client->request('GET', $this->url('/competitions/'.$code.'/teams'), [
+        $response = $this->client->request('GET', $this->url('/competitions/' . $code . '/teams'), [
             'headers' => $this->headers,
             'query' => [
                 'season' => $season->getYear()
@@ -87,13 +87,13 @@ class FootballDataOrgClient
         }
 
         $code = $competition->getCode();
-        $response = $this->client->request('GET', $this->url('/competitions/'.$code.'/matches'), [
+        $response = $this->client->request('GET', $this->url('/competitions/' . $code . '/matches'), [
             'headers' => $this->headers,
             'query' => $filters
         ]);
 
         if ($response->getStatusCode() !== Response::HTTP_OK) {
-            throw new Exception('Failed to fetch teams. Response code: '.$response->getStatusCode());
+            throw new Exception('Failed to fetch teams. Response code: ' . $response->getStatusCode());
         }
 
         return json_decode($response->getContent(), true);
@@ -101,6 +101,6 @@ class FootballDataOrgClient
 
     private function url(string $path): string
     {
-        return $this->apiUrl.$path;
+        return $this->apiUrl . $path;
     }
 }

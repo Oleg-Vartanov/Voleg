@@ -28,7 +28,7 @@ readonly class PredictionsService
         $awayScore = $fixture->getAwayScore();
         $pHomeScore = $prediction->getHomeScore();
         $pAwayScore = $prediction->getAwayScore();
-        
+
         if ($homeScore === $pHomeScore && $awayScore === $pAwayScore) {
             return 3;
         }

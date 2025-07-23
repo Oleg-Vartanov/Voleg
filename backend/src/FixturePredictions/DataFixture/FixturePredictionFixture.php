@@ -15,8 +15,8 @@ class FixturePredictionFixture extends Fixture implements DependentFixtureInterf
     public function load(ObjectManager $manager): void
     {
         $fixtures = [];
-        foreach (range(1,380) as $index) {
-            $fixtures[] = $this->getReference('fixture_'.$index, FpFixture::class);
+        foreach (range(1, 380) as $index) {
+            $fixtures[] = $this->getReference('fixture_' . $index, FpFixture::class);
         }
 
         $users = [
@@ -30,8 +30,8 @@ class FixturePredictionFixture extends Fixture implements DependentFixtureInterf
                 $fp->setFixture($fixture);
                 $fp->setUser($user);
                 $fp->setPoints([0, 1, 3][array_rand([0, 1, 3])]);
-                $fp->setHomeScore(random_int(0,4));
-                $fp->setAwayScore(random_int(0,4));
+                $fp->setHomeScore(random_int(0, 4));
+                $fp->setAwayScore(random_int(0, 4));
 
                 $manager->persist($fp);
             }

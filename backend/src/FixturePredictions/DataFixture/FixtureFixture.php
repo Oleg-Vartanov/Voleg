@@ -17,7 +17,7 @@ class FixtureFixture extends Fixture implements DependentFixtureInterface
     public function load(ObjectManager $manager): void
     {
         $teams = [];
-        foreach (range(1,20) as $index) {
+        foreach (range(1, 20) as $index) {
             $teams[] = $this->getReference('team_' . $index, Team::class);
         }
         $competition = $this->getReference('competition_PL', Competition::class);
@@ -35,8 +35,8 @@ class FixtureFixture extends Fixture implements DependentFixtureInterface
                 $f->setCompetition($competition);
                 $f->setHomeTeam($teamHome);
                 $f->setAwayTeam($teamAway);
-                $f->setHomeScore(random_int(0,4));
-                $f->setAwayScore(random_int(0,4));
+                $f->setHomeScore(random_int(0, 4));
+                $f->setAwayScore(random_int(0, 4));
                 $f->setStatus(FixtureStatusEnum::Unknown);
                 $f->setMatchday(1);
                 $f->setProviderFixtureId(1);
@@ -44,7 +44,7 @@ class FixtureFixture extends Fixture implements DependentFixtureInterface
 
                 $manager->persist($f);
 
-                $this->addReference('fixture_'.$index++, $f);
+                $this->addReference('fixture_' . $index++, $f);
             }
         }
 

@@ -25,10 +25,10 @@ class AuthSignUpActionTest extends ApiTestCase
         $lastUserId = $this->userRepository->findOneBy([], ['id' => 'desc'])?->getId() ?? 0;
 
         $testUser = [
-            'email' => 'user'.($lastUserId + 1).'@example.com',
+            'email' => 'user' . ($lastUserId + 1) . '@example.com',
             'password' => '!Qwerty1',
             'displayName' => 'John Doe',
-            'tag' => 'user'.($lastUserId + 1),
+            'tag' => 'user' . ($lastUserId + 1),
             'verificationEmailRedirectUrl' => 'https://example.com',
             'code' => 'sign-up-code',
         ];

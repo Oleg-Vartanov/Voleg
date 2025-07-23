@@ -76,7 +76,7 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
                 $teamsDtos[] = $dto;
             }
         } catch (Exception $e) {
-            throw new Exception('Error while handling data from a provider: '.$e->getMessage());
+            throw new Exception('Error while handling data from a provider: ' . $e->getMessage());
         }
 
         return $teamsDtos;
@@ -134,7 +134,7 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
                 $fixturesDtos[] = $dto;
             }
         } catch (Exception $e) {
-            throw new Exception('Error while handling data from a provider: '.$e->getMessage());
+            throw new Exception('Error while handling data from a provider: ' . $e->getMessage());
         }
 
         return $fixturesDtos;

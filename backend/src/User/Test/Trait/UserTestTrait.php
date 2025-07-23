@@ -36,10 +36,10 @@ trait UserTestTrait
 
         $index = $lastUserId + 1;
         $defaults = [
-            'email' => 'user'.$index.'@example.com',
+            'email' => 'user' . $index . '@example.com',
             'password' => self::DEFAULT_PASSWORD,
-            'displayName' => 'John Doe '.$index,
-            'tag' => 'john-doe-'.$index,
+            'displayName' => 'John Doe ' . $index,
+            'tag' => 'john-doe-' . $index,
             'roles' => [],
         ];
         $userData = array_merge($defaults, $userData);
@@ -77,7 +77,7 @@ trait UserTestTrait
         $response = $this->client->getResponse();
 
         if ($response->getStatusCode() !== 200) {
-            throw new RuntimeException('Sign in fail: '.$response->getContent());
+            throw new RuntimeException('Sign in fail: ' . $response->getContent());
         }
 
         $data = json_decode($response->getContent(), true);

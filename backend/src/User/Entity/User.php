@@ -211,7 +211,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->setVerificationCode(bin2hex(random_bytes(16)));
         $this->setVerificationCodeExpireAt(
             (new DateTimeImmutable())->modify(
-                '+'.self::VERIFICATION_EXPIRATION_TIME.' seconds'
+                '+' . self::VERIFICATION_EXPIRATION_TIME . ' seconds'
             )
         );
 
@@ -223,7 +223,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->verificationCodeExpireAt;
     }
 
-    public function setVerificationCodeExpireAt(DateTimeImmutable $value): static {
+    public function setVerificationCodeExpireAt(DateTimeImmutable $value): static
+    {
         $this->verificationCodeExpireAt = $value;
 
         return $this;

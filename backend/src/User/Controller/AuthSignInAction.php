@@ -31,7 +31,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/auth/sign-in', name: 'sign_in', methods: [Request::METHOD_POST])]
 class AuthSignInAction
 {
-    public function __invoke() {
+    public function __invoke()
+    {
         throw new LogicException('Route should be intercepted and should not enter here.');
     }
 }

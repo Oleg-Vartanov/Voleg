@@ -77,6 +77,8 @@ test:
 
 linter:
 	$(PHP_CONTAINER) vendor/bin/phpcs
+linter-fix:
+	$(PHP_CONTAINER) vendor/bin/phpcbf
 
 backup-db:
 	$(DB_CONTAINER) sh -c 'exec mysqldump -u $(MYSQL_USER) -p"$(MYSQL_PASSWORD)" $(MYSQL_DATABASE)' > backup_$$(date +%F_%H-%M-%S).sql

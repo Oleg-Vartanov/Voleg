@@ -10,9 +10,9 @@ class TeamFixture extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-        foreach (range(1,20) as $index) {
+        foreach (range(1, 20) as $index) {
             $team = new Team();
-            $team->setName('Team '.$index);
+            $team->setName('Team ' . $index);
             $manager->persist($team);
 
             $this->addReference('team_' . $index, $team);
