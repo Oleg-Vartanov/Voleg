@@ -1,0 +1,16 @@
+parameters:
+    level: 5
+    paths:
+        - bin/
+        - config/
+        - public/
+        - src/
+    excludePaths:
+        - src/*/Test/*
+    symfony:
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+    doctrine:
+        ormRepositoryClass: Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository
+includes:
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon
