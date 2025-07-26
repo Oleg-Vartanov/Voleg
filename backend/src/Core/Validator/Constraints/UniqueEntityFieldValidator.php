@@ -3,7 +3,6 @@
 namespace App\Core\Validator\Constraints;
 
 use Doctrine\ORM\EntityManagerInterface;
-use InvalidArgumentException;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -22,10 +21,6 @@ class UniqueEntityFieldValidator extends ConstraintValidator
         }
 
         $entityRepository = $this->em->getRepository($constraint->entityClass);
-
-        if (!is_scalar($constraint->field)) {
-            throw new InvalidArgumentException('"field" parameter should be any scalar type');
-        }
 
         $searchResults = $entityRepository->findBy([
             $constraint->field => $value

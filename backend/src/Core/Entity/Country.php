@@ -12,7 +12,7 @@ class Country
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private int $id;
+    private ?int $id = null;
 
     #[ORM\Column(length: 100)]
     private string $name;
@@ -29,7 +29,7 @@ class Country
     #[ORM\Column(name: 'iso_3166_2', length: 6, nullable: true)]
     private ?string $iso31662;
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

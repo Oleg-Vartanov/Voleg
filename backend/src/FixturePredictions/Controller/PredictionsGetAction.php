@@ -20,6 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[OA\Tag(name: 'Fixtures')]
 #[Security(name: 'Bearer')]
@@ -64,11 +65,13 @@ class PredictionsGetAction extends AbstractController
     }
 
     public function __invoke(
+        #[CurrentUser] User $user,
         #[MapQueryString(validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY)]
         FixturesDto $dto = new FixturesDto(),
     ): JsonResponse {
+        /** @var array<User> $users */
         $users = empty($dto->userIds) ? [] : $this->userRepository->findBy(['id' => $dto->userIds]);
-        array_unshift($users, $this->getUser());
+        array_unshift($users, $user);
 
         $competition = $this->competitionRepository->findOneByCode($dto->competitionCode);
 

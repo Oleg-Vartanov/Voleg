@@ -24,7 +24,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Response(
     response: Response::HTTP_OK,
     description: 'User Updated',
-    content: new Model(type: User::class, groups: [User::SHOW_ALL])
+    content: new Model(type: User::class, groups: User::SHOW_ALL)
 )]
 #[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access denied')]
 #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User not found')]

@@ -13,7 +13,7 @@ class Team
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private int $id;
+    private ?int $id = null;
 
     #[Groups([FixturePrediction::SHOW_PREDICTIONS])]
     #[ORM\Column(length: 100)]
@@ -22,7 +22,7 @@ class Team
     #[ORM\Column(nullable: true)]
     private ?int $providerTeamId = null;
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

@@ -12,7 +12,7 @@ class Competition
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private int $id;
+    private ?int $id = null;
 
     #[ORM\Column(length: 100)]
     private string $name;
@@ -23,7 +23,7 @@ class Competition
     #[ORM\ManyToOne]
     private ?Country $Country = null;
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

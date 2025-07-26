@@ -17,7 +17,7 @@ trait UserControllerTrait
 
     protected function isOwner(int $userId): bool
     {
-        /** @var User $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
         return $user?->getId() === $userId;

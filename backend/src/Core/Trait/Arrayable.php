@@ -2,7 +2,7 @@
 
 namespace App\Core\Trait;
 
-trait Arrayable
+trait Arrayable // @phpstan-ignore-line
 {
     public static function createByArray(array $values): self
     {

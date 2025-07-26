@@ -17,7 +17,7 @@ class FixturePrediction
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private int $id;
+    private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Fixture::class, inversedBy: 'fixturePredictions')]
     #[ORM\JoinColumn(nullable: false)]
@@ -40,7 +40,7 @@ class FixturePrediction
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $points = null;
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

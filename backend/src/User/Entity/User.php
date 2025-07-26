@@ -7,9 +7,10 @@ use App\User\DTO\Request\UserDto;
 use App\User\Enum\RoleEnum;
 use App\User\Repository\UserRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
-use Doctrine\ORM\PersistentCollection;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -42,7 +43,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private int $id;
+    private ?int $id = null;
 
     #[Groups([self::SHOW_ADMIN, self::SHOW_OWNER])]
     #[ORM\Column(length: 180)]
@@ -74,10 +75,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private DateTimeImmutable $createdAt;
 
     #[ORM\OneToMany(targetEntity: FixturePrediction::class, mappedBy: 'user')]
-    /**
-     * @var $fixturePredictions FixturePrediction[]|array|PersistentCollection
-     */
-    private PersistentCollection|array $fixturePredictions;
+    /** @var $fixturePredictions Collection<int, FixturePrediction> */
+    private Collection $fixturePredictions;
 
     #[Groups([self::SHOW])]
     #[ORM\Column(length: 255)]
@@ -87,9 +86,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->updateVerificationCode();
         $this->createdAt = new DateTimeImmutable();
+        $this->fixturePredictions = new ArrayCollection();
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -137,11 +137,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->roles = $roles;
 
         return $this;
-    }
-
-    public function hasRoles(array $roles): bool
-    {
-        return in_array($roles, $this->getRoles(), true);
     }
 
     /**
@@ -267,9 +262,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return FixturePrediction[]|array|PersistentCollection
+     * @return Collection<int, FixturePrediction>
      */
-    public function getFixturePredictions(): array|PersistentCollection
+    public function getFixturePredictions(): Collection
     {
         return $this->fixturePredictions;
     }

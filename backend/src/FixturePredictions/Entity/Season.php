@@ -12,12 +12,12 @@ class Season
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private int $id;
+    private ?int $id = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
     private int $year;
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
