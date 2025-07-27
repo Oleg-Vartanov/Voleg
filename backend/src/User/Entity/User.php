@@ -121,7 +121,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see UserInterface
      *
-     * @return list<string>
+     * @return non-empty-array<string>
      */
     public function getRoles(): array
     {
@@ -132,7 +132,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @param list<string> $roles
+     * @param string[] $roles
      */
     public function setRoles(array $roles): static
     {

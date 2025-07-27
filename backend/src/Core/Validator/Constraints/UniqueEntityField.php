@@ -11,10 +11,13 @@ use Symfony\Component\Validator\Constraint;
     public string $entityClass;
     public string $field;
 
+    /**
+     * @param mixed[] $options
+     */
     public function __construct(
         string $entityClass,
         string $field,
-        mixed $options = null,
+        array $options = [],
         ?array $groups = null,
         mixed $payload = null
     ) {

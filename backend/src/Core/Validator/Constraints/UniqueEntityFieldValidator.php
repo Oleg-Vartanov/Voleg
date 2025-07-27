@@ -20,7 +20,10 @@ class UniqueEntityFieldValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, UniqueEntityField::class);
         }
 
-        $entityRepository = $this->em->getRepository($constraint->entityClass);
+        /** @var class-string<object> $className */
+        $className = $constraint->entityClass;
+
+        $entityRepository = $this->em->getRepository($className);
 
         $searchResults = $entityRepository->findBy([
             $constraint->field => $value
