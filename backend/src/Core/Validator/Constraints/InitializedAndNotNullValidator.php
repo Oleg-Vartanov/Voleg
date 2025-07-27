@@ -29,13 +29,16 @@ class InitializedAndNotNullValidator extends ConstraintValidator
         }
 
         $property = $this->context->getPropertyName();
-        $object = $this->context->getObject();
+        if (null === $property) {
+            throw new InvalidArgumentException('Cannot access property name');
+        }
 
+        $object = $this->context->getObject();
         if (!$object instanceof PropertyAccessorInterface) {
             throw new InvalidArgumentException('Object should implement an interface');
         }
 
-        if ($object->isPropertyInitialized($property) && is_null($value)) {
+        if ($object->isPropertyInitialized($property) && null === $value) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ value }}', $this->formatValue($value))
                 ->addViolation();

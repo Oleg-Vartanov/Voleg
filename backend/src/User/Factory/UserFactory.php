@@ -20,7 +20,7 @@ readonly class UserFactory
         string $email,
         string $plaintextPassword,
         string $displayName,
-        ?string $tag = null,
+        string $tag,
         array $roles = [],
     ): User {
         $user = new User();

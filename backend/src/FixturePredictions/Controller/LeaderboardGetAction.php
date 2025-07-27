@@ -74,7 +74,7 @@ class LeaderboardGetAction extends AbstractController
 
         $users = $this->fpRepository->leaderboard(
             competition: $competition,
-            season: $this->seasonRepository->findOneByYear($dto->season),
+            season: null === $dto->season ? null : $this->seasonRepository->findOneByYear($dto->season),
             start: $dto->start,
             end: $dto->end,
             limit: $dto->limit,
@@ -82,8 +82,8 @@ class LeaderboardGetAction extends AbstractController
 
         return $this->json([
             'filters' => [
-                'start' => $dto->start->format('Y-m-d'),
-                'end' => $dto->end->format('Y-m-d'),
+                'start' => $dto->start?->format('Y-m-d'),
+                'end' => $dto->end?->format('Y-m-d'),
                 'competition' => $competition?->getCode(),
                 'season' => $dto->season,
                 'limit' => $dto->limit,

@@ -127,8 +127,10 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
                 $dto->providerFixtureId = $match['id'];
                 $dto->status = $this->transformStatus($match['status']);
                 $dto->matchday = $match['matchday'];
-                $dto->homeTeam = $this->teamRepository->findOneByProviderTeamId($match['homeTeam']['id']);
-                $dto->awayTeam = $this->teamRepository->findOneByProviderTeamId($match['awayTeam']['id']);
+                $dto->homeTeam = $this->teamRepository->findOneByProviderTeamId($match['homeTeam']['id'])
+                    ?? throw new Exception('Provider\'s team not found');
+                $dto->awayTeam = $this->teamRepository->findOneByProviderTeamId($match['awayTeam']['id'])
+                    ?? throw new Exception('Provider\'s team not found');
                 $dto->homeScore = $match['score']['fullTime']['home'];
                 $dto->awayScore = $match['score']['fullTime']['away'];
                 $dto->startAt = new DateTimeImmutable($match['utcDate']);
