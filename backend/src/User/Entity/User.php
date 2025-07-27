@@ -74,8 +74,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(options: ['default' => '1970-01-01 00:00:00'])]
     private DateTimeImmutable $createdAt;
 
+    /**
+     * @var Collection<int, FixturePrediction>
+     */
     #[ORM\OneToMany(targetEntity: FixturePrediction::class, mappedBy: 'user')]
-    /** @var $fixturePredictions Collection<int, FixturePrediction> */
     private Collection $fixturePredictions;
 
     #[Groups([self::SHOW])]

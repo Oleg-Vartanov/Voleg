@@ -59,6 +59,7 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
      * https://docs.football-data.org/general/v4/team.html
      *
      * @inheritDoc
+     * @return mixed[]
      * @throws Exception|TransportExceptionInterface|ServerExceptionInterface|RedirectionExceptionInterface|ClientExceptionInterface
      */
     protected function getTeams(Competition $competition, Season $season): array
@@ -107,6 +108,7 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
      * https://docs.football-data.org/general/v4/match.html
      *
      * @inheritDoc
+     * @return mixed[]
      * @throws Exception|TransportExceptionInterface
      */
     protected function getFixtures(
@@ -143,7 +145,7 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
     /**
      * https://docs.football-data.org/general/v4/match.html#_enums
      */
-    private function transformStatus($providerStatus): FixtureStatusEnum
+    private function transformStatus(string $providerStatus): FixtureStatusEnum
     {
         return match ($providerStatus) {
             'SCHEDULED', 'TIMED', 'CANCELLED', 'POSTPONED', 'SUSPENDED' => FixtureStatusEnum::Scheduled,
@@ -153,6 +155,9 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
         };
     }
 
+    /**
+     * @return mixed[]
+     */
     private function batchSeasonPeriods(SeasonDto $dto): array
     {
         $startDate = $dto->startDate;

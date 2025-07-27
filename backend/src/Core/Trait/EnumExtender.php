@@ -4,6 +4,9 @@ namespace App\Core\Trait;
 
 trait EnumExtender
 {
+    /**
+     * @return mixed[]
+     */
     public static function values(): array
     {
         return array_map(function ($case) {
@@ -11,6 +14,9 @@ trait EnumExtender
         }, self::cases());
     }
 
+    /**
+     * @return mixed[]
+     */
     public static function options(): array
     {
         $options = [];

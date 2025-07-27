@@ -54,8 +54,10 @@ class Fixture
     #[ORM\Column(nullable: true)]
     private ?int $providerFixtureId = null;
 
+    /**
+     * @var Collection<int, FixturePrediction>
+     */
     #[ORM\OneToMany(targetEntity: FixturePrediction::class, mappedBy: 'fixture')]
-    /** @var $fixturePredictions Collection<int, FixturePrediction> */
     private Collection $fixturePredictions;
 
     public function __construct()

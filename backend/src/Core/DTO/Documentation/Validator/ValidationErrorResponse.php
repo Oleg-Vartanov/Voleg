@@ -21,6 +21,9 @@ final class ValidationErrorResponse
         . ' characters or more.\npassword: Should have at least one digit.')]
     public string $detail;
 
+    /**
+     * @var Violation[]
+     */
     #[OA\Property(type: 'array', items: new OA\Items(ref: new Model(type: Violation::class)))]
     public array $violations;
 }

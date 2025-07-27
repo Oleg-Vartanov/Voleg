@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraint;
 
     public function __construct(
         public string $name,
-        array $options = [],
+        mixed $options = [],
         ?array $groups = null,
         mixed $payload = null
     ) {

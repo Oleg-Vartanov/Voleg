@@ -20,6 +20,9 @@ final class Violation
         . ' more.|This value is too short. It should have {{ limit }} characters or more.')]
     public string $template;
 
+    /**
+     * @var string[]
+     */
     #[OA\Property(example: ['{{ value }}' => "\"Str\"", '{{ limit }}' => '6', '{{ value_length }}' => '3'])]
     public array $parameters;
 

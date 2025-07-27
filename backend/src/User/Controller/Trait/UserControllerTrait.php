@@ -23,6 +23,9 @@ trait UserControllerTrait
         return $user?->getId() === $userId;
     }
 
+    /**
+     * @return string[]
+     */
     protected function showGroups(?int $userIdToShow = null): array
     {
         $groups = [User::SHOW];

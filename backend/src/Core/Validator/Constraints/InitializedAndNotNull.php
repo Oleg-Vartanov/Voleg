@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraint;
     public string $message = 'This value should not be null if it was initialized.';
 
     public function __construct(
-        ?array $options = null,
+        mixed $options = null,
         ?string $message = null,
         ?array $groups = null,
         mixed $payload = null

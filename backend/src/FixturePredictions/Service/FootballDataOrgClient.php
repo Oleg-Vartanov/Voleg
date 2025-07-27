@@ -20,6 +20,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class FootballDataOrgClient
 {
     private string $apiUrl;
+
+    /**
+     * @var mixed[]
+     */
     private array $headers = [];
 
     public function __construct(
@@ -34,6 +38,9 @@ class FootballDataOrgClient
     }
 
     /**
+     * @param Competition $competition
+     *
+     * @return mixed[]
      * @throws Exception|TransportExceptionInterface|ServerExceptionInterface|RedirectionExceptionInterface|ClientExceptionInterface
      */
     public function getSeasons(Competition $competition): array
@@ -50,6 +57,7 @@ class FootballDataOrgClient
     }
 
     /**
+     * @return mixed[]
      * @throws Exception|TransportExceptionInterface|ServerExceptionInterface|RedirectionExceptionInterface|ClientExceptionInterface
      */
     public function getTeams(Competition $competition, Season $season): array
@@ -70,6 +78,7 @@ class FootballDataOrgClient
     }
 
     /**
+     * @return mixed[]
      * @throws Exception|TransportExceptionInterface|ServerExceptionInterface|RedirectionExceptionInterface|ClientExceptionInterface
      */
     public function getMatches(

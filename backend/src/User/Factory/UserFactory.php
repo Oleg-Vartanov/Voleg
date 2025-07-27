@@ -13,6 +13,9 @@ readonly class UserFactory
     ) {
     }
 
+    /**
+     * @param array<string> $roles
+     */
     public function create(
         string $email,
         string $plaintextPassword,

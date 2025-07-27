@@ -4,6 +4,11 @@ namespace App\Core\Helper;
 
 class Arr
 {
+    /**
+     * @param mixed[] $array
+     *
+     * @return mixed[]
+     */
     public static function castItemsToIntIfPossible(array $array): array
     {
         return array_map(function ($item) {

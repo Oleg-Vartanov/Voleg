@@ -40,6 +40,9 @@ class MakePredictionsPostAction extends AbstractController
     {
     }
 
+    /**
+     * @param array<PredictionDto> $dtos
+     */
     public function __invoke(
         #[MapRequestPayload(type: PredictionDto::class)] array $dtos
     ): JsonResponse {

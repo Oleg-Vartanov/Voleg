@@ -6,7 +6,10 @@ use Exception;
 
 readonly class CsvReader
 {
-    /** @throws Exception */
+    /**
+     * @return mixed[]
+     * @throws Exception
+     */
     public function read(string $filePath): array
     {
         $resource = fopen($filePath, 'r');
@@ -24,7 +27,12 @@ readonly class CsvReader
         return $csvData;
     }
 
-    /** @throws Exception */
+    /**
+     * @param string $filePath
+     * @param mixed[] $rows
+     *
+     * @throws Exception
+     */
     public function write(string $filePath, array $rows): void
     {
         $resource = fopen($filePath, 'w');
