@@ -2,7 +2,7 @@
 
 namespace App\FixturePredictions\Controller;
 
-use App\Core\DTO\Documentation\Validator\ValidationErrorResponse;
+use App\Core\DTO\Documentation\Response as OACustomResponse;
 use App\FixturePredictions\DTO\Request\FixturesDto;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
@@ -45,11 +45,7 @@ use Symfony\Component\Routing\Attribute\Route;
     ]),
 )]
 #[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
-#[OA\Response(
-    response: Response::HTTP_UNPROCESSABLE_ENTITY,
-    description: 'Validation errors',
-    content: new Model(type: ValidationErrorResponse::class)
-)]
+#[OACustomResponse\ValidationErrorResponse]
 
 #[Route(
     path: '/fixtures/leaderboard',

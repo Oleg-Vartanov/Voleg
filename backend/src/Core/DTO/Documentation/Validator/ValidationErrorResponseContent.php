@@ -9,7 +9,7 @@ use OpenApi\Attributes as OA;
  * Used for documentation.
  */
 #[OA\Schema(title: 'Validation Error Response')]
-final class ValidationErrorResponse
+final class ValidationErrorResponseContent
 {
     #[OA\Property(type: 'string', example: 'https://symfony.com/errors/validation')]
     public string $type;

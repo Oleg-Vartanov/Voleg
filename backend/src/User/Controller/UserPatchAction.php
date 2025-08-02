@@ -2,7 +2,7 @@
 
 namespace App\User\Controller;
 
-use App\Core\DTO\Documentation\Validator\ValidationErrorResponse;
+use App\Core\DTO\Documentation\Response as OACustomResponse;
 use App\User\Controller\Trait\UserControllerTrait;
 use App\User\DTO\Request\UpdateDto;
 use App\User\DTO\Request\UserDto;
@@ -28,11 +28,7 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access denied')]
 #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User not found')]
-#[OA\Response(
-    response: Response::HTTP_UNPROCESSABLE_ENTITY,
-    description: 'Validation errors',
-    content: new Model(type: ValidationErrorResponse::class)
-)]
+#[OACustomResponse\ValidationErrorResponse]
 
 #[Route('/users/{id}', name: 'user_patch', methods: [Request::METHOD_PATCH])]
 class UserPatchAction extends AbstractController

@@ -2,11 +2,10 @@
 
 namespace App\User\Controller;
 
-use App\Core\DTO\Documentation\Validator\ValidationErrorResponse;
+use App\Core\DTO\Documentation\Response as OACustomResponse;
 use App\User\DTO\Request\SignUpDto;
 use App\User\DTO\Request\UserDto;
 use App\User\Service\AuthService;
-use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,11 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Tag(name: 'Authorization')]
 #[OA\Response(response: Response::HTTP_CREATED, description: 'Sign up successful')]
-#[OA\Response(
-    response: Response::HTTP_UNPROCESSABLE_ENTITY,
-    description: 'Validation errors',
-    content: new Model(type: ValidationErrorResponse::class)
-)]
+#[OACustomResponse\ValidationErrorResponse]
 
 #[Route('/auth/sign-up', name: 'sign_up', methods: [Request::METHOD_POST], format: 'json')]
 class AuthSignUpAction extends AbstractController

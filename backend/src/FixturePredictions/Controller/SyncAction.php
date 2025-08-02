@@ -2,7 +2,7 @@
 
 namespace App\FixturePredictions\Controller;
 
-use App\Core\DTO\Documentation\Validator\ValidationErrorResponse;
+use App\Core\DTO\Documentation\Response as OACustomResponse;
 use App\FixturePredictions\DTO\Request\SyncDto;
 use App\FixturePredictions\Interface\FixturesProviderInterface;
 use App\FixturePredictions\Repository\CompetitionRepository;
@@ -22,11 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Response(response: Response::HTTP_OK, description: 'Fixtures synced')]
 #[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
 #[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access denied')]
-#[OA\Response(
-    response: Response::HTTP_UNPROCESSABLE_ENTITY,
-    description: 'Validation errors',
-    content: new Model(type: ValidationErrorResponse::class)
-)]
+#[OACustomResponse\ValidationErrorResponse]
 
 #[Route(
     path: '/fixtures/sync',

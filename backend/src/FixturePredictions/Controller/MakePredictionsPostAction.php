@@ -2,12 +2,11 @@
 
 namespace App\FixturePredictions\Controller;
 
-use App\Core\DTO\Documentation\Validator\ValidationErrorResponse;
+use App\Core\DTO\Documentation\Response as OACustomResponse;
 use App\FixturePredictions\DTO\Request\PredictionDto;
 use App\FixturePredictions\Exception\FixtureHasStartedException;
 use App\FixturePredictions\Service\PredictionsService;
 use App\User\Entity\User;
-use Nelmio\ApiDocBundle\Attribute\Model;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,11 +21,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Response(response: Response::HTTP_CREATED, description: 'Success')]
 #[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
 #[OA\Response(response: Response::HTTP_CONFLICT, description: 'Fixture has already started')]
-#[OA\Response(
-    response: Response::HTTP_UNPROCESSABLE_ENTITY,
-    description: 'Validation errors',
-    content: new Model(type: ValidationErrorResponse::class)
-)]
+#[OACustomResponse\ValidationErrorResponse]
 
 #[Route(
     path: '/fixtures/make-predictions',
