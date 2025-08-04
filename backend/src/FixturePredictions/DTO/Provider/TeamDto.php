@@ -4,6 +4,9 @@ namespace App\FixturePredictions\DTO\Provider;
 
 class TeamDto
 {
-    public int $providerTeamId;
-    public string $name;
+    public function __construct(
+        public int $providerTeamId,
+        public string $name,
+    ) {
+    }
 }

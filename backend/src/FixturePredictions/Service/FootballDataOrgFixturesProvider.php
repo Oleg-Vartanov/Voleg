@@ -16,6 +16,7 @@ use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Generator;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -24,7 +25,7 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 /**
  * https://docs.football-data.org/general/v4/index.html
  */
-readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
+readonly class FootballDataOrgFixturesProvider extends FixturesProvider
 {
     public function __construct(
         TeamRepository $teamRepository,
@@ -37,50 +38,53 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
     }
 
     /**
-     * @throws Exception|TransportExceptionInterface
-     */
-    public function syncFixtures(Competition $competition, Season $season): void
-    {
-        $providerSeason = $this->getSeason($competition, $season) ?? throw new Exception('Provider season not found.');
-        $batchPeriods = $this->batchSeasonPeriods($providerSeason);
-
-        foreach ($batchPeriods as $period) {
-            $fixturesDtos = $this->getFixtures($competition, $season, $period['start'], $period['end']);
-
-            foreach ($fixturesDtos as $fixtureDto) {
-                $this->persistFixture($fixtureDto, $competition, $season);
-            }
-        }
-
-        $this->entityManager->flush();
-    }
-
-    /**
      * https://docs.football-data.org/general/v4/team.html
      *
      * @inheritDoc
-     * @return mixed[]
-     * @throws Exception|TransportExceptionInterface|ServerExceptionInterface|RedirectionExceptionInterface|ClientExceptionInterface
+     * @return Generator<int, TeamDto>
+     * @throws Exception|TransportExceptionInterface
      */
-    protected function getTeams(Competition $competition, Season $season): array
+    protected function getTeams(Competition $competition, Season $season): Generator
     {
         $responseData = $this->client->getTeams($competition, $season);
 
         try {
-            $teamsDtos = [];
             foreach ($responseData['teams'] as $team) {
-                $dto = new TeamDto();
-
-                $dto->name = $team['shortName'];
-                $dto->providerTeamId = $team['id'];
-
-                $teamsDtos[] = $dto;
+                yield $this->createTeamDto($team);
             }
         } catch (Exception $e) {
             throw new Exception('Error while handling data from a provider: ' . $e->getMessage());
         }
+    }
 
-        return $teamsDtos;
+    /**
+     * https://docs.football-data.org/general/v4/match.html
+     *
+     * @inheritDoc
+     * @return Generator<int, FixtureDto>
+     * @throws Exception|TransportExceptionInterface
+     */
+    protected function getFixtures(
+        Competition $competition,
+        Season $season,
+        ?DateTimeInterface $from = null,
+        ?DateTimeInterface $to = null,
+    ): Generator {
+        $providerSeason = $this->getSeason($competition, $season) ?? throw new Exception('Provider season not found.');
+        $batchPeriods = $this->batchSeasonPeriods($providerSeason, $from, $to);
+
+        foreach ($batchPeriods as $period) {
+            $responseData = $this->client->getMatches($competition, $season, $period['start'], $period['end']);
+
+            try {
+                foreach ($responseData['matches'] as $match) {
+                    yield $this->createFixtureDto($match);
+                }
+            } catch (Exception $e) {
+                throw new Exception('Error while handling data from a provider: ' . $e->getMessage());
+            }
+        }
+
     }
 
     /**
@@ -88,7 +92,7 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
      *
      * @throws Exception|TransportExceptionInterface|ServerExceptionInterface|RedirectionExceptionInterface|ClientExceptionInterface
      */
-    public function getSeason(Competition $competition, Season $season): ?SeasonDto
+    private function getSeason(Competition $competition, Season $season): ?SeasonDto
     {
         $response = $this->client->getSeasons($competition);
         foreach ($response['seasons'] as $providerSeason) {
@@ -105,46 +109,6 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
     }
 
     /**
-     * https://docs.football-data.org/general/v4/match.html
-     *
-     * @inheritDoc
-     * @return mixed[]
-     * @throws Exception|TransportExceptionInterface
-     */
-    protected function getFixtures(
-        Competition $competition,
-        Season $season,
-        ?DateTimeInterface $from = null,
-        ?DateTimeInterface $to = null,
-    ): array {
-        $responseData = $this->client->getMatches($competition, $season, $from, $to);
-
-        try {
-            $fixturesDtos = [];
-            foreach ($responseData['matches'] as $match) {
-                $dto = new FixtureDto();
-
-                $dto->providerFixtureId = $match['id'];
-                $dto->status = $this->transformStatus($match['status']);
-                $dto->matchday = $match['matchday'];
-                $dto->homeTeam = $this->teamRepository->findOneByProviderTeamId($match['homeTeam']['id'])
-                    ?? throw new Exception('Provider\'s team not found');
-                $dto->awayTeam = $this->teamRepository->findOneByProviderTeamId($match['awayTeam']['id'])
-                    ?? throw new Exception('Provider\'s team not found');
-                $dto->homeScore = $match['score']['fullTime']['home'];
-                $dto->awayScore = $match['score']['fullTime']['away'];
-                $dto->startAt = new DateTimeImmutable($match['utcDate']);
-
-                $fixturesDtos[] = $dto;
-            }
-        } catch (Exception $e) {
-            throw new Exception('Error while handling data from a provider: ' . $e->getMessage());
-        }
-
-        return $fixturesDtos;
-    }
-
-    /**
      * https://docs.football-data.org/general/v4/match.html#_enums
      */
     private function transformStatus(string $providerStatus): FixtureStatusEnum
@@ -158,12 +122,18 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
     }
 
     /**
+     * TODO: Move to some utils class.
+     *
      * @return mixed[]
      */
-    private function batchSeasonPeriods(SeasonDto $dto): array
-    {
-        $startDate = $dto->startDate;
-        $endDate = $dto->endDate;
+    private function batchSeasonPeriods(
+        SeasonDto $dto,
+        ?DateTimeInterface $from = null,
+        ?DateTimeInterface $to = null,
+    ): array {
+        $startDate = null === $from ? $dto->startDate : max($from, $dto->startDate);
+        $endDate = null === $to ? $dto->endDate : min($to, $dto->endDate);
+
         $interval = new DateInterval('P3M'); // 3 months.
         $period = new DatePeriod($startDate, $interval, $endDate);
         $dates = iterator_to_array($period);
@@ -181,5 +151,30 @@ readonly class FootballDataOrgFixturesProvider extends AbstractFixturesProvider
         }
 
         return $batchPeriods;
+    }
+
+    private function createTeamDto(array $team): TeamDto
+    {
+        return new TeamDto(
+            $team['id'],
+            $team['shortName'],
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function createFixtureDto(array $match): FixtureDto
+    {
+        return new FixtureDto(
+            $match['id'],
+            $this->transformStatus($match['status']),
+            $match['matchday'],
+            $this->teamRepository->findOneByProviderTeamId($match['homeTeam']['id']),
+            $this->teamRepository->findOneByProviderTeamId($match['awayTeam']['id']),
+            $match['score']['fullTime']['home'],
+            $match['score']['fullTime']['away'],
+            new DateTimeImmutable($match['utcDate']),
+        );
     }
 }

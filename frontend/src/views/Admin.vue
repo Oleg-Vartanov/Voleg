@@ -10,7 +10,7 @@ const isLoading = ref(false);
 const sync = () => {
   isLoading.value = true;
 
-  Client.syncFixtures('PL', 2024)
+  Client.syncFixtures('PL', 2025)
     .then(() => {
       topAlerts.add(new Alert('Fixtures were synced.', 'success', 10));
     })

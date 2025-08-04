@@ -29,5 +29,5 @@ services:
     #>>> Listeners
 
     #<<< Interfaces
-    App\Interface\FixturesProviderInterface: '@App\Service\Fixtures\FootballDataOrgFixturesProvider'
+    App\FixturePredictions\Service\FixturesProvider: '@App\FixturePredictions\Service\FootballDataOrgFixturesProvider'
     #>>> Interfaces

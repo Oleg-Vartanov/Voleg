@@ -4,10 +4,9 @@ namespace App\FixturePredictions\Controller;
 
 use App\Core\DTO\Documentation\Response as OACustomResponse;
 use App\FixturePredictions\DTO\Request\SyncDto;
-use App\FixturePredictions\Interface\FixturesProviderInterface;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
-use Nelmio\ApiDocBundle\Attribute\Model;
+use App\FixturePredictions\Service\FixturesProvider;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -33,7 +32,7 @@ class SyncAction extends AbstractController
 {
     public function __construct(
         private readonly CompetitionRepository $competitionRepository,
-        private readonly FixturesProviderInterface $fixturesProvider,
+        private readonly FixturesProvider $fixturesProvider,
         private readonly SeasonRepository $seasonRepository,
     ) {
     }
@@ -45,8 +44,7 @@ class SyncAction extends AbstractController
         $season = $this->seasonRepository->findOneByYear($dto->seasonYear)
             ?? throw new NotFoundHttpException();
 
-        $this->fixturesProvider->syncTeams($competition, $season);
-        $this->fixturesProvider->syncFixtures($competition, $season);
+        $this->fixturesProvider->sync($competition, $season);
 
         return new Response('Synced');
     }

@@ -8,13 +8,13 @@ use App\FixturePredictions\Entity\Competition;
 use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\Season;
 use App\FixturePredictions\Entity\Team;
-use App\FixturePredictions\Interface\FixturesProviderInterface;
 use App\FixturePredictions\Repository\FixtureRepository;
 use App\FixturePredictions\Repository\TeamRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
+use Generator;
 
-abstract readonly class AbstractFixturesProvider implements FixturesProviderInterface
+abstract readonly class FixturesProvider
 {
     public function __construct(
         protected TeamRepository $teamRepository,
@@ -24,17 +24,36 @@ abstract readonly class AbstractFixturesProvider implements FixturesProviderInte
     ) {
     }
 
-    abstract public function syncFixtures(Competition $competition, Season $season): void;
+    /**
+     * Get teams from a provider
+     *
+     * @return Generator<int, TeamDto>
+     */
+    abstract protected function getTeams(Competition $competition, Season $season): Generator;
 
     /**
-     * @return TeamDto[]
+     * Get fixtures from a provider
+     *
+     * @return Generator<int, FixtureDto>
      */
-    abstract protected function getTeams(Competition $competition, Season $season): array;
+    abstract protected function getFixtures(
+        Competition $competition,
+        Season $season,
+        ?DateTimeImmutable $from = null,
+        ?DateTimeImmutable $to = null,
+    ): Generator;
 
-    /**
-     * @throws Exception
-     */
-    public function syncTeams(Competition $competition, Season $season): void
+    public function sync(
+        Competition $competition,
+        Season $season, // TODO: Is it necessary? What if competition doesn't have a season?
+        ?DateTimeImmutable $from = null,
+        ?DateTimeImmutable $to = null,
+    ): void {
+        $this->syncTeams($competition, $season);
+        $this->syncFixtures($competition, $season, $from, $to);
+    }
+
+    private function syncTeams(Competition $competition, Season $season): void
     {
         $teamsDtos = $this->getTeams($competition, $season);
 
@@ -45,10 +64,22 @@ abstract readonly class AbstractFixturesProvider implements FixturesProviderInte
         $this->entityManager->flush();
     }
 
-    /**
-     * @throws Exception
-     */
-    protected function persistFixture(FixtureDto $dto, Competition $competition, Season $season): void
+    private function syncFixtures(
+        Competition $competition,
+        Season $season,
+        ?DateTimeImmutable $from = null,
+        ?DateTimeImmutable $to = null,
+    ): void {
+        $fixturesDtos = $this->getFixtures($competition, $season, $from, $to);
+
+        foreach ($fixturesDtos as $fixturesDto) {
+            $this->persistFixture($fixturesDto, $competition, $season);
+        }
+
+        $this->entityManager->flush();
+    }
+
+    private function persistFixture(FixtureDto $dto, Competition $competition, Season $season): void
     {
         $fixture = $this->fixtureRepository->findOneByProviderFixtureId($dto->providerFixtureId);
 
@@ -68,7 +99,7 @@ abstract readonly class AbstractFixturesProvider implements FixturesProviderInte
 
         $this->entityManager->persist($fixture);
 
-        // TODO: Move to subscriber/dispatcher?
+        // TODO: Create a queue job.
         if ($fixture->getId() !== null && $fixture->hasStarted()) {
             foreach ($fixture->getFixturePredictions() as $prediction) {
                 $points = $this->predictionsService->calculatePoints($prediction);
@@ -78,9 +109,6 @@ abstract readonly class AbstractFixturesProvider implements FixturesProviderInte
         }
     }
 
-    /**
-     * @throws Exception
-     */
     private function persistTeam(TeamDto $dto): void
     {
         $team = $this->teamRepository->findOneByProviderTeamId($dto->providerTeamId);
@@ -92,6 +120,7 @@ abstract readonly class AbstractFixturesProvider implements FixturesProviderInte
         $team = new Team();
         $team->setName($dto->name);
         $team->setProviderTeamId($dto->providerTeamId);
+        // TODO: Add new providerId property.
 
         $this->entityManager->persist($team);
     }
