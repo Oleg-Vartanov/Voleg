@@ -84,7 +84,6 @@ readonly class FootballDataOrgFixturesProvider extends FixturesProvider
                 throw new Exception('Error while handling data from a provider: ' . $e->getMessage());
             }
         }
-
     }
 
     /**
@@ -153,6 +152,9 @@ readonly class FootballDataOrgFixturesProvider extends FixturesProvider
         return $batchPeriods;
     }
 
+    /**
+     * @param Mixed[] $team
+     */
     private function createTeamDto(array $team): TeamDto
     {
         return new TeamDto(
@@ -162,6 +164,7 @@ readonly class FootballDataOrgFixturesProvider extends FixturesProvider
     }
 
     /**
+     * @param Mixed[] $match
      * @throws Exception
      */
     private function createFixtureDto(array $match): FixtureDto

@@ -50,7 +50,7 @@ class FootballDataOrgClient
         ]);
 
         if ($response->getStatusCode() !== Response::HTTP_OK) {
-            throw new Exception('Failed to fetch seasons');
+            throw new Exception('Failed to fetch seasons. Response code: ' . $response->getStatusCode());
         }
 
         return json_decode($response->getContent(), true);
@@ -71,7 +71,7 @@ class FootballDataOrgClient
         ]);
 
         if ($response->getStatusCode() !== Response::HTTP_OK) {
-            throw new Exception('Failed to fetch teams');
+            throw new Exception('Failed to fetch teams. Response code: ' . $response->getStatusCode());
         }
 
         return json_decode($response->getContent(), true);
@@ -102,7 +102,7 @@ class FootballDataOrgClient
         ]);
 
         if ($response->getStatusCode() !== Response::HTTP_OK) {
-            throw new Exception('Failed to fetch teams. Response code: ' . $response->getStatusCode());
+            throw new Exception('Failed to fetch matches. Response code: ' . $response->getStatusCode());
         }
 
         return json_decode($response->getContent(), true);
