@@ -152,12 +152,17 @@ readonly class FootballDataOrgFixturesProvider extends FixturesProvider
      */
     private function createFixtureDto(array $match): FixtureDto
     {
+        $homeTeam = $this->teamRepository->findOneByProviderTeamId($match['homeTeam']['id'])
+            ?? throw new Exception('Provider team not found.');
+        $awayTeam = $this->teamRepository->findOneByProviderTeamId($match['awayTeam']['id'])
+            ?? throw new Exception('Provider team not found.');
+
         return new FixtureDto(
             $match['id'],
             $this->transformStatus($match['status']),
             $match['matchday'],
-            $this->teamRepository->findOneByProviderTeamId($match['homeTeam']['id']),
-            $this->teamRepository->findOneByProviderTeamId($match['awayTeam']['id']),
+            $homeTeam,
+            $awayTeam,
             $match['score']['fullTime']['home'],
             $match['score']['fullTime']['away'],
             new DateTimeImmutable($match['utcDate']),
