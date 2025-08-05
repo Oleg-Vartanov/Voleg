@@ -2,7 +2,7 @@
 
 namespace App\FixturePredictions\Controller;
 
-use App\Core\DTO\Documentation\Response as OACustomResponse;
+use App\Core\Documentation\Attribute as CustomOA;
 use App\FixturePredictions\DTO\Request\FixturesDto;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
@@ -44,8 +44,8 @@ use Symfony\Component\Routing\Attribute\Route;
         ),
     ]),
 )]
-#[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
-#[OACustomResponse\ValidationErrorResponse]
+#[CustomOA\Response\UnauthorizedResponse]
+#[CustomOA\Response\ValidationErrorResponse]
 
 #[Route(
     path: '/fixtures/leaderboard',

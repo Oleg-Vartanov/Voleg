@@ -2,7 +2,7 @@
 
 namespace App\FixturePredictions\Controller;
 
-use App\Core\DTO\Documentation\Response as OACustomResponse;
+use App\Core\Documentation\Attribute as CustomOA;
 use App\FixturePredictions\DTO\Request\PredictionDto;
 use App\FixturePredictions\Exception\FixtureHasStartedException;
 use App\FixturePredictions\Service\PredictionsService;
@@ -19,9 +19,9 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: 'Fixtures')]
 #[Security(name: 'Bearer')]
 #[OA\Response(response: Response::HTTP_CREATED, description: 'Success')]
-#[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
+#[CustomOA\Response\UnauthorizedResponse]
 #[OA\Response(response: Response::HTTP_CONFLICT, description: 'Fixture has already started')]
-#[OACustomResponse\ValidationErrorResponse]
+#[CustomOA\Response\ValidationErrorResponse]
 
 #[Route(
     path: '/fixtures/make-predictions',

@@ -2,7 +2,7 @@
 
 namespace App\User\Controller;
 
-use App\Core\DTO\Documentation\Response as OACustomResponse;
+use App\Core\Documentation\Attribute as CustomOA;
 use App\User\DTO\Request\SignUpDto;
 use App\User\DTO\Request\UserDto;
 use App\User\Service\AuthService;
@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Tag(name: 'Authorization')]
 #[OA\Response(response: Response::HTTP_CREATED, description: 'Sign up successful')]
-#[OACustomResponse\ValidationErrorResponse]
+#[CustomOA\Response\ValidationErrorResponse]
 
 #[Route('/auth/sign-up', name: 'sign_up', methods: [Request::METHOD_POST], format: 'json')]
 class AuthSignUpAction extends AbstractController

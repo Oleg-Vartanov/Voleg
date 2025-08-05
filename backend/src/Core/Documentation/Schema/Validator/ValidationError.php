@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\DTO\Documentation\Validator;
+namespace App\Core\Documentation\Schema\Validator;
 
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
@@ -9,7 +9,7 @@ use OpenApi\Attributes as OA;
  * Used for documentation.
  */
 #[OA\Schema(title: 'Validation Error Response')]
-final class ValidationErrorResponseContent
+final class ValidationError
 {
     #[OA\Property(type: 'string', example: 'https://symfony.com/errors/validation')]
     public string $type;

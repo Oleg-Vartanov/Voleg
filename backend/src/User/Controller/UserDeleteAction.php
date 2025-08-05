@@ -2,6 +2,7 @@
 
 namespace App\User\Controller;
 
+use App\Core\Documentation\Attribute as CustomOA;
 use App\User\Controller\Trait\UserControllerTrait;
 use App\User\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: 'User')]
 #[Security(name: 'Bearer')]
 #[OA\Response(response: Response::HTTP_NO_CONTENT, description: 'Deleted')]
-#[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access denied')]
+#[CustomOA\Response\AccessDeniedResponse]
 #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User not found')]
 
 #[Route('/users/{id}', name: 'user_delete', methods: [Request::METHOD_DELETE])]

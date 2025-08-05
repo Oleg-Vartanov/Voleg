@@ -2,7 +2,7 @@
 
 namespace App\User\Controller;
 
-use App\Core\DTO\Documentation\Response as OACustomResponse;
+use App\Core\Documentation\Attribute as CustomOA;
 use App\User\Controller\Trait\UserControllerTrait;
 use App\User\DTO\Request\UpdateDto;
 use App\User\DTO\Request\UserDto;
@@ -26,9 +26,9 @@ use Symfony\Component\Routing\Attribute\Route;
     description: 'User Updated',
     content: new Model(type: User::class, groups: User::SHOW_ALL)
 )]
-#[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access denied')]
+#[CustomOA\Response\AccessDeniedResponse]
 #[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User not found')]
-#[OACustomResponse\ValidationErrorResponse]
+#[CustomOA\Response\ValidationErrorResponse]
 
 #[Route('/users/{id}', name: 'user_patch', methods: [Request::METHOD_PATCH])]
 class UserPatchAction extends AbstractController

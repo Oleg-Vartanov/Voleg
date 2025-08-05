@@ -2,7 +2,7 @@
 
 namespace App\FixturePredictions\Controller;
 
-use App\Core\DTO\Documentation\Response as OACustomResponse;
+use App\Core\Documentation\Attribute as CustomOA;
 use App\FixturePredictions\DTO\Request\SyncDto;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
@@ -19,9 +19,9 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: 'Fixtures')]
 #[Security(name: 'Bearer')]
 #[OA\Response(response: Response::HTTP_OK, description: 'Fixtures synced')]
-#[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
-#[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Access denied')]
-#[OACustomResponse\ValidationErrorResponse]
+#[CustomOA\Response\UnauthorizedResponse]
+#[CustomOA\Response\AccessDeniedResponse]
+#[CustomOA\Response\ValidationErrorResponse]
 
 #[Route(
     path: '/fixtures/sync',

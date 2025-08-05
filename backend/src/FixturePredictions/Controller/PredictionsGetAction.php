@@ -2,7 +2,7 @@
 
 namespace App\FixturePredictions\Controller;
 
-use App\Core\DTO\Documentation\Response as OACustomResponse;
+use App\Core\Documentation\Attribute as CustomOA;
 use App\FixturePredictions\DTO\Request\FixturesDto;
 use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\FixturePrediction;
@@ -41,8 +41,8 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
         new OA\Property(property: 'fixtures', ref: new Model(type: Fixture::class)),
     ]),
 )]
-#[OA\Response(response: Response::HTTP_UNAUTHORIZED, description: 'Unauthorized')]
-#[OACustomResponse\ValidationErrorResponse]
+#[CustomOA\Response\UnauthorizedResponse]
+#[CustomOA\Response\ValidationErrorResponse]
 
 #[Route(
     path: '/fixtures/predictions',

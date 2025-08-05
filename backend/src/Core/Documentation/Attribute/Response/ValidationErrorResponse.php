@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Core\DTO\Documentation\Response;
+namespace App\Core\Documentation\Attribute\Response;
 
-use App\Core\DTO\Documentation\Validator\ValidationErrorResponseContent;
+use App\Core\Documentation\Schema\Validator\ValidationError;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes\Response;
 
@@ -14,7 +14,7 @@ class ValidationErrorResponse extends Response
         parent::__construct(
             response: 422,
             description: 'Validation errors',
-            content: new Model(type: ValidationErrorResponseContent::class)
+            content: new Model(type: ValidationError::class)
         );
     }
 }
