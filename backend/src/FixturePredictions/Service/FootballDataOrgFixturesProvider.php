@@ -2,6 +2,8 @@
 
 namespace App\FixturePredictions\Service;
 
+use App\Core\Util\DateTimeUtil;
+use App\Core\ValueObject\Period;
 use App\FixturePredictions\DTO\Provider\FixtureDto;
 use App\FixturePredictions\DTO\Provider\SeasonDto;
 use App\FixturePredictions\DTO\Provider\TeamDto;
@@ -10,8 +12,6 @@ use App\FixturePredictions\Entity\Season;
 use App\FixturePredictions\Enum\FixtureStatusEnum;
 use App\FixturePredictions\Repository\FixtureRepository;
 use App\FixturePredictions\Repository\TeamRepository;
-use DateInterval;
-use DatePeriod;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -74,7 +74,7 @@ readonly class FootballDataOrgFixturesProvider extends FixturesProvider
         $batchPeriods = $this->batchSeasonPeriods($providerSeason, $from, $to);
 
         foreach ($batchPeriods as $period) {
-            $responseData = $this->client->getMatches($competition, $season, $period['start'], $period['end']);
+            $responseData = $this->client->getMatches($competition, $season, $period->getStart(), $period->getEnd());
 
             try {
                 foreach ($responseData['matches'] as $match) {
@@ -121,9 +121,8 @@ readonly class FootballDataOrgFixturesProvider extends FixturesProvider
     }
 
     /**
-     * TODO: Move to some utils class.
-     *
-     * @return mixed[]
+     * @return Period[]
+     * @throws Exception
      */
     private function batchSeasonPeriods(
         SeasonDto $dto,
@@ -133,23 +132,7 @@ readonly class FootballDataOrgFixturesProvider extends FixturesProvider
         $startDate = null === $from ? $dto->startDate : max($from, $dto->startDate);
         $endDate = null === $to ? $dto->endDate : min($to, $dto->endDate);
 
-        $interval = new DateInterval('P3M'); // 3 months.
-        $period = new DatePeriod($startDate, $interval, $endDate);
-        $dates = iterator_to_array($period);
-
-        if (end($dates) != $endDate) {
-            $dates[] = $endDate;
-        }
-
-        $batchPeriods = [];
-        for ($i = 0; $i < count($dates) - 1; $i++) {
-            $batchPeriods[] = [
-                'start' => $dates[$i],
-                'end' => $dates[$i + 1],
-            ];
-        }
-
-        return $batchPeriods;
+        return DateTimeUtil::getPeriods($startDate, $endDate, 'P3M'); // 3 months.
     }
 
     /**
