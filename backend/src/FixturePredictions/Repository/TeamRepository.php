@@ -20,4 +20,14 @@ class TeamRepository extends ServiceEntityRepository
     {
         return $this->findOneBy(['providerTeamId' => $id]);
     }
+
+    /**
+     * @param int[] $ids
+     *
+     * @return Team[]
+     */
+    public function findByProviderTeamIds(array $ids): array
+    {
+        return $this->findBy(['providerTeamId' => $ids]);
+    }
 }

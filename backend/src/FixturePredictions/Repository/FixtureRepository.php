@@ -27,6 +27,16 @@ class FixtureRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param int[] $ids
+     *
+     * @return Fixture[]
+     */
+    public function findByProviderFixtureIds(array $ids): array
+    {
+        return $this->findBy(['providerFixtureId' => $ids]);
+    }
+
+    /**
      * @param User[] $users
      */
     public function filter(

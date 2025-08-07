@@ -3,24 +3,35 @@
 namespace App\User\Test\Unit;
 
 use App\User\Entity\User;
+use App\User\Factory\UserFactory;
 use App\User\Service\AuthService;
+use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\MockObject\Exception;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Routing\RouterInterface;
 
 #[TestDox('Auth')]
-class AuthServiceTest extends WebTestCase
+class AuthServiceTest extends TestCase
 {
     private AuthService $authService;
 
+    /**
+     * @throws Exception
+     */
     public function setUp(): void
     {
-        $container = static::getContainer();
-        /** @var AuthService $authService */
-        $authService = $container->get(AuthService::class);
-        $this->authService = $authService;
+        $this->authService = new AuthService(
+            $this->createMock(EntityManagerInterface::class),
+            $this->createMock(MailerInterface::class),
+            $this->createMock(ParameterBagInterface::class),
+            $this->createMock(RouterInterface::class),
+            $this->createMock(UserFactory::class),
+        );
     }
 
     /**
