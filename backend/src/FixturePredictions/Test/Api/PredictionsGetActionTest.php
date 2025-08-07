@@ -26,7 +26,7 @@ class PredictionsGetActionTest extends ApiTestCase
         $user = $this->createUser();
         $this->signIn($user);
 
-        $response = $this->sendRequest();
+        $response = $this->sendRequest(userIds: [$user->getId()]);
         self::assertResponseIsSuccessful();
 
         $content = json_decode($response->getContent(), true);
@@ -47,7 +47,7 @@ class PredictionsGetActionTest extends ApiTestCase
         $user = $this->createUser();
         $this->signIn($user);
 
-        $this->sendRequest('invalid-date');
+        $this->sendRequest(userIds: ['invalid-id']);
         self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
@@ -62,6 +62,7 @@ class PredictionsGetActionTest extends ApiTestCase
         string $start = '2025-01-01',
         string $end = '2025-01-02',
         int $season = 2024,
+        array $userIds = [],
     ): Response {
         $this->client->request(
             method: Request::METHOD_GET,
@@ -70,6 +71,7 @@ class PredictionsGetActionTest extends ApiTestCase
                 'end' => $end,
                 'season' => $season,
                 'limit' => 20,
+                'userIds' => $userIds,
             ]),
         );
 

@@ -2,7 +2,7 @@
 
 namespace App\FixturePredictions\DTO\Request;
 
-use App\Core\Helper\Arr;
+use App\Core\Util\ArrayUtil;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
 use DateTime;
 use OpenApi\Attributes as OA;
@@ -27,7 +27,7 @@ class FixturesDto
         #[Assert\All([new Assert\Type('int'), new Assert\Positive()])]
         public array $userIds = [],
     ) {
-        $this->userIds = Arr::castItemsToIntIfPossible($userIds);
+        $this->userIds = ArrayUtil::castItemsToIntIfPossible($userIds);
         $this->start ??= (new DateTime())->modify('-5 days');
         $this->end ??= (new DateTime())->modify('+5 days');
         $this->start->setTime(0, 0, 0);

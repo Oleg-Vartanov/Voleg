@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Core\Helper;
+namespace App\Core\Util;
 
-class Arr
+class ArrayUtil
 {
     /**
      * @param mixed[] $array
