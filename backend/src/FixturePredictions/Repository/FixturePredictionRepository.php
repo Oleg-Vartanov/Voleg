@@ -3,6 +3,7 @@
 namespace App\FixturePredictions\Repository;
 
 use App\FixturePredictions\Entity\Competition;
+use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\FixturePrediction;
 use App\FixturePredictions\Entity\Season;
 use App\User\Entity\User;
@@ -19,6 +20,14 @@ class FixturePredictionRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, FixturePrediction::class);
+    }
+
+    /**
+     * @return FixturePrediction[]
+     */
+    public function findByFixture(Fixture $fixture): array
+    {
+        return $this->findBy(['fixture' => $fixture]);
     }
 
     /**

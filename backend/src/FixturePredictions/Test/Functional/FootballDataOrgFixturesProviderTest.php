@@ -11,6 +11,7 @@ use App\FixturePredictions\Repository\TeamRepository;
 use App\FixturePredictions\Service\FootballDataOrgFixturesProvider;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -20,7 +21,7 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
 {
     use ContainerTestTrait;
 
-    private HttpClientInterface $httpClientMock;
+    private MockObject&HttpClientInterface $httpClientMock;
     private FootballDataOrgFixturesProvider $fixturesProvider;
     private FixtureRepository $fixtureRepository;
     private CompetitionRepository $competitionRepository;

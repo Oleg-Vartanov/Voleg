@@ -63,12 +63,12 @@ migrate:
 mailer:
 	$(PHP_CONTAINER) php bin/console messenger:consume async
 
-cclear:
+cache:
 	$(PHP_CONTAINER) php bin/console cache:clear
 	$(PHP_CONTAINER) php bin/console cache:warmup
 
 test:
-	$(PHP_CONTAINER) php bin/console cache:clear
+	$(PHP_CONTAINER) php bin/console --env=test cache:clear
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:drop --force || true
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:create
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:schema:create

@@ -21,6 +21,11 @@ class FixtureRepository extends ServiceEntityRepository
         parent::__construct($registry, Fixture::class);
     }
 
+    public function findOneById(int $id): ?Fixture
+    {
+        return $this->findOneBy(['id' => $id]);
+    }
+
     public function findOneByProviderFixtureId(int $id): ?Fixture
     {
         return $this->findOneBy(['providerFixtureId' => $id]);

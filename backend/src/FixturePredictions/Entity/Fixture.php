@@ -200,4 +200,12 @@ class Fixture
     {
         return $this->getStartAt() <= new DateTime();
     }
+
+    /**
+     * @psalm-assert-if-true int $this->getId()
+     */
+    public function canCalculatePoints(): bool
+    {
+        return $this->getId() !== null && $this->hasStarted();
+    }
 }

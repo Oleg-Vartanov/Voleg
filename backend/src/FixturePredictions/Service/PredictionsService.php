@@ -3,13 +3,17 @@
 namespace App\FixturePredictions\Service;
 
 use App\FixturePredictions\DTO\Request\PredictionDto;
+use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\FixturePrediction;
 use App\FixturePredictions\Exception\FixtureHasStartedException;
+use App\FixturePredictions\Messenger\CalculatePointsMessage;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\FixturePredictions\Repository\FixtureRepository;
 use App\User\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 readonly class PredictionsService
 {
@@ -17,7 +21,29 @@ readonly class PredictionsService
         private FixtureRepository $fixtureRepository,
         private FixturePredictionRepository $predictionRepository,
         private EntityManagerInterface $entityManager,
+        private MessageBusInterface $messageBus,
     ) {
+    }
+
+    /**
+     * @throws ExceptionInterface
+     */
+    public function dispatchUpdatePoints(Fixture $fixture): void
+    {
+        if ($fixture->canCalculatePoints()) {
+            $this->messageBus->dispatch(new CalculatePointsMessage($fixture->getId()));
+        }
+    }
+
+    public function updatePoints(Fixture $fixture): void
+    {
+        if ($fixture->canCalculatePoints()) {
+            foreach ($fixture->getFixturePredictions() as $prediction) {
+                $points = $this->calculatePoints($prediction);
+                $prediction->setPoints($points);
+                $this->entityManager->persist($prediction);
+            }
+        }
     }
 
     public function calculatePoints(FixturePrediction $prediction): int

@@ -13,6 +13,7 @@ use App\FixturePredictions\Repository\TeamRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
 
 abstract readonly class FixturesProvider
 {
@@ -45,7 +46,7 @@ abstract readonly class FixturesProvider
 
     public function sync(
         Competition $competition,
-        Season $season, // TODO: Is it necessary? What if competition doesn't have a season?
+        Season $season,
         ?DateTimeImmutable $from = null,
         ?DateTimeImmutable $to = null,
     ): void {
@@ -79,6 +80,9 @@ abstract readonly class FixturesProvider
         $this->entityManager->flush();
     }
 
+    /**
+     * @throws ExceptionInterface
+     */
     private function persistFixture(FixtureDto $dto, Competition $competition, Season $season): void
     {
         $fixture = $this->fixtureRepository->findOneByProviderFixtureId($dto->providerFixtureId);
@@ -99,14 +103,7 @@ abstract readonly class FixturesProvider
 
         $this->entityManager->persist($fixture);
 
-        // TODO: Create a queue job.
-        if ($fixture->getId() !== null && $fixture->hasStarted()) {
-            foreach ($fixture->getFixturePredictions() as $prediction) {
-                $points = $this->predictionsService->calculatePoints($prediction);
-                $prediction->setPoints($points);
-                $this->entityManager->persist($prediction);
-            }
-        }
+        $this->predictionsService->dispatchUpdatePoints($fixture);
     }
 
     private function persistTeam(TeamDto $dto): void
