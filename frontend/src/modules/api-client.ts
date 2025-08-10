@@ -18,10 +18,10 @@ export default {
     return axios.post(`${apiBaseUrl}/auth/sign-up`, params);
   },
 
-  syncFixtures(competitionCode: string, seasonYear: number) {
+  syncFixtures(competitionCode: string, seasonYear: number, from: string, to: string) {
     return axios.post(
       `${apiBaseUrl}/fixtures/sync`,
-      { competitionCode, seasonYear },
+      { competitionCode, seasonYear, from, to },
       { headers: getHeader() }
     );
   },

@@ -44,7 +44,7 @@ class SyncAction extends AbstractController
         $season = $this->seasonRepository->findOneByYear($dto->seasonYear)
             ?? throw new NotFoundHttpException();
 
-        $this->fixturesProvider->sync($competition, $season);
+        $this->fixturesProvider->sync($competition, $season, $dto->from, $dto->to);
 
         return new Response('Synced');
     }
