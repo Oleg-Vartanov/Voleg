@@ -12,16 +12,12 @@ framework:
                 failure_transport: fixture_predictions_failed
             fixture_predictions_failed:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN_FIXTURE_PREDICTIONS_FAILED)%'
-
         routing:
             Symfony\Component\Mailer\Messenger\SendEmailMessage: default
             Symfony\Component\Notifier\Message\ChatMessage: default
             Symfony\Component\Notifier\Message\SmsMessage: default
-
-            # Route your messages to the transports
-            # 'App\Message\YourMessage': async
 when@test:
     framework:
         messenger:
             transports:
-                async_priority_normal: 'in-memory://'
+                fixture_predictions: 'sync://'
