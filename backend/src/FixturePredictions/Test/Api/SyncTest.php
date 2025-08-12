@@ -6,6 +6,7 @@ use App\Core\Test\ApiTestCase;
 use App\FixturePredictions\Service\FixturesProvider;
 use App\User\Enum\RoleEnum;
 use App\User\Test\Trait\UserTestTrait;
+use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\MockObject\Exception;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,6 +35,8 @@ class SyncTest extends ApiTestCase
     #[TestDox('Sync request: success')]
     public function testSuccess(): void
     {
+        $anyDate = (new DateTimeImmutable())->format('Y-m-d\TH:i:sO');
+
         $this->fixturesProviderMock
             ->expects(self::once())
             ->method('sync');
@@ -41,17 +44,29 @@ class SyncTest extends ApiTestCase
         $user = $this->createUser(['roles' => [RoleEnum::ROLE_ADMIN->value]]);
         $this->signIn($user);
 
-        $this->sendRequest(['competitionCode' => 'PL', 'seasonYear' => 2000]);
+        $this->sendRequest([
+            'competitionCode' => 'PL',
+            'seasonYear' => 2000,
+            'from' => $anyDate,
+            'to' => $anyDate,
+        ]);
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
     }
 
     #[TestDox('Sync request: not found')]
     public function testNotFound(): void
     {
+        $anyDate = (new DateTimeImmutable())->format('Y-m-d\TH:i:sO');
+
         $user = $this->createUser(['roles' => [RoleEnum::ROLE_ADMIN->value]]);
         $this->signIn($user);
 
-        $this->sendRequest(['competitionCode' => 'PL', 'seasonYear' => 1970]);
+        $this->sendRequest([
+            'competitionCode' => 'PL',
+            'seasonYear' => 1970,
+            'from' => $anyDate,
+            'to' => $anyDate,
+        ]);
         self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
 

@@ -5,6 +5,7 @@ namespace App\FixturePredictions\Service;
 use App\FixturePredictions\Entity\Competition;
 use App\FixturePredictions\Entity\Season;
 use DateTimeInterface;
+use DateTimeZone;
 use Exception;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -87,12 +88,14 @@ class FootballDataOrgClient
         ?DateTimeInterface $from = null,
         ?DateTimeInterface $to = null,
     ): array {
+        $timezone = new DateTimeZone('UTC');
+
         $filters = ['season' => $season->getYear()];
         if (!is_null($from)) {
-            $filters['dateFrom'] = $from->format('Y-m-d');
+            $filters['dateFrom'] = $from->setTimezone($timezone)->format('Y-m-d');
         }
         if (!is_null($to)) {
-            $filters['dateTo'] = $to->format('Y-m-d');
+            $filters['dateTo'] = $to->setTimezone($timezone)->format('Y-m-d');
         }
 
         $code = $competition->getCode();

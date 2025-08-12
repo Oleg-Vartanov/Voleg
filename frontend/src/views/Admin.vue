@@ -14,6 +14,7 @@ today.setHours(0, 0, 0, 0);
 const dayStart = DateHelper.format(today);
 today.setHours(23, 59, 59, 999);
 const dayEnd = DateHelper.format(today);
+const timezone = DateHelper.getTimezone(today);
 
 const competition = ref('PL');
 const season = ref(2025);
@@ -23,7 +24,12 @@ const end = ref(dayEnd);
 const sync = () => {
   isLoading.value = true;
 
-  Client.syncFixtures(competition.value, season.value , start.value, end.value)
+  Client.syncFixtures(
+    competition.value,
+    season.value ,
+    start.value + ' ' + timezone,
+    end.value + ' ' + timezone,
+  )
     .then(() => {
       topAlerts.add(new Alert('Fixtures were synced.', 'success', 10));
     })
