@@ -15,7 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 
-abstract readonly class FixturesProvider
+abstract readonly class FixtureProvider
 {
     public function __construct(
         protected TeamRepository $teamRepository,

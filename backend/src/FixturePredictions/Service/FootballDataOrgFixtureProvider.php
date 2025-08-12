@@ -25,7 +25,7 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 /**
  * https://docs.football-data.org/general/v4/index.html
  */
-readonly class FootballDataOrgFixturesProvider extends FixturesProvider
+readonly class FootballDataOrgFixtureProvider extends FixtureProvider
 {
     public function __construct(
         TeamRepository $teamRepository,

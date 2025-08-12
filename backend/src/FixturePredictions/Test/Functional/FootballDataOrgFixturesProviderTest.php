@@ -8,7 +8,7 @@ use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\FixtureRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
 use App\FixturePredictions\Repository\TeamRepository;
-use App\FixturePredictions\Service\FootballDataOrgFixturesProvider;
+use App\FixturePredictions\Service\FootballDataOrgFixtureProvider;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -22,7 +22,7 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
     use ContainerTestTrait;
 
     private MockObject&HttpClientInterface $httpClientMock;
-    private FootballDataOrgFixturesProvider $fixturesProvider;
+    private FootballDataOrgFixtureProvider $fixturesProvider;
     private FixtureRepository $fixtureRepository;
     private CompetitionRepository $competitionRepository;
     private SeasonRepository $seasonRepository;
@@ -36,7 +36,7 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
         $this->httpClientMock = $this->createMock(HttpClientInterface::class);
         static::getContainer()->set(HttpClientInterface::class, $this->httpClientMock);
 
-        $this->fixturesProvider = $this->getService(FootballDataOrgFixturesProvider::class);
+        $this->fixturesProvider = $this->getService(FootballDataOrgFixtureProvider::class);
         $this->teamRepository = $this->getService(TeamRepository::class);
         $this->fixtureRepository = $this->getService(FixtureRepository::class);
         $this->competitionRepository = $this->getService(CompetitionRepository::class);

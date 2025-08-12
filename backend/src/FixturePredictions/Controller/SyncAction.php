@@ -6,7 +6,7 @@ use App\Core\Documentation\Attribute as CustomOA;
 use App\FixturePredictions\DTO\Request\SyncDto;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
-use App\FixturePredictions\Service\FixturesProvider;
+use App\FixturePredictions\Service\FixtureProvider;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,7 +32,7 @@ class SyncAction extends AbstractController
 {
     public function __construct(
         private readonly CompetitionRepository $competitionRepository,
-        private readonly FixturesProvider $fixturesProvider,
+        private readonly FixtureProvider $fixturesProvider,
         private readonly SeasonRepository $seasonRepository,
     ) {
     }

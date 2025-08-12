@@ -3,7 +3,7 @@
 namespace App\FixturePredictions\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\FixturePredictions\Service\FixturesProvider;
+use App\FixturePredictions\Service\FixtureProvider;
 use App\User\Enum\RoleEnum;
 use App\User\Test\Trait\UserTestTrait;
 use DateTimeImmutable;
@@ -17,7 +17,7 @@ class SyncTest extends ApiTestCase
 {
     use UserTestTrait;
 
-    private FixturesProvider $fixturesProviderMock;
+    private FixtureProvider $fixturesProviderMock;
 
     /**
      * @throws Exception
@@ -28,8 +28,8 @@ class SyncTest extends ApiTestCase
         $this->bootUserTest();
 
         $this->client->disableReboot(); // For mocks in a controller.
-        $this->fixturesProviderMock = $this->createMock(FixturesProvider::class);
-        static::getContainer()->set(FixturesProvider::class, $this->fixturesProviderMock);
+        $this->fixturesProviderMock = $this->createMock(FixtureProvider::class);
+        static::getContainer()->set(FixtureProvider::class, $this->fixturesProviderMock);
     }
 
     #[TestDox('Sync request: success')]
