@@ -5,6 +5,7 @@ namespace App\FixturePredictions\DTO\Request;
 use App\Core\Util\ArrayUtil;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
 use DateTime;
+use DateTimeImmutable;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -13,9 +14,9 @@ class FixturesDto
 {
     public function __construct(
         #[OA\Property(example: '2024-12-31')]
-        public ?DateTime $start = null,
+        public ?DateTimeImmutable $start = null,
         #[OA\Property(example: '2024-12-31')]
-        public ?DateTime $end = null,
+        public ?DateTimeImmutable $end = null,
         #[Assert\Positive]
         public int $limit = 50,
         #[Assert\NotBlank, Assert\Positive]
@@ -28,9 +29,9 @@ class FixturesDto
         public array $userIds = [],
     ) {
         $this->userIds = ArrayUtil::castItemsToIntIfPossible($userIds);
-        $this->start ??= (new DateTime())->modify('-5 days');
-        $this->end ??= (new DateTime())->modify('+5 days');
-        $this->start->setTime(0, 0, 0);
-        $this->end->setTime(23, 59, 59);
+        $this->start ??= (new DateTimeImmutable())->modify('-5 days');
+        $this->end ??= (new DateTimeImmutable())->modify('+5 days');
+        $this->start = $this->start->setTime(0, 0, 0);
+        $this->end = $this->end->setTime(23, 59, 59);
     }
 }

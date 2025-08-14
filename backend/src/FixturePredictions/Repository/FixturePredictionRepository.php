@@ -8,7 +8,6 @@ use App\FixturePredictions\Entity\FixturePrediction;
 use App\FixturePredictions\Entity\Season;
 use App\User\Entity\User;
 use DateTimeImmutable;
-use DateTimeInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -36,8 +35,8 @@ class FixturePredictionRepository extends ServiceEntityRepository
     public function leaderboard(
         ?Competition $competition = null,
         ?Season $season = null,
-        ?DateTimeInterface $start = null,
-        ?DateTimeInterface $end = null,
+        ?DateTimeImmutable $start = null,
+        ?DateTimeImmutable $end = null,
         ?int $limit = null,
     ): array {
         $qb = $this->getEntityManager()

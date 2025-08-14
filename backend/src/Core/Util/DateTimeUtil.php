@@ -5,7 +5,7 @@ namespace App\Core\Util;
 use App\Core\ValueObject\Period;
 use DateInterval;
 use DatePeriod;
-use DateTimeInterface;
+use DateTimeImmutable;
 use Exception;
 
 class DateTimeUtil
@@ -24,8 +24,8 @@ class DateTimeUtil
      * @throws Exception
      */
     public static function getPeriods(
-        DateTimeInterface $from,
-        DateTimeInterface $to,
+        DateTimeImmutable $from,
+        DateTimeImmutable $to,
         string $intervalDuration = '',
     ): array {
         $interval = new DateInterval($intervalDuration);

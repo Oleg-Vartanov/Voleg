@@ -15,6 +15,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use PHPUnit\Framework\Attributes\TestDox;
+use PHPUnit\Framework\MockObject\Exception;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 
@@ -38,7 +39,7 @@ class UpdatePointsTest extends KernelTestCase
      * @throws ExceptionInterface
      * @throws ORMException
      */
-    #[TestDox('Update points')]
+    #[TestDox('Update points: dispatch success')]
     public function testDispatchUpdatePoints(): void
     {
         $fixture = $this->prepareFixture(1, 2);
@@ -61,6 +62,21 @@ class UpdatePointsTest extends KernelTestCase
             self::assertSame(0, $predictions[2]->getPoints());
             self::assertSame(0, $predictions[3]->getPoints());
         }
+    }
+
+    /**
+     * @throws ExceptionInterface
+     * @throws Exception
+     */
+    #[TestDox('Update points: handle non existent fixture')]
+    public function testHandleNonExistentFixture(): void
+    {
+        $f = $this->createMock(Fixture::class);
+        $f->method('getId')->willReturn(0);
+        $f->method('canCalculatePoints')->willReturn(true);
+
+        $this->predictionsService->dispatchUpdatePoints($f);
+        $this->assertTrue(true);
     }
 
     /**

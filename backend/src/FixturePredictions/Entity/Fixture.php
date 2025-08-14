@@ -198,7 +198,7 @@ class Fixture
 
     public function hasStarted(): bool
     {
-        return $this->getStartAt() <= new DateTime();
+        return $this->getStartAt() <= new DateTimeImmutable();
     }
 
     /**

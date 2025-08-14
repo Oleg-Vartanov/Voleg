@@ -11,6 +11,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use InvalidArgumentException;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -45,6 +46,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
+    /** @var non-empty-string */
     #[Groups([self::SHOW_ADMIN, self::SHOW_OWNER])]
     #[ORM\Column(length: 180)]
     private string $email;
@@ -103,7 +105,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setEmail(string $email): static
     {
-        $this->email = $email;
+        $this->email = !empty($email) ? $email : throw new InvalidArgumentException();
 
         return $this;
     }
@@ -111,6 +113,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * A visual identifier that represents this user.
      *
+     * @return non-empty-string
      * @see UserInterface
      */
     public function getUserIdentifier(): string
@@ -119,9 +122,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @see UserInterface
-     *
      * @return non-empty-array<string>
+     * @see UserInterface
      */
     public function getRoles(): array
     {

@@ -27,8 +27,10 @@ readonly class Sync
      */
     public function __invoke(): void
     {
-        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
-        $season = $this->seasonRepository->findOneByYear(2025); // TODO: Remove hardcode.
+        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value)
+            ?? throw new Exception('Competition not found');
+        $season = $this->seasonRepository->findOneByYear(2025) // TODO: Remove hardcode.
+            ?? throw new Exception('Season not found');
 
         $timezone = new DateTimeZone('UTC');
         $from = (new DateTimeImmutable('-1 day', timezone: $timezone))->setTime(0, 0);

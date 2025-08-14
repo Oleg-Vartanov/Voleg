@@ -2,22 +2,22 @@
 
 namespace App\Core\ValueObject;
 
-use DateTimeInterface;
+use DateTimeImmutable;
 
 readonly class Period
 {
     public function __construct(
-        private DateTimeInterface $start,
-        private DateTimeInterface $end,
+        private DateTimeImmutable $start,
+        private DateTimeImmutable $end,
     ) {
     }
 
-    public function getStart(): DateTimeInterface
+    public function getStart(): DateTimeImmutable
     {
         return $this->start;
     }
 
-    public function getEnd(): DateTimeInterface
+    public function getEnd(): DateTimeImmutable
     {
         return $this->end;
     }

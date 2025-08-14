@@ -6,7 +6,7 @@ use App\FixturePredictions\Entity\Competition;
 use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\Season;
 use App\User\Entity\User;
-use DateTimeInterface;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
@@ -49,8 +49,8 @@ class FixtureRepository extends ServiceEntityRepository
         ?Competition $competition = null,
         ?Season $season = null,
         ?int $round = null,
-        ?DateTimeInterface $start = null,
-        ?DateTimeInterface $end = null,
+        ?DateTimeImmutable $start = null,
+        ?DateTimeImmutable $end = null,
         ?int $limit = null,
     ): mixed {
         $qb = $this->createQueryBuilder('f')

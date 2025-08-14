@@ -4,7 +4,7 @@ namespace App\FixturePredictions\Service;
 
 use App\FixturePredictions\Entity\Competition;
 use App\FixturePredictions\Entity\Season;
-use DateTimeInterface;
+use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -85,8 +85,8 @@ class FootballDataOrgClient
     public function getMatches(
         Competition $competition,
         Season $season,
-        ?DateTimeInterface $from = null,
-        ?DateTimeInterface $to = null,
+        ?DateTimeImmutable $from = null,
+        ?DateTimeImmutable $to = null,
     ): array {
         $timezone = new DateTimeZone('UTC');
 

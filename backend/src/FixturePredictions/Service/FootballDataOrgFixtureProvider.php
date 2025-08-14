@@ -13,7 +13,6 @@ use App\FixturePredictions\Enum\FixtureStatusEnum;
 use App\FixturePredictions\Repository\FixtureRepository;
 use App\FixturePredictions\Repository\TeamRepository;
 use DateTimeImmutable;
-use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Generator;
@@ -67,8 +66,8 @@ readonly class FootballDataOrgFixtureProvider extends FixtureProvider
     protected function getFixtures(
         Competition $competition,
         Season $season,
-        ?DateTimeInterface $from = null,
-        ?DateTimeInterface $to = null,
+        ?DateTimeImmutable $from = null,
+        ?DateTimeImmutable $to = null,
     ): Generator {
         $providerSeason = $this->getSeason($competition, $season) ?? throw new Exception('Provider season not found.');
         $batchPeriods = $this->batchSeasonPeriods($providerSeason, $from, $to);
@@ -126,8 +125,8 @@ readonly class FootballDataOrgFixtureProvider extends FixtureProvider
      */
     private function batchSeasonPeriods(
         SeasonDto $dto,
-        ?DateTimeInterface $from = null,
-        ?DateTimeInterface $to = null,
+        ?DateTimeImmutable $from = null,
+        ?DateTimeImmutable $to = null,
     ): array {
         $startDate = null === $from ? $dto->startDate : max($from, $dto->startDate);
         $endDate = null === $to ? $dto->endDate : min($to, $dto->endDate);
