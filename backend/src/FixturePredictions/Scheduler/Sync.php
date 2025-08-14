@@ -18,7 +18,7 @@ readonly class Sync
     public function __construct(
         private CompetitionRepository $competitionRepository,
         private SeasonRepository $seasonRepository,
-        private FixtureProvider $fixturesProvider
+        private FixtureProvider $fixturesProvider,
     ) {
     }
 

@@ -10,10 +10,7 @@ services:
       - ./database/config:/etc/mysql/conf.d
       - ./database/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - ./database/mysql:/var/lib/mysql
-    env_file:
-      - ./.env
-      - ./.env.prod
-      - ./.env.local
+    env_file: [ ./.env, ./.env.prod, ./.env.local ]
 
   webserver:
     container_name: ${PROJECT_NAME}_nginx
@@ -30,12 +27,8 @@ services:
       - ./nginx/prod/templates:/etc/nginx/templates
       - ./nginx/prod/entrypoint.sh:/entrypoint.sh
       - ./nginx/prod/renew-certificates.sh:/renew-certificates.sh
-    depends_on:
-      - php
-    env_file:
-      - ./.env
-      - ./.env.prod
-      - ./.env.local
+    depends_on: [ php ]
+    env_file: [ ./.env, ./.env.prod, ./.env.local ]
     environment:
       NGINX_ENVSUBST_TEMPLATE_SUFFIX: ".conf" # Set to file extension, to keep it instead of ".template".
     entrypoint: [ "/entrypoint.sh" ]
@@ -49,12 +42,8 @@ services:
     volumes:
       - ../backend:/var/www/html/backend
       - ./php/php.ini:/usr/local/etc/php/php.ini
-    depends_on:
-      - database
-    env_file:
-      - ./.env
-      - ./.env.prod
-      - ./.env.local
+    depends_on: [ database ]
+    env_file: [ ./.env, ./.env.prod, ./.env.local ]
 
   php_supervisor:
     container_name: ${PROJECT_NAME}_php_supervisor
@@ -66,12 +55,8 @@ services:
       - ../backend:/var/www/html/backend
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - ./php/supervisor:/etc/supervisor/conf.d
-    depends_on:
-      - database
-    env_file:
-      - ./.env
-      - ./.env.prod
-      - ./.env.local
+    depends_on: [ database ]
+    env_file: [ ./.env, ./.env.prod, ./.env.local ]
 
   node:
     container_name: ${PROJECT_NAME}_node
@@ -79,8 +64,5 @@ services:
     working_dir: /var/www/html/frontend
     volumes:
       - ../frontend:/var/www/html/frontend
-    env_file:
-      - ./.env
-      - ./.env.prod
-      - ./.env.local
+    env_file: [ ./.env, ./.env.prod, ./.env.local ]
     command: tail -f /dev/null
