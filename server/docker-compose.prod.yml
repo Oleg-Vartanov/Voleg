@@ -45,9 +45,27 @@ services:
     container_name: ${PROJECT_NAME}_php
     build:
       context: ./php
+      target: php
     volumes:
       - ../backend:/var/www/html/backend
       - ./php/php.ini:/usr/local/etc/php/php.ini
+    depends_on:
+      - database
+    env_file:
+      - ./.env
+      - ./.env.prod
+      - ./.env.local
+
+  php_supervisor:
+    container_name: ${PROJECT_NAME}_php_supervisor
+    build:
+      context: ./php
+      target: php_supervisor
+    command: supervisord -c /etc/supervisor/supervisord.conf -n
+    volumes:
+      - ../backend:/var/www/html/backend
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+      - ./php/supervisor:/etc/supervisor/conf.d
     depends_on:
       - database
     env_file:
