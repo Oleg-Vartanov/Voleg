@@ -59,9 +59,8 @@ deploy:
 migrate:
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate
 
-# Start mail consumer.
-mailer:
-	$(PHP_CONTAINER) php bin/console messenger:consume async
+consumer:
+	$(PHP_CONTAINER) php bin/console messenger:consume default scheduler_fixture_predictions -vv
 
 cache:
 	$(PHP_CONTAINER) php bin/console cache:clear
