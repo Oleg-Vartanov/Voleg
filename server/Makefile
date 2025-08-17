@@ -1,43 +1,28 @@
 # ========== Makefile Variables ==========
 
-# Hierarchy of env files. The later overrides others.
-ENV_FILES := .env .env.local
+include .env
+-include .env.local
 
-# Include .env variables.
-define include_env_file
-    ifneq (,$(wildcard ./$(1)))
-        include $(1)
-        export $(shell sed 's/=.*//' $(1))
-    endif
-endef
-$(foreach env_file,$(ENV_FILES),$(eval $(call include_env_file,$(env_file))))
-
+# container
 PHP_CONTAINER = docker exec $(PROJECT_NAME)_php
 NODE_CONTAINER = docker exec $(PROJECT_NAME)_node
 DB_CONTAINER = docker exec $(PROJECT_NAME)_database
 
-DOCKER_COMPOSE_DEV = docker compose -f docker-compose.dev.yml
-DOCKER_COMPOSE_PROD = docker compose -f docker-compose.prod.yml
+# docker compose
+ENV_ARGS := $(addprefix --env-file , .env .env.$(APP_ENV) .env.local)
+DOCKER_COMPOSE := docker compose -f docker-compose.$(APP_ENV).yml $(ENV_ARGS)
 
 # ========== General ==========
 
-up-dev:
-	$(DOCKER_COMPOSE_DEV) up -d
-down-dev:
-	$(DOCKER_COMPOSE_DEV) down
-down-prod:
-	$(DOCKER_COMPOSE_PROD) down
+up:
+	$(DOCKER_COMPOSE) up -d
+down:
+	$(DOCKER_COMPOSE) down
 
-init-dev:
-	$(DOCKER_COMPOSE_DEV) build
-	$(DOCKER_COMPOSE_DEV) down
-	$(DOCKER_COMPOSE_DEV) up -d
-	$(MAKE) init-containers
-
-init-prod:
-	$(DOCKER_COMPOSE_PROD) build
-	$(DOCKER_COMPOSE_PROD) down
-	$(DOCKER_COMPOSE_PROD) up -d
+init:
+	$(DOCKER_COMPOSE) build
+	$(DOCKER_COMPOSE) down
+	$(DOCKER_COMPOSE) up -d
 	$(MAKE) init-containers
 
 init-containers:
@@ -52,7 +37,7 @@ init-containers:
 
 deploy:
 	git -C .. pull origin main
-	$(MAKE) init-prod
+	$(MAKE) init
 
 # ========== Backend ==========
 

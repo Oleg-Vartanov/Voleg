@@ -7,14 +7,14 @@ Check it out at [voleg.me](https://www.voleg.me)
 
 ### Deployment / Setup
 
-- Review `.env` file variables in the **server**, **backend**, and **frontend** directories.
-- Set up or override values in `.env.local` (default values should work for development out of the box).
-- Run `make init-dev`.
+- Review `env` files in the **server**, **backend**, and **frontend** directories
+- You can override values in these directories by creating `.env.local` file
+  - Default values should work for development out of the box
+- Run `make init`
 
-👉 _See other available commands in the `Makefile`._
+👉 _See other available commands in the `Makefile`_
 
 ### Other Resources
  
 - API Documentation (OpenAPI Specification)
   - [GUI](https://www.api.voleg.me/doc), [JSON](https://www.api.voleg.me/doc.json)
-

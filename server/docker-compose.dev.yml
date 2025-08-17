@@ -18,7 +18,7 @@ services:
       context: ./nginx/dev
     ports:
       - ${APP_PORT}:80
-      - 443:443
+      - ${APP_PORT_HTTPS}:443
     volumes:
       - ../backend:/var/www/html/backend
       - ../frontend:/var/www/html/frontend
@@ -41,8 +41,7 @@ services:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - ./php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
       - ./php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
-    depends_on:
-      - database
+    depends_on: [ database ]
     env_file: [ ./.env, ./.env.dev, ./.env.local ]
 
   php_supervisor:
@@ -56,16 +55,13 @@ services:
       - ../backend:/var/www/html/backend
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - ./php/supervisor:/etc/supervisor/conf.d
-    depends_on:
-      - database
+    depends_on: [ database ]
     env_file: [ ./.env, ./.env.dev, ./.env.local ]
 
   node:
     container_name: ${PROJECT_NAME}_node
     image: node:latest
     working_dir: /var/www/html/frontend
-    ports:
-      - 5173:5173
     volumes:
       - ../frontend:/var/www/html/frontend
       - ./node/command.sh:/command.sh
@@ -76,5 +72,5 @@ services:
     container_name: ${PROJECT_NAME}_mailer
     image: maildev/maildev
     ports:
-      - 1080:1080
-      - 1025:1025
+      - ${MAILER_UI_PORT}:1080
+      - ${MAILER_SMTP_PORT}:1025
