@@ -1,3 +1,3 @@
-/database/mysql/
-/nginx/prod/letsencrypt/
+/common/database/mysql/
+/prod/nginx/letsencrypt/
 .env.local
