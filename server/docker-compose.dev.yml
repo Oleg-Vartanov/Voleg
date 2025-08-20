@@ -3,14 +3,17 @@ services:
   database:
     container_name: ${PROJECT_NAME}_database
     image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
     ports:
-      - ${DATABASE_PORT}:3306
+      - ${DATABASE_PORT}:${MYSQL_PORT}
     volumes:
-      - ./common/database/config:/etc/mysql/conf.d
       - ./common/database/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - ./common/database/mysql:/var/lib/mysql
     env_file: [ ./.env, ./.env.dev, ./.env.local ]
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$MYSQL_ROOT_PASSWORD" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   webserver:
     container_name: ${PROJECT_NAME}_nginx
@@ -41,7 +44,9 @@ services:
       - ./common/php/php.ini:/usr/local/etc/php/php.ini
       - ./common/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
       - ./common/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
-    depends_on: [ database ]
+    depends_on:
+      database:
+        condition: service_healthy
     env_file: [ ./.env, ./.env.dev, ./.env.local ]
 
   php_supervisor:
@@ -55,7 +60,9 @@ services:
       - ../backend:/var/www/html/backend
       - ./common/php/php.ini:/usr/local/etc/php/php.ini
       - ./common/php/supervisor:/etc/supervisor/conf.d
-    depends_on: [ database ]
+    depends_on:
+      database:
+        condition: service_healthy
     env_file: [ ./.env, ./.env.dev, ./.env.local ]
 
   node:

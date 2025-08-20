@@ -9,8 +9,8 @@ NODE_CONTAINER = docker exec $(PROJECT_NAME)_node
 DB_CONTAINER = docker exec $(PROJECT_NAME)_database
 
 # docker compose
-ENV_ARGS := $(addprefix --env-file , .env .env.$(APP_ENV) .env.local)
-DOCKER_COMPOSE := docker compose -f docker-compose.$(APP_ENV).yml $(ENV_ARGS)
+ENV_ARGS := $(addprefix --env-file , .env .env.$(SERVER_ENV) .env.local)
+DOCKER_COMPOSE := docker compose -f docker-compose.$(SERVER_ENV).yml $(ENV_ARGS)
 
 # ========== General ==========
 
