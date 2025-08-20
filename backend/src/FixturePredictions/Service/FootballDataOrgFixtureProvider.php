@@ -135,7 +135,7 @@ readonly class FootballDataOrgFixtureProvider extends FixtureProvider
     }
 
     /**
-     * @param Mixed[] $team
+     * @param array{id: int, shortName: string} $team
      */
     private function createTeamDto(array $team): TeamDto
     {
@@ -146,7 +146,16 @@ readonly class FootballDataOrgFixtureProvider extends FixtureProvider
     }
 
     /**
-     * @param Mixed[] $match
+     * @param array{
+     *     id: int,
+     *     utcDate: string,
+     *     status: string,
+     *     matchday: int,
+     *     homeTeam: array{id: int, name: string},
+     *     awayTeam: array{id: int, name: string},
+     *     score: array{fullTime: array{home: int|null, away: int|null}}
+     * } $match
+     *
      * @throws Exception
      */
     private function createFixtureDto(array $match): FixtureDto

@@ -7,7 +7,8 @@ use Exception;
 readonly class CsvReader
 {
     /**
-     * @return mixed[]
+     * @return array<int, array<int, string|null>>
+     *
      * @throws Exception
      */
     public function read(string $filePath): array
@@ -29,7 +30,7 @@ readonly class CsvReader
 
     /**
      * @param string $filePath
-     * @param mixed[] $rows
+     * @param array<int, array<int|string, bool|float|int|string|null>> $rows
      *
      * @throws Exception
      */

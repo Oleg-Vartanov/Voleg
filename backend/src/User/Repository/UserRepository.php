@@ -37,7 +37,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * @return mixed[]
+     * @return User[]
      */
     public function list(?string $tag, int $offset = 0, int $limit = 100): array
     {
@@ -47,9 +47,12 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             $qb->where('u.tag = :tag')->setParameter('tag', $tag);
         }
 
-        return $qb->setFirstResult($offset)
-                  ->setMaxResults($limit)
-                  ->getQuery()
-                  ->getResult();
+        /** @var User[] $users */
+        $users = $qb->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        return $users;
     }
 }

@@ -4,7 +4,6 @@ namespace App\FixturePredictions\Entity;
 
 use App\FixturePredictions\Enum\FixtureStatusEnum;
 use App\FixturePredictions\Repository\FixtureRepository;
-use DateTime;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

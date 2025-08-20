@@ -70,6 +70,6 @@ class FixturePredictionRepository extends ServiceEntityRepository
             $qb->setMaxResults($limit);
         }
 
-        return $qb->getQuery()->getResult();
+        return $qb->getQuery()->getResult(); // @phpstan-ignore-line Ignore mixed to avoid copying return type.
     }
 }

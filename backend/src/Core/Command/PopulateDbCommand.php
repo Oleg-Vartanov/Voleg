@@ -65,6 +65,15 @@ class PopulateDbCommand extends Command
         $progressBar->start();
 
         foreach ($rows as $row) {
+            if (
+                !isset($row[$headers['name']]) ||
+                !isset($row[$headers['iso_3166_1_alpha_2']]) ||
+                !isset($row[$headers['iso_3166_1_alpha_3']]) ||
+                !isset($row[$headers['iso_3166_1_numeric']])
+            ) {
+                throw new Exception('Invalid datac');
+            }
+
             if ($this->countryRepository->findOneByName($row[$headers['name']]) !== null) {
                 continue;
             }
@@ -73,7 +82,7 @@ class PopulateDbCommand extends Command
             $country->setName($row[$headers['name']]);
             $country->setIso31661Alpha2($row[$headers['iso_3166_1_alpha_2']]);
             $country->setIso31661Alpha3($row[$headers['iso_3166_1_alpha_3']]);
-            $country->setIso31661Numeric($row[$headers['iso_3166_1_numeric']]);
+            $country->setIso31661Numeric((int) $row[$headers['iso_3166_1_numeric']]);
             $country->setIso31662(empty($row[$headers['iso_3166_2']]) ? null : $row[$headers['iso_3166_2']]);
 
             $this->entityManager->persist($country);
