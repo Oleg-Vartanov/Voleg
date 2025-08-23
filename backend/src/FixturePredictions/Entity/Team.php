@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
+#[ORM\Table(name: "fp_team")]
 class Team
 {
     #[Groups([FixturePrediction::SHOW_PREDICTIONS])]

@@ -7,6 +7,7 @@ use App\FixturePredictions\Repository\CompetitionRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CompetitionRepository::class)]
+#[ORM\Table(name: "fp_competition")]
 class Competition
 {
     #[ORM\Id]

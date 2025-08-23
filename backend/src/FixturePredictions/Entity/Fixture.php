@@ -12,6 +12,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 #[Groups([FixturePrediction::SHOW_PREDICTIONS])]
 #[ORM\Entity(repositoryClass: FixtureRepository::class)]
+#[ORM\Table(name: "fp_fixture")]
 class Fixture
 {
     #[ORM\Id]

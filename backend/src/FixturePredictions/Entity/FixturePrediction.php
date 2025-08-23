@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: FixturePredictionRepository::class)]
+#[ORM\Table(name: "fp_fixture_prediction")]
 class FixturePrediction
 {
     public const string SHOW_PREDICTIONS = 'ShowPredictions';
