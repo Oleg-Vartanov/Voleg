@@ -7,7 +7,11 @@ function getTag(name: string) {
 </script>
 
 <template>
-  <img :src="'/team-logo/'+getTag(teamName)+'.png'"
-       width="20" height="20"
-       alt="logo">
+  <img
+    :src="'/team-logo/'+getTag(teamName)+'.png'"
+    width="20"
+    height="20"
+    alt="logo"
+    @error="($event) => { $event.target.src = '/team-logo/default.png' }"
+  >
 </template>
