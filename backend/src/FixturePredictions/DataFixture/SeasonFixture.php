@@ -8,6 +8,9 @@ use Doctrine\Persistence\ObjectManager;
 
 class SeasonFixture extends Fixture
 {
+    /** @var int Obviously used for test and possibly dev env. */
+    public const int CURRENT_SEASON = 2024;
+
     public function load(ObjectManager $manager): void
     {
         foreach (range(1992, 2100) as $year) {
@@ -15,7 +18,7 @@ class SeasonFixture extends Fixture
             $s->setYear($year);
             $manager->persist($s);
 
-            if ($year === 2024) {
+            if ($year === self::CURRENT_SEASON) {
                 $this->addReference('season', $s);
             }
         }

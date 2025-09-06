@@ -7,7 +7,7 @@ use DateTimeImmutable;
 use Symfony\Component\Messenger\Attribute\AsMessage;
 
 #[AsMessage('default')]
-class SyncMessage
+readonly class SyncMessage
 {
     public function __construct(
         public CompetitionCodeEnum $competition = CompetitionCodeEnum::EPL,
