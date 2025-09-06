@@ -68,9 +68,16 @@ class LeaderboardGetAction extends AbstractController
     ): JsonResponse {
         $competition = $this->competitionRepository->findOneByCode($dto->competitionCode);
 
+        $season = null;
+        if ($dto->season !== null) {
+            $season = $this->seasonRepository->findOneByYear($dto->season);
+        } elseif ($dto->defaultToCurrentSeason && $competition !== null) {
+            $season = $this->seasonRepository->findCurrentByCompetition($competition);
+        }
+
         $users = $this->fpRepository->leaderboard(
             competition: $competition,
-            season: null === $dto->season ? null : $this->seasonRepository->findOneByYear($dto->season),
+            season: $season,
             start: $dto->start,
             end: $dto->end,
             limit: $dto->limit,
@@ -81,7 +88,7 @@ class LeaderboardGetAction extends AbstractController
                 'start' => $dto->start?->format('Y-m-d'),
                 'end' => $dto->end?->format('Y-m-d'),
                 'competition' => $competition?->getCode(),
-                'season' => $dto->season,
+                'season' => $season?->getYear(),
                 'limit' => $dto->limit,
             ],
             'users' => $users,

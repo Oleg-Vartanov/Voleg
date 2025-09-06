@@ -18,8 +18,9 @@ class FixturesDto
         public ?DateTimeImmutable $end = null,
         #[Assert\Positive]
         public int $limit = 50,
-        #[Assert\NotBlank, Assert\Positive]
+        #[Assert\Positive]
         public ?int $season = null,
+        public bool $defaultToCurrentSeason = false,
         #[Assert\NotBlank, Assert\Choice(callback: [CompetitionCodeEnum::class, 'values'])]
         public string $competitionCode = CompetitionCodeEnum::EPL->value,
         /** @var mixed[] */

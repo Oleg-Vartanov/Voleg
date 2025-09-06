@@ -22,6 +22,9 @@ class Competition
     private string $code;
 
     #[ORM\ManyToOne]
+    private ?Season $currentSeason = null;
+
+    #[ORM\ManyToOne]
     private ?Country $Country = null;
 
     public function getId(): ?int
@@ -63,5 +66,15 @@ class Competition
         $this->Country = $Country;
 
         return $this;
+    }
+
+    public function getCurrentSeason(): ?Season
+    {
+        return $this->currentSeason;
+    }
+
+    public function setCurrentSeason(?Season $currentSeason): void
+    {
+        $this->currentSeason = $currentSeason;
     }
 }

@@ -13,7 +13,7 @@ const auth = useAuth();
 const start = ref(null);
 const end = ref(null);
 const competition = ref('PL');
-const season = ref(new Date().getFullYear());
+const season = ref(null);
 
 const fixtures = ref(null);
 const leaderboard = ref(null);

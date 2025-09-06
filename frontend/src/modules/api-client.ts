@@ -31,11 +31,11 @@ export default {
     end: null|string = null,
     competition: null|string = null,
     userIds: null|number[] = null,
-    season: number
+    season: null|number
   ) {
     return axios.get(`${apiBaseUrl}/fixtures/predictions`, {
       headers: getHeader(),
-      params: { start: start, end: end, competition: competition, userIds: userIds, season: season }
+      params: { start: start, end: end, competition: competition, userIds: userIds, season: season, defaultToCurrentSeason: true }
     });
   },
 
@@ -43,11 +43,11 @@ export default {
     start: null|string = null,
     end: null|string = null,
     competition: null|string = null,
-    season: number
+    season: null|number
   ) {
     return axios.get(`${apiBaseUrl}/fixtures/leaderboard`, {
       headers: getHeader(),
-      params: { start: start, end: end, competition: competition, season: season }
+      params: { start: start, end: end, competition: competition, season: season, defaultToCurrentSeason: true }
     });
   },
 

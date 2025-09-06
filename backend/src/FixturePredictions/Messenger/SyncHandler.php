@@ -25,13 +25,20 @@ readonly class SyncHandler
      */
     public function __invoke(SyncMessage $message): void
     {
-        $competition = $this->competitionRepository->findOneByCode($message->competition->value)
-            ?? throw new Exception('Competition not found');
-        $season = $this->seasonRepository->findOneByYear($message->year ?? 2025) // TODO: Remove hardcode.
-            ?? throw new Exception('Season not found');
+        $competition = $this->competitionRepository->findOneByCode($message->competition->value);
+        if (null === $competition) {
+            throw new Exception('Competition not found');
+        }
+
+        $season = null === $message->year
+            ? $this->seasonRepository->findCurrentByCompetition($competition)
+            : $this->seasonRepository->findOneByYear($message->year);
+        if (null === $season) {
+            throw new Exception('Season not found');
+        }
+
         $from = $message->from;
         $to = $message->to;
-
         if ($from === null || $to === null) {
             $timezone = new DateTimeZone('UTC');
             $from = (new DateTimeImmutable('-1 day', timezone: $timezone))->setTime(0, 0);

@@ -17,7 +17,7 @@ const dayEnd = DateHelper.format(today);
 const timezone = DateHelper.getTimezone(today);
 
 const competition = ref('PL');
-const season = ref(2025);
+const season = ref(new Date().getFullYear());
 const start = ref(dayStart);
 const end = ref(dayEnd);
 
