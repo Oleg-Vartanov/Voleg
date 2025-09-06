@@ -3,6 +3,7 @@
 namespace App\FixturePredictions\Test\Api;
 
 use App\Core\Test\ApiTestCase;
+use App\FixturePredictions\DataFixture\SeasonFixture;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
 use App\User\Test\Trait\UserTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
@@ -35,7 +36,7 @@ class PredictionsGetActionTest extends ApiTestCase
             'start' => '2025-01-01',
             'end' => '2025-01-02',
             'competition' => CompetitionCodeEnum::EPL->value,
-            'season' => 2024,
+            'season' => SeasonFixture::CURRENT_SEASON,
             'limit' => 20,
         ], $content['filters']);
         self::assertSame(20, count($content['fixtures']));
@@ -61,7 +62,7 @@ class PredictionsGetActionTest extends ApiTestCase
     private function sendRequest(
         string $start = '2025-01-01',
         string $end = '2025-01-02',
-        int $season = 2024,
+        int $season = SeasonFixture::CURRENT_SEASON,
         array $userIds = [],
     ): Response {
         $this->client->request(

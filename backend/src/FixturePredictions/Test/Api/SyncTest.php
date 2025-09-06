@@ -9,6 +9,7 @@ use App\User\Test\Trait\UserTestTrait;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,7 +18,7 @@ class SyncTest extends ApiTestCase
 {
     use UserTestTrait;
 
-    private FixtureProvider $fixturesProviderMock;
+    private FixtureProvider&MockObject $fixturesProviderMock;
 
     /**
      * @throws Exception

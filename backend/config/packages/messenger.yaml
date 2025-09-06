@@ -20,4 +20,5 @@ when@test:
     framework:
         messenger:
             transports:
+                default: 'sync://'
                 fixture_predictions: 'sync://'
