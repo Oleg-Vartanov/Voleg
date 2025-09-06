@@ -117,7 +117,6 @@ abstract readonly class FixtureProvider
         $team = new Team();
         $team->setName($dto->name);
         $team->setProviderTeamId($dto->providerTeamId);
-        // TODO: Add new providerId property.
 
         $this->entityManager->persist($team);
     }

@@ -85,11 +85,13 @@ const sync = () => {
         <input id="end" class="form-control filter-date-input" type="datetime-local" v-model="end"/>
       </div>
 
-      <button :disabled="isLoading" v-on:click="sync" type="button" class="btn btn-outline-primary py-2 mb-3 w-100">Sync Matches</button>
+      <button :disabled="isLoading" v-on:click="sync" type="button" class="btn btn-outline-primary py-2 mb-2 w-100">Sync Matches</button>
       <br>
       <div v-if="isLoading" class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
+      <i class="text-secondary">* The current fixtures provider converts datetime to UTC and then uses only the date, ignoring the time.</i> &#128533;<br>
+      <i class="text-secondary">* The end date fixtures are not included in the result, so it's "until then".</i> &#128534;
 
       <router-view></router-view>
 
