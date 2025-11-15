@@ -20,7 +20,7 @@ class SyncDto
     #[Assert\NotBlank]
     public DateTimeImmutable $from;
 
-    #[OA\Property(example: '2025-01-1T20:30:00+0400')]
+    #[OA\Property(example: '2025-01-01T20:30:00+0400')]
     #[Assert\NotBlank]
     public DateTimeImmutable $to;
 }

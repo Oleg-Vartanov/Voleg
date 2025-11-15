@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import RouterHelper from '@/helpers/router-helper';
-import Client from '@/modules/api-client';
+import Client from "@/modules/Core/apiClient";
 import {type Router, useRouter} from 'vue-router';
-import {useTopAlerts} from '@/modules/top-alerts';
+import {useTopAlerts} from "@/modules/Core/topAlerts";
 import {ref, reactive} from 'vue';
 import {Alert} from "@/models/alert";
 

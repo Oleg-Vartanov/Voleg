@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import Client from '@/modules/api-client.ts';
-import { useTopAlerts } from "@/modules/top-alerts";
+import Client from '@/modules/Core/apiClient';
+import { useTopAlerts } from "@/modules/Core/topAlerts";
 import { Alert } from "@/models/alert";
 import ArrayHelper from "@/helpers/array-helper";
 import DateHelper from '@/helpers/date-helper';

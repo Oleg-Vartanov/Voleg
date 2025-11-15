@@ -56,7 +56,7 @@ class FixtureRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('f')
             ->addSelect('fp', 'ht', 'at')
             ->leftJoin('f.fixturePredictions', 'fp', Join::WITH, 'fp.user IN (:users) ')
-                ->setParameter('users', $users)
+            ->setParameter('users', $users)
             ->leftJoin('f.homeTeam', 'ht')
             ->leftJoin('f.awayTeam', 'at')
         ;

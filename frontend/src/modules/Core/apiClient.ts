@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {useAuth} from "@/modules/auth";
+import {useAuth} from "@/modules/Core/auth";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 const authType: string = 'Bearer';

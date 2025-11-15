@@ -2,7 +2,7 @@ import type {Router} from 'vue-router';
 import {Alert} from '@/models/alert';
 import {reactive, readonly} from 'vue';
 import {useRouter} from 'vue-router';
-import {useTopAlerts} from '@/modules/top-alerts';
+import {useTopAlerts} from "@/modules/Core/topAlerts";
 import {jwtDecode} from 'jwt-decode';
 import ArrayHelper from '@/helpers/array-helper';
 
