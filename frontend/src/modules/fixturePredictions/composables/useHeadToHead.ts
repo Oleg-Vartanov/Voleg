@@ -1,6 +1,6 @@
 import { ref } from 'vue';
-import Client from "@/modules/Core/apiClient";
-import ArrayHelper from "@/helpers/array-helper";
+import Client from '@/modules/core/apiClient';
+import arrayUtils from '@/modules/core/utils/array';
 
 export interface HeadToHead {
   searchUsers: Ref<any[]>;
@@ -11,12 +11,12 @@ export interface HeadToHead {
   removeUser: (user: any) => void;
 }
 
-export function useHeadToHead(): HeadToHead {
-  const isLoading = ref(false);
-  const searchUsers = ref([]);
-  const users = ref([]);
-  const input = ref({ value: '', error: '' });
+const isLoading = ref(false);
+const searchUsers = ref([]);
+const users = ref([]);
+const input = ref({ value: '', error: '' });
 
+export function useHeadToHead(): HeadToHead {
   async function searchUser() {
     isLoading.value = true;
     try {
@@ -37,7 +37,7 @@ export function useHeadToHead(): HeadToHead {
   }
 
   function removeUser(user: any) {
-    ArrayHelper.removeItem(users.value, user);
+    arrayUtils.removeItem(users.value, user);
   }
 
   return { isLoading, searchUsers, users, input, searchUser, addUser, removeUser };

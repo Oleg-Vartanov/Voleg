@@ -1,6 +1,6 @@
 import type {UnwrapRefSimple, ReactiveMarker} from "@vue/reactivity";
 import {reactive, watch} from "vue";
-import ArrayHelper from "@/helpers/array-helper";
+import ArrayHelper from "@/modules/core/utils/array";
 import {Alert} from "@/models/alert";
 
 const alerts: Alert[]|UnwrapRefSimple<any>[] & ReactiveMarker = reactive([]);
@@ -20,7 +20,7 @@ export const useTopAlerts = ()  => {
   };
 
   const generateNewAlertId = (): number => {
-    let highestAlertId: null|number = getHighestAlertId();
+    const highestAlertId: null|number = getHighestAlertId();
     return highestAlertId !== null ? highestAlertId + 1: 0;
   };
 

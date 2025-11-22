@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import Client from '@/modules/Core/apiClient';
-import { useTopAlerts } from "@/modules/Core/topAlerts";
+import Client from '@/modules/core/apiClient';
+import { useTopAlerts } from "@/modules/core/topAlerts";
 import { Alert } from "@/models/alert";
-import ArrayHelper from "@/helpers/array-helper";
+import ArrayHelper from "@/modules/core/utils/array";
 import DateHelper from '@/helpers/date-helper';
 
 const topAlerts = useTopAlerts();

@@ -2,6 +2,7 @@
 
 namespace App\Core\Trait;
 
+// TODO: Refactor?
 trait PropertyAccessor
 {
     /**

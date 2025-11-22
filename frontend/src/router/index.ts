@@ -9,7 +9,7 @@ const index = createRouter({
     {
       path: '/',
       name: 'defaultLayout',
-      component: () => import('@/views/layouts/DefaultLayout.vue'),
+      component: () => import('@/modules/core/view/layout/DefaultLayout.vue'),
       children: [
         {
           path: '/',
@@ -28,7 +28,7 @@ const index = createRouter({
           name: 'football-predictions',
           meta: { title: 'Predictions' },
           beforeEnter: [guards.isAuthenticated],
-          component: () => import('@/views/games/FootballPredictions.vue'),
+          component: () => import('@/modules/fixturePredictions/view/FootballPredictions.vue'),
         },
         {
           path: '/about',

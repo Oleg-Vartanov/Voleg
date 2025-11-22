@@ -9,12 +9,12 @@ export interface FixtureFilters {
   applyFilters?: (response: any) => void;
 }
 
-export function useFilters(): FixtureFilters {
-  const start = ref<string | null>(null);
-  const end = ref<string | null>(null);
-  const competition = ref('PL');
-  const season = ref<number | null>(null);
+const start = ref<string | null>(null);
+const end = ref<string | null>(null);
+const competition = ref('PL');
+const season = ref<number | null>(null);
 
+export function useFilters(): FixtureFilters {
   function applyFilters(response: any) {
     start.value = response.data.filters.start;
     end.value = response.data.filters.end;

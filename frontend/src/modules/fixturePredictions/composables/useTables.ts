@@ -1,34 +1,40 @@
-import { ref } from 'vue';
-import Client from "@/modules/Core/apiClient";
-import { Alert } from "@/models/alert";
-import type { FixtureFilters } from "@/modules/FixturePredictions/composables/useFilters";
-import type { HeadToHead } from "@/modules/FixturePredictions/composables/useHeadToHead";
+import { computed, ref } from 'vue';
+import Client from '@/modules/core/apiClient';
+import { Alert } from '@/models/alert';
+import { useFilters } from '@/modules/fixturePredictions/composables/useFilters';
+import { useHeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead';
+import type { Fixture, LeaderboardUser } from '@/modules/fixturePredictions/type';
+
+export type TablesEnum = 'matches' | 'leaderboard';
 
 export interface Tables {
   isLoading: Ref<{
     fixtures: boolean;
     leaderboard: boolean;
   }>;
-  fixtures: Ref<any[]>;
-  leaderboard: Ref<any[] | null>;
-  initTable: (tab: 'matches' | 'leaderboard') => void;
+  isLoadingTables: Ref<boolean>;
+  fixtures: Ref<Fixture[] | null>;
+  leaderboard: Ref<LeaderboardUser[] | null>;
+  initTable: (tab: TablesEnum) => void;
   updateLoadedTables: () => void;
   loadFixtures: (userIds?: number[]) => Promise<void>;
   loadLeaderboard: () => Promise<void>;
 }
 
-export function useTables(
-  filters: FixtureFilters,
-  h2h: HeadToHead,
-): Tables {
-  const isLoading = ref({
-    fixtures: false,
-    leaderboard: false,
-  });
+const filters = useFilters();
+const h2h = useHeadToHead();
 
-  const fixtures = ref([]);
-  const leaderboard = ref(null);
+const isLoading = ref({
+  fixtures: false,
+  leaderboard: false,
+});
+const isLoadingTables = computed(() => {
+  return isLoading.value.fixtures || isLoading.value.leaderboard;
+});
+const fixtures = ref(null);
+const leaderboard = ref(null);
 
+export function useTables(): Tables {
   function initTable(tab: string) {
     if (tab === 'matches' && fixtures.value === null) {
       loadFixtures(h2h.users.value.map(u => u.id));
@@ -55,7 +61,7 @@ export function useTables(
         filters.end.value,
         filters.competition.value,
         userIds,
-        filters.season.value
+        filters.season.value,
       );
       fixtures.value = response.data.fixtures;
       filters.applyFilters(response);
@@ -73,7 +79,7 @@ export function useTables(
         filters.start.value,
         filters.end.value,
         filters.competition.value,
-        filters.season.value
+        filters.season.value,
       );
       leaderboard.value = response.data.users;
       filters.applyFilters(response);
@@ -84,5 +90,14 @@ export function useTables(
     }
   }
 
-  return { isLoading, fixtures, leaderboard, initTable, updateLoadedTables, loadFixtures, loadLeaderboard };
+  return {
+    isLoading,
+    isLoadingTables,
+    fixtures,
+    leaderboard,
+    initTable,
+    updateLoadedTables,
+    loadFixtures,
+    loadLeaderboard,
+  };
 }

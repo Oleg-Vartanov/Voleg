@@ -1,5 +1,7 @@
 <script setup lang="ts">
-defineProps(['teamName'])
+const props = defineProps<{
+  teamName: string;
+}>();
 
 function getTag(name: string) {
   return name.toLowerCase().replace(' ', '-');

@@ -1,21 +1,23 @@
-import type {Router} from 'vue-router';
-import {Alert} from '@/models/alert';
-import {reactive, readonly} from 'vue';
-import {useRouter} from 'vue-router';
-import {useTopAlerts} from "@/modules/Core/topAlerts";
-import {jwtDecode} from 'jwt-decode';
-import ArrayHelper from '@/helpers/array-helper';
+import type { Router } from 'vue-router';
+import type { User } from '@/modules/user/type';
+import arrayUtils from '@/modules/core/utils/array';
+import { Alert } from '@/models/alert';
+import { reactive, readonly } from 'vue';
+import { useRouter } from 'vue-router';
+import { useTopAlerts } from '@/modules/core/topAlerts';
+import { jwtDecode } from 'jwt-decode';
 
-const localStorageKey = 'voleg-jwt'
+const localStorageKey = 'voleg-jwt';
 const topAlerts = useTopAlerts();
 
-const defaultUser = {
+const defaultUser: User = {
   isSignedIn: false,
   id: null,
   displayName: null,
   roles: [],
+  tag: null,
 };
-const user = reactive({...defaultUser});
+const user = reactive({ ...defaultUser });
 setUserByToken();
 
 function setUserByToken(): void {
@@ -79,7 +81,7 @@ export const useAuth = () => {
   }
 
   function hasRole(roles: string[]): boolean {
-    return ArrayHelper.intersects(user.roles, roles);
+    return arrayUtils.intersects(user.roles, roles);
   }
 
   return {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
-import { useAuth } from "@/modules/Core/auth";
-import { useTopAlerts } from "@/modules/Core/topAlerts";
+import { useAuth } from "@/modules/user/auth";
+import { useTopAlerts } from "@/modules/core/topAlerts";
 import { Alert } from "@/models/alert";
 import { type Router, useRouter } from "vue-router";
 

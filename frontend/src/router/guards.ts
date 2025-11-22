@@ -1,5 +1,5 @@
-import { useAuth } from "@/modules/Core/auth";
-import { useTopAlerts } from "@/modules/Core/topAlerts";
+import { useAuth } from "@/modules/user/auth";
+import { useTopAlerts } from "@/modules/core/topAlerts";
 import { Alert } from "@/models/alert";
 
 export const useGuard = () => {
