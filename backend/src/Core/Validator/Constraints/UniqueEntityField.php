@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraint;
      */
     public function __construct(
         string $entityClass,
-        string $field,
+        string $field = 'id',
         array $options = [],
         ?array $groups = null,
         mixed $payload = null

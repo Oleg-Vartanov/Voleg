@@ -243,22 +243,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->setCreatedAt(new DateTimeImmutable());
     }
 
-    // TODO: Move to a service.
-    public function patch(UserDto $dto): self
-    {
-        if ($dto->isPropertyInitialized('email')) {
-            $this->setEmail($dto->email);
-        }
-        if ($dto->isPropertyInitialized('displayName')) {
-            $this->setDisplayName($dto->displayName);
-        }
-        if ($dto->isPropertyInitialized('tag')) {
-            $this->setTag($dto->tag);
-        }
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, FixturePrediction>
      */

@@ -2,18 +2,14 @@
 
 namespace App\User\DTO\Request;
 
-use App\Core\Interface\PropertyAccessorInterface;
-use App\Core\Trait\PropertyAccessor;
 use App\Core\Validator\Constraints as CustomAssert;
 use App\User\Entity\User;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class UserDto implements PropertyAccessorInterface
+class UserDto
 {
-    use PropertyAccessor;
-
     public const string SIGN_UP = 'SignUp';
     public const string UPDATE = 'Update';
     /** @var string[]  */
@@ -26,7 +22,6 @@ class UserDto implements PropertyAccessorInterface
         Assert\Type('string', groups: self::ALL),
         Assert\Email(groups: self::ALL),
         Assert\Length(max: 180, groups: self::ALL),
-        CustomAssert\InitializedAndNotNull(groups: [self::UPDATE]),
         CustomAssert\UniqueEntityField(entityClass: User::class, field: 'email', groups: self::ALL),
     ]
     public string $email;
@@ -56,7 +51,6 @@ class UserDto implements PropertyAccessorInterface
     #[OA\Property(example: 'Cool Name')]
     #[
         Assert\NotBlank(groups: [self::SIGN_UP]),
-        CustomAssert\InitializedAndNotNull(groups: [self::UPDATE]),
         Assert\Type('string', groups: self::ALL),
         Assert\Length(min: 1, groups: self::ALL),
         Assert\Length(max: 255, groups: self::ALL),
@@ -67,7 +61,6 @@ class UserDto implements PropertyAccessorInterface
     #[OA\Property(example: 'cool-name')]
     #[
         Assert\NotBlank(groups: [self::SIGN_UP]),
-        CustomAssert\InitializedAndNotNull(groups: [self::UPDATE]),
         Assert\Type('string', groups: self::ALL),
         Assert\Length(min: 1, groups: self::ALL),
         Assert\Length(max: 255, groups: self::ALL),

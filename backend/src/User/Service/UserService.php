@@ -1,12 +1,13 @@
 <?php
 
-namespace App\User\Factory;
+namespace App\User\Service;
 
+use App\Core\Util\PropertyAccessor;
 use App\User\DTO\Request\UserDto;
 use App\User\Entity\User;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-readonly class UserFactory
+readonly class UserService
 {
     public function __construct(
         private UserPasswordHasherInterface $passwordHasher,
@@ -42,5 +43,22 @@ readonly class UserFactory
             displayName: $dto->displayName,
             tag: $dto->tag,
         );
+    }
+
+    public function patch(User $user, UserDto $dto): User
+    {
+        $props = array_flip(PropertyAccessor::getInitializedProperties($dto));
+
+        if (isset($props['email'])) {
+            $user->setEmail($dto->email);
+        }
+        if (isset($props['displayName'])) {
+            $user->setDisplayName($dto->displayName);
+        }
+        if (isset($props['tag'])) {
+            $user->setTag($dto->tag);
+        }
+
+        return $user;
     }
 }

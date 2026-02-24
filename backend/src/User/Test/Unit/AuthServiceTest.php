@@ -3,8 +3,8 @@
 namespace App\User\Test\Unit;
 
 use App\User\Entity\User;
-use App\User\Factory\UserFactory;
 use App\User\Service\AuthService;
+use App\User\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
 use PHPUnit\Framework\Attributes\TestDox;
@@ -30,7 +30,7 @@ class AuthServiceTest extends TestCase
             $this->createMock(MailerInterface::class),
             $this->createMock(ParameterBagInterface::class),
             $this->createMock(RouterInterface::class),
-            $this->createMock(UserFactory::class),
+            $this->createMock(UserService::class),
         );
     }
 

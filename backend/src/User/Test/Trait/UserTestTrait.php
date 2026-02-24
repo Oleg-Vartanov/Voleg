@@ -3,9 +3,9 @@
 namespace App\User\Test\Trait;
 
 use App\User\Entity\User;
-use App\User\Factory\UserFactory;
 use App\User\Repository\UserRepository;
 use App\User\Service\AuthService;
+use App\User\Service\UserService;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +15,7 @@ trait UserTestTrait
     protected const string DEFAULT_PASSWORD = '!Qwerty1';
 
     protected KernelBrowser $client;
-    protected UserFactory $userFactory;
+    protected UserService $userService;
     protected UserRepository $userRepository;
     protected AuthService $authService;
 
@@ -23,7 +23,7 @@ trait UserTestTrait
     {
         $container = static::getContainer();
 
-        $this->userFactory = $container->get(UserFactory::class);
+        $this->userService = $container->get(UserService::class);
         $this->userRepository = $container->get(UserRepository::class);
         $this->authService = $container->get(AuthService::class);
     }
@@ -44,7 +44,7 @@ trait UserTestTrait
         ];
         $userData = array_merge($defaults, $userData);
 
-        $user = $this->userFactory->create(
+        $user = $this->userService->create(
             $userData['email'],
             $userData['password'],
             $userData['displayName'],

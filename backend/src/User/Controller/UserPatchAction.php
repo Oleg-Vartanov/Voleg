@@ -8,6 +8,7 @@ use App\User\DTO\Request\UpdateDto;
 use App\User\DTO\Request\UserDto;
 use App\User\Entity\User;
 use App\User\Repository\UserRepository;
+use App\User\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Nelmio\ApiDocBundle\Attribute\Security;
@@ -38,6 +39,7 @@ class UserPatchAction extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserRepository $userRepository,
+        private readonly UserService $userService,
     ) {
     }
 
@@ -52,7 +54,7 @@ class UserPatchAction extends AbstractController
             throw new NotFoundHttpException();
         }
 
-        $user->patch($dto);
+        $user = $this->userService->patch($user, $dto);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 

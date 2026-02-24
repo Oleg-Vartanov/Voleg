@@ -4,7 +4,6 @@ namespace App\User\Service;
 
 use App\User\DTO\Request\SignUpDto;
 use App\User\Entity\User;
-use App\User\Factory\UserFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -22,14 +21,14 @@ readonly class AuthService
         private MailerInterface $mailer,
         private ParameterBagInterface $parameterBag,
         private RouterInterface $router,
-        private UserFactory $userFactory,
+        private UserService $userService,
     ) {
     }
 
     /** @throws TransportExceptionInterface */
     public function signUp(SignUpDto $dto): void
     {
-        $user = $this->userFactory->createByDto($dto);
+        $user = $this->userService->createByDto($dto);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
@@ -65,7 +64,7 @@ readonly class AuthService
             throw new LogicException('User is already verified.');
         }
 
-        $email = (new TemplatedEmail())
+        $email = new TemplatedEmail()
             ->from('no-reply@' . $this->parameterBag->get('app.mail.domain'))
             ->to(new Address($user->getEmail()))
             ->subject('Verify Sign Up')
