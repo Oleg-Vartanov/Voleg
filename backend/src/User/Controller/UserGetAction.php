@@ -2,6 +2,7 @@
 
 namespace App\User\Controller;
 
+use App\Core\Documentation\Attribute\Response\NotFoundResponse;
 use App\User\Controller\Trait\UserControllerTrait;
 use App\User\Entity\User;
 use App\User\Repository\UserRepository;
@@ -14,14 +15,17 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[OA\Tag(name: 'User')]
-#[OA\Response(
-    response: Response::HTTP_OK,
-    description: 'User',
-    content: new Model(type: User::class, groups: User::SHOW_ALL)
+#[OA\Get(
+    tags: ['User'],
+    responses: [
+        new OA\Response(
+            response: Response::HTTP_OK,
+            description: 'User',
+            content: new Model(type: User::class, groups: User::SHOW_ALL),
+        ),
+        new NotFoundResponse('User not found'),
+    ],
 )]
-#[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User not found')]
-
 #[Route('/users/{id}', name: 'user_get', methods: [Request::METHOD_GET])]
 class UserGetAction extends AbstractController
 {

@@ -2,26 +2,30 @@
 
 namespace App\User\Controller;
 
-use App\Core\Documentation\Attribute as CustomOA;
+use App\Core\Controller\ApiController;
+use App\Core\Documentation\Attribute\Response\AccessDeniedResponse;
+use App\Core\Documentation\Attribute\Response\MessageResponse;
+use App\Core\Documentation\Attribute\Response\NotFoundResponse;
 use App\User\Controller\Trait\UserControllerTrait;
 use App\User\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[OA\Tag(name: 'User')]
-#[Security(name: 'Bearer')]
-#[OA\Response(response: Response::HTTP_NO_CONTENT, description: 'Deleted')]
-#[CustomOA\Response\AccessDeniedResponse]
-#[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User not found')]
-
+#[OA\Delete(
+    security: [['Bearer' => []]],
+    tags: ['User'],
+    responses: [
+        new MessageResponse(Response::HTTP_NO_CONTENT, 'Deleted'),
+        new AccessDeniedResponse(),
+        new NotFoundResponse('User not found'),
+    ]
+)]
 #[Route('/users/{id}', name: 'user_delete', methods: [Request::METHOD_DELETE])]
-class UserDeleteAction extends AbstractController
+class UserDeleteAction extends ApiController
 {
     use UserControllerTrait;
 
@@ -43,6 +47,6 @@ class UserDeleteAction extends AbstractController
         $this->entityManager->remove($user);
         $this->entityManager->flush();
 
-        return new Response(status: Response::HTTP_NO_CONTENT);
+        return $this->messageResponse('Deleted', Response::HTTP_NO_CONTENT);
     }
 }

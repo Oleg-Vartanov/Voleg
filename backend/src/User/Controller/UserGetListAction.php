@@ -14,16 +14,19 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[OA\Tag(name: 'User')]
-#[OA\Response(
-    response: Response::HTTP_OK,
-    description: 'Users',
-    content: new OA\JsonContent(
-        type: 'array',
-        items: new OA\Items(ref: new Model(type: User::class, groups: [User::SHOW]))
-    )
+#[OA\Get(
+    tags: ['User'],
+    responses: [
+        new OA\Response(
+            response: Response::HTTP_OK,
+            description: 'Users',
+            content: new OA\JsonContent(
+                type: 'array',
+                items: new OA\Items(ref: new Model(type: User::class, groups: [User::SHOW]))
+            )
+        )
+    ],
 )]
-
 #[Route('/users', name: 'user_get_list', methods: [Request::METHOD_GET])]
 class UserGetListAction extends AbstractController
 {

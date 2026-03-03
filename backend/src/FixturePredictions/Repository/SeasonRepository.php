@@ -2,6 +2,7 @@
 
 namespace App\FixturePredictions\Repository;
 
+use App\FixturePredictions\DTO\Request\FixturesDto;
 use App\FixturePredictions\Entity\Competition;
 use App\FixturePredictions\Entity\Season;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -27,5 +28,17 @@ class SeasonRepository extends ServiceEntityRepository
         $year = $competition->getCurrentSeason()?->getYear();
 
         return null === $year ? null : $this->findOneByYear($year);
+    }
+
+    public function findByRequest(FixturesDto $dto, ?Competition $competition): ?Season
+    {
+        $season = null;
+        if ($dto->season !== null) {
+            $season = $this->findOneByYear($dto->season);
+        } elseif ($dto->defaultToCurrentSeason && $competition !== null) {
+            $season = $this->findCurrentByCompetition($competition);
+        }
+
+        return $season;
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\User\Controller;
 
-use App\Core\Documentation\Attribute as CustomOA;
+use App\Core\Documentation\Attribute\Response\AccessDeniedResponse;
+use App\Core\Documentation\Attribute\Response\NotFoundResponse;
+use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\User\Controller\Trait\UserControllerTrait;
 use App\User\DTO\Request\UpdateDto;
 use App\User\DTO\Request\UserDto;
@@ -11,7 +13,6 @@ use App\User\Repository\UserRepository;
 use App\User\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Attribute\Model;
-use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,17 +21,20 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[OA\Tag(name: 'User')]
-#[Security(name: 'Bearer')]
-#[OA\Response(
-    response: Response::HTTP_OK,
-    description: 'User Updated',
-    content: new Model(type: User::class, groups: User::SHOW_ALL)
+#[OA\Patch(
+    security: [['Bearer' => []]],
+    tags: ['User'],
+    responses: [
+        new OA\Response(
+            response: Response::HTTP_OK,
+            description: 'User Updated',
+            content: new Model(type: User::class, groups: User::SHOW_ALL),
+        ),
+        new AccessDeniedResponse(),
+        new NotFoundResponse('User not found'),
+        new ValidationErrorResponse(),
+    ],
 )]
-#[CustomOA\Response\AccessDeniedResponse]
-#[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'User not found')]
-#[CustomOA\Response\ValidationErrorResponse]
-
 #[Route('/users/{id}', name: 'user_patch', methods: [Request::METHOD_PATCH])]
 class UserPatchAction extends AbstractController
 {

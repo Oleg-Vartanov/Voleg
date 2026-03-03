@@ -2,34 +2,38 @@
 
 namespace App\FixturePredictions\Controller;
 
-use App\Core\Documentation\Attribute as CustomOA;
+use App\Core\Controller\ApiController;
+use App\Core\Documentation\Attribute\Response\MessageResponse;
+use App\Core\Documentation\Attribute\Response\UnauthorizedResponse;
+use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\FixturePredictions\DTO\Request\PredictionDto;
 use App\FixturePredictions\Exception\FixtureHasStartedException;
 use App\FixturePredictions\Service\PredictionsService;
 use App\User\Entity\User;
-use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[OA\Tag(name: 'Fixtures')]
-#[Security(name: 'Bearer')]
-#[OA\Response(response: Response::HTTP_CREATED, description: 'Success')]
-#[CustomOA\Response\UnauthorizedResponse]
-#[OA\Response(response: Response::HTTP_CONFLICT, description: 'Fixture has already started')]
-#[CustomOA\Response\ValidationErrorResponse]
-
+#[OA\Post(
+    security: [['Bearer' => []]],
+    tags: ['Fixtures'],
+    responses: [
+        new MessageResponse(Response::HTTP_CREATED, 'Success'),
+        new UnauthorizedResponse(),
+        new MessageResponse(Response::HTTP_CONFLICT, 'Fixture has already started'),
+        new ValidationErrorResponse(),
+    ],
+)]
 #[Route(
     path: '/fixtures/make-predictions',
     name: 'make_predictions',
     methods: [Request::METHOD_POST],
     format: 'json'
 )]
-class MakePredictionsPostAction extends AbstractController
+class MakePredictionsPostAction extends ApiController
 {
     public function __construct(private readonly PredictionsService $predictionsService)
     {
@@ -47,9 +51,9 @@ class MakePredictionsPostAction extends AbstractController
         try {
             $this->predictionsService->makePredictions($dtos, $user);
         } catch (FixtureHasStartedException $e) {
-            return $this->json(['message' => 'Fixture has already started'], Response::HTTP_CONFLICT);
+            return $this->messageResponse('Fixture has already started', Response::HTTP_CONFLICT);
         }
 
-        return $this->json(['message' => 'Success'], Response::HTTP_CREATED);
+        return $this->messageResponse('Success', Response::HTTP_CREATED);
     }
 }

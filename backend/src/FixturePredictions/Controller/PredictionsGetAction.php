@@ -2,7 +2,8 @@
 
 namespace App\FixturePredictions\Controller;
 
-use App\Core\Documentation\Attribute as CustomOA;
+use App\Core\Documentation\Attribute\Response\UnauthorizedResponse;
+use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\FixturePredictions\DTO\Request\FixturesDto;
 use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\FixturePrediction;
@@ -12,7 +13,6 @@ use App\FixturePredictions\Repository\SeasonRepository;
 use App\User\Entity\User;
 use App\User\Repository\UserRepository;
 use Nelmio\ApiDocBundle\Attribute\Model;
-use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,28 +22,31 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
-#[OA\Tag(name: 'Fixtures')]
-#[Security(name: 'Bearer')]
-#[OA\Response(
-    response: Response::HTTP_OK,
-    description: 'OK',
-    content: new OA\JsonContent(properties: [
-        new OA\Property(
-            property: 'filters',
-            properties: [
-                new OA\Property(property: 'start', description: 'Y-m-d', type: 'string'),
-                new OA\Property(property: 'end', description: 'Y-m-d', type: 'string'),
-                new OA\Property(property: 'competition', type: 'string'),
-                new OA\Property(property: 'season', type: 'int'),
-                new OA\Property(property: 'limit', type: 'int'),
-            ]
+#[OA\Get(
+    security: [['Bearer' => []]],
+    tags: ['Fixtures'],
+    responses: [
+        new OA\Response(
+            response: Response::HTTP_OK,
+            description: 'OK',
+            content: new OA\JsonContent(properties: [
+                new OA\Property(
+                    property: 'filters',
+                    properties: [
+                        new OA\Property(property: 'start', description: 'Y-m-d', type: 'string'),
+                        new OA\Property(property: 'end', description: 'Y-m-d', type: 'string'),
+                        new OA\Property(property: 'competition', type: 'string'),
+                        new OA\Property(property: 'season', type: 'int'),
+                        new OA\Property(property: 'limit', type: 'int'),
+                    ]
+                ),
+                new OA\Property(property: 'fixtures', ref: new Model(type: Fixture::class)),
+            ]),
         ),
-        new OA\Property(property: 'fixtures', ref: new Model(type: Fixture::class)),
-    ]),
+        new UnauthorizedResponse(),
+        new ValidationErrorResponse(),
+    ],
 )]
-#[CustomOA\Response\UnauthorizedResponse]
-#[CustomOA\Response\ValidationErrorResponse]
-
 #[Route(
     path: '/fixtures/predictions',
     name: 'fixtures_predictions',
@@ -70,13 +73,7 @@ class PredictionsGetAction extends AbstractController
         array_unshift($users, $user);
 
         $competition = $this->competitionRepository->findOneByCode($dto->competitionCode);
-
-        $season = null;
-        if ($dto->season !== null) {
-            $season = $this->seasonRepository->findOneByYear($dto->season);
-        } elseif ($dto->defaultToCurrentSeason && $competition !== null) {
-            $season = $this->seasonRepository->findCurrentByCompetition($competition);
-        }
+        $season = $this->seasonRepository->findByRequest($dto, $competition);
 
         $fixtures = $this->fixtureRepository->filter(
             users: $users,

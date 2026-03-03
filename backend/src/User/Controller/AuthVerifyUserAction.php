@@ -14,10 +14,13 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[OA\Tag(name: 'Authorization')]
-#[OA\Response(response: Response::HTTP_OK, description: 'Verified page')]
-#[OA\Response(response: Response::HTTP_NOT_FOUND, description: 'Invalid link')]
-
+#[OA\Get(
+    tags: ['Authorization'],
+    responses: [
+        new OA\Response(response: Response::HTTP_OK, description: 'Verified page'),
+        new OA\Response(response: Response::HTTP_NOT_FOUND, description: 'Invalid link'),
+    ],
+)]
 #[Route('/auth/sign-up/verify', name: 'sign_up_verify', methods: [Request::METHOD_GET])]
 class AuthVerifyUserAction extends AbstractController
 {

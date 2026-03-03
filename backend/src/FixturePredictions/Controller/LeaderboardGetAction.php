@@ -2,14 +2,14 @@
 
 namespace App\FixturePredictions\Controller;
 
-use App\Core\Documentation\Attribute as CustomOA;
+use App\Core\Documentation\Attribute\Response\UnauthorizedResponse;
+use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\FixturePredictions\DTO\Request\FixturesDto;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
 use App\User\Entity\User;
 use Nelmio\ApiDocBundle\Attribute\Model;
-use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,35 +18,38 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[OA\Tag(name: 'Fixtures')]
-#[Security(name: 'Bearer')]
-#[OA\Response(
-    response: Response::HTTP_OK,
-    description: 'OK',
-    content: new OA\JsonContent(properties: [
-        new OA\Property(
-            property: 'filters',
-            properties: [
-                new OA\Property(property: 'start', description: 'Y-m-d', type: 'string'),
-                new OA\Property(property: 'end', description: 'Y-m-d', type: 'string'),
-                new OA\Property(property: 'competition', type: 'string'),
-                new OA\Property(property: 'season', type: 'int'),
-                new OA\Property(property: 'limit', type: 'int'),
-            ]
+#[OA\Get(
+    security: [['Bearer' => []]],
+    tags: ['Fixtures'],
+    responses: [
+        new OA\Response(
+            response: Response::HTTP_OK,
+            description: 'OK',
+            content: new OA\JsonContent(properties: [
+                new OA\Property(
+                    property: 'filters',
+                    properties: [
+                        new OA\Property(property: 'start', description: 'Y-m-d', type: 'string'),
+                        new OA\Property(property: 'end', description: 'Y-m-d', type: 'string'),
+                        new OA\Property(property: 'competition', type: 'string'),
+                        new OA\Property(property: 'season', type: 'int'),
+                        new OA\Property(property: 'limit', type: 'int'),
+                    ]
+                ),
+                new OA\Property(
+                    property: 'users',
+                    properties: [
+                        new OA\Property(property: 'user', ref: new Model(type: User::class, groups: [User::SHOW])),
+                        new OA\Property(property: 'totalPoints', type: 'int'),
+                        new OA\Property(property: 'periodPoints', type: 'int'),
+                    ]
+                ),
+            ]),
         ),
-        new OA\Property(
-            property: 'users',
-            properties: [
-                new OA\Property(property: 'user', ref: new Model(type: User::class, groups: [User::SHOW])),
-                new OA\Property(property: 'totalPoints', type: 'int'),
-                new OA\Property(property: 'periodPoints', type: 'int'),
-            ]
-        ),
-    ]),
+        new UnauthorizedResponse(),
+        new ValidationErrorResponse(),
+    ],
 )]
-#[CustomOA\Response\UnauthorizedResponse]
-#[CustomOA\Response\ValidationErrorResponse]
-
 #[Route(
     path: '/fixtures/leaderboard',
     name: 'fixtures_leaderboard',
@@ -67,13 +70,7 @@ class LeaderboardGetAction extends AbstractController
         FixturesDto $dto = new FixturesDto(),
     ): JsonResponse {
         $competition = $this->competitionRepository->findOneByCode($dto->competitionCode);
-
-        $season = null;
-        if ($dto->season !== null) {
-            $season = $this->seasonRepository->findOneByYear($dto->season);
-        } elseif ($dto->defaultToCurrentSeason && $competition !== null) {
-            $season = $this->seasonRepository->findCurrentByCompetition($competition);
-        }
+        $season = $this->seasonRepository->findByRequest($dto, $competition);
 
         $users = $this->fpRepository->leaderboard(
             competition: $competition,

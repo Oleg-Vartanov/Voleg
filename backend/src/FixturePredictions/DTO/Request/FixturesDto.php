@@ -29,8 +29,8 @@ class FixturesDto
         public array $userIds = [],
     ) {
         $this->userIds = ArrayUtil::castItemsToIntIfPossible($userIds);
-        $this->start ??= (new DateTimeImmutable())->modify('-5 days');
-        $this->end ??= (new DateTimeImmutable())->modify('+5 days');
+        $this->start ??= new DateTimeImmutable()->modify('-5 days');
+        $this->end ??= new DateTimeImmutable()->modify('+5 days');
         $this->start = $this->start->setTime(0, 0, 0);
         $this->end = $this->end->setTime(23, 59, 59);
     }
