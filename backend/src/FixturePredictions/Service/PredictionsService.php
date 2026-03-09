@@ -2,10 +2,10 @@
 
 namespace App\FixturePredictions\Service;
 
-use App\FixturePredictions\DTO\Request\PredictionDto;
 use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\FixturePrediction;
 use App\FixturePredictions\Exception\FixtureHasStartedException;
+use App\FixturePredictions\Http\V1\MakePredictions\MakePredictionsRequest;
 use App\FixturePredictions\Messenger\CalculatePointsMessage;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\FixturePredictions\Repository\FixtureRepository;
@@ -70,7 +70,7 @@ readonly class PredictionsService
         return 0;
     }
 
-    /** @param PredictionDto[] $dtos
+    /** @param MakePredictionsRequest[] $dtos
      * @throws FixtureHasStartedException
      */
     public function makePredictions(array $dtos, User $user): void

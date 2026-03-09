@@ -3,7 +3,6 @@
 namespace App\User\Entity;
 
 use App\FixturePredictions\Entity\FixturePrediction;
-use App\User\DTO\Request\UserDto;
 use App\User\Enum\RoleEnum;
 use App\User\Repository\UserRepository;
 use DateTimeImmutable;

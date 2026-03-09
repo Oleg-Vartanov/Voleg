@@ -2,7 +2,7 @@ nelmio_api_doc:
     documentation:
         info:
             title: '%app.name%'
-            version: 1.0.0
+            version: v1
         servers:
             - url: '%app.url%'
         components:
@@ -13,6 +13,4 @@ nelmio_api_doc:
                     bearerFormat: JWT
     areas:
         path_patterns:
-            - ^/auth
-            - ^/users
-            - ^/fixtures
+            - ^/v1

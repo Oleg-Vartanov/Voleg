@@ -2,8 +2,8 @@
 
 namespace App\User\Service;
 
-use App\User\DTO\Request\SignUpDto;
 use App\User\Entity\User;
+use App\User\Http\V1\Request\SignUpDto;
 use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;

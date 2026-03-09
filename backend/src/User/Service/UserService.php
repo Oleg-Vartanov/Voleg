@@ -3,8 +3,8 @@
 namespace App\User\Service;
 
 use App\Core\Util\PropertyAccessor;
-use App\User\DTO\Request\UserDto;
 use App\User\Entity\User;
+use App\User\Http\V1\Request\UserDto;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 readonly class UserService

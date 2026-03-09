@@ -6,6 +6,7 @@ use App\FixturePredictions\Entity\Competition;
 use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\FixturePrediction;
 use App\FixturePredictions\Entity\Season;
+use App\FixturePredictions\Http\V1\Leaderboard\LeaderboardRow;
 use App\User\Entity\User;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -30,7 +31,7 @@ class FixturePredictionRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return array<int, array{user: User, totalPoints: float, periodPoints: float}>
+     * @return LeaderboardRow[]
      */
     public function leaderboard(
         ?Competition $competition = null,
@@ -42,9 +43,11 @@ class FixturePredictionRepository extends ServiceEntityRepository
         $qb = $this->getEntityManager()
             ->createQueryBuilder()
             ->select(
-                'u AS user',
-                'SUM(fp.points) AS totalPoints',
-                'SUM(CASE WHEN f.startAt >= :start AND f.startAt <= :end THEN fp.points ELSE 0 END) AS periodPoints'
+                'NEW ' . LeaderboardRow::class . '(
+                    u,
+                    SUM(fp.points),
+                    SUM(CASE WHEN f.startAt >= :start AND f.startAt <= :end THEN fp.points ELSE 0 END)
+                )'
             )
             ->from(User::class, 'u')
             ->join('u.fixturePredictions', 'fp')
@@ -64,12 +67,15 @@ class FixturePredictionRepository extends ServiceEntityRepository
         $qb->setParameter('end', $end ?? new DateTimeImmutable('9999-12-31'));
 
         $qb->groupBy('u.id')
-           ->orderBy('totalPoints', 'DESC');
+           ->orderBy('SUM(fp.points)', 'DESC');
 
         if ($limit !== null) {
             $qb->setMaxResults($limit);
         }
 
-        return $qb->getQuery()->getResult(); // @phpstan-ignore-line Ignore mixed to avoid copying return type.
+        /** @var LeaderboardRow[] $rows */
+        $rows = $qb->getQuery()->getResult();
+
+        return $rows;
     }
 }

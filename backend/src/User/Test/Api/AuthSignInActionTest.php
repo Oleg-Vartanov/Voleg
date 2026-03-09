@@ -3,7 +3,7 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\User\Controller\AuthSignInAction;
+use App\User\Http\V1\AuthSignInAction;
 use App\User\Test\Trait\UserTestTrait;
 use LogicException;
 use PHPUnit\Framework\Attributes\TestDox;

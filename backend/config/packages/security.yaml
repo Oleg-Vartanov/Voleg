@@ -15,11 +15,11 @@ security:
             security: false
         public:
             pattern:
-                - ^/auth/sign-up
+                - ^/v1/auth/sign-up
             security: false
         login:
             pattern:
-                - ^/auth/sign-in
+                - ^/v1/auth/sign-in
             stateless: true
             user_checker: App\User\Security\UserChecker
             json_login:
@@ -33,12 +33,12 @@ security:
             stateless: true
             jwt: ~
     access_control:
-        - { path: ^/fixtures/sync, roles: ROLE_ADMIN }
-        - { path: ^/fixtures, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/test, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/users, roles: IS_AUTHENTICATED_FULLY, methods: [DELETE, PATCH] }
-        - { path: ^/users, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/auth, roles: PUBLIC_ACCESS }
+        - { path: ^/v1/fixtures/sync, roles: ROLE_ADMIN }
+        - { path: ^/v1/fixtures, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/v1/test, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/v1/users, roles: IS_AUTHENTICATED_FULLY, methods: [DELETE, PATCH] }
+        - { path: ^/v1/users, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/v1/auth, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: PUBLIC_ACCESS }
 when@test:
     security:
