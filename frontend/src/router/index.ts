@@ -12,7 +12,7 @@ const index = createRouter({
       component: () => import('@/modules/core/view/layout/DefaultLayout.vue'),
       children: [
         {
-          path: '/',
+          path: '',
           name: 'home',
           meta: { title: 'Home' },
           redirect: { name: 'about' },
