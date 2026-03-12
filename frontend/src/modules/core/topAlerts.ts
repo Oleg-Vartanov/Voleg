@@ -1,6 +1,6 @@
 import type {UnwrapRefSimple, ReactiveMarker} from "@vue/reactivity";
 import {reactive, watch} from "vue";
-import ArrayHelper from "@/modules/core/utils/array";
+import arrayUtils from "@/modules/core/utils/arrayUtils";
 import {Alert} from "@/models/alert";
 
 const alerts: Alert[]|UnwrapRefSimple<any>[] & ReactiveMarker = reactive([]);
@@ -15,7 +15,7 @@ export const useTopAlerts = ()  => {
   const remove = (alert: Alert): void => {
     const index: number = alerts.indexOf(alert);
     if (index !== -1) {
-      ArrayHelper.removeIndex(alerts, index);
+      arrayUtils.removeIndex(alerts, index);
     }
   };
 

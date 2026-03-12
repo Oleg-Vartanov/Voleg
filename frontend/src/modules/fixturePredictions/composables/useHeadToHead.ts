@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import Client from '@/modules/core/apiClient';
-import arrayUtils from '@/modules/core/utils/array';
+import arrayUtils from '@/modules/core/utils/arrayUtils';
 
 export interface HeadToHead {
   searchUsers: Ref<any[]>;

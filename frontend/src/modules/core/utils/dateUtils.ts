@@ -1,4 +1,3 @@
-// TODO: Move to core.
 export default {
   format(date, format = 'YYYY-MM-DDThh:mm:ss') {
     const pad = (n) => n.toString().padStart(2, '0');

@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Client from '@/modules/core/apiClient';
-import { useTopAlerts } from "@/modules/core/topAlerts";
-import { Alert } from "@/models/alert";
-import ArrayHelper from "@/modules/core/utils/array";
-import DateHelper from '@/helpers/date-helper';
+import { useTopAlerts } from '@/modules/core/topAlerts';
+import { Alert } from '@/models/alert';
+import arrayUtils from '@/modules/core/utils/arrayUtils';
+import dateUtils from '@/modules/core/utils/dateUtils';
 
 const topAlerts = useTopAlerts();
 const isLoading = ref(false);
 
 const today = (new Date());
 today.setHours(0, 0, 0, 0);
-const dayStart = DateHelper.format(today);
+const dayStart = dateUtils.format(today);
 today.setHours(23, 59, 59, 999);
-const dayEnd = DateHelper.format(today);
-const timezone = DateHelper.getTimezone(today);
+const dayEnd = dateUtils.format(today);
+const timezone = dateUtils.getTimezone(today);
 
 const competition = ref('PL');
 const season = ref(new Date().getFullYear());
@@ -26,7 +26,7 @@ const sync = () => {
 
   Client.syncFixtures(
     competition.value,
-    season.value ,
+    season.value,
     start.value + ' ' + timezone,
     end.value + ' ' + timezone,
   )
@@ -47,8 +47,8 @@ const sync = () => {
     })
     .finally(() => {
       isLoading.value = false;
-    })
-}
+    });
+};
 </script>
 
 <template>
@@ -69,7 +69,7 @@ const sync = () => {
       <div class="input-group mb-2 w-100">
         <span class="input-group-text filter-date-text">Season</span>
         <select class="form-select" v-model="season">
-          <option v-for="year in ArrayHelper.range(2023, 2100)" :key="year" :value="year">
+          <option v-for="year in arrayUtils.range(2023, 2100)" :key="year" :value="year">
             {{ year }}
           </option>
         </select>
@@ -85,13 +85,17 @@ const sync = () => {
         <input id="end" class="form-control filter-date-input" type="datetime-local" v-model="end"/>
       </div>
 
-      <button :disabled="isLoading" v-on:click="sync" type="button" class="btn btn-outline-primary py-2 mb-2 w-100">Sync Matches</button>
+      <button :disabled="isLoading" v-on:click="sync" type="button" class="btn btn-outline-primary py-2 mb-2 w-100">Sync
+        Matches
+      </button>
       <br>
       <div v-if="isLoading" class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
-      <i class="text-secondary">* The current fixtures provider converts datetime to UTC and then uses only the date, ignoring the time.</i> &#128533;<br>
-      <i class="text-secondary">* The end date fixtures are not included in the result, so it's "until then".</i> &#128534;
+      <i class="text-secondary">* The current fixtures provider converts datetime to UTC and then uses only the date,
+        ignoring the time.</i> &#128533;<br>
+      <i class="text-secondary">* The end date fixtures are not included in the result, so it's "until then".</i>
+      &#128534;
 
       <router-view></router-view>
 

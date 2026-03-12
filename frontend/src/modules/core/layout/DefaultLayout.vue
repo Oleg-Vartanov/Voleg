@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import NavBar from '@/components/NavBar.vue';
-import TopAlerts from '@/components/TopAlerts.vue';
+import NavBar from '@/modules/core/components/NavBar.vue';
+import TopAlerts from '@/modules/core/components/TopAlerts.vue';
 </script>
 
 <template>

@@ -1,6 +1,7 @@
 import type {Ref, UnwrapRef} from "vue";
 import {ref} from "vue";
 
+// TODO: refactor
 export class Alert {
   public id: number = 0;
   public text: string;

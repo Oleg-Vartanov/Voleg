@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import routerUtils from '@/modules/core/utils/router';
+import routerUtils from '@/modules/core/utils/routerUtils';
 import Client from "@/modules/core/apiClient";
 import {type Router, useRouter} from 'vue-router';
 import {useTopAlerts} from "@/modules/core/topAlerts";

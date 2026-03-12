@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import arrayUtils from '@/modules/core/utils/array';
+import arrayUtils from '@/modules/core/utils/arrayUtils';
 import { useFilters } from '@/modules/fixturePredictions/composables/useFilters';
 import { useTables } from '@/modules/fixturePredictions/composables/useTables';
 

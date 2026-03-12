@@ -1,6 +1,6 @@
 import type { Router } from 'vue-router';
 import type { User } from '@/modules/user/type';
-import arrayUtils from '@/modules/core/utils/array';
+import arrayUtils from '@/modules/core/utils/arrayUtils';
 import { Alert } from '@/models/alert';
 import { reactive, readonly } from 'vue';
 import { useRouter } from 'vue-router';
