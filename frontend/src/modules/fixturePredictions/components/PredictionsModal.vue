@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import TeamLogo from '@/modules/fixturePredictions/components/TeamLogo.vue';
-import { useAuth } from '@/modules/user/auth';
+import { useAuth } from '@/modules/user/composables/useAuth';
 import { useTables } from '@/modules/fixturePredictions/composables/useTables';
 import { usePredictions } from '@/modules/fixturePredictions/composables/usePredictions';
 

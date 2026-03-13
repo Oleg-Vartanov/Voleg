@@ -2,8 +2,7 @@ import type { Fixture, Prediction } from '@/modules/fixturePredictions/type';
 import { useTables } from '@/modules/fixturePredictions/composables/useTables';
 import Client from '@/modules/core/apiClient';
 import { computed, ref } from 'vue';
-import { useTopAlerts } from '@/modules/core/topAlerts';
-import { Alert } from '@/models/alert';
+import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
 
 export interface Predictions {
   isLoading: Ref<boolean>;
@@ -110,14 +109,14 @@ export function usePredictions(): Predictions {
     try {
       await Client.makePredictions(Object.values(predictions));
       tables.updateLoadedTables();
-      topAlerts.add(new Alert('Updated.', 'success', 10));
+      topAlerts.add('Updated.', 'success');
     } catch (err: any) {
       switch (err?.response?.status) {
         case 409:
-          topAlerts.add(new Alert('Some fixtures have already started. Try to reload the page.', 'danger', 10));
+          topAlerts.add('Some fixtures have already started. Try to reload the page.', 'danger');
           break;
         default:
-          topAlerts.add(new Alert('Error. Try again later or contact support.', 'danger', 10));
+          topAlerts.add('Error. Try again later or contact support.', 'danger');
       }
     } finally {
       isLoading.value = false;

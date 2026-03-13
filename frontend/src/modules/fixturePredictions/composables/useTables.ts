@@ -1,6 +1,5 @@
 import { computed, ref } from 'vue';
 import Client from '@/modules/core/apiClient';
-import { Alert } from '@/models/alert';
 import { useFilters } from '@/modules/fixturePredictions/composables/useFilters';
 import { useHeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead';
 import type { Fixture, LeaderboardUser } from '@/modules/fixturePredictions/type';
@@ -66,7 +65,7 @@ export function useTables(): Tables {
       fixtures.value = response.data.fixtures;
       filters.applyFilters(response);
     } catch {
-      topAlerts.add(new Alert('Error during obtaining data.', 'danger', 10));
+      topAlerts.add('Error during obtaining data.', 'danger');
     } finally {
       isLoading.value.fixtures = false;
     }
@@ -84,7 +83,7 @@ export function useTables(): Tables {
       leaderboard.value = response.data.users;
       filters.applyFilters(response);
     } catch {
-      topAlerts.add(new Alert('Error during obtaining leaderboard.', 'danger', 10));
+      topAlerts.add('Error during obtaining leaderboard.', 'danger');
     } finally {
       isLoading.value.leaderboard = false;
     }

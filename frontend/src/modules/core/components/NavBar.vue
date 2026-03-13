@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import ColorThemeToggle from './ColorThemeToggle.vue';
-import {useRoute} from 'vue-router'
-import {useAuth} from "@/modules/user/auth";
+import { useRoute } from 'vue-router';
+import { useAuth } from '@/modules/user/composables/useAuth';
 
 let centerRoutes: { name: string, title: string }[] = [
-  {name: 'about', title: 'About'},
-  {name: 'games', title: 'Games'},
-  {name: 'pricing', title: 'Pricing'},
-  {name: 'admin', title: 'Admin', roles: ['ROLE_ADMIN']},
+  { name: 'about', title: 'About' },
+  { name: 'games', title: 'Games' },
+  { name: 'pricing', title: 'Pricing' },
+  { name: 'admin', title: 'Admin', roles: ['ROLE_ADMIN'] },
 ];
 
 const route = useRoute();
@@ -66,7 +66,8 @@ function routerLinkClass(routeName: string) {
               </router-link>
             </li>
             <li v-if="auth.user.isSignedIn" class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">{{ auth.user.displayName ?? 'User' }}</a>
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"
+                 aria-expanded="false">{{ auth.user.displayName ?? 'User' }}</a>
               <ul class="dropdown-menu dropdown-menu-end">
                 <router-link class="dropdown-item" :to="{ name: 'profile' }">Profile</router-link>
                 <li><a @click="auth.signOut()" class="dropdown-item" href="#">Sign Out</a></li>

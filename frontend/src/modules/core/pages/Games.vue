@@ -1,9 +1,8 @@
 <script setup lang="ts">
 
-import { useAuth } from "@/modules/user/auth";
-import { useTopAlerts } from "@/modules/core/topAlerts";
-import { Alert } from "@/models/alert";
-import { type Router, useRouter } from "vue-router";
+import { useAuth } from '@/modules/user/composables/useAuth';
+import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
+import { type Router, useRouter } from 'vue-router';
 
 const router: Router = useRouter();
 const auth = useAuth();
@@ -15,16 +14,16 @@ const games = [
     description: 'Guess the result and score points against other players.',
     logo: '/football-predictions-logo.png',
     path: 'football-predictions',
-    requireSignIn: true
-  }
+    requireSignIn: true,
+  },
 ];
 
 function checkRequirements(game) {
   if (game.requireSignIn && !auth.user.isSignedIn) {
-    topAlerts.add(new Alert(game.title+' requires to sign in. To keep track of results.', 'info', 5));
+    topAlerts.add(game.title + ' requires to sign in. To keep track of results.', 'info', 5);
     return;
   }
-  router.push({ name: game.path })
+  router.push({ name: game.path });
 }
 
 </script>

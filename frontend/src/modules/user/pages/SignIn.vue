@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import client from "@/modules/core/apiClient";
-import {useAuth} from "@/modules/user/auth";
-import {type Ref, ref, type UnwrapRef} from 'vue';
+import client from '@/modules/core/apiClient';
+import { useAuth } from '@/modules/user/auth';
+import { type Ref, ref, type UnwrapRef } from 'vue';
 
 const auth = useAuth();
 
-const message401: Ref<UnwrapRef<string|null>> = ref(null);
+const message401: Ref<UnwrapRef<string | null>> = ref(null);
 const isLoading = ref(false);
 
 const signIn = (event: SubmitEvent) => {
@@ -17,7 +17,7 @@ const signIn = (event: SubmitEvent) => {
 
   client.signIn(formValues)
     .then((response) => {
-      auth.signIn(response.data)
+      auth.signIn(response.data);
     })
     .catch((axiosError) => {
       message401.value = 'Invalid credentials';
@@ -28,7 +28,7 @@ const signIn = (event: SubmitEvent) => {
     .finally(() => {
       isLoading.value = false;
     });
-}
+};
 </script>
 
 <template>

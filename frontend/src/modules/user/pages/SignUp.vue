@@ -1,20 +1,19 @@
 <script setup lang="ts">
 import routerUtils from '@/modules/core/utils/routerUtils';
-import Client from "@/modules/core/apiClient";
-import {type Router, useRouter} from 'vue-router';
-import {useTopAlerts} from "@/modules/core/topAlerts";
-import {ref, reactive} from 'vue';
-import {Alert} from "@/models/alert";
+import Client from '@/modules/core/apiClient';
+import { type Router, useRouter } from 'vue-router';
+import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
+import { ref, reactive } from 'vue';
 
 const topAlerts = useTopAlerts();
 const router: Router = useRouter();
 
 const fields = reactive({
-  'displayName': { 'isValid': null, 'errorMessage': ''},
-  'tag': { 'isValid': null, 'errorMessage': ''},
-  'email': { 'isValid': null, 'errorMessage': ''},
-  'password': { 'isValid': null, 'errorMessage': ''},
-  'code': { 'isValid': null, 'errorMessage': ''},
+  'displayName': { 'isValid': null, 'errorMessage': '' },
+  'tag': { 'isValid': null, 'errorMessage': '' },
+  'email': { 'isValid': null, 'errorMessage': '' },
+  'password': { 'isValid': null, 'errorMessage': '' },
+  'code': { 'isValid': null, 'errorMessage': '' },
 });
 const isLoading = ref(false);
 
@@ -22,8 +21,8 @@ const resetResult = () => {
   Object.keys(fields).forEach((v) => {
     fields[v]['isValid'] = null;
     fields[v]['errorMessage'] = '';
-  })
-}
+  });
+};
 
 const signUp = (event: SubmitEvent) => {
   isLoading.value = true;
@@ -34,7 +33,7 @@ const signUp = (event: SubmitEvent) => {
 
   Client.signUp(formValues)
     .then(() => {
-      topAlerts.add(new Alert('You\'ve signed up! All that\'s left is to verify your account via email.', 'success', 30));
+      topAlerts.add('You\'ve signed up! All that\'s left is to verify your account via email.', 'success', 30);
       router.push({ name: 'signIn' });
     })
     .catch((axiosError) => {
@@ -42,7 +41,7 @@ const signUp = (event: SubmitEvent) => {
         const property = violation.propertyPath;
         if (fields.hasOwnProperty(property)) {
           fields[property].isValid = false;
-          fields[property].errorMessage += violation.title + "<br>";
+          fields[property].errorMessage += violation.title + '<br>';
         }
       });
 
@@ -50,12 +49,12 @@ const signUp = (event: SubmitEvent) => {
         if (fields[field]['isValid'] === null) {
           fields[field]['isValid'] = true;
         }
-      })
+      });
     })
     .finally(() => {
       isLoading.value = false;
     });
-}
+};
 </script>
 
 <template>
@@ -155,7 +154,7 @@ const signUp = (event: SubmitEvent) => {
       >
       <label for="password">Password</label>
       <div
-          v-if="fields.password.isValid === false"
+        v-if="fields.password.isValid === false"
         id="password-validation-feedback"
         class="invalid-feedback"
         v-html="fields.password.errorMessage">

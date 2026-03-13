@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Client from '@/modules/core/apiClient';
-import { useTopAlerts } from '@/modules/core/topAlerts';
-import { Alert } from '@/models/alert';
+import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
 import arrayUtils from '@/modules/core/utils/arrayUtils';
 import dateUtils from '@/modules/core/utils/dateUtils';
 
@@ -31,18 +30,18 @@ const sync = () => {
     end.value + ' ' + timezone,
   )
     .then(() => {
-      topAlerts.add(new Alert('Fixtures were synced.', 'success', 10));
+      topAlerts.add('Fixtures were synced.', 'success');
     })
     .catch((axiosError) => {
       switch (axiosError.response.status) {
         case 403:
-          topAlerts.add(new Alert('Forbidden action.', 'danger', 10));
+          topAlerts.add('Forbidden action.', 'danger');
           break;
         case 401:
-          topAlerts.add(new Alert('Unauthorized.', 'danger', 10));
+          topAlerts.add('Unauthorized.', 'danger');
           break;
         default:
-          topAlerts.add(new Alert('Unable to sync. Try again later. Or contact support.', 'danger', 10));
+          topAlerts.add('Unable to sync. Try again later. Or contact support.', 'danger');
       }
     })
     .finally(() => {

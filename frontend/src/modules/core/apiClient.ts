@@ -1,13 +1,13 @@
 import axios from 'axios';
-import {useAuth} from "@/modules/user/auth";
+import { useAuth } from '@/modules/user/composables/useAuth';
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL + '/v1';
 const authType: string = 'Bearer';
 
 const getHeader = () => {
   const auth = useAuth();
-  return auth.user.isSignedIn ? {Authorization: `${authType} ${auth.getToken()}`} : {};
-}
+  return auth.user.isSignedIn ? { Authorization: `${authType} ${auth.getToken()}` } : {};
+};
 
 export default {
   signIn(params: object): Promise<axios.AxiosResponse> {
@@ -22,45 +22,52 @@ export default {
     return axios.post(
       `${apiBaseUrl}/fixtures/sync`,
       { competitionCode, seasonYear, from, to },
-      { headers: getHeader() }
+      { headers: getHeader() },
     );
   },
 
   showFixtures(
-    start: null|string = null,
-    end: null|string = null,
-    competition: null|string = null,
-    userIds: null|number[] = null,
-    season: null|number
+    start: null | string = null,
+    end: null | string = null,
+    competition: null | string = null,
+    userIds: null | number[] = null,
+    season: null | number,
   ) {
     return axios.get(`${apiBaseUrl}/fixtures/predictions`, {
       headers: getHeader(),
-      params: { start: start, end: end, competition: competition, userIds: userIds, season: season, defaultToCurrentSeason: true }
+      params: {
+        start: start,
+        end: end,
+        competition: competition,
+        userIds: userIds,
+        season: season,
+        defaultToCurrentSeason: true,
+      },
     });
   },
 
   leaderboard(
-    start: null|string = null,
-    end: null|string = null,
-    competition: null|string = null,
-    season: null|number
+    start: null | string = null,
+    end: null | string = null,
+    competition: null | string = null,
+    season: null | number,
   ) {
     return axios.get(`${apiBaseUrl}/fixtures/leaderboard`, {
       headers: getHeader(),
-      params: { start: start, end: end, competition: competition, season: season, defaultToCurrentSeason: true }
+      params: { start: start, end: end, competition: competition, season: season, defaultToCurrentSeason: true },
     });
   },
 
-  listUsers(userTag: null|string = null) {
+  listUsers(userTag: null | string = null) {
     return axios.get(`${apiBaseUrl}/users`, {
       headers: getHeader(),
-      params: { tag: userTag }
+      params: { tag: userTag },
     });
   },
 
   makePredictions(params: object) {
     return axios.post(`${apiBaseUrl}/fixtures/make-predictions`, params, {
-      headers: getHeader()
+      headers: getHeader(),
     });
   },
 };

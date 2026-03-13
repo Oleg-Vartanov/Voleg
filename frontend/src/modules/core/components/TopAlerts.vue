@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { useTopAlerts } from '@/modules/core/topAlerts';
+import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
 
 const module = useTopAlerts();
 </script>
 
 <template>
   <TransitionGroup name="list" tag="div">
-  <div v-for="alert in module.alerts" :key="alert.id">
+    <div v-for="alert in module.alerts" :key="alert.id">
       <div
         :class="['alert-' + alert.type]"
         class="alert alert-dismissible d-flex justify-content-between align-items-center mt-1 mb-0"
@@ -23,7 +23,7 @@ const module = useTopAlerts();
           <button @click="module.remove(alert)" type="button" class="btn-close" aria-label="Close"></button>
         </div>
       </div>
-  </div>
+    </div>
   </TransitionGroup>
 </template>
 
@@ -31,6 +31,7 @@ const module = useTopAlerts();
 .alert {
   padding: 5px;
 }
+
 .alert-dismissible .btn-close {
   padding: 10px;
   position: relative;

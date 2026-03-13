@@ -1,10 +1,9 @@
 import type { Router } from 'vue-router';
 import type { User } from '@/modules/user/type';
 import arrayUtils from '@/modules/core/utils/arrayUtils';
-import { Alert } from '@/models/alert';
 import { reactive, readonly } from 'vue';
 import { useRouter } from 'vue-router';
-import { useTopAlerts } from '@/modules/core/topAlerts';
+import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
 import { jwtDecode } from 'jwt-decode';
 
 const localStorageKey = 'voleg-jwt';
@@ -65,13 +64,13 @@ export const useAuth = () => {
   function signIn(params: object): void {
     setToken(params.token);
     setUserByToken();
-    topAlerts.add(new Alert('Successfully signed in. Welcome!', 'success', 10));
+    topAlerts.add('Successfully signed in. Welcome!', 'success');
     router.push({ name: 'home' });
   }
 
   function signOut(): void {
     reset();
-    topAlerts.add(new Alert('Signed out.', 'success', 5));
+    topAlerts.add('Signed out.', 'success', 5);
     router.push({ name: 'signIn' });
   }
 
