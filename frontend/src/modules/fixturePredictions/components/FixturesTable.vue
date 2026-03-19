@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import TeamLogo from '@/modules/fixturePredictions/components/TeamLogo.vue';
 import { useAuth } from '@/modules/user/composables/useAuth';
-import { useHeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead';
-import { useTables } from '@/modules/fixturePredictions/composables/useTables';
-import { usePredictions } from '@/modules/fixturePredictions/composables/usePredictions';
+import type HeadToHead from '@/modules/fixturePredictions/composables/useHeadToHead';
+import type Tables from '@/modules/fixturePredictions/composables/useTables';
+import type Predictions from '@/modules/fixturePredictions/composables/usePredictions';
+
+const props = defineProps<{
+  tables: Tables;
+  h2h: HeadToHead;
+  predictions: Predictions;
+}>();
 
 const auth = useAuth();
-const h2h = useHeadToHead();
-const tables = useTables();
-const predictions = usePredictions();
 </script>
 
 <template>
@@ -31,7 +34,7 @@ const predictions = usePredictions();
     <!-- No fixtures -->
     <tr v-if="tables.fixtures.value?.length === 0">
       <td colspan="6" class="text-center py-3 text-muted">
-        No fixtures for this period
+        No fixtures found
       </td>
     </tr>
 

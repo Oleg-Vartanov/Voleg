@@ -10,7 +10,7 @@ class LeaderboardRow
 {
     public function __construct(
         public User $user,
-        public int $totalPoints,
+        public ?int $totalPoints,
         public int $periodPoints,
     ) {
     }

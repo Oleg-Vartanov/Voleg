@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { useTables } from '@/modules/fixturePredictions/composables/useTables';
+import type Tables from '@/modules/fixturePredictions/composables/useTables';
 
-const tables = useTables();
+const props = defineProps<{
+  tables: Tables;
+}>();
 </script>
 
 <template>
@@ -19,7 +21,7 @@ const tables = useTables();
     <!-- No results -->
     <tr v-if="tables.leaderboard.value?.length === 0">
       <td colspan="6" class="text-center py-3 text-muted">
-        No results for this period
+        No results found
       </td>
     </tr>
 

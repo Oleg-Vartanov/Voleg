@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { type TablesEnum, useTables } from '@/modules/fixturePredictions/composables/useTables';
+import { type Tables, type TablesEnum } from '@/modules/fixturePredictions/composables/useTables';
 
 const props = defineProps<{
+  tables: Tables;
   table: TablesEnum;
   text: string;
   active: boolean;
 }>();
-
-const tables = useTables();
 </script>
 
 <template>

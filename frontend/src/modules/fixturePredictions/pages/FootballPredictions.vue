@@ -10,8 +10,14 @@ import { useTables } from '@/modules/fixturePredictions/composables/useTables';
 import TopButtons from '@/modules/fixturePredictions/components/TopButtons.vue';
 import TabNavigationButton from '@/modules/fixturePredictions/components/TabNavigationButton.vue';
 import Tab from '@/modules/fixturePredictions/components/Tab.vue';
+import { useFilters } from '@/modules/fixturePredictions/composables/useFilters';
+import { useHeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead';
+import { usePredictions } from '@/modules/fixturePredictions/composables/usePredictions';
 
-const tables = useTables();
+const filters = useFilters();
+const h2h = useHeadToHead();
+const tables = useTables(filters, h2h);
+const predictions = usePredictions(tables);
 
 tables.loadFixtures();
 
@@ -24,16 +30,16 @@ const disablePredictions = computed(() => {
   <div class="ov-center">
     <div class="container">
 
-      <FixtureFilters/>
-      <HeadToHeadModal/>
-      <PredictionsModal/>
+      <FixtureFilters :tables :filters/>
+      <HeadToHeadModal :tables :h2h/>
+      <PredictionsModal :tables :predictions/>
 
-      <TopButtons :disablePredictions="disablePredictions"/>
+      <TopButtons :disablePredictions/>
 
       <nav>
         <div class="nav nav-tabs justify-content-center" id="nav-tab" role="tablist">
-          <TabNavigationButton :table="'matches'" text="Matches" :active="true"/>
-          <TabNavigationButton :table="'leaderboard'" text="Leaderboard" :active="false"/>
+          <TabNavigationButton :tables :table="'matches'" text="Matches" :active="true"/>
+          <TabNavigationButton :tables :table="'leaderboard'" text="Leaderboard" :active="false"/>
         </div>
       </nav>
 
@@ -42,10 +48,10 @@ const disablePredictions = computed(() => {
           <span class="visually-hidden">Loading...</span>
         </div>
         <Tab :table="'matches'" :active="true">
-          <FixturesTable/>
+          <FixturesTable :tables :h2h :predictions/>
         </Tab>
         <Tab :table="'leaderboard'">
-          <LeaderboardTable/>
+          <LeaderboardTable :tables/>
         </Tab>
       </div>
 

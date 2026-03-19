@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import client from '@/modules/core/apiClient';
-import { useAuth } from '@/modules/user/auth';
+import { useAuth } from '@/modules/user/composables/useAuth';
 import { type Ref, ref, type UnwrapRef } from 'vue';
 
 const auth = useAuth();

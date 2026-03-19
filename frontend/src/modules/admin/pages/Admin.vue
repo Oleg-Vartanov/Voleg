@@ -4,6 +4,7 @@ import Client from '@/modules/core/apiClient';
 import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
 import arrayUtils from '@/modules/core/utils/arrayUtils';
 import dateUtils from '@/modules/core/utils/dateUtils';
+import { CompetitionCode, CompetitionNames } from '@/modules/fixturePredictions/enum';
 
 const topAlerts = useTopAlerts();
 const isLoading = ref(false);
@@ -15,7 +16,7 @@ today.setHours(23, 59, 59, 999);
 const dayEnd = dateUtils.format(today);
 const timezone = dateUtils.getTimezone(today);
 
-const competition = ref('PL');
+const competition = ref(CompetitionCode.PL);
 const season = ref(new Date().getFullYear());
 const start = ref(dayStart);
 const end = ref(dayEnd);
@@ -61,7 +62,7 @@ const sync = () => {
       <div class="input-group mb-2 w-100">
         <span class="input-group-text filter-date-text">Competition</span>
         <select class="form-select" aria-label="Default select example" v-model="competition">
-          <option value="PL">English Premier League</option>
+          <option :value="CompetitionCode.PL">{{ CompetitionNames[CompetitionCode.PL] }}</option>
         </select>
       </div>
 

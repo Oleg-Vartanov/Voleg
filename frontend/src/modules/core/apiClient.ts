@@ -38,7 +38,7 @@ export default {
       params: {
         start: start,
         end: end,
-        competition: competition,
+        competitionCode: competition,
         userIds: userIds,
         season: season,
         defaultToCurrentSeason: true,
@@ -54,7 +54,13 @@ export default {
   ) {
     return axios.get(`${apiBaseUrl}/fixtures/leaderboard`, {
       headers: getHeader(),
-      params: { start: start, end: end, competition: competition, season: season, defaultToCurrentSeason: true },
+      params: {
+        start: start,
+        end: end,
+        competitionCode: competition,
+        season: season,
+        defaultToCurrentSeason: true
+      },
     });
   },
 

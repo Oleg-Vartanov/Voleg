@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import arrayUtils from '@/modules/core/utils/arrayUtils';
-import { useFilters } from '@/modules/fixturePredictions/composables/useFilters';
-import { useTables } from '@/modules/fixturePredictions/composables/useTables';
+import type FixtureFilters from '@/modules/fixturePredictions/composables/useFilters';
+import type Tables from '@/modules/fixturePredictions/composables/useTables';
+import { CompetitionCode, CompetitionNames } from '@/modules/fixturePredictions/enum';
 
-const filters = useFilters();
-const tables = useTables();
+const props = defineProps<{
+  tables: Tables;
+  filters: FixtureFilters;
+}>();
 </script>
 
 <template>
@@ -39,7 +42,7 @@ const tables = useTables();
             <div class="input-group">
               <span class="input-group-text filter-date-text">Competition</span>
               <select class="form-select" aria-label="Default select example" v-model="filters.competition.value">
-                <option value="PL">English Premier League</option>
+                <option :value="CompetitionCode.PL">{{ CompetitionNames[CompetitionCode.PL] }}</option>
               </select>
             </div>
           </div>

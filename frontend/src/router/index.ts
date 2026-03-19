@@ -54,7 +54,7 @@ const index = createRouter({
           name: 'admin',
           meta: { title: 'Admin' },
           beforeEnter: [guards.isAuthenticated, guards.hasRole(['ROLE_ADMIN'])],
-          component: () => import('@/modules/core/pages/Admin.vue'),
+          component: () => import('@/modules/admin/pages/Admin.vue'),
         },
         {
           path: 'auth-forms',

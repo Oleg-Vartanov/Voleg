@@ -1,5 +1,5 @@
 import type { Fixture, Prediction } from '@/modules/fixturePredictions/type';
-import { useTables } from '@/modules/fixturePredictions/composables/useTables';
+import type Tables from '@/modules/fixturePredictions/composables/useTables';
 import Client from '@/modules/core/apiClient';
 import { computed, ref } from 'vue';
 import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
@@ -14,26 +14,26 @@ export interface Predictions {
   fixtureDate: (fixture: Fixture) => { date: string; time: string };
 }
 
-const tables = useTables();
-
-const isLoading = ref(false);
-const predictionMap = computed(() => {
-  const map = new Map();
-
-  for (const fixture of tables.fixtures.value) {
-    if (!fixture.fixturePredictions) continue;
-
-    for (const p of fixture.fixturePredictions) {
-      const key = `${fixture.id}-${p.user.id}`;
-      map.set(key, p);
-    }
-  }
-
-  return map;
-});
-
-export function usePredictions(): Predictions {
+export function usePredictions(
+  tables: Tables,
+): Predictions {
   const topAlerts = useTopAlerts();
+
+  const isLoading = ref(false);
+  const predictionMap = computed(() => {
+    const map = new Map();
+
+    for (const fixture of tables.fixtures.value) {
+      if (!fixture.fixturePredictions) continue;
+
+      for (const p of fixture.fixturePredictions) {
+        const key = `${fixture.id}-${p.user.id}`;
+        map.set(key, p);
+      }
+    }
+
+    return map;
+  });
 
   function getPrediction(fixtureId, userId) {
     return predictionMap.value.get(`${fixtureId}-${userId}`) || null;

@@ -1,10 +1,14 @@
 import { computed, ref } from 'vue';
 import Client from '@/modules/core/apiClient';
-import { useFilters } from '@/modules/fixturePredictions/composables/useFilters';
-import { useHeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead';
+import type FixtureFilters from '@/modules/fixturePredictions/composables/useFilters';
+import type HeadToHead from '@/modules/fixturePredictions/composables/useHeadToHead';
+import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
 import type { Fixture, LeaderboardUser } from '@/modules/fixturePredictions/type';
 
-export type TablesEnum = 'matches' | 'leaderboard';
+export enum TablesEnum {
+  MATCHES = 'matches',
+  LEADERBOARD = 'leaderboard',
+}
 
 export interface Tables {
   isLoading: Ref<{
@@ -20,40 +24,45 @@ export interface Tables {
   loadLeaderboard: () => Promise<void>;
 }
 
-const filters = useFilters();
-const h2h = useHeadToHead();
+export function useTables(
+  filters: FixtureFilters,
+  h2h: HeadToHead,
+): Tables {
+  const topAlerts = useTopAlerts();
 
-const isLoading = ref({
-  fixtures: false,
-  leaderboard: false,
-});
-const isLoadingTables = computed(() => {
-  return isLoading.value.fixtures || isLoading.value.leaderboard;
-});
-const fixtures = ref(null);
-const leaderboard = ref(null);
+  const isLoading = ref({
+    fixtures: false,
+    leaderboard: false,
+  });
+  const isLoadingTables = computed(() => {
+    return isLoading.value.fixtures || isLoading.value.leaderboard;
+  });
+  const fixtures = ref(null);
+  const leaderboard = ref(null);
 
-export function useTables(): Tables {
-  function initTable(tab: string) {
-    if (tab === 'matches' && fixtures.value === null) {
-      loadFixtures(h2h.users.value.map(u => u.id));
+  function initTable(tab: TablesEnum) {
+    if (tab === TablesEnum.MATCHES && fixtures.value === null) {
+      loadFixtures();
     }
-    if (tab === 'leaderboard' && leaderboard.value === null) {
+    if (tab === TablesEnum.LEADERBOARD && leaderboard.value === null) {
       loadLeaderboard();
     }
   }
 
   function updateLoadedTables() {
     if (fixtures.value !== null) {
-      loadFixtures(h2h.users.value.map(u => u.id));
+      loadFixtures();
     }
     if (leaderboard.value !== null) {
       loadLeaderboard();
     }
   }
 
-  async function loadFixtures(userIds: number[] = []) {
+  async function loadFixtures() {
+    const userIds = h2h.users.value.map(u => u.id);
+
     isLoading.value.fixtures = true;
+
     try {
       const response = await Client.showFixtures(
         filters.start.value,
@@ -63,9 +72,14 @@ export function useTables(): Tables {
         filters.season.value,
       );
       fixtures.value = response.data.fixtures;
-      filters.applyFilters(response);
-    } catch {
-      topAlerts.add('Error during obtaining data.', 'danger');
+      filters.applyByResponse(response);
+    } catch (err: any) {
+      if (err?.response?.status === 422) {
+        topAlerts.add('Invalid request. Check the filters and retry.', 'warning');
+      } else {
+        topAlerts.add('Error during obtaining data.', 'danger');
+      }
+      reset();
     } finally {
       isLoading.value.fixtures = false;
     }
@@ -81,12 +95,23 @@ export function useTables(): Tables {
         filters.season.value,
       );
       leaderboard.value = response.data.users;
-      filters.applyFilters(response);
-    } catch {
-      topAlerts.add('Error during obtaining leaderboard.', 'danger');
+      filters.applyByResponse(response);
+    } catch (err: any) {
+      if (err?.response?.status === 422) {
+        topAlerts.add('Invalid request. Check the filters and retry.', 'warning');
+      } else {
+        topAlerts.add('Error during obtaining leaderboard.', 'danger');
+      }
+      reset();
     } finally {
       isLoading.value.leaderboard = false;
     }
+  }
+
+  function reset(): void {
+    fixtures.value = [];
+    leaderboard.value = [];
+    filters.reset();
   }
 
   return {

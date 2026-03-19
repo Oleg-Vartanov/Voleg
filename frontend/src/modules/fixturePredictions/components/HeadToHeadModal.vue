@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { useHeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead';
-import { useTables } from '@/modules/fixturePredictions/composables/useTables';
+import type HeadToHead from '@/modules/fixturePredictions/composables/useHeadToHead';
+import type Tables from '@/modules/fixturePredictions/composables/useTables';
 
-const h2h = useHeadToHead();
-const tables = useTables();
+const { h2h, tables } = defineProps<{
+  tables: Tables;
+  h2h: HeadToHead;
+}>();
 
 function addUser(user) {
   h2h.addUser(user);

@@ -11,12 +11,12 @@ export interface HeadToHead {
   removeUser: (user: any) => void;
 }
 
-const isLoading = ref(false);
-const searchUsers = ref([]);
-const users = ref([]);
-const input = ref({ value: '', error: '' });
-
 export function useHeadToHead(): HeadToHead {
+  const isLoading = ref(false);
+  const searchUsers = ref([]);
+  const users = ref([]);
+  const input = ref({ value: '', error: '' });
+
   async function searchUser() {
     isLoading.value = true;
     try {
