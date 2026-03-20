@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
+import { useTopAlerts } from '@/modules/core/stores/useTopAlerts';
 
 const module = useTopAlerts();
 </script>

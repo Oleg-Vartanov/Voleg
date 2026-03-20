@@ -2,7 +2,7 @@ import { computed, ref } from 'vue';
 import Client from '@/modules/core/apiClient';
 import type FixtureFilters from '@/modules/fixturePredictions/composables/useFilters';
 import type HeadToHead from '@/modules/fixturePredictions/composables/useHeadToHead';
-import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
+import { useTopAlerts } from '@/modules/core/stores/useTopAlerts';
 import type { Fixture, LeaderboardUser } from '@/modules/fixturePredictions/type';
 
 export enum TablesEnum {

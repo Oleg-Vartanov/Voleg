@@ -2,7 +2,7 @@
 import routerUtils from '@/modules/core/utils/routerUtils';
 import Client from '@/modules/core/apiClient';
 import { type Router, useRouter } from 'vue-router';
-import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
+import { useTopAlerts } from '@/modules/core/stores/useTopAlerts';
 import { ref, reactive } from 'vue';
 
 const topAlerts = useTopAlerts();

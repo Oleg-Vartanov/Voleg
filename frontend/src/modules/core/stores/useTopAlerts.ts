@@ -1,4 +1,4 @@
-import type { UnwrapRefSimple, ReactiveMarker } from '@vue/reactivity';
+import { defineStore } from 'pinia';
 import { ref, reactive, watch } from 'vue';
 import arrayUtils from '@/modules/core/utils/arrayUtils';
 
@@ -12,9 +12,9 @@ export interface Alert {
   countdown: Ref<number>;
 }
 
-const alerts: Alert[] | UnwrapRefSimple<any>[] & ReactiveMarker = reactive([]);
+export const useTopAlerts = defineStore('topAlerts', () => {
+  const alerts = reactive<Alert[]>([]);
 
-export const useTopAlerts = () => {
   function createAlert(text: string, type: AlertType = 'primary', timeout: number = 10): Alert {
     const countdown = ref(timeout);
 
@@ -55,11 +55,11 @@ export const useTopAlerts = () => {
   };
 
   const generateNewAlertId = (): number => {
-    const highestAlertId: null | number = getHighestAlertId();
+    const highestAlertId: number | null = getHighestAlertId();
     return highestAlertId !== null ? highestAlertId + 1 : 0;
   };
 
-  const getHighestAlertId = (): null | number => {
+  const getHighestAlertId = (): number | null => {
     if (alerts.length === 0) {
       return null;
     }
@@ -81,4 +81,4 @@ export const useTopAlerts = () => {
   };
 
   return { alerts, add, remove };
-};
+});

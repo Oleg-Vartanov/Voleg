@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
-import { useAuth } from '@/modules/user/composables/useAuth';
-import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
+import { useAuth } from '@/modules/user/stores/useAuth';
+import { useTopAlerts } from '@/modules/core/stores/useTopAlerts';
 import { type Router, useRouter } from 'vue-router';
 
 const router: Router = useRouter();

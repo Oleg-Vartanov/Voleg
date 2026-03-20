@@ -28,7 +28,7 @@ class UserFixture extends Fixture
                 'reference' => 'admin',
             ],
             [
-                'email' => 'user@admin.com',
+                'email' => 'user@user.com',
                 'password' => 'user',
                 'displayName' => 'User',
                 'tag' => 'user',

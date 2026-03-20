@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useAuth } from '@/modules/user/composables/useAuth';
+import { useAuth } from '@/modules/user/stores/useAuth';
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL + '/v1';
 const authType: string = 'Bearer';

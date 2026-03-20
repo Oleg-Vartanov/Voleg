@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Client from '@/modules/core/apiClient';
-import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
+import { useTopAlerts } from '@/modules/core/stores/useTopAlerts';
 import arrayUtils from '@/modules/core/utils/arrayUtils';
 import dateUtils from '@/modules/core/utils/dateUtils';
 import { CompetitionCode, CompetitionNames } from '@/modules/fixturePredictions/enum';

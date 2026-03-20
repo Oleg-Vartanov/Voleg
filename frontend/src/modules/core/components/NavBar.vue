@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ColorThemeToggle from './ColorThemeToggle.vue';
 import { useRoute } from 'vue-router';
-import { useAuth } from '@/modules/user/composables/useAuth';
+import { useAuth } from '@/modules/user/stores/useAuth';
 
 let centerRoutes: { name: string, title: string }[] = [
   { name: 'about', title: 'About' },

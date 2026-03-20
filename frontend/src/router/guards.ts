@@ -1,11 +1,11 @@
-import { useAuth } from '@/modules/user/composables/useAuth';
-import { useTopAlerts } from '@/modules/core/composables/useTopAlerts';
+import { useAuth } from '@/modules/user/stores/useAuth';
+import { useTopAlerts } from '@/modules/core/stores/useTopAlerts';
 
 export const useGuard = () => {
-  const auth = useAuth();
-  const topAlerts = useTopAlerts();
-
   function isAuthenticated(to: object, from: object, next: any): void {
+    const auth = useAuth();
+    const topAlerts = useTopAlerts();
+
     if (auth.isTokenValid()) {
       next();
     } else {
@@ -17,6 +17,9 @@ export const useGuard = () => {
 
   function hasRole(roles: string[]) {
     return function (to, from, next) {
+      const auth = useAuth();
+      const topAlerts = useTopAlerts();
+
       if (auth.hasRole(roles)) {
         next();
       } else {
