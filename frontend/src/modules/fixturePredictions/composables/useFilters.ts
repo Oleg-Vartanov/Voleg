@@ -1,6 +1,6 @@
 import { ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import type { Ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { type Ref } from 'vue';
 import { CompetitionCode } from '@/modules/fixturePredictions/enum';
 
 export interface FixtureFilters {

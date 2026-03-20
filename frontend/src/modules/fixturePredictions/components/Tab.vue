@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TablesEnum } from '@/modules/fixturePredictions/composables/useTables';
+import { type TablesEnum } from '@/modules/fixturePredictions/composables/useTables';
 
 const props = withDefaults(defineProps<{
   table: TablesEnum;

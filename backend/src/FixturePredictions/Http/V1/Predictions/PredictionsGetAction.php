@@ -58,8 +58,10 @@ class PredictionsGetAction extends ApiController
         #[MapQueryString(validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY)]
         PredictionsRequest $dto = new PredictionsRequest(),
     ): JsonResponse {
+        $userIds = array_diff($dto->userIds, [$user->getId()]); // Remove the current user from the list.
         /** @var array<User> $users */
-        $users = empty($dto->userIds) ? [] : $this->userRepository->findBy(['id' => $dto->userIds]);
+        $users = empty($userIds) ? [] : $this->userRepository->findBy(['id' => $userIds]);
+        array_unshift($users, $user);
 
         $competition = $this->competitionRepository->findOneByCode($dto->competitionCode);
         $season = $this->seasonRepository->findByYearOrCompetition(

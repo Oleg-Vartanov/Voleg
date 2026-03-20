@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import TeamLogo from '@/modules/fixturePredictions/components/TeamLogo.vue';
 import { useAuth } from '@/modules/user/stores/useAuth';
-import type Tables from '@/modules/fixturePredictions/composables/useTables';
-import type Predictions from '@/modules/fixturePredictions/composables/usePredictions';
+import { type Tables } from '@/modules/fixturePredictions/composables/useTables';
+import { type Predictions } from '@/modules/fixturePredictions/composables/usePredictions';
 
 const props = defineProps<{
   tables: Tables;

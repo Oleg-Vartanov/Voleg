@@ -1,5 +1,5 @@
 import type { Fixture, Prediction } from '@/modules/fixturePredictions/type';
-import type Tables from '@/modules/fixturePredictions/composables/useTables';
+import { type Tables } from '@/modules/fixturePredictions/composables/useTables';
 import Client from '@/modules/core/apiClient';
 import { computed, ref } from 'vue';
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts';

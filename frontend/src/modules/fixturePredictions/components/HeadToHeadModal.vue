@@ -1,13 +1,22 @@
 <script setup lang="ts">
-import type HeadToHead from '@/modules/fixturePredictions/composables/useHeadToHead';
-import type Tables from '@/modules/fixturePredictions/composables/useTables';
+import { type HeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead';
+import { type Tables } from '@/modules/fixturePredictions/composables/useTables';
+import { useAuth } from '@/modules/user/stores/useAuth';
+import { useTopAlerts } from '@/modules/core/stores/useTopAlerts';
 
 const { h2h, tables } = defineProps<{
   tables: Tables;
   h2h: HeadToHead;
 }>();
 
+const auth = useAuth();
+const topAlerts = useTopAlerts();
+
 function addUser(user) {
+  if (auth.user.id === user.id) {
+    topAlerts.add("It's you :)", 'info');
+    return;
+  }
   h2h.addUser(user);
   tables.updateLoadedTables();
 }

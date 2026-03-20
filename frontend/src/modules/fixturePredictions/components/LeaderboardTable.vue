@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type Tables from '@/modules/fixturePredictions/composables/useTables';
+import { type Tables } from '@/modules/fixturePredictions/composables/useTables';
 
 const props = defineProps<{
   tables: Tables;

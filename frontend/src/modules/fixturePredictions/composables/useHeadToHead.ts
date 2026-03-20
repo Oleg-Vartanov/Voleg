@@ -1,4 +1,5 @@
 import { type Ref, ref } from 'vue';
+import { useAuth } from '@/modules/user/stores/useAuth';
 import Client from '@/modules/core/apiClient';
 import arrayUtils from '@/modules/core/utils/arrayUtils';
 import { useRoute, useRouter } from 'vue-router';
@@ -19,6 +20,7 @@ export interface HeadToHead {
 export function useHeadToHead(): HeadToHead {
   const route = useRoute();
   const router = useRouter();
+  const auth = useAuth();
 
   const wasRequested = ref(false);
   const isLoading = ref(false);
@@ -40,7 +42,7 @@ export function useHeadToHead(): HeadToHead {
   }
 
   function addUser(user: any) {
-    if (!users.value.includes(user)) {
+    if (!users.value.includes(user) && auth.user.id !== user.id) {
       users.value.push(user);
     }
   }
@@ -58,7 +60,9 @@ export function useHeadToHead(): HeadToHead {
 
   function updateByResponse(response: any): void {
     wasRequested.value = true;
-    users.value = response.data.filters.users;
+    users.value = response.data.filters.users.filter(function(user) {
+      return user.id !== auth.user.id;
+    });
   }
 
   function routeQuery() {
