@@ -1,9 +1,10 @@
 import { computed, ref } from 'vue';
 import Client from '@/modules/core/apiClient';
-import type FixtureFilters from '@/modules/fixturePredictions/composables/useFilters';
-import type HeadToHead from '@/modules/fixturePredictions/composables/useHeadToHead';
+import { type FixtureFilters } from '@/modules/fixturePredictions/composables/useFilters';
+import { type HeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead';
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts';
 import type { Fixture, LeaderboardUser } from '@/modules/fixturePredictions/type';
+import { useRouter } from 'vue-router';
 
 export enum TablesEnum {
   MATCHES = 'matches',
@@ -28,6 +29,7 @@ export function useTables(
   filters: FixtureFilters,
   h2h: HeadToHead,
 ): Tables {
+  const router = useRouter();
   const topAlerts = useTopAlerts();
 
   const isLoading = ref({
@@ -59,8 +61,6 @@ export function useTables(
   }
 
   async function loadFixtures() {
-    const userIds = h2h.users.value.map(u => u.id);
-
     isLoading.value.fixtures = true;
 
     try {
@@ -68,11 +68,13 @@ export function useTables(
         filters.start.value,
         filters.end.value,
         filters.competition.value,
-        userIds,
+        h2h.getUserIds(),
         filters.season.value,
       );
       fixtures.value = response.data.fixtures;
-      filters.applyByResponse(response);
+      filters.updateByResponse(response);
+      h2h.updateByResponse(response);
+      updateRouteQuery();
     } catch (err: any) {
       if (err?.response?.status === 422) {
         topAlerts.add('Invalid request. Check the filters and retry.', 'warning');
@@ -95,7 +97,8 @@ export function useTables(
         filters.season.value,
       );
       leaderboard.value = response.data.users;
-      filters.applyByResponse(response);
+      filters.updateByResponse(response);
+      updateRouteQuery();
     } catch (err: any) {
       if (err?.response?.status === 422) {
         topAlerts.add('Invalid request. Check the filters and retry.', 'warning');
@@ -112,6 +115,16 @@ export function useTables(
     fixtures.value = [];
     leaderboard.value = [];
     filters.reset();
+  }
+
+  function updateRouteQuery(): void {
+    router.replace({
+      query: {
+        ...router.query,
+        ...filters.routeQuery(),
+        ...h2h.routeQuery(),
+      },
+    });
   }
 
   return {

@@ -60,7 +60,6 @@ class PredictionsGetAction extends ApiController
     ): JsonResponse {
         /** @var array<User> $users */
         $users = empty($dto->userIds) ? [] : $this->userRepository->findBy(['id' => $dto->userIds]);
-        array_unshift($users, $user);
 
         $competition = $this->competitionRepository->findOneByCode($dto->competitionCode);
         $season = $this->seasonRepository->findByYearOrCompetition(
@@ -75,6 +74,7 @@ class PredictionsGetAction extends ApiController
             competitionEntity: $competition,
             seasonEntity: $season,
             limit: $dto->limit,
+            users: $users,
         );
         $fixtures = $this->fixtureRepository->filter(
             users: $users,
