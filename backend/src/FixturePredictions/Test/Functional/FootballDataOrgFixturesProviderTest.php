@@ -9,9 +9,10 @@ use App\FixturePredictions\Repository\FixtureRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
 use App\FixturePredictions\Repository\TeamRepository;
 use App\FixturePredictions\Service\FootballDataOrgFixtureProvider;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\MockObject\Exception;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -21,7 +22,7 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
 {
     use ContainerTestTrait;
 
-    private MockObject&HttpClientInterface $httpClientMock;
+    private Stub&HttpClientInterface $httpClientStub;
     private FootballDataOrgFixtureProvider $fixturesProvider;
     private FixtureRepository $fixtureRepository;
     private CompetitionRepository $competitionRepository;
@@ -33,8 +34,8 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
      */
     public function setUp(): void
     {
-        $this->httpClientMock = $this->createMock(HttpClientInterface::class);
-        static::getContainer()->set(HttpClientInterface::class, $this->httpClientMock);
+        $this->httpClientStub = $this->createStub(HttpClientInterface::class);
+        static::getContainer()->set(HttpClientInterface::class, $this->httpClientStub);
 
         $this->fixturesProvider = $this->getService(FootballDataOrgFixtureProvider::class);
         $this->teamRepository = $this->getService(TeamRepository::class);
@@ -46,13 +47,14 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
     /**
      * @throws Exception
      */
+    #[AllowMockObjectsWithoutExpectations]
     #[TestDox('Provider: sync success')]
     public function testSync(): void
     {
         $this->prepareProviderResponses([
-            ['statusCode' => 200, 'content' => $this->mockTeamsResponse()],
-            ['statusCode' => 200, 'content' => $this->mockSeasonResponse()],
-            ['statusCode' => 200, 'content' => $this->mockFixturesResponse()],
+            ['statusCode' => 200, 'content' => $this->teamsResponseContent()],
+            ['statusCode' => 200, 'content' => $this->seasonResponseContent()],
+            ['statusCode' => 200, 'content' => $this->fixturesResponseContent()],
         ]);
 
         $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
@@ -72,21 +74,21 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
      */
     private function prepareProviderResponses(array $responses): void
     {
-        $mockedResponses = [];
+        $stubResponses = [];
 
         foreach ($responses as $response) {
-            $responseMock = $this->createMock(ResponseInterface::class);
-            $responseMock->method('getStatusCode')->willReturn($response['statusCode']);
-            $responseMock->method('getContent')->willReturn(json_encode($response['content']));
-            $mockedResponses[] = $responseMock;
+            $stubResponse = $this->createStub(ResponseInterface::class);
+            $stubResponse->method('getStatusCode')->willReturn($response['statusCode']);
+            $stubResponse->method('getContent')->willReturn(json_encode($response['content']));
+            $stubResponses[] = $stubResponse;
         }
 
-        $this->httpClientMock
+        $this->httpClientStub
             ->method('request')
-            ->willReturnOnConsecutiveCalls(...$mockedResponses);
+            ->willReturnOnConsecutiveCalls(...$stubResponses);
     }
 
-    private function mockTeamsResponse(): array
+    private function teamsResponseContent(): array
     {
         return [
             'teams' => [
@@ -97,7 +99,7 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
         ];
     }
 
-    private function mockSeasonResponse(): array
+    private function seasonResponseContent(): array
     {
         return [
             'seasons' => [
@@ -106,7 +108,7 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
         ];
     }
 
-    private function mockFixturesResponse(): array
+    private function fixturesResponseContent(): array
     {
         return [
             'matches' => [

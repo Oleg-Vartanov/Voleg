@@ -31,14 +31,13 @@ class PredictionsGetActionTest extends ApiTestCase
         self::assertResponseIsSuccessful();
 
         $content = json_decode($response->getContent(), true);
-
-        self::assertSame([
-            'start' => '2025-01-01',
-            'end' => '2025-01-02',
-            'competition' => CompetitionCodeEnum::EPL->value,
-            'season' => SeasonFixture::CURRENT_SEASON,
-            'limit' => 20,
-        ], $content['filters']);
+        $filters = $content['filters'];
+        self::assertSame('2025-01-01', $filters['start']);
+        self::assertSame('2025-01-02', $filters['end']);
+        self::assertSame(CompetitionCodeEnum::EPL->value, $filters['competition']);
+        self::assertSame(SeasonFixture::CURRENT_SEASON, $filters['season']);
+        self::assertSame(20, $filters['limit']);
+        self::assertSame($user->getId(), array_first($filters['users'])['id']);
         self::assertSame(20, count($content['fixtures']));
     }
 

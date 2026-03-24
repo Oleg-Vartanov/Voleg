@@ -8,8 +8,6 @@ use App\User\Enum\RoleEnum;
 use App\User\Test\Trait\UserTestTrait;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\TestDox;
-use PHPUnit\Framework\MockObject\Exception;
-use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -18,29 +16,21 @@ class SyncTest extends ApiTestCase
 {
     use UserTestTrait;
 
-    private FixtureProvider&MockObject $fixturesProviderMock;
-
-    /**
-     * @throws Exception
-     */
     public function setUp(): void
     {
         parent::setUp();
         $this->bootUserTest();
-
-        $this->client->disableReboot(); // For mocks in a controller.
-        $this->fixturesProviderMock = $this->createMock(FixtureProvider::class);
-        static::getContainer()->set(FixtureProvider::class, $this->fixturesProviderMock);
     }
 
     #[TestDox('Sync request: success')]
     public function testSuccess(): void
     {
-        $anyDate = (new DateTimeImmutable())->format('Y-m-d\TH:i:sO');
+        $anyDate = new DateTimeImmutable()->format('Y-m-d\TH:i:sO');
 
-        $this->fixturesProviderMock
-            ->expects(self::once())
-            ->method('sync');
+        $this->client->disableReboot(); // For mocks in a controller.
+        $fixtureProviderMock = $this->createMock(FixtureProvider::class);
+        $fixtureProviderMock->expects(self::once())->method('sync');
+        static::getContainer()->set(FixtureProvider::class, $fixtureProviderMock);
 
         $user = $this->createUser(['roles' => [RoleEnum::ROLE_ADMIN->value]]);
         $this->signIn($user);
@@ -57,7 +47,7 @@ class SyncTest extends ApiTestCase
     #[TestDox('Sync request: not found')]
     public function testNotFound(): void
     {
-        $anyDate = (new DateTimeImmutable())->format('Y-m-d\TH:i:sO');
+        $anyDate = new DateTimeImmutable()->format('Y-m-d\TH:i:sO');
 
         $user = $this->createUser(['roles' => [RoleEnum::ROLE_ADMIN->value]]);
         $this->signIn($user);

@@ -28,9 +28,6 @@ class SyncResultsTest extends KernelTestCase
     public function setUp(): void
     {
         $this->messageBus = $this->getService(MessageBusInterface::class);
-
-        $this->fixturesProviderMock = $this->createMock(FixtureProvider::class);
-        static::getContainer()->set(FixtureProvider::class, $this->fixturesProviderMock);
     }
 
     /**
@@ -47,7 +44,8 @@ class SyncResultsTest extends KernelTestCase
         $from = new DateTimeImmutable('2025-01-01T00:00:00Z');
         $to = new DateTimeImmutable('2025-01-02T00:00:00Z');
 
-        $this->fixturesProviderMock
+        $fixturesProviderMock = $this->mockFixturesProvider();
+        $fixturesProviderMock
             ->expects(self::once())
             ->method('sync')
             ->with($competition, $season, $from, $to);
@@ -61,18 +59,19 @@ class SyncResultsTest extends KernelTestCase
     #[TestDox('Sync results: dispatch sync message with default params')]
     public function testDispatchSyncMessageWithDefaultParams(): void
     {
-        $this->fixturesProviderMock->expects(self::once())->method('sync');
+        $fixturesProviderMock = $this->mockFixturesProvider();
+        $fixturesProviderMock->expects(self::once())->method('sync');
 
         $this->messageBus->dispatch(new SyncMessage(year: SeasonFixture::CURRENT_SEASON));
     }
 
     /**
-     * @throws ExceptionInterface|\PHPUnit\Framework\MockObject\Exception
+     * @throws ExceptionInterface
      */
     #[TestDox('Sync results: competition not found')]
     public function testCompetitionNotFound(): void
     {
-        $repo = $this->createMock(CompetitionRepository::class);
+        $repo = $this->createStub(CompetitionRepository::class);
         $repo->method('findOneByCode')->willReturn(null);
         self::getContainer()->set(CompetitionRepository::class, $repo);
 
@@ -81,16 +80,24 @@ class SyncResultsTest extends KernelTestCase
     }
 
     /**
-     * @throws ExceptionInterface|\PHPUnit\Framework\MockObject\Exception
+     * @throws ExceptionInterface
      */
     #[TestDox('Sync results: season not found')]
     public function testSeasonNotFound(): void
     {
-        $repo = $this->createMock(SeasonRepository::class);
+        $repo = $this->createStub(SeasonRepository::class);
         $repo->method('findOneByYear')->willReturn(null);
         self::getContainer()->set(SeasonRepository::class, $repo);
 
         self::expectException(Exception::class);
         $this->messageBus->dispatch(new SyncMessage());
+    }
+
+    private function mockFixturesProvider(): FixtureProvider&MockObject
+    {
+        $fixturesProviderMock = $this->createMock(FixtureProvider::class);
+        static::getContainer()->set(FixtureProvider::class, $fixturesProviderMock);
+
+        return $fixturesProviderMock;
     }
 }

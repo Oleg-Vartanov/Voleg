@@ -58,7 +58,10 @@ class PredictionsGetAction extends ApiController
         #[MapQueryString(validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY)]
         PredictionsRequest $dto = new PredictionsRequest(),
     ): JsonResponse {
-        $userIds = array_diff($dto->userIds, [$user->getId()]); // Remove the current user from the list.
+        /** @var int[] $userIds */
+        $userIds = $dto->userIds;
+        $userIds = array_diff($userIds, [$user->getId()]); // Remove the current user from the list.
+
         /** @var array<User> $users */
         $users = empty($userIds) ? [] : $this->userRepository->findBy(['id' => $userIds]);
         array_unshift($users, $user);

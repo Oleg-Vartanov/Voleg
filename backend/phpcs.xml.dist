@@ -16,5 +16,6 @@
     <file>src/</file>
 
     <exclude-pattern>src/Core/Test/bootstrap.php</exclude-pattern>
+    <exclude-pattern>config/reference.php</exclude-pattern>
 
 </ruleset>
