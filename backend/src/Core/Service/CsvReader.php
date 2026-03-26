@@ -43,10 +43,19 @@ readonly class CsvReader
         }
 
         foreach ($rows as $row) {
-            if (fputcsv($resource, $row) === false) {
+            if ($this->writeRow($resource, $row) === false) {
                 throw new Exception("Unable to write data to CSV file: " . $filePath);
             }
         }
         fclose($resource);
+    }
+
+    /**
+     * @param resource|false $resource
+     * @param array<int|string, bool|float|int|string|null> $row
+     */
+    protected function writeRow(mixed $resource, array $row): int|false
+    {
+        return fputcsv($resource, $row, ',', '"', '');
     }
 }
