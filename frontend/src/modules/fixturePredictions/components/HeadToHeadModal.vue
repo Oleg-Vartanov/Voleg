@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { type HeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead';
-import { type Tables } from '@/modules/fixturePredictions/composables/useTables';
 import { useAuth } from '@/modules/user/stores/useAuth';
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts';
+import { inject } from 'vue';
 
-const { h2h, tables } = defineProps<{
-  tables: Tables;
-  h2h: HeadToHead;
-}>();
-
+const tables: HeadToHead = inject('tables');
+const h2h: HeadToHead = inject('h2h');
 const auth = useAuth();
 const topAlerts = useTopAlerts();
 
@@ -41,6 +38,7 @@ function addUser(user) {
           <ul class="list-group list-group-flush mb-3">
             <li
               v-for="user in h2h.users.value"
+              :key="user.id"
               class="h2h-user list-group-item list-group-item-action"
               @click="h2h.removeUser(user)"
             >
@@ -72,6 +70,7 @@ function addUser(user) {
           <ul class="list-group list-group-flush">
             <li
               v-for="user in h2h.searchUsers.value"
+              :key="user.id"
               class="h2h-user list-group-item list-group-item-action"
               @click="addUser(user);"
             >

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type TablesEnum } from '@/modules/fixturePredictions/composables/useTables';
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   table: TablesEnum;
   active?: boolean;
 }>(), {

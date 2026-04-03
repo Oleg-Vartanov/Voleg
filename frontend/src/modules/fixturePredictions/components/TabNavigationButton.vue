@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { type Tables, type TablesEnum } from '@/modules/fixturePredictions/composables/useTables';
+import { inject } from 'vue';
 
-const props = defineProps<{
-  tables: Tables;
+withDefaults(defineProps<{
   table: TablesEnum;
   text: string;
-  active: boolean;
-}>();
+  active?: boolean;
+}>(), {
+  active: false,
+});
+
+const tables: Tables = inject('tables');
 </script>
 
 <template>

@@ -3,12 +3,10 @@ import TeamLogo from '@/modules/fixturePredictions/components/TeamLogo.vue';
 import { useAuth } from '@/modules/user/stores/useAuth';
 import { type Tables } from '@/modules/fixturePredictions/composables/useTables';
 import { type Predictions } from '@/modules/fixturePredictions/composables/usePredictions';
+import { inject } from 'vue';
 
-const props = defineProps<{
-  tables: Tables;
-  predictions: Predictions;
-}>();
-
+const tables: Tables = inject('tables');
+const predictions: Predictions = inject('predictions');
 const auth = useAuth();
 </script>
 
@@ -37,7 +35,7 @@ const auth = useAuth();
               </tr>
               </thead>
               <tbody>
-              <template v-for="fixture in tables.fixtures.value">
+              <template v-for="fixture in tables.fixtures.value" :key="fixture.id">
                 <tr v-if="new Date(fixture.startAt) > new Date()">
                   <td class="text-start">
                         <span>

@@ -21,7 +21,7 @@ const signIn = (event: SubmitEvent) => {
     })
     .catch((axiosError) => {
       message401.value = 'Invalid credentials';
-      if (axiosError.response.status === 401 && axiosError.response.data.hasOwnProperty('message')) {
+      if (axiosError.response.status === 401 && Object.prototype.hasOwnProperty.call(axiosError.response.data, 'message')) {
         message401.value = axiosError.response.data.message;
       }
     })

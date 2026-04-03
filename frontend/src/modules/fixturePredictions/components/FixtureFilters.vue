@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import arrayUtils from '@/modules/core/utils/arrayUtils';
+import { inject } from 'vue';
 import { type FixtureFilters } from '@/modules/fixturePredictions/composables/useFilters';
 import { type Tables } from '@/modules/fixturePredictions/composables/useTables';
 import { CompetitionCode, CompetitionNames } from '@/modules/fixturePredictions/enum';
 
-const props = defineProps<{
-  tables: Tables;
-  filters: FixtureFilters;
-}>();
+const tables: Tables = inject('tables');
+const filters: FixtureFilters = inject('filters');
 </script>
 
 <template>

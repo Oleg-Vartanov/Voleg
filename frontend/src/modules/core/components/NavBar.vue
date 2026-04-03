@@ -39,7 +39,7 @@ function routerLinkClass(routeName: string) {
       <div class="collapse navbar-collapse col-9" id="navbars">
 
         <ul class="navbar-nav col-8 justify-content-center nav-pills">
-          <li v-for="route in centerRoutes" class="nav-item">
+          <li v-for="route in centerRoutes" :key="route.name" class="nav-item">
             <router-link
               v-if="!route.hasOwnProperty('roles') || auth.hasRole(route.roles)"
               class="nav-link"

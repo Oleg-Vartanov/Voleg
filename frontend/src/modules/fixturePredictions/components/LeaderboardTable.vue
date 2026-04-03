@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { type Tables } from '@/modules/fixturePredictions/composables/useTables';
+import { inject } from 'vue';
 
-const props = defineProps<{
-  tables: Tables;
-}>();
+const tables: Tables = inject('tables');
 </script>
 
 <template>
@@ -26,7 +25,7 @@ const props = defineProps<{
     </tr>
 
     <!-- Leaderboard -->
-    <tr v-for="(user, index) in tables.leaderboard.value">
+    <tr v-for="(user, index) in tables.leaderboard.value" :key="user.user.id">
       <th scope="row">{{ index + 1 }}</th>
       <td>{{ user.user.displayName }}</td>
       <td>{{ user.periodPoints ?? '-' }}</td>

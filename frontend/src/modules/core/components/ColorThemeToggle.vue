@@ -19,9 +19,9 @@ function apply(isDark: boolean = false) {
   element.setAttribute("data-bs-theme", isDark ? "dark" : "light");
 }
 
-watch(isDark, async (newIsChecked, oldIsChecked) => {
-  saveIsDark(newIsChecked);
-  apply(newIsChecked);
+watch(isDark, async (isChecked) => {
+  saveIsDark(isChecked);
+  apply(isChecked);
 })
 </script>
 

@@ -11,7 +11,7 @@ export interface Predictions {
   getAwayScore: (prediction: Nullable<Prediction>, defaultValue?: string) => number | string | null;
   makePredictions: (event: SubmitEvent) => Promise<void>;
   scoreColorClass: (prediction: Nullable<Prediction>) => string;
-  fixtureDate: (fixture: Fixture) => { date: string; time: string };
+  fixtureDate: (fixture: Fixture) => { id: number; date: string; time: string };
 }
 
 export function usePredictions(
@@ -68,7 +68,7 @@ export function usePredictions(
     const hour = String(date.getHours()).padStart(2, '0');
     const minute = String(date.getMinutes()).padStart(2, '0');
 
-    return { date: `${day}/${month}`, time: `${hour}:${minute}` };
+    return { id: fixture.id, date: `${day}/${month}`, time: `${hour}:${minute}` };
   }
 
   async function makePredictions(event: SubmitEvent) {

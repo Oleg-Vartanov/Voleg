@@ -31,7 +31,7 @@ function checkRequirements(game) {
 <template>
   <div class="ov-center p-2">
     <div class="row row-cols-1 row-cols-md-6 g-4">
-      <div class="col" v-for="game in games">
+      <div class="col" v-for="game in games" :key="game.title">
         <a class="text-decoration-none" @click="checkRequirements(game)" href="javascript:void(0)">
           <div class="card">
             <img :src="game.logo" class="card-img-top" alt="logo">

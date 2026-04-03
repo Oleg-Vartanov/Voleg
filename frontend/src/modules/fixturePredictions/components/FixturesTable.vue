@@ -4,13 +4,11 @@ import { useAuth } from '@/modules/user/stores/useAuth';
 import { type HeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead';
 import { type Tables } from '@/modules/fixturePredictions/composables/useTables';
 import { type Predictions } from '@/modules/fixturePredictions/composables/usePredictions';
+import { inject } from 'vue';
 
-const props = defineProps<{
-  tables: Tables;
-  h2h: HeadToHead;
-  predictions: Predictions;
-}>();
-
+const tables: Tables = inject('tables');
+const h2h: HeadToHead = inject('h2h');
+const predictions: Predictions = inject('predictions');
 const auth = useAuth();
 </script>
 
@@ -24,7 +22,7 @@ const auth = useAuth();
         {{ h2h.users.value.length === 0 ? 'Prediction' : auth.user.displayName }}
       </th>
       <th scope="col" v-if="h2h.users.value.length === 0">Points</th>
-      <th scope="col" v-for="h2hUser in h2h.users.value">{{ h2hUser.displayName }}</th>
+      <th scope="col" v-for="h2hUser in h2h.users.value" :key="h2hUser.id">{{ h2hUser.displayName }}</th>
       <th scope="col">Start</th>
     </tr>
     </thead>
@@ -82,7 +80,7 @@ const auth = useAuth();
       </td>
 
       <!-- Fixture Start Date -->
-      <td v-for="{ date, time } of [predictions.fixtureDate(fixture)]">
+      <td v-for="{ id, date, time } of [predictions.fixtureDate(fixture)]" :key="id">
         {{ time }}<br/>{{ date }}
       </td>
     </tr>
