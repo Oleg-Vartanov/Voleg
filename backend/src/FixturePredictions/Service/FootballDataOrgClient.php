@@ -4,6 +4,7 @@ namespace App\FixturePredictions\Service;
 
 use App\FixturePredictions\Entity\Competition;
 use App\FixturePredictions\Entity\Season;
+use App\FixturePredictions\Exception\FixtureProviderClientException;
 use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
@@ -58,7 +59,7 @@ class FootballDataOrgClient
         ]);
 
         if ($response->getStatusCode() !== Response::HTTP_OK) {
-            throw new Exception('Failed to fetch seasons. Response code: ' . $response->getStatusCode());
+            $this->throwResponseError('Failed to fetch seasons.', $response);
         }
 
         return $this->decodeResponse($response); // @phpstan-ignore-line Ignore mixed to avoid copying return type.
@@ -85,7 +86,7 @@ class FootballDataOrgClient
         ]);
 
         if ($response->getStatusCode() !== Response::HTTP_OK) {
-            throw new Exception('Failed to fetch teams. Response code: ' . $response->getStatusCode());
+            $this->throwResponseError('Failed to fetch teams.', $response);
         }
 
         return $this->decodeResponse($response); // @phpstan-ignore-line Ignore mixed to avoid copying return type.
@@ -131,7 +132,7 @@ class FootballDataOrgClient
         ]);
 
         if ($response->getStatusCode() !== Response::HTTP_OK) {
-            throw new Exception('Failed to fetch matches. Response code: ' . $response->getStatusCode());
+            $this->throwResponseError('Failed to fetch matches.', $response);
         }
 
         return $this->decodeResponse($response); // @phpstan-ignore-line Ignore mixed to avoid copying return type.
@@ -147,14 +148,27 @@ class FootballDataOrgClient
         $data = json_decode($response->getContent(), true);
 
         if (!is_array($data)) {
-            throw new Exception('Invalid API response: expected array.');
+            $this->throwResponseError('Invalid API response: expected array.', $response);
         }
 
+        /** @var mixed[] $data */
         return $data;
     }
 
     private function url(string $path): string
     {
         return $this->apiUrl . $path;
+    }
+
+    /**
+     * @throws TransportExceptionInterface|ServerExceptionInterface|RedirectionExceptionInterface|FixtureProviderClientException|ClientExceptionInterface
+     */
+    private function throwResponseError(string $message, ResponseInterface $response): void
+    {
+        throw new FixtureProviderClientException(
+            $response->getStatusCode(),
+            $message,
+            $response->getContent(false),
+        );
     }
 }

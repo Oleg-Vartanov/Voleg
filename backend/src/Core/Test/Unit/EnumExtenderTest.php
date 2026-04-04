@@ -2,7 +2,6 @@
 
 namespace App\Core\Test\Unit;
 
-use App\Core\Trait\EnumExtender;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
 
@@ -24,13 +23,4 @@ class EnumExtenderTest extends TestCase
         ];
         $this->assertSame($expected, TestEnum::options());
     }
-}
-
-enum TestEnum: string
-{
-    use EnumExtender;
-
-    case FIRST = 'first';
-    case SECOND = 'second';
-    case THIRD = 'third';
 }

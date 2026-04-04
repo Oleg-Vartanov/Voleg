@@ -4,6 +4,7 @@ namespace App\FixturePredictions\Test\Functional;
 
 use App\Core\Test\Trait\ContainerTestTrait;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
+use App\FixturePredictions\Exception\FixtureProviderClientException;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\FixtureRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
@@ -49,17 +50,16 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
      */
     #[AllowMockObjectsWithoutExpectations]
     #[TestDox('Provider: sync success')]
-    public function testSync(): void
+    public function testSyncSuccess(): void
     {
+        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
+        $season = $this->seasonRepository->findOneByYear(2025);
+
         $this->prepareProviderResponses([
             ['statusCode' => 200, 'content' => $this->teamsResponseContent()],
             ['statusCode' => 200, 'content' => $this->seasonResponseContent()],
             ['statusCode' => 200, 'content' => $this->fixturesResponseContent()],
         ]);
-
-        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
-        $season = $this->seasonRepository->findOneByYear(2025);
-
         $this->fixturesProvider->sync($competition, $season);
 
         $teams = $this->teamRepository->findByProviderTeamIds([57, 58, 61]);
@@ -67,6 +67,81 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
 
         $fixtures = $this->fixtureRepository->findByProviderFixtureIds([537793, 537794]);
         self::assertCount(2, $fixtures);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[AllowMockObjectsWithoutExpectations]
+    #[TestDox('Provider: sync error invalid response data')]
+    public function testSyncErrorInvalidData(): void
+    {
+        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
+        $season = $this->seasonRepository->findOneByYear(2025);
+
+        $this->prepareProviderResponses([
+            ['statusCode' => 200, 'content' => 'invalid-data'],
+        ]);
+        self::expectException(FixtureProviderClientException::class);
+        self::expectExceptionMessage('Invalid API response: expected array.');
+        $this->fixturesProvider->sync($competition, $season);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[AllowMockObjectsWithoutExpectations]
+    #[TestDox('Provider: sync error fetching teams')]
+    public function testSyncErrorFetchingTeams(): void
+    {
+        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
+        $season = $this->seasonRepository->findOneByYear(2025);
+
+        $this->prepareProviderResponses([
+            ['statusCode' => 500, 'content' => 'test'],
+        ]);
+        self::expectException(FixtureProviderClientException::class);
+        self::expectExceptionMessage('Failed to fetch teams.');
+        $this->fixturesProvider->sync($competition, $season);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[AllowMockObjectsWithoutExpectations]
+    #[TestDox('Provider: sync error fetching seasons')]
+    public function testSyncErrorFetchingSeasons(): void
+    {
+        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
+        $season = $this->seasonRepository->findOneByYear(2025);
+
+        $this->prepareProviderResponses([
+            ['statusCode' => 200, 'content' => $this->teamsResponseContent()],
+            ['statusCode' => 500, 'content' => 'test'],
+        ]);
+        self::expectException(FixtureProviderClientException::class);
+        self::expectExceptionMessage('Failed to fetch seasons.');
+        $this->fixturesProvider->sync($competition, $season);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[AllowMockObjectsWithoutExpectations]
+    #[TestDox('Provider: sync error fetching matches')]
+    public function testSyncErrorFetchingMatches(): void
+    {
+        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
+        $season = $this->seasonRepository->findOneByYear(2025);
+
+        $this->prepareProviderResponses([
+            ['statusCode' => 200, 'content' => $this->teamsResponseContent()],
+            ['statusCode' => 200, 'content' => $this->seasonResponseContent()],
+            ['statusCode' => 500, 'content' => 'test'],
+        ]);
+        self::expectException(FixtureProviderClientException::class);
+        self::expectExceptionMessage('Failed to fetch matches.');
+        $this->fixturesProvider->sync($competition, $season);
     }
 
     /**

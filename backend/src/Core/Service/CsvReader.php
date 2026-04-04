@@ -51,7 +51,7 @@ readonly class CsvReader
     }
 
     /**
-     * @param resource|false $resource
+     * @param resource $resource
      * @param array<int|string, bool|float|int|string|null> $row
      */
     protected function writeRow(mixed $resource, array $row): int|false
