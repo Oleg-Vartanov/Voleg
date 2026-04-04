@@ -1,3 +1,4 @@
 /common/database/mysql/
+/dev/nginx/certs/
 /prod/nginx/letsencrypt/
 .env.local
