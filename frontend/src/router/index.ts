@@ -26,7 +26,7 @@ const index = createRouter({
         {
           path: 'games/football-predictions',
           name: 'football-predictions',
-          meta: { title: 'Predictions' },
+          meta: { title: 'Football Predictions' },
           beforeEnter: [guards.isAuthenticated],
           component: () => import('@/modules/fixturePredictions/pages/FootballPredictionsPage.vue'),
         },

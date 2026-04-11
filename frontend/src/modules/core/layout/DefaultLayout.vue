@@ -10,9 +10,3 @@ import TopAlerts from '@/modules/core/components/TopAlerts.vue';
     <router-view></router-view>
   </div>
 </template>
-
-<!--<style>-->
-<!--body {-->
-<!--  background-color: #b7ccb7;-->
-<!--}-->
-<!--</style>-->
