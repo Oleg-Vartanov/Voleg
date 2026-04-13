@@ -1,28 +1,30 @@
 <script setup lang="ts">
 import ColorThemeToggle from './ColorThemeToggle.vue';
-import { useRoute } from 'vue-router';
+import NavBarDropdown from '@/modules/core/components/NavBarDropdown.vue';
+import NavBarDropdownItem from '@/modules/core/components/NavBarDropdownItem.vue';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '@/modules/user/stores/useAuth';
-import { computed } from 'vue';
 
 const route = useRoute();
+const router = useRouter();
 const auth = useAuth();
 
-type NavRoute = { name: string, title: string, roles?: string[] };
+type menuItem = { name: string, title: string, roles?: string[] };
 
-const navRoutes: NavRoute[] = [
+const menuItems: menuItem[] = [
   { name: 'about', title: 'About' },
-  { name: 'football-predictions', title: 'Football Predictions' },
+  { name: 'footballPredictions', title: 'Football Predictions' },
   { name: 'pricing', title: 'Pricing' },
   { name: 'admin', title: 'Admin', roles: ['ROLE_ADMIN'] },
 ];
 
-const currentNavRoute = computed((): NavRoute => {
-  return navRoutes.find(nav => nav.name === route.name) ?? { name: 'pages', title: 'Pages' };
-});
+const isMenuDropdownOpen = ref(false);
+const isProfileDropdownOpen = ref(false);
 
-function routerLinkClass(routeName: string) {
-  return routeName === route.name ? 'active text-white' : '';
-}
+const activeMenuItem = computed((): menuItem | null => {
+  return menuItems.find(nav => nav.name === route.name) ?? null;
+});
 </script>
 
 <template>
@@ -53,51 +55,60 @@ function routerLinkClass(routeName: string) {
 
         <ul class="navbar-nav">
 
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              href="#"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
+          <!-- Menu Navigation-->
+          <NavBarDropdown
+            v-model:is-open="isMenuDropdownOpen"
+            :text="activeMenuItem?.title ?? 'Menu'"
+            :active="activeMenuItem !== null"
+          >
+            <NavBarDropdownItem v-for="menuItem in menuItems" :key="menuItem.name">
+              <router-link
+                class="dropdown-item"
+                v-if="!menuItem.roles || auth.hasRole(menuItem.roles)"
+                :class="{ active: menuItem.name === route.name }"
+                :to="{ name: menuItem.name }"
+              >
+                {{ menuItem.title }}
+              </router-link>
+            </NavBarDropdownItem>
+          </NavBarDropdown>
+
+          <!-- Sign In -->
+          <li class="nav-item">
+            <router-link
+              class="nav-link"
+              v-if="!auth.user.isSignedIn"
+              :to="{ name: 'signIn' }"
+              :class="{ active: 'signIn' === route.name }"
             >
-              {{ currentNavRoute.title }}
-            </a>
-            <ul class="dropdown-menu">
-              <li v-for="navRoute in navRoutes" :key="route.name">
-                <router-link
-                  v-if="!navRoute.hasOwnProperty('roles') || auth.hasRole(navRoute.roles)"
-                  class="dropdown-item"
-                  :to="{ name: navRoute.name }"
-                  :class="routerLinkClass(navRoute.name)"
-                >
-                  {{ navRoute.title }}
-                </router-link>
-              </li>
-            </ul>
+              Sign In
+            </router-link>
           </li>
 
-          <li class="nav-item">
-            <ul class="navbar-nav nav-pills me-2">
-              <li v-if="!auth.user.isSignedIn" class="nav-item">
-                <router-link
-                  class="nav-link"
-                  :to="{ name: 'signIn' }"
-                >
-                  Sign In
-                </router-link>
-              </li>
-              <li v-if="auth.user.isSignedIn" class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"
-                   aria-expanded="false">{{ auth.user.displayName ?? 'User' }}</a>
-                <ul class="dropdown-menu">
-                  <router-link class="dropdown-item" :to="{ name: 'profile' }">Profile</router-link>
-                  <li><a @click="auth.signOut()" class="dropdown-item" href="#">Sign Out</a></li>
-                </ul>
-              </li>
-              <li class="nav-item nav-link">
-                <ColorThemeToggle></ColorThemeToggle>
-              </li>
-            </ul>
+          <!-- Profile Navigation-->
+          <NavBarDropdown
+            v-if="auth.user.isSignedIn"
+            v-model:is-open="isProfileDropdownOpen"
+            :text="auth.user.displayName ?? 'User'"
+            :active="route.name === 'profile'"
+          >
+            <NavBarDropdownItem>
+              <router-link
+                class="dropdown-item"
+                :class="{ active: route.name === 'profile' }"
+                :to="{ name: 'profile' }"
+              >
+                Profile
+              </router-link>
+            </NavBarDropdownItem>
+
+            <NavBarDropdownItem>
+              <a class="dropdown-item" href="#" @click="auth.signOut()">Sign Out</a>
+            </NavBarDropdownItem>
+          </NavBarDropdown>
+
+          <li class="nav-item nav-link">
+            <ColorThemeToggle></ColorThemeToggle>
           </li>
 
         </ul>

@@ -18,14 +18,8 @@ const index = createRouter({
           redirect: { name: 'about' },
         },
         {
-          path: 'games',
-          name: 'games',
-          meta: { title: 'Games' },
-          component: () => import('@/modules/core/pages/GamesPage.vue'),
-        },
-        {
           path: 'games/football-predictions',
-          name: 'football-predictions',
+          name: 'footballPredictions',
           meta: { title: 'Football Predictions' },
           beforeEnter: [guards.isAuthenticated],
           component: () => import('@/modules/fixturePredictions/pages/FootballPredictionsPage.vue'),
@@ -73,7 +67,7 @@ const index = createRouter({
               meta: { title: 'Sign Up' },
               component: () => import('@/modules/user/pages/SignUpPage.vue'),
             },
-          ]
+          ],
         },
         {
           path: '/:pathMatch(.*)*',
@@ -83,8 +77,8 @@ const index = createRouter({
         },
       ],
     },
-  ]
-})
+  ],
+});
 
 // Add the beforeEach guard for updating document title and description
 index.beforeEach((to) => {
@@ -93,4 +87,4 @@ index.beforeEach((to) => {
   document.title = title || defaultTitle;
 });
 
-export default index
+export default index;

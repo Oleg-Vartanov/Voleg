@@ -9,7 +9,11 @@ export const useGuard = () => {
     if (auth.isTokenValid()) {
       next();
     } else {
-      topAlerts.add('Not authenticated.', 'info', 5);
+      let message = 'Not authenticated.';
+      if (to.name === 'footballPredictions') {
+        message = 'Football Predictions requires to sign in. To keep track of results.';
+      }
+      topAlerts.add(message, 'info', 5);
       auth.reset();
       next({ name: 'signIn' });
     }

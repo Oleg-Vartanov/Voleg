@@ -79,3 +79,6 @@ watch:
 
 front-build:
 	$(NODE_CONTAINER) npm run build-only
+
+eslint:
+	$(NODE_CONTAINER) npm run lint
