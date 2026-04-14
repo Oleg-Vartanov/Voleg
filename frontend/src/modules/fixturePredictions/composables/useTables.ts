@@ -72,10 +72,10 @@ export function useTables(
         filters.season.value,
       );
       fixtures.value = response.data.fixtures;
-      filters.updateByResponse(response);
+      filters.updateByResponse(response.data.filters);
       h2h.updateByResponse(response);
       updateRouteQuery();
-    } catch (err: any) {
+    } catch (err) {
       if (err?.response?.status === 422) {
         topAlerts.add('Invalid request. Check the filters and retry.', 'warning');
       } else {
@@ -97,9 +97,9 @@ export function useTables(
         filters.season.value,
       );
       leaderboard.value = response.data.users;
-      filters.updateByResponse(response);
+      filters.updateByResponse(response.data.filters);
       updateRouteQuery();
-    } catch (err: any) {
+    } catch (err) {
       if (err?.response?.status === 422) {
         topAlerts.add('Invalid request. Check the filters and retry.', 'warning');
       } else {

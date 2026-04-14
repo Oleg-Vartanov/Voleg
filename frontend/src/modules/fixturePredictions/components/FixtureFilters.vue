@@ -10,13 +10,14 @@ const filters: FixtureFilters = inject('filters');
 </script>
 
 <template>
-  <div class="offcanvas offcanvas-start"
-       tabindex="-1"
-       id="offcanvasFilters"
-       aria-labelledby="offcanvas-filters-label"
+  <div
+    id="offcanvasFilters"
+    class="offcanvas offcanvas-start"
+    tabindex="-1"
+    aria-labelledby="offcanvas-filters-label"
   >
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvas-filters-label">Filters</h5>
+      <h5 id="offcanvas-filters-label" class="offcanvas-title">Filters</h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
@@ -26,21 +27,21 @@ const filters: FixtureFilters = inject('filters');
           <div class="col-auto mb-2 p-1">
             <div class="input-group">
               <span class="input-group-text filter-date-text">Start</span>
-              <input id="start" class="form-control filter-date-input" type="date" v-model="filters.start.value"/>
+              <input id="start" v-model="filters.start.value" class="form-control filter-date-input" type="date"/>
             </div>
           </div>
 
           <div class="col-auto mb-2 p-1">
             <div class="input-group">
               <span class="input-group-text filter-date-text">End</span>
-              <input id="end" class="form-control filter-date-input" type="date" v-model="filters.end.value"/>
+              <input id="end" v-model="filters.end.value" class="form-control filter-date-input" type="date"/>
             </div>
           </div>
 
           <div class="col-auto mb-2 p-1">
             <div class="input-group">
               <span class="input-group-text filter-date-text">Competition</span>
-              <select class="form-select" aria-label="Default select example" v-model="filters.competition.value">
+              <select v-model="filters.competition.value" class="form-select" aria-label="Default select example">
                 <option :value="CompetitionCode.PL">{{ CompetitionNames[CompetitionCode.PL] }}</option>
               </select>
             </div>
@@ -49,7 +50,7 @@ const filters: FixtureFilters = inject('filters');
           <div class="col-auto mb-2 p-1">
             <div class="input-group">
               <span class="input-group-text filter-date-text">Season</span>
-              <select class="form-select" v-model="filters.season.value">
+              <select v-model="filters.season.value" class="form-select">
                 <option v-for="year in arrayUtils.range(2023, 2100)" :key="year" :value="year">
                   {{ year }}
                 </option>
@@ -58,9 +59,10 @@ const filters: FixtureFilters = inject('filters');
           </div>
 
           <div class="col-auto mb-2 p-1">
-            <button class="btn btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#go"
+            <button
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#go"
             >
               <i class="bi bi-people-fill"></i>
               H2H
@@ -68,11 +70,12 @@ const filters: FixtureFilters = inject('filters');
           </div>
 
           <div class="col-auto mb-2 p-1">
-            <button @click="tables.updateLoadedTables"
-                    class="btn btn-outline-primary"
-                    type="button"
-                    :disabled="tables.isLoading.value.fixtures || tables.isLoading.value.leaderboard"
-                    data-bs-dismiss="offcanvas"
+            <button
+              class="btn btn-outline-primary"
+              type="button"
+              :disabled="tables.isLoading.value.fixtures || tables.isLoading.value.leaderboard"
+              data-bs-dismiss="offcanvas"
+              @click="tables.updateLoadedTables"
             >
               <i class="bi bi-funnel"></i>
               Filter

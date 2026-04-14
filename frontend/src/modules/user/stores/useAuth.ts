@@ -5,7 +5,13 @@ import arrayUtils from '@/modules/core/utils/arrayUtils';
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts';
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode, type JwtPayload } from 'jwt-decode';
+
+interface apiJwtPayload extends JwtPayload {
+  id: number;
+  displayName: string;
+  roles: string[];
+}
 
 const localStorageKey = 'voleg-jwt';
 
@@ -27,7 +33,7 @@ export const useAuth = defineStore('auth', () => {
   function setUserByToken(): void {
     const token: string | null = getToken();
     if (token !== null) {
-      const decodedToken: any = jwtDecode(token);
+      const decodedToken: apiJwtPayload = jwtDecode(token);
       user.isSignedIn = isTokenValid();
       user.id = decodedToken['id'] ?? null;
       user.displayName = decodedToken['displayName'] ?? null;
@@ -54,7 +60,7 @@ export const useAuth = defineStore('auth', () => {
 
   function isTokenExpired(jwtToken: string) {
     try {
-      const decodedToken: any = jwtDecode(jwtToken);
+      const decodedToken: apiJwtPayload = jwtDecode(jwtToken);
       const currentTime = Date.now() / 1000;
       return decodedToken.exp < currentTime;
     } catch (error) {
@@ -63,8 +69,8 @@ export const useAuth = defineStore('auth', () => {
     }
   }
 
-  function signIn(params: any): void {
-    setToken(params.token);
+  function signIn(token: string): void {
+    setToken(token);
     setUserByToken();
     topAlerts.add('Successfully signed in. Welcome!', 'success');
     router.push({ name: 'home' });

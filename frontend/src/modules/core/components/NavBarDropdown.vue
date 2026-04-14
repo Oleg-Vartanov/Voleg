@@ -39,7 +39,7 @@ onBeforeUnmount(() => isOpenProxy.value = false);
 </script>
 
 <template>
-  <li class="nav-item" ref="root">
+  <li ref="root" class="nav-item">
     <a
       class="nav-link dropdown-toggle"
       :class="{ active: active }"

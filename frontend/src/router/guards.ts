@@ -1,13 +1,14 @@
+import type { RouteLocationNormalized } from 'vue-router';
 import { useAuth } from '@/modules/user/stores/useAuth';
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts';
 
 export const useGuard = () => {
-  function isAuthenticated(to: object, from: object, next: any): void {
+  function isAuthenticated(to: RouteLocationNormalized): void {
     const auth = useAuth();
     const topAlerts = useTopAlerts();
 
     if (auth.isTokenValid()) {
-      next();
+      return true;
     } else {
       let message = 'Not authenticated.';
       if (to.name === 'footballPredictions') {
@@ -15,20 +16,22 @@ export const useGuard = () => {
       }
       topAlerts.add(message, 'info', 5);
       auth.reset();
-      next({ name: 'signIn' });
+
+      return { name: 'signIn' };
     }
   }
 
   function hasRole(roles: string[]) {
-    return function (to, from, next) {
+    return function () {
       const auth = useAuth();
       const topAlerts = useTopAlerts();
 
       if (auth.hasRole(roles)) {
-        next();
+        return true;
       } else {
         topAlerts.add('Forbidden.', 'danger', 5);
-        next({ name: 'home' });
+
+        return { name: 'home' };
       }
     };
   }

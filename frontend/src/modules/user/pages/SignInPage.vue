@@ -17,7 +17,7 @@ const signIn = (event: SubmitEvent) => {
 
   client.signIn(formValues)
     .then((response) => {
-      auth.signIn(response.data);
+      auth.signIn(response.data.token);
     })
     .catch((axiosError) => {
       message401.value = 'Invalid credentials';
@@ -35,12 +35,12 @@ const signIn = (event: SubmitEvent) => {
   <form @submit.prevent="signIn">
 
     <div class="form-floating mb-3">
-      <input name="email" type="email" class="form-control" id="email" placeholder="">
+      <input id="email" name="email" type="email" class="form-control" placeholder="">
       <label for="email">Email address</label>
     </div>
 
     <div class="form-floating mb-3">
-      <input name="password" type="password" class="form-control" id="password" placeholder="">
+      <input id="password" name="password" type="password" class="form-control" placeholder="">
       <label for="password">Password</label>
     </div>
 

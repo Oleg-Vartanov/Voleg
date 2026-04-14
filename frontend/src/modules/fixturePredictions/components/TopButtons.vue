@@ -8,7 +8,8 @@ defineProps<{
   <div class="d-flex justify-content-center mb-3">
     <div class="btn-group me-2" role="group" aria-label="Top buttons">
 
-      <button class="btn btn-outline-primary"
+      <button
+class="btn btn-outline-primary"
               data-bs-toggle="offcanvas"
               data-bs-target="#offcanvasFilters"
               aria-controls="offcanvasFilters"
@@ -17,7 +18,8 @@ defineProps<{
         Filters
       </button>
 
-      <button class="btn btn-outline-primary"
+      <button
+class="btn btn-outline-primary"
               data-bs-toggle="modal"
               data-bs-target="#predictionsModal"
               :disabled="disablePredictions"

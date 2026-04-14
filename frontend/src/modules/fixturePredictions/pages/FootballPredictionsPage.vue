@@ -33,25 +33,42 @@ const disablePredictions = computed(() => {
 <template>
   <div class="ov-center">
     <div class="container">
-
       <FixtureFilters/>
       <HeadToHeadModal/>
       <PredictionsModal/>
 
-      <TopButtons :disablePredictions/>
+      <TopButtons :disable-predictions/>
 
       <nav>
-        <div class="nav nav-tabs justify-content-center" id="nav-tab" role="tablist">
-          <TabNavigationButton :table="'matches'" text="Matches" :active="true"/>
-          <TabNavigationButton :table="'leaderboard'" text="Leaderboard"/>
+        <div
+          id="nav-tab"
+          class="nav nav-tabs justify-content-center"
+          role="tablist"
+        >
+          <TabNavigationButton
+            :table="'matches'"
+            text="Matches"
+            :active="true"
+          />
+          <TabNavigationButton
+            :table="'leaderboard'"
+            text="Leaderboard"
+          />
         </div>
       </nav>
 
       <div class="tab-content">
-        <div v-if="tables.isLoadingTables.value" class="spinner-border text-primary mt-3" role="status">
+        <div
+          v-if="tables.isLoadingTables.value"
+          class="spinner-border text-primary mt-3"
+          role="status"
+        >
           <span class="visually-hidden">Loading...</span>
         </div>
-        <Tab :table="'matches'" :active="true">
+        <Tab
+          :table="'matches'"
+          :active="true"
+        >
           <FixturesTable/>
         </Tab>
         <Tab :table="'leaderboard'">
@@ -60,7 +77,6 @@ const disablePredictions = computed(() => {
       </div>
 
       <AboutFixtures/>
-
     </div>
   </div>
 </template>

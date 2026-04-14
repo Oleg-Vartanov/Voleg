@@ -13,7 +13,7 @@ export interface HeadToHead {
   addUser: (user: any) => void;
   removeUser: (user: any) => void;
   updateByResponse: (response: any) => void;
-  routeQuery: (response: any) => object;
+  routeQuery: () => object;
   getUserIds: () => number[];
 }
 

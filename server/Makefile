@@ -80,5 +80,9 @@ watch:
 front-build:
 	$(NODE_CONTAINER) npm run build-only
 
-eslint:
+front-linter:
 	$(NODE_CONTAINER) npm run lint
+front-linter-fix:
+	$(NODE_CONTAINER) npm run lint:fix
+front-prettier:
+	$(NODE_CONTAINER) npm run format

@@ -52,24 +52,34 @@ const sync = () => {
 </script>
 
 <template>
-  <div class="ov-center">
-
-  </div>
+  <div class="ov-center"/>
 
   <div class="ov-center">
     <div class="form w-100 m-auto">
-
       <div class="input-group mb-2 w-100">
         <span class="input-group-text filter-date-text">Competition</span>
-        <select class="form-select" aria-label="Default select example" v-model="competition">
-          <option :value="CompetitionCode.PL">{{ CompetitionNames[CompetitionCode.PL] }}</option>
+        <select
+          v-model="competition"
+          class="form-select"
+          aria-label="Default select example"
+        >
+          <option :value="CompetitionCode.PL">
+            {{ CompetitionNames[CompetitionCode.PL] }}
+          </option>
         </select>
       </div>
 
       <div class="input-group mb-2 w-100">
         <span class="input-group-text filter-date-text">Season</span>
-        <select class="form-select" v-model="season">
-          <option v-for="year in arrayUtils.range(2023, 2100)" :key="year" :value="year">
+        <select
+          v-model="season"
+          class="form-select"
+        >
+          <option
+            v-for="year in arrayUtils.range(2023, 2100)"
+            :key="year"
+            :value="year"
+          >
             {{ year }}
           </option>
         </select>
@@ -77,19 +87,39 @@ const sync = () => {
 
       <div class="input-group mb-2 w-100">
         <span class="input-group-text filter-date-text">Start</span>
-        <input id="start" class="form-control filter-date-input" type="datetime-local" v-model="start"/>
+        <input
+          id="start"
+          v-model="start"
+          class="form-control filter-date-input"
+          type="datetime-local"
+        >
       </div>
 
       <div class="input-group mb-2 w-100">
         <span class="input-group-text filter-date-text">End</span>
-        <input id="end" class="form-control filter-date-input" type="datetime-local" v-model="end"/>
+        <input
+          id="end"
+          v-model="end"
+          class="form-control filter-date-input"
+          type="datetime-local"
+        >
       </div>
 
-      <button :disabled="isLoading" v-on:click="sync" type="button" class="btn btn-outline-primary py-2 mb-2 w-100">Sync
+      <button
+        :disabled="isLoading"
+        type="button"
+        class="btn btn-outline-primary py-2 mb-2 w-100"
+        @click="sync"
+      >
+        Sync
         Matches
       </button>
       <br>
-      <div v-if="isLoading" class="spinner-border text-primary" role="status">
+      <div
+        v-if="isLoading"
+        class="spinner-border text-primary"
+        role="status"
+      >
         <span class="visually-hidden">Loading...</span>
       </div>
       <i class="text-secondary">* The current fixtures provider converts datetime to UTC and then uses only the date,
@@ -97,8 +127,7 @@ const sync = () => {
       <i class="text-secondary">* The end date fixtures are not included in the result, so it's "until then".</i>
       &#128534;
 
-      <router-view></router-view>
-
+      <router-view/>
     </div>
   </div>
 </template>

@@ -8,30 +8,37 @@ const route = useRoute();
 <template>
   <div class="ov-center">
     <main class="form-signin w-100 m-auto">
-      <div class="btn-group mb-3 w-100" role="group" aria-label="Basic radio toggle button group">
-
+      <div
+        class="btn-group mb-3 w-100"
+        role="group"
+        aria-label="Basic radio toggle button group"
+      >
         <input
-          @click="router.push({ name: 'signIn' })"
+          id="sign-in"
           :checked="route.name === 'signIn'"
           type="radio"
           class="btn-check"
-          id="sign-in"
+          @click="router.push({ name: 'signIn' })"
         >
-        <label class="btn btn-outline-primary" for="sign-in">Sign In</label>
+        <label
+          class="btn btn-outline-primary"
+          for="sign-in"
+        >Sign In</label>
 
         <input
-          @click="router.push({ name: 'signUp' })"
+          id="sign-up"
           :checked="route.name === 'signUp'"
           type="radio"
           class="btn-check"
-          id="sign-up"
+          @click="router.push({ name: 'signUp' })"
         >
-        <label class="btn btn-outline-primary" for="sign-up">Sign Up</label>
-
+        <label
+          class="btn btn-outline-primary"
+          for="sign-up"
+        >Sign Up</label>
       </div>
 
-      <router-view></router-view>
-
+      <router-view/>
     </main>
   </div>
 </template>

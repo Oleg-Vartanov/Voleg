@@ -14,15 +14,16 @@ const tables: Tables = inject('tables');
 </script>
 
 <template>
-  <button @click="tables.initTable(table)"
-          class="nav-link"
-          :class="{'active': active}"
-          :id="'nav-'+table+'-tab'"
-          role="tab"
-          data-bs-toggle="tab"
-          :data-bs-target="'#nav-'+table"
-          :aria-controls="'nav-'+table"
-          aria-selected="true"
+  <button
+    :id="'nav-'+table+'-tab'"
+    class="nav-link"
+    :class="{'active': active}"
+    role="tab"
+    data-bs-toggle="tab"
+    :data-bs-target="'#nav-'+table"
+    :aria-controls="'nav-'+table"
+    aria-selected="true"
+    @click="tables.initTable(table)"
   >
     {{ text }}
   </button>

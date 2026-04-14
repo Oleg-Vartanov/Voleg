@@ -21,8 +21,8 @@ const auth = useAuth();
       <th scope="col">
         {{ h2h.users.value.length === 0 ? 'Prediction' : auth.user.displayName }}
       </th>
-      <th scope="col" v-if="h2h.users.value.length === 0">Points</th>
-      <th scope="col" v-for="h2hUser in h2h.users.value" :key="h2hUser.id">{{ h2hUser.displayName }}</th>
+      <th v-if="h2h.users.value.length === 0" scope="col">Points</th>
+      <th v-for="h2hUser in h2h.users.value" :key="h2hUser.id" scope="col">{{ h2hUser.displayName }}</th>
       <th scope="col">Start</th>
     </tr>
     </thead>
@@ -42,12 +42,12 @@ const auth = useAuth();
       <!-- Teams -->
       <td class="text-start">
         <span>
-          <TeamLogo :teamName="fixture.homeTeam.name"/>
+          <TeamLogo :team-name="fixture.homeTeam.name"/>
           {{ fixture.homeTeam.name }}
         </span>
         <br/>
         <span>
-          <TeamLogo :teamName="fixture.awayTeam.name"/>
+          <TeamLogo :team-name="fixture.awayTeam.name"/>
           {{ fixture.awayTeam.name }}
         </span>
       </td>

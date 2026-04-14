@@ -5,8 +5,8 @@ import TopAlerts from '@/modules/core/components/TopAlerts.vue';
 
 <template>
   <div class="main-container">
-    <NavBar></NavBar>
-    <TopAlerts></TopAlerts>
-    <router-view></router-view>
+    <NavBar/>
+    <TopAlerts/>
+    <router-view/>
   </div>
 </template>

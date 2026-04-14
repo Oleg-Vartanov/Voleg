@@ -3,16 +3,15 @@ import ColorThemeToggle from './ColorThemeToggle.vue';
 import NavBarDropdown from '@/modules/core/components/NavBarDropdown.vue';
 import NavBarDropdownItem from '@/modules/core/components/NavBarDropdownItem.vue';
 import { computed, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useAuth } from '@/modules/user/stores/useAuth';
 
 const route = useRoute();
-const router = useRouter();
 const auth = useAuth();
 
-type menuItem = { name: string, title: string, roles?: string[] };
+type menuItemType = { name: string, title: string, roles?: string[] };
 
-const menuItems: menuItem[] = [
+const menuItems: menuItemType[] = [
   { name: 'about', title: 'About' },
   { name: 'footballPredictions', title: 'Football Predictions' },
   { name: 'pricing', title: 'Pricing' },
@@ -22,7 +21,7 @@ const menuItems: menuItem[] = [
 const isMenuDropdownOpen = ref(false);
 const isProfileDropdownOpen = ref(false);
 
-const activeMenuItem = computed((): menuItem | null => {
+const activeMenuItem = computed((): menuItemType | null => {
   return menuItems.find(nav => nav.name === route.name) ?? null;
 });
 </script>
@@ -36,18 +35,19 @@ const activeMenuItem = computed((): menuItem | null => {
           <img src="/logo-voleg.svg" width="100" height="40" alt="logo">
         </div>
 
-        <button class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbars"
-                aria-controls="navbars"
-                aria-expanded="false"
-                aria-label="Toggle navigation">
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbars"
+          aria-controls="navbars"
+          aria-expanded="false"
+          aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
       </div>
 
-      <div class="collapse navbar-collapse justify-content-center w-100" id="navbars">
+      <div id="navbars" class="collapse navbar-collapse justify-content-center w-100">
 
         <div class="navbar-brand p-0 pe-2 m-0 d-none d-md-block">
           <img src="/logo-voleg.svg" width="100" height="40" alt="logo">
@@ -63,8 +63,8 @@ const activeMenuItem = computed((): menuItem | null => {
           >
             <NavBarDropdownItem v-for="menuItem in menuItems" :key="menuItem.name">
               <router-link
-                class="dropdown-item"
                 v-if="!menuItem.roles || auth.hasRole(menuItem.roles)"
+                class="dropdown-item"
                 :class="{ active: menuItem.name === route.name }"
                 :to="{ name: menuItem.name }"
               >
@@ -76,8 +76,8 @@ const activeMenuItem = computed((): menuItem | null => {
           <!-- Sign In -->
           <li class="nav-item">
             <router-link
-              class="nav-link"
               v-if="!auth.user.isSignedIn"
+              class="nav-link"
               :to="{ name: 'signIn' }"
               :class="{ active: 'signIn' === route.name }"
             >

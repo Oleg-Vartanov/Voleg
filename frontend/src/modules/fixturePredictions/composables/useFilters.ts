@@ -1,16 +1,16 @@
-import { ref } from 'vue';
+import { type Ref, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { type Ref } from 'vue';
 import { CompetitionCode } from '@/modules/fixturePredictions/enum';
+import type { FixtureFiltersResponse } from '@/modules/core/response.ts';
 
 export interface FixtureFilters {
   start: Ref<string | null>;
   end: Ref<string | null>;
   competition: Ref<CompetitionCode>;
   season: Ref<number | null>;
-  updateByResponse: (response: any) => void;
-  reset: (response: any) => void;
-  routeQuery: (response: any) => object;
+  updateByResponse: (filters: FixtureFiltersResponse) => void;
+  reset: () => void;
+  routeQuery: () => object;
 }
 
 export function useFilters() {
@@ -43,11 +43,11 @@ export function useFilters() {
     season.value = defaults.season;
   }
 
-  function updateByResponse(response: any): void {
-    start.value = response.data.filters.start;
-    end.value = response.data.filters.end;
-    competition.value = response.data.filters.competition;
-    season.value = response.data.filters.season;
+  function updateByResponse(filters: FixtureFiltersResponse): void {
+    start.value = filters.start;
+    end.value = filters.end;
+    competition.value = filters.competition;
+    season.value = filters.season;
   }
 
   function routeQuery() {

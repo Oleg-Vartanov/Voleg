@@ -10,9 +10,10 @@ withDefaults(defineProps<{
 </script>
 
 <template>
-  <div class="tab-pane fade"
+  <div
+:id="'nav-'+table"
+       class="tab-pane fade"
        :class="{'show active': active}"
-       :id="'nav-'+table"
        role="tabpanel"
        :aria-labelledby="'nav-'+table+'-tab'"
        tabindex="0"

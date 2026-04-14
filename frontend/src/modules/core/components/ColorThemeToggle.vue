@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
-const localStorageKey = 'voleg-is-dark-theme'
-const element = document.getElementsByTagName("body")[0];
+const localStorageKey = 'voleg-is-dark-theme';
+const element = document.getElementsByTagName('body')[0];
 
 const isDark = ref(initIsDark());
 apply(isDark.value);
@@ -16,18 +16,18 @@ function saveIsDark(isDark: boolean = false): void {
 }
 
 function apply(isDark: boolean = false) {
-  element.setAttribute("data-bs-theme", isDark ? "dark" : "light");
+  element.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
 }
 
 watch(isDark, async (isChecked) => {
   saveIsDark(isChecked);
   apply(isChecked);
-})
+});
 </script>
 
 <template>
   <div class="form-check form-switch">
-    <input v-model="isDark" class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+    <input id="flexSwitchCheckChecked" v-model="isDark" class="form-check-input" type="checkbox" role="switch" checked>
     <label class="form-check-label" for="flexSwitchCheckChecked">
       <i class="bi" :class="[isDark ? 'bi-moon-stars-fill' : 'bi-moon-stars']"></i>
     </label>

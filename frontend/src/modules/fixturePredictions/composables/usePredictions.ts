@@ -110,7 +110,7 @@ export function usePredictions(
       await Client.makePredictions(Object.values(predictions));
       tables.updateLoadedTables();
       topAlerts.add('Updated.', 'success');
-    } catch (err: any) {
+    } catch (err) {
       switch (err?.response?.status) {
         case 409:
           topAlerts.add('Some fixtures have already started. Try to reload the page.', 'danger');
