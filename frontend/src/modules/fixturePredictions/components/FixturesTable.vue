@@ -1,90 +1,89 @@
 <script setup lang="ts">
-import TeamLogo from '@/modules/fixturePredictions/components/TeamLogo.vue';
-import { useAuth } from '@/modules/user/stores/useAuth';
-import { type HeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead';
-import { type Tables } from '@/modules/fixturePredictions/composables/useTables';
-import { type Predictions } from '@/modules/fixturePredictions/composables/usePredictions';
-import { inject } from 'vue';
+import TeamLogo from '@/modules/fixturePredictions/components/TeamLogo.vue'
+import { useAuth } from '@/modules/user/stores/useAuth'
+import { type HeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead'
+import { type Tables } from '@/modules/fixturePredictions/composables/useTables'
+import { type Predictions } from '@/modules/fixturePredictions/composables/usePredictions'
+import { inject } from 'vue'
 
-const tables: Tables = inject('tables');
-const h2h: HeadToHead = inject('h2h');
-const predictions: Predictions = inject('predictions');
-const auth = useAuth();
+const tables: Tables = inject('tables')
+const h2h: HeadToHead = inject('h2h')
+const predictions: Predictions = inject('predictions')
+const auth = useAuth()
 </script>
 
 <template>
   <table v-if="!tables.isLoading.value.leaderboard" class="table table-sm">
     <thead>
-    <tr>
-      <th scope="col">Match</th>
-      <th scope="col">Score</th>
-      <th scope="col">
-        {{ h2h.users.value.length === 0 ? 'Prediction' : auth.user.displayName }}
-      </th>
-      <th v-if="h2h.users.value.length === 0" scope="col">Points</th>
-      <th v-for="h2hUser in h2h.users.value" :key="h2hUser.id" scope="col">{{ h2hUser.displayName }}</th>
-      <th scope="col">Start</th>
-    </tr>
+      <tr>
+        <th scope="col">Match</th>
+        <th scope="col">Score</th>
+        <th scope="col">
+          {{ h2h.users.value.length === 0 ? 'Prediction' : auth.user.displayName }}
+        </th>
+        <th v-if="h2h.users.value.length === 0" scope="col">Points</th>
+        <th v-for="h2hUser in h2h.users.value" :key="h2hUser.id" scope="col">
+          {{ h2hUser.displayName }}
+        </th>
+        <th scope="col">Start</th>
+      </tr>
     </thead>
 
     <tbody>
+      <!-- No fixtures -->
+      <tr v-if="tables.fixtures.value?.length === 0">
+        <td colspan="6" class="text-center py-3 text-muted">No fixtures found</td>
+      </tr>
 
-    <!-- No fixtures -->
-    <tr v-if="tables.fixtures.value?.length === 0">
-      <td colspan="6" class="text-center py-3 text-muted">
-        No fixtures found
-      </td>
-    </tr>
+      <!-- Fixtures -->
+      <tr v-for="fixture in tables.fixtures.value" :key="fixture.id">
+        <!-- Teams -->
+        <td class="text-start">
+          <span>
+            <TeamLogo :team-name="fixture.homeTeam.name" />
+            {{ fixture.homeTeam.name }}
+          </span>
+          <br />
+          <span>
+            <TeamLogo :team-name="fixture.awayTeam.name" />
+            {{ fixture.awayTeam.name }}
+          </span>
+        </td>
 
-    <!-- Fixtures -->
-    <tr v-for="fixture in tables.fixtures.value" :key="fixture.id">
+        <!-- Score -->
+        <td>
+          {{ fixture.homeScore ?? '-' }}<br />
+          {{ fixture.awayScore ?? '-' }}
+        </td>
 
-      <!-- Teams -->
-      <td class="text-start">
-        <span>
-          <TeamLogo :team-name="fixture.homeTeam.name"/>
-          {{ fixture.homeTeam.name }}
-        </span>
-        <br/>
-        <span>
-          <TeamLogo :team-name="fixture.awayTeam.name"/>
-          {{ fixture.awayTeam.name }}
-        </span>
-      </td>
+        <!-- Current user prediction -->
+        <td
+          :class="predictions.scoreColorClass(predictions.getPrediction(fixture.id, auth.user.id))"
+        >
+          {{ predictions.getPrediction(fixture.id, auth.user.id)?.homeScore ?? '-' }}<br />
+          {{ predictions.getPrediction(fixture.id, auth.user.id)?.awayScore ?? '-' }}
+        </td>
 
-      <!-- Score -->
-      <td>
-        {{ fixture.homeScore ?? '-' }}<br/>
-        {{ fixture.awayScore ?? '-' }}
-      </td>
+        <!-- Points -->
+        <td v-if="h2h.users.value.length === 0">
+          {{ predictions.getPrediction(fixture.id, auth.user.id)?.points ?? '-' }}
+        </td>
 
-      <!-- Current user prediction -->
-      <td :class="predictions.scoreColorClass(predictions.getPrediction(fixture.id, auth.user.id))">
-        {{ predictions.getPrediction(fixture.id, auth.user.id)?.homeScore ?? '-' }}<br/>
-        {{ predictions.getPrediction(fixture.id, auth.user.id)?.awayScore ?? '-' }}
-      </td>
+        <!-- Head to Head users predictions -->
+        <td
+          v-for="h2hUser in h2h.users.value"
+          :key="h2hUser.id"
+          :class="predictions.scoreColorClass(predictions.getPrediction(fixture.id, h2hUser.id))"
+        >
+          {{ predictions.getPrediction(fixture.id, h2hUser.id)?.homeScore ?? '-' }}<br />
+          {{ predictions.getPrediction(fixture.id, h2hUser.id)?.awayScore ?? '-' }}
+        </td>
 
-      <!-- Points -->
-      <td v-if="h2h.users.value.length === 0">
-        {{ predictions.getPrediction(fixture.id, auth.user.id)?.points ?? '-' }}
-      </td>
-
-      <!-- Head to Head users predictions -->
-      <td
-        v-for="h2hUser in h2h.users.value"
-        :key="h2hUser.id"
-        :class="predictions.scoreColorClass(predictions.getPrediction(fixture.id, h2hUser.id))"
-      >
-        {{ predictions.getPrediction(fixture.id, h2hUser.id)?.homeScore ?? '-' }}<br/>
-        {{ predictions.getPrediction(fixture.id, h2hUser.id)?.awayScore ?? '-' }}
-      </td>
-
-      <!-- Fixture Start Date -->
-      <td v-for="{ id, date, time } of [predictions.fixtureDate(fixture)]" :key="id">
-        {{ time }}<br/>{{ date }}
-      </td>
-    </tr>
-
+        <!-- Fixture Start Date -->
+        <td v-for="{ id, date, time } of [predictions.fixtureDate(fixture)]" :key="id">
+          {{ time }}<br />{{ date }}
+        </td>
+      </tr>
     </tbody>
   </table>
 </template>

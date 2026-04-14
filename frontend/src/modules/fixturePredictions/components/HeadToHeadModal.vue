@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { type HeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead';
-import { useAuth } from '@/modules/user/stores/useAuth';
-import { useTopAlerts } from '@/modules/core/stores/useTopAlerts';
-import { inject } from 'vue';
+import { type HeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead'
+import { useAuth } from '@/modules/user/stores/useAuth'
+import { useTopAlerts } from '@/modules/core/stores/useTopAlerts'
+import { inject } from 'vue'
 
-const tables: HeadToHead = inject('tables');
-const h2h: HeadToHead = inject('h2h');
-const auth = useAuth();
-const topAlerts = useTopAlerts();
+const tables: HeadToHead = inject('tables')
+const h2h: HeadToHead = inject('h2h')
+const auth = useAuth()
+const topAlerts = useTopAlerts()
 
 function addUser(user) {
   if (auth.user.id === user.id) {
-    topAlerts.add('It\'s you :)', 'info');
-    return;
+    topAlerts.add("It's you :)", 'info')
+    return
   }
-  h2h.addUser(user);
-  tables.updateLoadedTables();
+  h2h.addUser(user)
+  tables.updateLoadedTables()
 }
 </script>
 
@@ -31,10 +31,14 @@ function addUser(user) {
       <div class="modal-content">
         <div class="modal-header">
           <h1 id="h2hModalLabel" class="modal-title fs-5">Head To Head</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <div class="modal-body">
-
           <ul class="list-group list-group-flush mb-3">
             <li
               v-for="user in h2h.users.value"
@@ -42,7 +46,8 @@ function addUser(user) {
               class="h2h-user list-group-item list-group-item-action"
               @click="h2h.removeUser(user)"
             >
-              {{ user.displayName }} (@{{ user.tag }}) <i class="bi bi-x-lg text-danger" style="font-size: 20px;"></i>
+              {{ user.displayName }} (@{{ user.tag }})
+              <i class="bi bi-x-lg text-danger" style="font-size: 20px"></i>
             </li>
           </ul>
 
@@ -54,13 +59,18 @@ function addUser(user) {
               :class="[h2h.input.value.error === '' ? '' : 'is-invalid']"
               class="form-control"
               aria-describedby="go-h2h validation-go-h2h"
-              @keyup.enter="h2h.input.value.value === '' || h2h.isLoading.value ? '' : h2h.searchUser()">
+              @keyup.enter="
+                h2h.input.value.value === '' || h2h.isLoading.value ? '' : h2h.searchUser()
+              "
+            />
             <button
               id="go-h2h"
               :disabled="h2h.input.value.value === '' || h2h.isLoading.value"
               class="btn btn btn-outline-primary rounded-0"
               type="button"
-              @click="h2h.searchUser()">Search
+              @click="h2h.searchUser()"
+            >
+              Search
             </button>
             <div id="validation-go-h2h" class="invalid-feedback">{{ h2h.input.value.error }}</div>
           </div>
@@ -74,13 +84,12 @@ function addUser(user) {
               v-for="user in h2h.searchUsers.value"
               :key="user.id"
               class="h2h-user list-group-item list-group-item-action"
-              @click="addUser(user);"
+              @click="addUser(user)"
             >
               {{ user.displayName }} (@{{ user.tag }})
-              <i class="bi bi-person-plus text-primary" style="font-size: 20px;"></i>
+              <i class="bi bi-person-plus text-primary" style="font-size: 20px"></i>
             </li>
           </ul>
-
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

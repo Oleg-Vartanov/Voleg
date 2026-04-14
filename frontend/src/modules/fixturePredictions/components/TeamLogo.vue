@@ -1,19 +1,23 @@
 <script setup lang="ts">
 defineProps<{
-  teamName: string;
-}>();
+  teamName: string
+}>()
 
 function getTag(name: string) {
-  return name.toLowerCase().replace(' ', '-');
+  return name.toLowerCase().replace(' ', '-')
 }
 </script>
 
 <template>
   <img
-    :src="'/team-logo/'+getTag(teamName)+'.png'"
+    :src="'/team-logo/' + getTag(teamName) + '.png'"
     width="20"
     height="20"
     alt="logo"
-    @error="($event) => { $event.target.src = '/team-logo/default.png' }"
-  >
+    @error="
+      ($event) => {
+        $event.target.src = '/team-logo/default.png'
+      }
+    "
+  />
 </template>

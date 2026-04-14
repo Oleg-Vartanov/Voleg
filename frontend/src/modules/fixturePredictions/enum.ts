@@ -1,7 +1,7 @@
 export enum CompetitionCode {
-  PL = 'PL',
+  PL = 'PL'
 }
 
 export const CompetitionNames: Record<CompetitionCode, string> = {
-  [CompetitionCode.PL]: 'English Premier League',
-};
+  [CompetitionCode.PL]: 'English Premier League'
+}

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import arrayUtils from '@/modules/core/utils/arrayUtils';
-import { inject } from 'vue';
-import { type FixtureFilters } from '@/modules/fixturePredictions/composables/useFilters';
-import { type Tables } from '@/modules/fixturePredictions/composables/useTables';
-import { CompetitionCode, CompetitionNames } from '@/modules/fixturePredictions/enum';
+import arrayUtils from '@/modules/core/utils/arrayUtils'
+import { inject } from 'vue'
+import { type FixtureFilters } from '@/modules/fixturePredictions/composables/useFilters'
+import { type Tables } from '@/modules/fixturePredictions/composables/useTables'
+import { CompetitionCode, CompetitionNames } from '@/modules/fixturePredictions/enum'
 
-const tables: Tables = inject('tables');
-const filters: FixtureFilters = inject('filters');
+const tables: Tables = inject('tables')
+const filters: FixtureFilters = inject('filters')
 </script>
 
 <template>
@@ -18,31 +18,51 @@ const filters: FixtureFilters = inject('filters');
   >
     <div class="offcanvas-header">
       <h5 id="offcanvas-filters-label" class="offcanvas-title">Filters</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="offcanvas"
+        aria-label="Close"
+      ></button>
     </div>
     <div class="offcanvas-body">
-
       <div class="d-flex justify-content-center">
         <div class="row">
           <div class="col-auto mb-2 p-1">
             <div class="input-group">
               <span class="input-group-text filter-date-text">Start</span>
-              <input id="start" v-model="filters.start.value" class="form-control filter-date-input" type="date"/>
+              <input
+                id="start"
+                v-model="filters.start.value"
+                class="form-control filter-date-input"
+                type="date"
+              />
             </div>
           </div>
 
           <div class="col-auto mb-2 p-1">
             <div class="input-group">
               <span class="input-group-text filter-date-text">End</span>
-              <input id="end" v-model="filters.end.value" class="form-control filter-date-input" type="date"/>
+              <input
+                id="end"
+                v-model="filters.end.value"
+                class="form-control filter-date-input"
+                type="date"
+              />
             </div>
           </div>
 
           <div class="col-auto mb-2 p-1">
             <div class="input-group">
               <span class="input-group-text filter-date-text">Competition</span>
-              <select v-model="filters.competition.value" class="form-select" aria-label="Default select example">
-                <option :value="CompetitionCode.PL">{{ CompetitionNames[CompetitionCode.PL] }}</option>
+              <select
+                v-model="filters.competition.value"
+                class="form-select"
+                aria-label="Default select example"
+              >
+                <option :value="CompetitionCode.PL">
+                  {{ CompetitionNames[CompetitionCode.PL] }}
+                </option>
               </select>
             </div>
           </div>
@@ -59,11 +79,7 @@ const filters: FixtureFilters = inject('filters');
           </div>
 
           <div class="col-auto mb-2 p-1">
-            <button
-              class="btn btn-primary"
-              data-bs-toggle="modal"
-              data-bs-target="#go"
-            >
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#go">
               <i class="bi bi-people-fill"></i>
               H2H
             </button>
@@ -83,7 +99,6 @@ const filters: FixtureFilters = inject('filters');
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>

@@ -1,41 +1,44 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 
-const props = withDefaults(defineProps<{
-  isOpen: boolean;
-  text: string;
-  active?: boolean;
-}>(), {
-  active: false,
-});
+const props = withDefaults(
+  defineProps<{
+    isOpen: boolean
+    text: string
+    active?: boolean
+  }>(),
+  {
+    active: false
+  }
+)
 
 const emit = defineEmits<{
-  (e: 'update:isOpen', value: boolean): void;
-}>();
+  (e: 'update:isOpen', value: boolean): void
+}>()
 
-const root = ref<HTMLElement | null>(null);
+const root = ref<HTMLElement | null>(null)
 
 const isOpenProxy = computed({
   get: () => props.isOpen,
-  set: (v) => emit('update:isOpen', v),
-});
+  set: (v) => emit('update:isOpen', v)
+})
 
 function toggle() {
-  isOpenProxy.value = !isOpenProxy.value;
+  isOpenProxy.value = !isOpenProxy.value
 }
 
 function close() {
-  isOpenProxy.value = false;
+  isOpenProxy.value = false
 }
 
 function onOutsideClick(e: MouseEvent) {
   if (root.value && !root.value.contains(e.target as Node)) {
-    close();
+    close()
   }
 }
 
-onMounted(() => document.addEventListener('click', onOutsideClick));
-onBeforeUnmount(() => isOpenProxy.value = false);
+onMounted(() => document.addEventListener('click', onOutsideClick))
+onBeforeUnmount(() => (isOpenProxy.value = false))
 </script>
 
 <template>
@@ -50,12 +53,8 @@ onBeforeUnmount(() => isOpenProxy.value = false);
       {{ text }}
     </a>
 
-    <ul
-      class="dropdown-menu"
-      :class="{ show: isOpenProxy }"
-      @click="close"
-    >
-      <slot/>
+    <ul class="dropdown-menu" :class="{ show: isOpenProxy }" @click="close">
+      <slot />
     </ul>
   </li>
 </template>
