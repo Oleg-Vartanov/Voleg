@@ -29,13 +29,9 @@ const activeMenuItem = computed((): menuItemType | null => {
 <template>
   <nav class="navbar navbar-expand-md bg-body-tertiary" aria-label="Navbar">
     <div class="container-fluid">
-      <div class="d-flex d-md-none w-100 justify-content-between">
-        <div class="navbar-brand p-0 pe-2 m-0">
-          <img src="/logo-voleg.svg" width="100" height="40" alt="logo" />
-        </div>
-
+      <div class="d-flex d-md-none w-100">
         <button
-          class="navbar-toggler"
+          class="btn"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbars"
@@ -45,6 +41,10 @@ const activeMenuItem = computed((): menuItemType | null => {
         >
           <span class="navbar-toggler-icon"></span>
         </button>
+
+        <div class="navbar-brand p-0 pe-2 m-0">
+          <img src="/logo-voleg.svg" width="100" height="40" alt="logo" />
+        </div>
       </div>
 
       <div id="navbars" class="collapse navbar-collapse justify-content-center w-100">
