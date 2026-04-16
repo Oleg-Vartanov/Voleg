@@ -24,6 +24,7 @@ init:
 	$(DOCKER_COMPOSE) down
 	$(DOCKER_COMPOSE) up -d
 	$(MAKE) init-containers
+	$(DOCKER_COMPOSE) restart php_supervisor
 
 init-containers:
 	$(PHP_CONTAINER) composer install --no-interaction
