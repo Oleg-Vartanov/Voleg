@@ -43,7 +43,7 @@ const signUp = (event: SubmitEvent) => {
     .catch((axiosError) => {
       axiosError.response.data.violations.forEach((violation) => {
         const property = violation.propertyPath
-        if (Object.prototype.hasOwnProperty.call(fields, 'property')) {
+        if (Object.prototype.hasOwnProperty.call(fields, property)) {
           fields[property].isValid = false
           fields[property].errorMessage += violation.title + '<br>'
         }
