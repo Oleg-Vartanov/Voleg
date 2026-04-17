@@ -24,20 +24,17 @@ class AuthVerifyUserActionTest extends ApiTestCase
     {
         $user = $this->createUser(verified: false);
 
-        $response = $this->sendRequest([
+        $this->sendRequest([
             'userId' => $user->getId(),
             'code' => $user->getVerificationCode(),
-            'redirectUrl' => 'https://example.com',
         ]);
 
-        $this->assertResponseIsSuccessful();
-        $this->assertStringContainsString(
-            '<!-- TEMPLATE: verify_success -->',
-            $response->getContent()
+        $this->assertTrue($user->isVerified());
+        $this->assertResponseStatusCodeSame(Response::HTTP_SEE_OTHER);
+        $this->assertResponseHeaderSame(
+            'Location',
+            $this->getParameter('client.url.auth-verification-success'),
         );
-        $this->assertSelectorTextContains('#display-name', $user->getDisplayName());
-        $this->assertSelectorTextContains('#support-email', 'support@mail.com');
-        $this->assertSelectorExists('a[href="https://example.com"]');
     }
 
     #[TestDox('Verify user: fail')]
@@ -45,29 +42,20 @@ class AuthVerifyUserActionTest extends ApiTestCase
     {
         $user = $this->createUser(verified: false);
 
-        $response = $this->sendRequest([
-            'userId' => $user->getId(),
-            'code' => 'wrong-code',
-            'redirectUrl' => 'https://example.com',
-        ]);
+        $this->sendRequest(['userId' => $user->getId(), 'code' => 'wrong-code']);
 
-        $this->assertResponseIsSuccessful();
-        $this->assertStringContainsString(
-            '<!-- TEMPLATE: verify_fail -->',
-            $response->getContent()
+        $this->assertFalse($user->isVerified());
+        $this->assertResponseStatusCodeSame(Response::HTTP_SEE_OTHER);
+        $this->assertResponseHeaderSame(
+            'Location',
+            $this->getParameter('client.url.auth-verification-fail'),
         );
-        $this->assertSelectorTextContains('#display-name', $user->getDisplayName());
-        $this->assertSelectorTextContains('#support-email', 'support@mail.com');
     }
 
     #[TestDox('Verify user: not found')]
     public function testVerifyUserNotFound(): void
     {
-        $this->sendRequest([
-            'userId' => 0,
-            'code' => 'code',
-            'redirectUrl' => 'https://example.com',
-        ]);
+        $this->sendRequest(['userId' => 0, 'code' => 'code']);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
@@ -75,13 +63,14 @@ class AuthVerifyUserActionTest extends ApiTestCase
     #[TestDox('Verify user: invalid link')]
     public function testVerifyUserInvalidLink(): void
     {
-        $this->sendRequest([
-            'userId' => 11,
-            'code' => 69,
-            'redirectUrl' => 69,
-        ]);
+        $this->sendRequest(['userId' => -1, 'code' => []]);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+    }
+
+    private function getParameter(string $name): string
+    {
+        return self::getContainer()->get('parameter_bag')->get($name);
     }
 
     private function sendRequest(array $parameters): Response
@@ -90,7 +79,7 @@ class AuthVerifyUserActionTest extends ApiTestCase
             method: Request::METHOD_GET,
             uri: $this->router->generate('sign_up_verify'),
             parameters: $parameters,
-            server: ['CONTENT_TYPE' => 'application/json']
+            server: ['CONTENT_TYPE' => 'application/json'],
         );
 
         return $this->client->getResponse();

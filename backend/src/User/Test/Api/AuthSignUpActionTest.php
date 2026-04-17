@@ -29,7 +29,6 @@ class AuthSignUpActionTest extends ApiTestCase
             'password' => '!Qwerty1',
             'displayName' => 'John Doe',
             'tag' => 'user' . ($lastUserId + 1),
-            'verificationEmailRedirectUrl' => 'https://example.com',
             'code' => 'sign-up-code',
         ];
 

@@ -25,7 +25,7 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
       <i class="bi bi-file-text me-1" />API Documentation <a :href="apiBaseUrl + '/doc'">GUI</a> ,
       <a :href="apiBaseUrl + '/doc.json'">JSON</a>
     </p>
-    <i class="bi bi-github me-1" />This app's <a href="https://github.com/Oleg-Vartanov/Voleg">GitHub</a
-    ><br />
+    <i class="bi bi-github me-1" />This app's
+    <a href="https://github.com/Oleg-Vartanov/Voleg">GitHub</a><br />
   </div>
 </template>

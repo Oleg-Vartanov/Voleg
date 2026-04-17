@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Get(
     tags: ['Authorization'],
     responses: [
-        new OA\Response(response: Response::HTTP_OK, description: 'Verified page'),
+        new OA\Response(response: Response::HTTP_SEE_OTHER, description: 'Verification results redirected to client'),
         new OA\Response(response: Response::HTTP_NOT_FOUND, description: 'Invalid link'),
     ],
 )]
@@ -37,13 +37,11 @@ class AuthVerifyUserAction extends ApiController
         $user = $this->userRepository->find($link->userId) ?? throw new NotFoundHttpException();
 
         $verified = $user->isVerified() || $this->authService->verifyUser($link->code, $user);
-        $template = $verified ? 'email/verification-success.html.twig' : 'email/verification-fail.html.twig';
+        $urlParameter = $verified ? 'client.url.auth-verification-success' : 'client.url.auth-verification-fail';
 
-        // TODO: verification pages on client side.
-        return $this->render($template, [
-            'displayName' => $user->getDisplayName(),
-            'supportEmail' => $this->parameterBag->get('app.support.email'),
-            'continueLink' => $link->redirectUrl,
-        ]);
+        return $this->redirect(
+            $this->parameterBag->get($urlParameter),
+            Response::HTTP_SEE_OTHER,
+        );
     }
 }

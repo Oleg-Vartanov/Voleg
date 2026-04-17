@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import routerUtils from '@/modules/core/utils/routerUtils'
 import Client from '@/modules/core/apiClient'
 import { type Router, useRouter } from 'vue-router'
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts'
@@ -63,13 +62,6 @@ const signUp = (event: SubmitEvent) => {
 
 <template>
   <form @submit.prevent="signUp">
-    <input
-      name="verificationEmailRedirectUrl"
-      hidden
-      type="url"
-      :value="routerUtils.url('signIn')"
-    />
-
     <div class="form-floating mb-3">
       <input
         name="code"

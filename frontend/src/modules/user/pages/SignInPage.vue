@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import client from '@/modules/core/apiClient'
+import { useTopAlerts } from '@/modules/core/stores/useTopAlerts.ts'
 import { useAuth } from '@/modules/user/stores/useAuth'
-import { type Ref, ref, type UnwrapRef } from 'vue'
+import { type Ref, ref, type UnwrapRef, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const auth = useAuth()
+const route = useRoute()
+const router = useRouter()
+const topAlerts = useTopAlerts()
 
 const message401: Ref<UnwrapRef<string | null>> = ref(null)
 const isLoading = ref(false)
@@ -33,6 +38,22 @@ const signIn = (event: SubmitEvent) => {
       isLoading.value = false
     })
 }
+
+function verificationMessage() {
+  if (route.query.verify === 'success') {
+    topAlerts.add('You have successfully verified the account. 🎉', 'success')
+  }
+  if (route.query.verify === 'fail') {
+    topAlerts.add(
+      "Verification link isn't valid anymore. Resent verification request to get the new one.",
+      'danger'
+    )
+  }
+}
+
+onMounted(() => {
+  verificationMessage()
+})
 </script>
 
 <template>

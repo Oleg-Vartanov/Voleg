@@ -13,8 +13,4 @@ class VerificationLinkDto
 
     #[Assert\NotBlank]
     public string $code;
-
-    #[OA\Property(example: 'https://example.com')]
-    #[Assert\Type('string'), Assert\Url]
-    public ?string $redirectUrl = null;
 }

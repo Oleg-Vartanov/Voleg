@@ -32,7 +32,7 @@ readonly class AuthService
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        $this->sendVerificationEmail($user, $dto->verificationEmailRedirectUrl);
+        $this->sendVerificationEmail($user);
     }
 
     public function verifyUser(string $code, User $user): bool
@@ -48,17 +48,16 @@ readonly class AuthService
         return $verified;
     }
 
-    public function createVerificationLink(User $user, ?string $redirectUrl = null): string
+    public function createVerificationLink(User $user): string
     {
         return $this->router->generate('sign_up_verify', [
             'userId' => $user->getId(),
             'code' => $user->getVerificationCode(),
-            'redirectUrl' => $redirectUrl,
-        ], UrlGeneratorInterface::NETWORK_PATH);
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
     }
 
     /** @throws TransportExceptionInterface */
-    public function sendVerificationEmail(User $user, ?string $redirectUrl = null): void
+    public function sendVerificationEmail(User $user): void
     {
         if ($user->isVerified()) {
             throw new LogicException('User is already verified.');
@@ -70,7 +69,7 @@ readonly class AuthService
             ->subject('Verify Sign Up')
             ->htmlTemplate('email/sign-up.html.twig')
             ->context([
-                'verifyLink' => $this->createVerificationLink($user, $redirectUrl),
+                'verifyLink' => $this->createVerificationLink($user),
                 'displayName' => $user->getDisplayName(),
                 'supportEmail' => $this->parameterBag->get('app.support.email'),
             ])
