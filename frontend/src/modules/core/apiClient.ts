@@ -71,6 +71,18 @@ export default {
     })
   },
 
+  getUser(id: number) {
+    return axios.get(`${apiBaseUrl}/users/${id}`, {
+      headers: getHeader()
+    })
+  },
+
+  patchUser(id: number, params: object) {
+    return axios.patch(`${apiBaseUrl}/users/${id}`, params, {
+      headers: getHeader()
+    })
+  },
+
   makePredictions(params: object) {
     return axios.post(`${apiBaseUrl}/fixtures/make-predictions`, params, {
       headers: getHeader()

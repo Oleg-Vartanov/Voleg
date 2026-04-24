@@ -1,7 +1,7 @@
 export interface User {
-  id: number | string
+  id: number
   displayName: string
-  tag?: string
-  isSignedIn: false
-  roles: []
+  tag: string
+  isSignedIn: boolean
+  roles: string[]
 }
