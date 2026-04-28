@@ -35,8 +35,8 @@ class UserPatchActionTest extends ApiTestCase
         $patchedUser = $this->entityManager->getRepository(User::class)->find($user->getId());
 
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-        $this->assertSame($user->getId(), $patchedUser->getId());
-        $this->assertSame('patched-email@mail.com', $patchedUser->getEmail());
+        $this->assertSame($user->getEmail(), $patchedUser->getEmail());
+        $this->assertSame('patched-email@mail.com', $patchedUser->getEmailChange());
         $this->assertSame('patched-name', $patchedUser->getDisplayName());
         $this->assertSame('patched-tag', $patchedUser->getTag());
     }

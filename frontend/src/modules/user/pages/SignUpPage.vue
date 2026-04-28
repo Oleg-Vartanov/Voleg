@@ -40,19 +40,24 @@ const signUp = (event: SubmitEvent) => {
       router.push({ name: 'signIn' })
     })
     .catch((axiosError) => {
-      axiosError.response.data.violations.forEach((violation) => {
-        const property = violation.propertyPath
-        if (Object.prototype.hasOwnProperty.call(fields, property)) {
-          fields[property].isValid = false
-          fields[property].errorMessage += violation.title + '<br>'
-        }
-      })
+      if (axiosError.response.status === 422) {
+        axiosError.response.data.violations.forEach((violation) => {
+          const property = violation.propertyPath
+          if (Object.prototype.hasOwnProperty.call(fields, property)) {
+            fields[property].isValid = false
+            fields[property].errorMessage +=
+              (fields[property].errorMessage ? '\n' : '') + violation.title
+          }
+        })
 
-      Object.keys(fields).forEach((field) => {
-        if (fields[field]['isValid'] === null) {
-          fields[field]['isValid'] = true
-        }
-      })
+        Object.keys(fields).forEach((field) => {
+          if (fields[field]['isValid'] === null) {
+            fields[field]['isValid'] = true
+          }
+        })
+      } else {
+        topAlerts.add('Failed to sign up.', 'danger')
+      }
     })
     .finally(() => {
       isLoading.value = false
@@ -79,8 +84,10 @@ const signUp = (event: SubmitEvent) => {
         v-if="fields.code.isValid === false"
         id="code-validation-feedback"
         class="invalid-feedback"
-        v-html="fields.code.errorMessage"
-      ></div>
+        style="white-space: pre-line"
+      >
+        {{ fields.code.errorMessage }}
+      </div>
       <div class="form-text">
         While site is in development sign-up is restricted and requires this code.
       </div>
@@ -107,8 +114,10 @@ const signUp = (event: SubmitEvent) => {
         v-if="fields.displayName.isValid === false"
         id="display-name-validation-feedback"
         class="invalid-feedback"
-        v-html="fields.displayName.errorMessage"
-      ></div>
+        style="white-space: pre-line"
+      >
+        {{ fields.displayName.errorMessage }}
+      </div>
       <div class="form-text">Your public name displayed on the platform.</div>
     </div>
 
@@ -127,8 +136,10 @@ const signUp = (event: SubmitEvent) => {
         v-if="fields.tag.isValid === false"
         id="tag-validation-feedback"
         class="invalid-feedback"
-        v-html="fields.tag.errorMessage"
-      ></div>
+        style="white-space: pre-line"
+      >
+        {{ fields.tag.errorMessage }}
+      </div>
       <div class="form-text">A unique tag used for search purposes.</div>
     </div>
 
@@ -149,8 +160,10 @@ const signUp = (event: SubmitEvent) => {
         v-if="fields.email.isValid === false"
         id="email-validation-feedback"
         class="invalid-feedback"
-        v-html="fields.email.errorMessage"
-      ></div>
+        style="white-space: pre-line"
+      >
+        {{ fields.email.errorMessage }}
+      </div>
       <div id="emailHelp" class="form-text">Your email will stay private, it wont be shared.</div>
     </div>
 
@@ -175,8 +188,10 @@ const signUp = (event: SubmitEvent) => {
         v-if="fields.password.isValid === false"
         id="password-validation-feedback"
         class="invalid-feedback"
-        v-html="fields.password.errorMessage"
-      ></div>
+        style="white-space: pre-line"
+      >
+        {{ fields.password.errorMessage }}
+      </div>
     </div>
 
     <button :disabled="isLoading" class="btn btn-primary w-100 py-2 mb-3" type="submit">

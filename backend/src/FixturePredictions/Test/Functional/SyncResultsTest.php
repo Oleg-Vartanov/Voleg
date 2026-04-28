@@ -95,7 +95,7 @@ class SyncResultsTest extends KernelTestCase
 
     private function mockFixturesProvider(): FixtureProvider&MockObject
     {
-        $fixturesProviderMock = $this->createMock(FixtureProvider::class);
+        $fixturesProviderMock = self::createMock(FixtureProvider::class);
         static::getContainer()->set(FixtureProvider::class, $fixturesProviderMock);
 
         return $fixturesProviderMock;

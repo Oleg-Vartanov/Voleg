@@ -12,7 +12,7 @@ class UserDto
 {
     public const string SIGN_UP = 'SignUp';
     public const string UPDATE = 'Update';
-    /** @var string[]  */
+    /** @var string[] */
     public const array ALL = [self::SIGN_UP, self::UPDATE];
 
     #[Groups(self::ALL)]
@@ -66,6 +66,11 @@ class UserDto
         Assert\Length(max: 255, groups: self::ALL),
         Assert\Regex(pattern: '/^\S+$/', message: 'The value can\'t contain spaces.', groups: self::ALL),
         Assert\Regex(pattern: '/^[^A-Z]*$/', message: 'All the letters must be lowercase.', groups: self::ALL),
+        Assert\Regex(
+            pattern: '/[a-z0-9]/',
+            message: 'The value must contain at least one letter or number.',
+            groups: self::ALL,
+        ),
         CustomAssert\UniqueEntityField(entityClass: User::class, field: 'tag', groups: self::ALL),
     ]
     public string $tag;

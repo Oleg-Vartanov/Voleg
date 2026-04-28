@@ -6,6 +6,8 @@ parameters:
     client.url: 'https://%env(DOMAIN)%'
     client.url.auth-verification-success: 'https://%env(DOMAIN)%/auth-forms/sign-in?verify=success'
     client.url.auth-verification-fail: 'https://%env(DOMAIN)%/auth-forms/sign-in?verify=fail'
+    client.url.email-change-success: 'https://%env(DOMAIN)%/profile?emailChange=success'
+    client.url.email-change-fail: 'https://%env(DOMAIN)%/profile?emailChange=fail'
     auth.sign.up.code: '%env(SIGN_UP_CODE)%'
     fixtures.football-data-org.api.url: '%env(FOOTBALL_DATA_ORG_URL)%'
     fixtures.football-data-org.api.key: '%env(FOOTBALL_DATA_ORG_KEY)%'

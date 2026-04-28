@@ -28,7 +28,7 @@ class SyncTest extends ApiTestCase
         $anyDate = new DateTimeImmutable()->format('Y-m-d\TH:i:sO');
 
         $this->client->disableReboot(); // For mocks in a controller.
-        $fixtureProviderMock = $this->createMock(FixtureProvider::class);
+        $fixtureProviderMock = self::createMock(FixtureProvider::class);
         $fixtureProviderMock->expects(self::once())->method('sync');
         static::getContainer()->set(FixtureProvider::class, $fixtureProviderMock);
 
