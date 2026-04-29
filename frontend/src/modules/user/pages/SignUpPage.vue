@@ -12,7 +12,6 @@ const fields = reactive({
   tag: { isValid: null, errorMessage: '' },
   email: { isValid: null, errorMessage: '' },
   password: { isValid: null, errorMessage: '' },
-  code: { isValid: null, errorMessage: '' }
 })
 const isLoading = ref(false)
 
@@ -67,31 +66,6 @@ const signUp = (event: SubmitEvent) => {
 
 <template>
   <form @submit.prevent="signUp">
-    <div class="form-floating mb-3">
-      <input
-        name="code"
-        type="text"
-        class="form-control"
-        :class="[
-          fields.code.isValid === null ? '' : fields.code.isValid ? 'is-valid' : 'is-invalid'
-        ]"
-        aria-describedby="code-validation-feedback"
-        placeholder=""
-        required
-      />
-      <label for="code">Special Code</label>
-      <div
-        v-if="fields.code.isValid === false"
-        id="code-validation-feedback"
-        class="invalid-feedback"
-        style="white-space: pre-line"
-      >
-        {{ fields.code.errorMessage }}
-      </div>
-      <div class="form-text">
-        While site is in development sign-up is restricted and requires this code.
-      </div>
-    </div>
 
     <div class="form-floating mb-3">
       <input
