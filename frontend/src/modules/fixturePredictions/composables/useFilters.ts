@@ -1,14 +1,14 @@
 import { type Ref, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { CompetitionCode } from '@/modules/fixturePredictions/enum'
-import type { FixtureFiltersResponse } from '@/modules/core/response.ts'
+import type { ApiFixtureFilters } from '@/modules/core/apiType.ts'
 
 export interface FixtureFilters {
   start: Ref<string | null>
   end: Ref<string | null>
   competition: Ref<CompetitionCode>
   season: Ref<number | null>
-  updateByResponse: (filters: FixtureFiltersResponse) => void
+  updateByResponse: (filters: ApiFixtureFilters) => void
   reset: () => void
   routeQuery: () => object
 }
@@ -35,7 +35,7 @@ export function useFilters() {
     season.value = defaults.season
   }
 
-  function updateByResponse(filters: FixtureFiltersResponse): void {
+  function updateByResponse(filters: ApiFixtureFilters): void {
     start.value = filters.start
     end.value = filters.end
     competition.value = filters.competition

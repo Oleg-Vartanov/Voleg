@@ -54,6 +54,11 @@ class UserDto
         Assert\Type('string', groups: self::ALL),
         Assert\Length(min: 1, groups: self::ALL),
         Assert\Length(max: 255, groups: self::ALL),
+        Assert\Regex(
+            pattern: '/[a-z0-9]/',
+            message: 'The value must contain at least one letter or number.',
+            groups: self::ALL,
+        )
     ]
     public string $displayName;
 

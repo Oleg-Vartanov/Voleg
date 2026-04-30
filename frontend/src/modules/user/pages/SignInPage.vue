@@ -2,8 +2,9 @@
 import client from '@/modules/core/apiClient'
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts.ts'
 import { useAuth } from '@/modules/user/stores/useAuth'
-import { type Ref, ref, type UnwrapRef, onMounted } from 'vue'
+import { type Ref, ref, type UnwrapRef, onMounted, reactive } from 'vue'
 import { useRoute } from 'vue-router'
+import FormField from '@/modules/core/components/form/FormField.vue'
 
 const auth = useAuth()
 const route = useRoute()
@@ -11,16 +12,14 @@ const topAlerts = useTopAlerts()
 
 const message401: Ref<UnwrapRef<string | null>> = ref(null)
 const isLoading = ref(false)
+const model = reactive({ email: '', password: '' })
 
-const signIn = (event: SubmitEvent) => {
+const signIn = () => {
   isLoading.value = true
   message401.value = null
 
-  const formData = new FormData(event.target as HTMLFormElement)
-  const formValues = Object.fromEntries(formData.entries())
-
   client
-    .signIn(formValues)
+    .signIn({ ...model })
     .then((response) => {
       auth.signIn(response.data.token)
     })
@@ -57,15 +56,8 @@ onMounted(() => {
 
 <template>
   <form @submit.prevent="signIn">
-    <div class="form-floating mb-3">
-      <input id="email" name="email" type="email" class="form-control" placeholder="" />
-      <label for="email">Email address</label>
-    </div>
-
-    <div class="form-floating mb-3">
-      <input id="password" name="password" type="password" class="form-control" placeholder="" />
-      <label for="password">Password</label>
-    </div>
+    <FormField id="email" v-model="model.email" type="email" label="Email address" />
+    <FormField id="password" v-model="model.password" type="password" label="Password" />
 
     <button :disabled="isLoading" class="btn btn-primary w-100 py-2 mb-3" type="submit">
       Submit
