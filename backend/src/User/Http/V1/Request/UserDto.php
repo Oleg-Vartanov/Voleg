@@ -27,23 +27,9 @@ class UserDto
     public string $email;
 
     #[Groups([self::SIGN_UP])]
-    #[OA\Property(example: 'StrongPassword!1')]
     #[
         Assert\NotBlank(groups: [self::SIGN_UP]),
-        Assert\Type('string', groups: [self::SIGN_UP]),
-        Assert\Length(min: 6, groups: [self::SIGN_UP]),
-        Assert\Regex(pattern: '/^\S+$/', message: 'The value can\'t contain spaces.', groups: [self::SIGN_UP]),
-        Assert\Regex(pattern: '/\d+/i', message: 'Should have at least one digit.', groups: [self::SIGN_UP]),
-        Assert\Regex(
-            pattern: '/[#?!@$%^&*-]+/i',
-            message: 'Should have at least one character from [#?!@$%^&*-].',
-            groups: [self::SIGN_UP]
-        ),
-        Assert\Regex(
-            pattern: '/[A-Z]+/',
-            message: 'Should have at least one upper case character.',
-            groups: [self::SIGN_UP]
-        ),
+        CustomAssert\StrongPassword(groups: [self::SIGN_UP]),
     ]
     public string $password;
 

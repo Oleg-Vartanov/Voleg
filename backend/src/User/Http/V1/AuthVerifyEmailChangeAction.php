@@ -40,7 +40,7 @@ class AuthVerifyEmailChangeAction extends ApiController
     public function __invoke(
         #[MapQueryString] VerificationLinkDto $link,
     ): Response {
-        $user = $this->userRepository->find($link->userId)
+        $user = $this->userRepository->findById($link->userId)
             ?? throw new NotFoundHttpException();
 
         $verified = $this->userService->verifyEmailChange(

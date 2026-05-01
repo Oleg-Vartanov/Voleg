@@ -17,10 +17,4 @@ use Symfony\Component\Validator\Constraint;
     ) {
         parent::__construct($options, $groups, $payload);
     }
-
-    /** @inheritDoc */
-    public function getTargets(): array|string
-    {
-        return self::PROPERTY_CONSTRAINT;
-    }
 }

@@ -40,7 +40,7 @@ readonly class UserService
         $user = new User();
 
         $user->setEmail($email);
-        $user->setPassword($this->passwordHasher->hashPassword($user, $plaintextPassword));
+        $this->setHashedPassword($user, $plaintextPassword);
         $user->setDisplayName($displayName);
         $user->setTag($tag);
         $user->setRoles($roles);
@@ -73,6 +73,17 @@ readonly class UserService
         }
 
         return $user;
+    }
+
+    public function isPasswordValid(User $user, string $plainPassword): bool
+    {
+        return $this->passwordHasher->isPasswordValid($user, $plainPassword);
+    }
+
+    public function setHashedPassword(User $user, string $plaintextPassword): void
+    {
+        $hashedPassword = $this->passwordHasher->hashPassword($user, $plaintextPassword);
+        $user->setPassword($hashedPassword);
     }
 
     public function verifyEmailChange(string $code, User $user): bool

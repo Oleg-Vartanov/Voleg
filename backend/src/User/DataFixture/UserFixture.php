@@ -4,14 +4,14 @@ namespace App\User\DataFixture;
 
 use App\User\Entity\User;
 use App\User\Enum\RoleEnum;
+use App\User\Service\UserService;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixture extends Fixture
 {
     public function __construct(
-        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly UserService $userService,
     ) {
     }
 
@@ -41,9 +41,7 @@ class UserFixture extends Fixture
         foreach ($users as $user) {
             $u = new User();
             $u->setEmail($user['email']);
-            $u->setPassword(
-                $this->passwordHasher->hashPassword($u, $user['password'])
-            );
+            $this->userService->setHashedPassword($u, $user['password']);
             $u->setDisplayName($user['displayName']);
             $u->setTag($user['tag']);
             $u->setRoles($user['roles']);

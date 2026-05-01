@@ -60,6 +60,15 @@ class AuthVerifyEmailChangeActionTest extends ApiTestCase
         );
     }
 
+    #[TestDox('Verify email change: not found')]
+    public function testVerifyEmailChangeNotFound(): void
+    {
+        $nonExistentUserId = 9999999999;
+        $this->sendRequest(['userId' => $nonExistentUserId, 'code' => 'wrong-code']);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+    }
+
     #[TestDox('Verify email change: invalid link')]
     public function testVerifyEmailChangeInvalidLink(): void
     {
