@@ -83,6 +83,12 @@ export default {
     })
   },
 
+  changePassword(params: object) {
+    return axios.post(`${apiBaseUrl}/users/change-password`, params, {
+      headers: getHeader()
+    })
+  },
+
   makePredictions(params: object) {
     return axios.post(`${apiBaseUrl}/fixtures/make-predictions`, params, {
       headers: getHeader()

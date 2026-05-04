@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 interface Props {
   id: string
@@ -23,6 +23,16 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
 }>()
 
+const showPassword = ref(false)
+
+const inputType = computed(() => {
+  if (props.type !== 'password') return props.type
+  return showPassword.value ? 'text' : 'password'
+})
+const eyeOffsetClass = computed(() => {
+  return props.isValidationError ? 'me-4' : 'me-2'
+})
+
 const validationClass = computed(() => {
   if (!props.isValidationError) return ''
   return props.error ? 'is-invalid' : 'is-valid'
@@ -30,26 +40,39 @@ const validationClass = computed(() => {
 </script>
 
 <template>
-  <div class="form-floating mb-3">
-    <input
-      :id="id"
-      :type="type"
-      class="form-control"
-      :class="validationClass"
-      :value="modelValue"
-      :aria-describedby="`${id}-validation-feedback`"
-      placeholder=""
-      required
-      :disabled="disabled"
-      @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-    />
+  <div class="mb-3">
+    <div class="form-floating position-relative">
+      <input
+        :id="id"
+        :type="inputType"
+        class="form-control"
+        :class="validationClass"
+        :value="modelValue"
+        :aria-describedby="`${id}-validation-feedback`"
+        placeholder=""
+        required
+        :disabled="disabled"
+        @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+      />
 
-    <label :for="id">{{ label }}</label>
+      <label :for="id">{{ label }}</label>
+
+      <!-- 👁 Password toggle -->
+      <button
+        v-if="type === 'password'"
+        type="button"
+        :class="['btn btn-sm position-absolute end-0 top-50 translate-middle-y', eyeOffsetClass]"
+        tabindex="-1"
+        @click="showPassword = !showPassword"
+      >
+        <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
+      </button>
+    </div>
 
     <div
       v-if="isValidationError && error"
       :id="`${id}-validation-feedback`"
-      class="invalid-feedback"
+      class="invalid-feedback d-block"
       style="white-space: pre-line"
     >
       {{ error }}

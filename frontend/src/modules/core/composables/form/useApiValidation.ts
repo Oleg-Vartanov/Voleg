@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 
-export function useApiValidation<T extends Record<string, any>>() {
+export function useApiValidation<T>() {
   const isError = ref(false)
   const errors = ref<Partial<Record<keyof T, string>>>({})
 

@@ -88,13 +88,13 @@ const activeMenuItem = computed((): menuItemType | null => {
             v-if="auth.user.isSignedIn"
             v-model:is-open="isProfileDropdownOpen"
             :text="auth.user.displayName ?? 'User'"
-            :active="route.name === 'profile'"
+            :active="route.name === 'profileInfo'"
           >
             <NavBarDropdownItem>
               <router-link
                 class="dropdown-item"
-                :class="{ active: route.name === 'profile' }"
-                :to="{ name: 'profile' }"
+                :class="{ active: route.name === 'profileInfo' }"
+                :to="{ name: 'profileInfo' }"
               >
                 Profile
               </router-link>

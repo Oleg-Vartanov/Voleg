@@ -41,7 +41,21 @@ const index = createRouter({
           name: 'profile',
           meta: { title: 'Profile' },
           beforeEnter: [guards.isAuthenticated],
-          component: () => import('@/modules/user/pages/ProfilePage.vue')
+          component: () => import('@/modules/user/pages/ProfilePage.vue'),
+          children: [
+            {
+              path: '',
+              name: 'profileInfo',
+              meta: { title: 'Profile' },
+              component: () => import('@/modules/user/components/ProfileInfo.vue')
+            },
+            {
+              path: 'password-change',
+              name: 'passwordChange',
+              meta: { title: 'Password Change' },
+              component: () => import('@/modules/user/components/PasswordChange.vue')
+            }
+          ]
         },
         {
           path: 'admin',
