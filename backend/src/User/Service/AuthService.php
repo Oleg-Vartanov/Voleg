@@ -2,26 +2,22 @@
 
 namespace App\User\Service;
 
+use App\Core\Service\Mailer;
 use App\User\Entity\User;
 use App\User\Http\V1\Request\SignUpDto;
-use Doctrine\ORM\EntityManagerInterface;
+use App\User\Repository\UserRepository;
 use LogicException;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 
 readonly class AuthService
 {
     public function __construct(
-        private EntityManagerInterface $entityManager,
-        private MailerInterface $mailer,
-        private ParameterBagInterface $parameterBag,
+        private Mailer $mailer,
         private RouterInterface $router,
         private UserService $userService,
+        private UserRepository $userRepository,
     ) {
     }
 
@@ -29,31 +25,22 @@ readonly class AuthService
     public function signUp(SignUpDto $dto): void
     {
         $user = $this->userService->createByDto($dto);
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+        $this->userRepository->save($user, true);
 
         $this->sendVerificationEmail($user);
     }
 
     public function verifyUser(string $code, User $user): bool
     {
+        // TODO: hash user code
         $verified = !$user->verificationCodeExpired() && $user->getVerificationCode() === $code;
 
         if ($verified) {
             $user->setVerified(true);
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
+            $this->userRepository->save($user, true);
         }
 
         return $verified;
-    }
-
-    public function createVerificationLink(User $user): string
-    {
-        return $this->router->generate('sign_up_verify', [
-            'userId' => $user->getId(),
-            'code' => $user->getVerificationCode(),
-        ], UrlGeneratorInterface::ABSOLUTE_URL);
     }
 
     /** @throws TransportExceptionInterface */
@@ -63,18 +50,22 @@ readonly class AuthService
             throw new LogicException('User is already verified.');
         }
 
-        $email = new TemplatedEmail()
-            ->from('no-reply@' . $this->parameterBag->get('app.mail.domain'))
-            ->to(new Address($user->getEmail()))
-            ->subject('Verify Sign Up')
-            ->htmlTemplate('email/sign-up.html.twig')
-            ->context([
+        $this->mailer->send(
+            template: 'email/sign-up.html.twig',
+            to: $user->getEmail(),
+            subject: 'Verify Sign Up',
+            context: [
                 'verifyLink' => $this->createVerificationLink($user),
                 'displayName' => $user->getDisplayName(),
-                'supportEmail' => $this->parameterBag->get('app.support.email'),
-            ])
-        ;
+            ],
+        );
+    }
 
-        $this->mailer->send($email);
+    private function createVerificationLink(User $user): string
+    {
+        return $this->router->generate('sign_up_verify', [
+            'userId' => $user->getId(),
+            'code' => $user->getVerificationCode(),
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
     }
 }

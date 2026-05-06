@@ -2,14 +2,13 @@
 
 namespace App\User\Test\Unit;
 
+use App\Core\Service\Mailer;
 use App\User\Entity\User;
+use App\User\Repository\UserRepository;
 use App\User\Service\UserService;
-use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -22,9 +21,8 @@ class UserServiceTest extends TestCase
     {
         $this->userService = new UserService(
             $this->createStub(UserPasswordHasherInterface::class),
-            $this->createStub(EntityManagerInterface::class),
-            $this->createStub(MailerInterface::class),
-            $this->createStub(ParameterBagInterface::class),
+            $this->createStub(UserRepository::class),
+            $this->createStub(Mailer::class),
             $this->createStub(RouterInterface::class),
         );
     }

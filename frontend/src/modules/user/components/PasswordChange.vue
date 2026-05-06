@@ -27,7 +27,7 @@ const changePassword = () => {
   validation.reset()
 
   client
-    .changePassword({ ...model })
+    .passwordChange({ ...model })
     .then(() => {
       resetForm()
       router.push({ name: 'profileInfo' })
@@ -56,16 +56,16 @@ const changePassword = () => {
       v-model="model.currentPassword"
       label="Current Password"
       type="password"
-      :error="validation.errors.value.currentPassword"
-      :is-validation-error="validation.isError.value"
+      :is-valid="validation.isValid('currentPassword')"
+      :error-text="validation.getError('currentPassword')"
     />
     <FormField
       id="newPassword"
       v-model="model.newPassword"
       label="New Password"
       type="password"
-      :error="validation.errors.value.newPassword"
-      :is-validation-error="validation.isError.value"
+      :is-valid="validation.isValid('newPassword')"
+      :error-text="validation.getError('newPassword')"
     />
     <FormButton label="Change Password" variant="primary" :loading="isLoading" type="submit" />
     <FormButton

@@ -2,16 +2,13 @@
 
 namespace App\User\Service;
 
+use App\Core\Service\Mailer;
 use App\Core\Util\PropertyAccessor;
 use App\User\Entity\User;
 use App\User\Http\V1\Request\UserDto;
-use Doctrine\ORM\EntityManagerInterface;
+use App\User\Repository\UserRepository;
 use LogicException;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -20,9 +17,8 @@ readonly class UserService
 {
     public function __construct(
         private UserPasswordHasherInterface $passwordHasher,
-        private EntityManagerInterface $entityManager,
-        private MailerInterface $mailer,
-        private ParameterBagInterface $parameterBag,
+        private UserRepository $userRepository,
+        private Mailer $mailer,
         private RouterInterface $router,
     ) {
     }
@@ -95,8 +91,7 @@ readonly class UserService
         if ($verified) {
             $user->setEmail($emailChange);
             $user->clearEmailChangeChange();
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
+            $this->userRepository->save($user, true);
         }
 
         return $verified;
@@ -113,8 +108,7 @@ readonly class UserService
 
         $user->setEmailChange($emailChange);
         $user->updateEmailChangeCode();
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+        $this->userRepository->save($user, true);
 
         $this->sendEmailChangeVerificationEmail($user);
     }
@@ -129,19 +123,15 @@ readonly class UserService
             throw new LogicException('Pending email change is not initialized.');
         }
 
-        $email = new TemplatedEmail()
-            ->from('no-reply@' . $this->parameterBag->get('app.mail.domain'))
-            ->to(new Address($emailChange))
-            ->subject('Verify Email Change')
-            ->htmlTemplate('email/email-change.html.twig')
-            ->context([
+        $this->mailer->send(
+            template: 'email/email-change.html.twig',
+            to: $emailChange,
+            subject: 'Verify Email Change',
+            context: [
                 'verifyLink' => $this->createEmailChangeVerificationLink($user),
                 'displayName' => $user->getDisplayName(),
-                'supportEmail' => $this->parameterBag->get('app.support.email'),
-            ])
-        ;
-
-        $this->mailer->send($email);
+            ],
+        );
     }
 
     private function createEmailChangeVerificationLink(User $user): string

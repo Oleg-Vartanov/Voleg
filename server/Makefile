@@ -42,8 +42,11 @@ deploy:
 
 # ========== Backend ==========
 
-migrate:
+migrations-migrate:
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate
+
+migrations-generate:
+	$(PHP_CONTAINER) php bin/console doctrine:migrations:diff
 
 consumer:
 	$(PHP_CONTAINER) php bin/console messenger:consume default scheduler_fixture_predictions -vv

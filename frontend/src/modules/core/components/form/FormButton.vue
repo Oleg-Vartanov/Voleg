@@ -4,7 +4,7 @@ import { computed } from 'vue'
 interface Props {
   label: string
   type?: 'button' | 'submit' | 'reset'
-  variant?: 'primary' | 'secondary' | 'outline-primary' | 'outline-secondary' | 'danger'
+  variant?: 'primary' | 'secondary' | 'outline-primary' | 'outline-secondary' | 'danger' | 'link'
   loading?: boolean
   disabled?: boolean
 }

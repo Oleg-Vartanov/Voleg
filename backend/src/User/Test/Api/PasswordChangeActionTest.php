@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[TestDox('User')]
-class UserChangePasswordActionTest extends ApiTestCase
+class PasswordChangeActionTest extends ApiTestCase
 {
     use UserTestTrait;
 
@@ -25,7 +25,7 @@ class UserChangePasswordActionTest extends ApiTestCase
     }
 
     #[TestDox('User change password: success')]
-    public function testUserChangePasswordSuccess(): void
+    public function testSuccess(): void
     {
         $user = $this->createUser(['password' => self::DEFAULT_PASSWORD]);
         $this->signIn($user);
@@ -43,7 +43,7 @@ class UserChangePasswordActionTest extends ApiTestCase
     }
 
     #[TestDox('User change password: wrong password')]
-    public function testUserChangePasswordWrongPassword(): void
+    public function testWrongPassword(): void
     {
         $user = $this->createUser(['password' => self::DEFAULT_PASSWORD]);
         $this->signIn($user);
@@ -55,7 +55,7 @@ class UserChangePasswordActionTest extends ApiTestCase
     }
 
     #[TestDox('User change password: same password')]
-    public function testUserChangePasswordSamePassword(): void
+    public function testSamePassword(): void
     {
         $user = $this->createUser(['password' => self::DEFAULT_PASSWORD]);
         $this->signIn($user);
@@ -67,7 +67,7 @@ class UserChangePasswordActionTest extends ApiTestCase
     }
 
     #[TestDox('User change password: invalid password')]
-    public function testUserChangePasswordInvalidPassword(): void
+    public function testInvalidPassword(): void
     {
         $user = $this->createUser(['password' => self::DEFAULT_PASSWORD]);
         $this->signIn($user);
@@ -80,14 +80,14 @@ class UserChangePasswordActionTest extends ApiTestCase
 
 
     #[TestDox('User change password: unauthorized')]
-    public function testUserChangePasswordUnauthorized(): void
+    public function testUnauthorized(): void
     {
         $this->sendRequest();
         self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
     }
 
     #[TestDox('User change password: rate limit')]
-    public function testUserChangePasswordRateLimit(): void
+    public function testRateLimit(): void
     {
         $user = $this->createUser(['password' => self::DEFAULT_PASSWORD]);
         $this->signIn($user);
@@ -105,7 +105,7 @@ class UserChangePasswordActionTest extends ApiTestCase
     {
         $this->client->request(
             method: Request::METHOD_POST,
-            uri: $this->router->generate('user_change_password'),
+            uri: $this->router->generate('password_change'),
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode($content),
         );

@@ -24,14 +24,16 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
     security: [['Bearer' => []]],
     tags: ['User'],
     responses: [
-        new MessageResponse(Response::HTTP_OK, 'Password changed'),
+        new MessageResponse(Response::HTTP_OK, PasswordChangeAction::MESSAGE),
         new ValidationErrorResponse(),
         new UnauthorizedResponse(),
     ],
 )]
-#[Route('/users/change-password', name: 'user_change_password', methods: [Request::METHOD_POST])]
-class UserChangePasswordAction extends ApiController
+#[Route('/auth/password-change', name: 'password_change', methods: [Request::METHOD_POST])]
+class PasswordChangeAction extends ApiController
 {
+    public const string MESSAGE = 'Password changed';
+
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly UserService $userService,
@@ -65,6 +67,6 @@ class UserChangePasswordAction extends ApiController
         $this->userService->setHashedPassword($user, $dto->newPassword);
         $this->userRepository->save($user, true);
 
-        return $this->messageResponse('Password changed');
+        return $this->messageResponse(self::MESSAGE);
     }
 }

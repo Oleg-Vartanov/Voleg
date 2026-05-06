@@ -19,7 +19,6 @@ class UserDto
     #[OA\Property(example: 'name@mail.com')]
     #[
         Assert\NotBlank(groups: [self::SIGN_UP]),
-        Assert\Type('string', groups: self::ALL),
         Assert\Email(groups: self::ALL),
         Assert\Length(max: 180, groups: self::ALL),
         CustomAssert\UniqueEntityField(entityClass: User::class, field: 'email', groups: self::ALL),

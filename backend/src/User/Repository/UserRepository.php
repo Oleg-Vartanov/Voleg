@@ -29,6 +29,11 @@ class UserRepository extends AbstractEntityRepository implements PasswordUpgrade
         return $this->find($id);
     }
 
+    public function findByEmail(string $email): ?User
+    {
+        return $this->findOneBy(['email' => $email]);
+    }
+
     /** Used to upgrade (rehash) the user's password automatically over time. */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {

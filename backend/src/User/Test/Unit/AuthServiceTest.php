@@ -2,16 +2,15 @@
 
 namespace App\User\Test\Unit;
 
+use App\Core\Service\Mailer;
 use App\User\Entity\User;
+use App\User\Repository\UserRepository;
 use App\User\Service\AuthService;
 use App\User\Service\UserService;
-use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\RouterInterface;
 
 #[TestDox('Auth')]
@@ -22,11 +21,10 @@ class AuthServiceTest extends TestCase
     public function setUp(): void
     {
         $this->authService = new AuthService(
-            $this->createStub(EntityManagerInterface::class),
-            $this->createStub(MailerInterface::class),
-            $this->createStub(ParameterBagInterface::class),
+            $this->createStub(Mailer::class),
             $this->createStub(RouterInterface::class),
             $this->createStub(UserService::class),
+            $this->createStub(UserRepository::class),
         );
     }
 

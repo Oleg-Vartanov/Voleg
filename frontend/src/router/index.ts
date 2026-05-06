@@ -65,7 +65,7 @@ const index = createRouter({
           component: () => import('@/modules/admin/pages/AdminPage.vue')
         },
         {
-          path: 'auth-forms',
+          path: 'auth',
           name: 'authForms',
           component: () => import('@/modules/user/components/AuthForms.vue'),
           children: [
@@ -80,6 +80,18 @@ const index = createRouter({
               name: 'signUp',
               meta: { title: 'Sign Up' },
               component: () => import('@/modules/user/pages/SignUpPage.vue')
+            },
+            {
+              path: 'password-forgot',
+              name: 'passwordForgot',
+              meta: { title: 'Forgot Password' },
+              component: () => import('@/modules/user/components/PasswordForgot.vue')
+            },
+            {
+              path: 'password-reset',
+              name: 'passwordReset',
+              meta: { title: 'Reset Password' },
+              component: () => import('@/modules/user/components/PasswordReset.vue')
             }
           ]
         },

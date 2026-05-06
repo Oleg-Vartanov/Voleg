@@ -17,9 +17,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-/* OpenAi Documentation */
 #[OA\Schema(title: 'User')]
-
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_USER_EMAIL', fields: ['email'])]
 #[ORM\UniqueConstraint(name: 'UNIQ_USER_TAG', fields: ['tag'])]
@@ -31,7 +29,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public const string SHOW_OWNER = 'show:owner';
     /** @var string[] */
     public const array SHOW_ALL = [self::SHOW, self::SHOW_ADMIN, self::SHOW_OWNER];
-    private const int VERIFICATION_EXPIRATION_TIME = 24 * 60 * 60;
+    private const int VERIFICATION_EXPIRATION_TIME = 60 * 60;
 
     #[Groups([self::SHOW])]
     #[ORM\Id]
@@ -199,22 +197,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->verificationCode;
     }
 
-    public function updateVerificationCode(): User
-    {
-        $this->verificationCode = $this->generateVerificationCode();
-        $this->verificationCodeExpireAt = $this->createVerificationCodeExpireDate();
-
-        return $this;
-    }
-
-    public function getVerificationCodeExpireAt(): DateTimeImmutable
-    {
-        return $this->verificationCodeExpireAt;
-    }
-
     public function verificationCodeExpired(): bool
     {
-        return $this->getVerificationCodeExpireAt() < new DateTimeImmutable();
+        return $this->dateExpired($this->verificationCodeExpireAt);
     }
 
     public function getEmailChange(): ?string
@@ -229,14 +214,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function updateEmailChangeCode(): static
-    {
-        $this->emailChangeCode = $this->generateVerificationCode();
-        $this->emailChangeCodeExpireAt = $this->createVerificationCodeExpireDate();
-
-        return $this;
-    }
-
     public function getEmailChangeCode(): ?string
     {
         return $this->emailChangeCode;
@@ -244,16 +221,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function emailChangeCodeExpired(): bool
     {
-        return $this->emailChangeCodeExpireAt === null || $this->emailChangeCodeExpireAt < new DateTimeImmutable();
+        return $this->dateExpired($this->emailChangeCodeExpireAt);
     }
 
-    public function clearEmailChangeChange(): static
+    public function updateVerificationCode(): void
+    {
+        $this->verificationCode = $this->generateVerificationCode();
+        $this->verificationCodeExpireAt = $this->createVerificationCodeExpireDate();
+    }
+
+    public function updateEmailChangeCode(): void
+    {
+        $this->emailChangeCode = $this->generateVerificationCode();
+        $this->emailChangeCodeExpireAt = $this->createVerificationCodeExpireDate();
+    }
+
+    public function clearEmailChangeChange(): void
     {
         $this->emailChange = null;
         $this->emailChangeCode = null;
         $this->emailChangeCodeExpireAt = null;
-
-        return $this;
     }
 
     public function getCreatedAt(): ?DateTimeImmutable
@@ -301,8 +288,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     private function createVerificationCodeExpireDate(): DateTimeImmutable
     {
-        return (new DateTimeImmutable())->modify(
-            '+' . self::VERIFICATION_EXPIRATION_TIME . ' seconds'
-        );
+        return new DateTimeImmutable('+' . self::VERIFICATION_EXPIRATION_TIME . ' seconds');
+    }
+
+    private function dateExpired(?DateTimeImmutable $date): bool
+    {
+        return $date === null || $date < new DateTimeImmutable();
     }
 }
