@@ -6,16 +6,16 @@ interface Props {
   label: string
   modelValue: string
   type?: string
-  error?: string
-  isValidationError?: boolean
+  isValid?: boolean
+  errorText?: string
   helpText?: string
   disabled?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   type: 'text',
-  error: '',
-  isValidationError: false,
+  isValid: null,
+  errorText: '',
   helpText: ''
 })
 
@@ -30,12 +30,12 @@ const inputType = computed(() => {
   return showPassword.value ? 'text' : 'password'
 })
 const eyeOffsetClass = computed(() => {
-  return props.isValidationError ? 'me-4' : 'me-2'
+  return props.isValid !== null ? 'me-4' : 'me-2'
 })
 
 const validationClass = computed(() => {
-  if (!props.isValidationError) return ''
-  return props.error ? 'is-invalid' : 'is-valid'
+  if (props.isValid === null) return ''
+  return !props.isValid ? 'is-invalid' : 'is-valid'
 })
 </script>
 
@@ -70,12 +70,12 @@ const validationClass = computed(() => {
     </div>
 
     <div
-      v-if="isValidationError && error"
+      v-if="!isValid && errorText"
       :id="`${id}-validation-feedback`"
       class="invalid-feedback d-block"
       style="white-space: pre-line"
     >
-      {{ error }}
+      {{ errorText }}
     </div>
 
     <div v-if="helpText" class="form-text">

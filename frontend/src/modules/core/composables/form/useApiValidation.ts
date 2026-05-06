@@ -18,10 +18,25 @@ export function useApiValidation<T>() {
     isError.value = true
   }
 
+  const hasError = (path: keyof T): boolean => {
+    return Object.prototype.hasOwnProperty.call(errors.value, path);
+  }
+
+  const getError = (path: keyof T): string|null => {
+    return errors.value[path] ?? null
+  }
+
+  const isValid = (path: keyof T): boolean|null => {
+    return isError.value ? !hasError(path) : null
+  }
+
   return {
     isError,
     errors,
     reset,
-    applyErrors
+    applyErrors,
+    hasError,
+    getError,
+    isValid
   }
 }

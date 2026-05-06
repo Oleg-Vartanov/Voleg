@@ -50,8 +50,8 @@ const signUp = () => {
       id="displayName"
       v-model="model.displayName"
       label="Display Name"
-      :error="validation.errors.value.displayName"
-      :is-validation-error="validation.isError.value"
+      :is-valid="validation.isValid('displayName')"
+      :error-text="validation.getError('displayName')"
       help-text="Your public name displayed on the platform."
     />
 
@@ -59,8 +59,8 @@ const signUp = () => {
       id="tag"
       v-model="model.tag"
       label="Tag"
-      :error="validation.errors.value.tag"
-      :is-validation-error="validation.isError.value"
+      :is-valid="validation.isValid('tag')"
+      :error-text="validation.getError('tag')"
       help-text="A unique tag used for search purposes."
     />
 
@@ -69,8 +69,8 @@ const signUp = () => {
       v-model="model.email"
       label="Email address"
       type="email"
-      :error="validation.errors.value.email"
-      :is-validation-error="validation.isError.value"
+      :is-valid="validation.isValid('email')"
+      :error-text="validation.getError('email')"
       help-text="Your email will stay private, it wont be shared."
     />
 
@@ -79,8 +79,8 @@ const signUp = () => {
       v-model="model.password"
       label="Password"
       type="password"
-      :error="validation.errors.value.password"
-      :is-validation-error="validation.isError.value"
+      :is-valid="validation.isValid('password')"
+      :error-text="validation.getError('password')"
     />
 
     <button :disabled="isLoading" class="btn btn-primary w-100 py-2 mb-3" type="submit">

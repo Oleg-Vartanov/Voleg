@@ -140,8 +140,8 @@ onMounted(() => {
       id="displayName"
       v-model="editForm.displayName"
       label="Display Name"
-      :error="validation.errors.value.displayName"
-      :is-validation-error="validation.isError.value"
+      :is-valid="validation.isValid('displayName')"
+      :error-text="validation.getError('displayName')"
       help-text="Your public name displayed on the platform."
       :disabled="!isEditing"
     />
@@ -150,8 +150,8 @@ onMounted(() => {
       id="tag"
       v-model="editForm.tag"
       label="Tag"
-      :error="validation.errors.value.tag"
-      :is-validation-error="validation.isError.value"
+      :is-valid="validation.isValid('tag')"
+      :error-text="validation.getError('tag')"
       help-text="A unique tag used for search purposes."
       :disabled="!isEditing"
     />
@@ -161,8 +161,8 @@ onMounted(() => {
       v-model="editForm.email"
       label="Email address"
       type="email"
-      :error="validation.errors.value.email"
-      :is-validation-error="validation.isError.value"
+      :is-valid="validation.isValid('email')"
+      :error-text="validation.getError('email')"
       :disabled="!isEditing"
     />
 
