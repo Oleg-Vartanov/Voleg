@@ -83,8 +83,21 @@ export default {
     })
   },
 
-  changePassword(params: object) {
-    return axios.post(`${apiBaseUrl}/users/change-password`, params, {
+  passwordChange(params: object) {
+    return axios.post(`${apiBaseUrl}/auth/password-change`, params, {
+      headers: getHeader()
+    })
+  },
+
+  passwordForgot(email: string) {
+    return axios.post(`${apiBaseUrl}/auth/password-forgot`, { email }, {
+      headers: getHeader()
+    })
+  },
+
+  passwordReset(selector: string, token: string, password: string) {
+    const params = { selector, token, password }
+    return axios.post(`${apiBaseUrl}/auth/password-reset`, params, {
       headers: getHeader()
     })
   },
