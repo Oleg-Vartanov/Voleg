@@ -78,7 +78,7 @@ class SyncTest extends ApiTestCase
         $this->signIn($this->createUser());
         $this->sendRequest();
 
-        $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
     #[TestDox('Sync request: unauthorized')]

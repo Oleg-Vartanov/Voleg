@@ -3,7 +3,8 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\User\Test\Trait\UserTestTrait;
+use App\User\Repository\UserRepository;
+use App\User\Test\Trait\UserTokenTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,35 +12,40 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Auth')]
 class AuthSignUpActionTest extends ApiTestCase
 {
-    use UserTestTrait;
+    use UserTokenTestTrait;
+
+    private UserRepository $userRepository;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->bootUserTest();
+        $this->tokenSetUp();
+        $this->userRepository = static::getContainer()->get(UserRepository::class);
     }
 
     #[TestDox('Sign up action: success')]
-    public function testSignUpActionSuccess(): void
+    public function testSuccess(): void
     {
-        $lastUserId = $this->userRepository->findOneBy([], ['id' => 'desc'])?->getId() ?? 0;
+        $id = ($this->userRepository->lastId() ?? 0) + 1;
 
         $testUser = [
-            'email' => 'user' . ($lastUserId + 1) . '@example.com',
+            'email' => 'user' . $id . '@example.com',
             'password' => '!Qwerty1',
             'displayName' => 'John Doe',
-            'tag' => 'user' . ($lastUserId + 1),
+            'tag' => 'user' . $id,
             'code' => 'sign-up-code',
         ];
 
+        $this->mockToken('selector'.$id, 'secret'.$id);
         $response = $this->signUpRequest($testUser);
 
-        $this->assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
-        $this->assertEmailHtmlBodyContains($this->getMailerMessage(), $testUser['displayName']);
+        self::assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
+        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'selector'.$id);
+        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'secret'.$id);
     }
 
     #[TestDox('Sign up action: validation error')]
-    public function testSignUpActionValidationError(): void
+    public function testValidationError(): void
     {
         $response = $this->signUpRequest([
             'email' => 'john.doe',
@@ -47,7 +53,7 @@ class AuthSignUpActionTest extends ApiTestCase
             'displayName' => '',
         ]);
 
-        $this->assertEquals(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
+        self::assertEquals(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
     }
 
     private function signUpRequest(array $array): Response

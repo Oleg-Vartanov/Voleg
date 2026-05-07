@@ -4,9 +4,13 @@ namespace App\User\Service;
 
 use App\Core\Service\Mailer;
 use App\User\Entity\User;
+use App\User\Entity\UserToken;
+use App\User\Enum\UserTokenTypeEnum;
 use App\User\Http\V1\Request\SignUpDto;
 use App\User\Repository\UserRepository;
+use App\User\Repository\UserTokenRepository;
 use LogicException;
+use Random\RandomException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -18,54 +22,66 @@ readonly class AuthService
         private RouterInterface $router,
         private UserService $userService,
         private UserRepository $userRepository,
+        private UserTokenService $tokenService,
+        private UserTokenRepository $tokenRepository,
     ) {
     }
 
-    /** @throws TransportExceptionInterface */
+    /** @throws TransportExceptionInterface|RandomException */
     public function signUp(SignUpDto $dto): void
     {
         $user = $this->userService->createByDto($dto);
-        $this->userRepository->save($user, true);
+        $this->userRepository->save($user);
 
         $this->sendVerificationEmail($user);
     }
 
-    public function verifyUser(string $code, User $user): bool
+    public function verifyUser(UserToken $token, string $secret): bool
     {
-        // TODO: hash user code
-        $verified = !$user->verificationCodeExpired() && $user->getVerificationCode() === $code;
-
-        if ($verified) {
-            $user->setVerified(true);
-            $this->userRepository->save($user, true);
+        if (
+            $token->isExpired()
+            || $token->getType() !== UserTokenTypeEnum::VERIFICATION
+            || !$this->tokenService->verifySecret($secret, $token->getSecret())
+        ) {
+            return false;
         }
 
-        return $verified;
+        $user = $token->getUser();
+        $user->setVerified(true);
+        $this->userRepository->save($user, true);
+
+        return true;
     }
 
-    /** @throws TransportExceptionInterface */
+    /**
+     * @throws TransportExceptionInterface|RandomException
+     */
     public function sendVerificationEmail(User $user): void
     {
         if ($user->isVerified()) {
             throw new LogicException('User is already verified.');
         }
 
+        [$token, $secret] = $this->tokenService->createToken(
+            type: UserTokenTypeEnum::VERIFICATION,
+            user: $user,
+        );
+
+        $this->tokenRepository->save($token, true);
+
+        $verifyLink = $this->router->generate('sign_up_verify', [
+            'selector' => $token->getSelector(),
+            'secret' => $secret->plain,
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
         $this->mailer->send(
             template: 'email/sign-up.html.twig',
             to: $user->getEmail(),
             subject: 'Verify Sign Up',
             context: [
-                'verifyLink' => $this->createVerificationLink($user),
+                'verifyLink' => $verifyLink,
                 'displayName' => $user->getDisplayName(),
             ],
         );
-    }
-
-    private function createVerificationLink(User $user): string
-    {
-        return $this->router->generate('sign_up_verify', [
-            'userId' => $user->getId(),
-            'code' => $user->getVerificationCode(),
-        ], UrlGeneratorInterface::ABSOLUTE_URL);
     }
 }

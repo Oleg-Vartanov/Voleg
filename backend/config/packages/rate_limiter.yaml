@@ -1,6 +1,6 @@
 framework:
   rate_limiter:
-    change_password:
+    anti_enumeration:
       policy: sliding_window
       limit: 5
       interval: 1 minute

@@ -19,12 +19,12 @@ class PopulateDbCommandTest extends WebTestCase
         $commandTester = new CommandTester($command);
         $exitCode = $commandTester->execute([]);
 
-        $this->assertSame(0, $exitCode);
+        self::assertSame(0, $exitCode);
 
         $display = $commandTester->getDisplay();
 
-        $this->assertStringContainsString('Populated country table', $display);
-        $this->assertStringContainsString('Populated competition table', $display);
-        $this->assertStringContainsString('Populated season table', $display);
+        self::assertStringContainsString('Populated country table', $display);
+        self::assertStringContainsString('Populated competition table', $display);
+        self::assertStringContainsString('Populated season table', $display);
     }
 }

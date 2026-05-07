@@ -44,7 +44,8 @@ deploy:
 
 migrations-migrate:
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate
-
+migrations-rollback:
+	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate prev
 migrations-generate:
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:diff
 

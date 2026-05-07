@@ -2,7 +2,7 @@
 
 namespace App\Core\ValueObject;
 
-readonly class Token
+readonly class Secret
 {
     public function __construct(
         public string $plain,

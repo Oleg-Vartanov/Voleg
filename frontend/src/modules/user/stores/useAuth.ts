@@ -24,11 +24,10 @@ const defaultUser: User = {
 }
 
 export const useAuth = defineStore('auth', () => {
-  const user = reactive({ ...defaultUser })
-
-  // safe: called inside store
   const topAlerts = useTopAlerts()
   const router: Router = useRouter()
+
+  const user = reactive({ ...defaultUser })
 
   function setUserByToken(): void {
     const token: string | null = getToken()
@@ -38,6 +37,7 @@ export const useAuth = defineStore('auth', () => {
       user.id = decodedToken['id'] ?? null
       user.displayName = decodedToken['displayName'] ?? null
       user.roles = decodedToken['roles'] ?? []
+      user.tag = decodedToken['tag'] ?? []
     }
   }
 

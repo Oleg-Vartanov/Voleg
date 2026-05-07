@@ -95,7 +95,12 @@ const saveProfile = () => {
       auth.user.displayName = response.data.displayName
       auth.user.tag = response.data.tag
       isEditing.value = false
-      topAlerts.add('Profile updated successfully.', 'success', 5)
+
+      let message = 'Profile updated successfully.';
+      if (payload.email !== undefined) {
+        message += ' Please check your new email for verification.'
+      }
+      topAlerts.add(message, 'success', 5)
     })
     .catch((axiosError) => {
       if (axiosError.response.status === 422) {
@@ -113,12 +118,10 @@ const showEmailChangeVerificationResult = () => {
   if (route.query.emailChange === 'success') {
     topAlerts.add('Your new email has been verified successfully.', 'success')
   } else if (route.query.emailChange === 'fail') {
-    topAlerts.add('Email verification link is invalid or expired.', 'danger', 20)
+    topAlerts.add('Email verification link is invalid or expired.', 'danger', 10)
   } else {
     return
   }
-
-  router.replace({ name: 'profile', query: {} })
 }
 
 onMounted(() => {
@@ -130,10 +133,11 @@ onMounted(() => {
 <template>
   <h1 class="h4 mb-3 fw-normal">Profile info</h1>
 
-  <div v-if="userData?.emailChange" class="alert alert-warning">
-    Pending email verification: <strong>{{ userData?.emailChange }}</strong
-    >.
-  </div>
+  <!-- TODO: Just remove? -->
+<!--  <div v-if="userData?.emailChange" class="alert alert-warning">-->
+<!--    Pending email verification: <strong>{{ userData?.emailChange }}</strong-->
+<!--    >.-->
+<!--  </div>-->
 
   <form @submit.prevent="saveProfile">
     <FormField

@@ -3,25 +3,22 @@
 namespace App\User\Service;
 
 use App\Core\Service\Mailer;
-use App\Core\Service\TokenService;
 use App\User\Entity\User;
-use App\User\Entity\UserPasswordReset;
-use App\User\Repository\UserPasswordResetRepository;
+use App\User\Entity\UserToken;
+use App\User\Enum\UserTokenTypeEnum;
 use App\User\Repository\UserRepository;
-use DateTimeImmutable;
+use App\User\Repository\UserTokenRepository;
 use Random\RandomException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 readonly class PasswordResetService
 {
-    public const string TOKEN_EXPIRE_TIME = '+30 minutes';
-
     public function __construct(
         private UserRepository $userRepository,
         private UserService $userService,
-        private UserPasswordResetRepository $repository,
-        private TokenService $tokenService,
+        private UserTokenRepository $tokenRepository,
+        private UserTokenService $tokenService,
         private Mailer $mailer,
         private ParameterBagInterface $parameterBag,
     ) {}
@@ -33,21 +30,20 @@ readonly class PasswordResetService
      */
     public function requestReset(User $user): void
     {
-        $this->repository->removeByUser($user); // Remove older tokens.
+        // Remove older tokens.
+        $this->tokenRepository->removeByUser($user, UserTokenTypeEnum::PASSWORD_RESET);
 
-        $token = $this->tokenService->generate();
-        $passwordReset = new UserPasswordReset(
+        [$token, $secret] = $this->tokenService->createToken(
+            type: UserTokenTypeEnum::PASSWORD_RESET,
             user: $user,
-            tokenHash: $token->hash,
-            expiresAt: new DateTimeImmutable(self::TOKEN_EXPIRE_TIME),
         );
 
-        $this->repository->save($passwordReset, true);
+        $this->tokenRepository->save($token, true);
 
         $baseUrl = $this->parameterBag->get('client.url.auth-password-reset');
         $resetLink = $baseUrl . '?' . http_build_query([
-            'selector' => $passwordReset->getSelector(),
-            'token' => $token->plain,
+            'selector' => $token->getSelector(),
+            'secret' => $secret->plain,
         ]);
 
         $this->mailer->send(
@@ -62,20 +58,21 @@ readonly class PasswordResetService
     }
 
     public function resetPassword(
-        UserPasswordReset $passwordReset,
-        string $plainToken,
+        UserToken $token,
+        string $secret,
         string $newPassword
     ): bool {
         if (
-            $passwordReset->isExpired()
-            || !$this->tokenService->verify($plainToken, $passwordReset->getTokenHash())
+            $token->isExpired()
+            || $token->getType() !== UserTokenTypeEnum::PASSWORD_RESET
+            || !$this->tokenService->verifySecret($secret, $token->getSecret())
         ) {
             return false;
         }
 
-        $user = $passwordReset->getUser();
+        $user = $token->getUser();
         $this->userService->setHashedPassword($user, $newPassword);
-        $this->repository->remove($passwordReset);
+        $this->tokenRepository->remove($token);
         $this->userRepository->save($user, true);
 
         return true;

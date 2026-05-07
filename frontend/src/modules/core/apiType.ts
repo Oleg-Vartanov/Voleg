@@ -3,7 +3,6 @@ export interface ApiUser {
   displayName: string
   tag: string
   email: string
-  emailChange?: string | null
   createdAt: string
 }
 

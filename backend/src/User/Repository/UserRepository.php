@@ -64,4 +64,9 @@ class UserRepository extends AbstractEntityRepository implements PasswordUpgrade
 
         return $users;
     }
+
+    public function lastId(): ?int
+    {
+        return $this->findOneBy([], ['id' => 'desc'])?->getId();
+    }
 }

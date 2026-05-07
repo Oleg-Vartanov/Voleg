@@ -95,8 +95,8 @@ export default {
     })
   },
 
-  passwordReset(selector: string, token: string, password: string) {
-    const params = { selector, token, password }
+  passwordReset(selector: string, secret: string, password: string) {
+    const params = { selector, secret, password }
     return axios.post(`${apiBaseUrl}/auth/password-reset`, params, {
       headers: getHeader()
     })

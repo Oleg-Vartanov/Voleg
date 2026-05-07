@@ -5,11 +5,14 @@ namespace App\User\Test\Unit;
 use App\Core\Service\Mailer;
 use App\User\Entity\User;
 use App\User\Repository\UserRepository;
+use App\User\Repository\UserTokenRepository;
 use App\User\Service\AuthService;
 use App\User\Service\UserService;
+use App\User\Service\UserTokenService;
 use LogicException;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
+use Random\RandomException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -25,11 +28,13 @@ class AuthServiceTest extends TestCase
             $this->createStub(RouterInterface::class),
             $this->createStub(UserService::class),
             $this->createStub(UserRepository::class),
+            $this->createStub(UserTokenService::class),
+            $this->createStub(UserTokenRepository::class),
         );
     }
 
     /**
-     * @throws TransportExceptionInterface
+     * @throws TransportExceptionInterface|RandomException
      */
     #[TestDox('Try to send verification email on verified user')]
     public function testSendVerificationEmailOnVerifiedUser(): void

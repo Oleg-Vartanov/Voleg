@@ -29,7 +29,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public const string SHOW_OWNER = 'show:owner';
     /** @var string[] */
     public const array SHOW_ALL = [self::SHOW, self::SHOW_ADMIN, self::SHOW_OWNER];
-    private const int VERIFICATION_EXPIRATION_TIME = 60 * 60;
 
     #[Groups([self::SHOW])]
     #[ORM\Id]
@@ -41,10 +40,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups([self::SHOW_ADMIN, self::SHOW_OWNER])]
     #[ORM\Column(length: 180)]
     private string $email;
-
-    #[Groups([self::SHOW_ADMIN, self::SHOW_OWNER])]
-    #[ORM\Column(length: 180, nullable: true)]
-    private ?string $emailChange = null;
 
     /** @var string[] The user roles */
     #[ORM\Column]
@@ -60,18 +55,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private bool $verified = false;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $verificationCode = null;
-
-    #[ORM\Column(options: ['default' => '1970-01-01 00:00:00'])]
-    private DateTimeImmutable $verificationCodeExpireAt;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $emailChangeCode = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?DateTimeImmutable $emailChangeCodeExpireAt = null;
 
     #[Groups([self::SHOW])]
     #[ORM\Column(options: ['default' => '1970-01-01 00:00:00'])]
@@ -89,7 +72,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->updateVerificationCode();
         $this->createdAt = new DateTimeImmutable();
         $this->fixturePredictions = new ArrayCollection();
     }
@@ -192,57 +174,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getVerificationCode(): ?string
-    {
-        return $this->verificationCode;
-    }
-
-    public function verificationCodeExpired(): bool
-    {
-        return $this->dateExpired($this->verificationCodeExpireAt);
-    }
-
-    public function getEmailChange(): ?string
-    {
-        return !$this->emailChangeCodeExpired() ? $this->emailChange : null;
-    }
-
-    public function setEmailChange(?string $emailChange): static
-    {
-        $this->emailChange = empty($emailChange) ? null : $emailChange;
-
-        return $this;
-    }
-
-    public function getEmailChangeCode(): ?string
-    {
-        return $this->emailChangeCode;
-    }
-
-    public function emailChangeCodeExpired(): bool
-    {
-        return $this->dateExpired($this->emailChangeCodeExpireAt);
-    }
-
-    public function updateVerificationCode(): void
-    {
-        $this->verificationCode = $this->generateVerificationCode();
-        $this->verificationCodeExpireAt = $this->createVerificationCodeExpireDate();
-    }
-
-    public function updateEmailChangeCode(): void
-    {
-        $this->emailChangeCode = $this->generateVerificationCode();
-        $this->emailChangeCodeExpireAt = $this->createVerificationCodeExpireDate();
-    }
-
-    public function clearEmailChangeChange(): void
-    {
-        $this->emailChange = null;
-        $this->emailChangeCode = null;
-        $this->emailChangeCodeExpireAt = null;
-    }
-
     public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->createdAt;
@@ -279,20 +210,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->tag = trim($tag);
 
         return $this;
-    }
-
-    private function generateVerificationCode(): string
-    {
-        return bin2hex(random_bytes(16));
-    }
-
-    private function createVerificationCodeExpireDate(): DateTimeImmutable
-    {
-        return new DateTimeImmutable('+' . self::VERIFICATION_EXPIRATION_TIME . ' seconds');
-    }
-
-    private function dateExpired(?DateTimeImmutable $date): bool
-    {
-        return $date === null || $date < new DateTimeImmutable();
     }
 }

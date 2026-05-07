@@ -28,8 +28,8 @@ class UserGetActionTest extends ApiTestCase
         $response = $this->sendRequest($user->getId());
         $responseUser = json_decode($response->getContent(), true);
 
-        $this->assertResponseIsSuccessful();
-        $this->assertEquals($user->getTag(), $responseUser['tag']);
+        self::assertResponseIsSuccessful();
+        self::assertEquals($user->getTag(), $responseUser['tag']);
     }
 
     #[TestDox('User GET: success admin')]
@@ -41,8 +41,8 @@ class UserGetActionTest extends ApiTestCase
         $response = $this->sendRequest($user->getId());
         $responseUser = json_decode($response->getContent(), true);
 
-        $this->assertResponseIsSuccessful();
-        $this->assertEquals($user->getEmail(), $responseUser['email']);
+        self::assertResponseIsSuccessful();
+        self::assertEquals($user->getEmail(), $responseUser['email']);
     }
 
     #[TestDox('User GET: not found')]
@@ -50,7 +50,7 @@ class UserGetActionTest extends ApiTestCase
     {
         $response = $this->sendRequest(0);
 
-        $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+        self::assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 
     private function sendRequest(int $id): Response

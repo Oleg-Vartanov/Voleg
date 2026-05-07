@@ -31,8 +31,8 @@ class UserGetListActionTest extends ApiTestCase
         $data = json_decode($response->getContent(), true);
         $responseUser = $data[0];
 
-        $this->assertResponseIsSuccessful();
-        $this->assertEquals($user->getTag(), $responseUser['tag']);
+        self::assertResponseIsSuccessful();
+        self::assertEquals($user->getTag(), $responseUser['tag']);
     }
 
     private function sendRequest(

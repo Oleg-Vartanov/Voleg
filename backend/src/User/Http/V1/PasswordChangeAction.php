@@ -6,17 +6,16 @@ use App\Core\Documentation\Attribute\Response\MessageResponse;
 use App\Core\Documentation\Attribute\Response\UnauthorizedResponse;
 use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Http\ApiController;
+use App\Core\Service\AntiEnumerationLimiter;
 use App\Core\ValueObject\Validator\Violation;
 use App\User\Entity\User;
 use App\User\Http\V1\Request\PasswordChangeDto;
 use App\User\Repository\UserRepository;
 use App\User\Service\UserService;
 use OpenApi\Attributes as OA;
-use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
@@ -37,8 +36,7 @@ class PasswordChangeAction extends ApiController
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly UserService $userService,
-        #[Target('change_password')]
-        private readonly RateLimiterFactoryInterface $changePasswordLimiter,
+        private readonly AntiEnumerationLimiter $limiter,
     ) {
     }
 
@@ -46,9 +44,7 @@ class PasswordChangeAction extends ApiController
         #[CurrentUser] User $user,
         #[MapRequestPayload] PasswordChangeDto $dto
     ): Response {
-        $limiter = $this->changePasswordLimiter->create((string) $user->getId());
-        $limit = $limiter->consume();
-        if (!$limit->isAccepted()) {
+        if ($this->limiter->limit('passwordChange'.$user->getId())) {
             return $this->limitResponse();
         }
 

@@ -15,10 +15,12 @@ use App\User\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
+use Random\RandomException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Patch(
@@ -47,20 +49,19 @@ class UserPatchAction extends ApiController
     ) {
     }
 
+    /**
+     * @throws TransportExceptionInterface|RandomException
+     */
     public function __invoke(
         int $id,
         #[MapRequestPayload(validationGroups: [UserDto::UPDATE])] UpdateDto $dto,
     ): Response {
         $this->checkModifyAccess($id);
-        $user = $this->userRepository->find($id);
-
-        if ($user === null) {
-            throw new NotFoundHttpException();
-        }
+        $user = $this->userRepository->findById($id)
+            ?? throw new NotFoundHttpException();
 
         $user = $this->userService->patch($user, $dto);
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+        $this->userRepository->save($user, true);
 
         return $this->json($user, context: ['groups' => $this->showGroups($id)]);
     }

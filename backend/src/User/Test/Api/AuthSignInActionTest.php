@@ -3,6 +3,7 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
+use App\User\DataFixture\UserFixture;
 use App\User\Http\V1\AuthSignInAction;
 use App\User\Test\Trait\UserTestTrait;
 use LogicException;
@@ -28,13 +29,13 @@ class AuthSignInActionTest extends ApiTestCase
 
         $response = $this->sendRequest([
             'email' => $user->getEmail(),
-            'password' => self::DEFAULT_PASSWORD,
+            'password' => UserFixture::DEFAULT_PASSWORD,
         ]);
 
         $data = json_decode($response->getContent(), true);
 
-        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-        $this->assertNotEmpty($data['token']);
+        self::assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        self::assertNotEmpty($data['token']);
     }
 
     #[TestDox('Sign in action: invalid credentials')]
@@ -45,7 +46,7 @@ class AuthSignInActionTest extends ApiTestCase
             'password' => 'fail',
         ]);
 
-        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
+        self::assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
     }
 
     #[TestDox('Sign in action: unverified')]
@@ -55,10 +56,10 @@ class AuthSignInActionTest extends ApiTestCase
 
         $response = $this->sendRequest([
             'email' => $user->getEmail(),
-            'password' => self::DEFAULT_PASSWORD,
+            'password' => UserFixture::DEFAULT_PASSWORD,
         ]);
 
-        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
+        self::assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
     }
 
     #[TestDox('Sign in action: logic exception')]

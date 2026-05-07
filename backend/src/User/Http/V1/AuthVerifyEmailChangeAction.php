@@ -3,15 +3,15 @@
 namespace App\User\Http\V1;
 
 use App\Core\Http\ApiController;
-use App\User\Http\V1\Request\VerificationLinkDto;
-use App\User\Repository\UserRepository;
-use App\User\Service\UserService;
+use App\Core\Service\AntiEnumerationLimiter;
+use App\User\Http\V1\Request\UserTokenDto;
+use App\User\Repository\UserTokenRepository;
+use App\User\Service\EmailChangeService;
 use OpenApi\Attributes as OA;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Get(
@@ -31,23 +31,28 @@ use Symfony\Component\Routing\Attribute\Route;
 class AuthVerifyEmailChangeAction extends ApiController
 {
     public function __construct(
-        private readonly UserService $userService,
+        private readonly EmailChangeService $emailChangeService,
         private readonly ParameterBagInterface $parameterBag,
-        private readonly UserRepository $userRepository,
+        private readonly UserTokenRepository $tokenRepository,
+        private readonly AntiEnumerationLimiter $limiter
     ) {
     }
 
     public function __invoke(
-        #[MapQueryString] VerificationLinkDto $link,
+        #[MapQueryString] UserTokenDto $dto,
     ): Response {
-        $user = $this->userRepository->findById($link->userId)
-            ?? throw new NotFoundHttpException();
+        if ($this->limiter->limit('emailChange'.$dto->selector)) {
+            return $this->limitResponse();
+        }
 
-        $verified = $this->userService->verifyEmailChange(
-            $link->code,
-            $user,
-        );
-        $urlParameter = $verified ? 'client.url.email-change-success' : 'client.url.email-change-fail';
+        $token = $this->tokenRepository->findBySelector($dto->selector);
+
+        $changed = $token !== null
+            && $this->emailChangeService->emailChange($token, $dto->secret);
+
+        $urlParameter = $changed
+            ? 'client.url.email-change-success'
+            : 'client.url.email-change-fail';
 
         return $this->redirect(
             $this->parameterBag->get($urlParameter),

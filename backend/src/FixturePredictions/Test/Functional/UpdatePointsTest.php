@@ -74,7 +74,7 @@ class UpdatePointsTest extends KernelTestCase
         $fixture->method('canCalculatePoints')->willReturn(true);
 
         $this->predictionsService->dispatchUpdatePoints($fixture);
-        $this->assertTrue(true);
+        self::assertTrue(true);
     }
 
     /**

@@ -21,7 +21,7 @@ const submit = () => {
   client
     .passwordReset(
       route.query.selector as string,
-      route.query.token as string,
+      route.query.secret as string,
       password.value,
     )
     .then(() => {

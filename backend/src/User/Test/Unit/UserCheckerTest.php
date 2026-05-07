@@ -25,7 +25,7 @@ class UserCheckerTest extends TestCase
         } catch (CustomUserMessageAccountStatusException $e) {
             $this->fail('Expected no CustomUserMessageAccountStatusException to be thrown');
         }
-        $this->assertTrue(true);
+        self::assertTrue(true);
     }
 
     #[TestDox('Pre auth: unverified user')]
@@ -50,6 +50,6 @@ class UserCheckerTest extends TestCase
         } catch (Error $e) {
             $this->fail($e->getMessage());
         }
-        $this->assertTrue(true);
+        self::assertTrue(true);
     }
 }

@@ -5,6 +5,8 @@ namespace App\User\Test\Api;
 use App\Core\Test\ApiTestCase;
 use App\User\Entity\User;
 use App\User\Enum\RoleEnum;
+use App\User\Enum\UserTokenTypeEnum;
+use App\User\Repository\UserTokenRepository;
 use App\User\Test\Trait\UserTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,14 +33,17 @@ class UserPatchActionTest extends ApiTestCase
             'displayName' => 'patched-name',
             'tag' => 'patched-tag',
         ]);
-        /** @var User $patchedUser */
-        $patchedUser = $this->entityManager->getRepository(User::class)->find($user->getId());
+        $patchedUser = $this->userRepository->findById($user->getId());
 
-        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-        $this->assertSame($user->getEmail(), $patchedUser->getEmail());
-        $this->assertSame('patched-email@mail.com', $patchedUser->getEmailChange());
-        $this->assertSame('patched-name', $patchedUser->getDisplayName());
-        $this->assertSame('patched-tag', $patchedUser->getTag());
+        /** @var UserTokenRepository $tokenRepository */
+        $tokenRepository = static::getContainer()->get(UserTokenRepository::class);
+        $emailChangeToken = $tokenRepository->findOneByUser($user, UserTokenTypeEnum::EMAIL_CHANGE);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
+        self::assertSame($user->getEmail(), $patchedUser->getEmail());
+        self::assertSame('patched-email@mail.com', $emailChangeToken->getEmailChange());
+        self::assertSame('patched-name', $patchedUser->getDisplayName());
+        self::assertSame('patched-tag', $patchedUser->getTag());
     }
 
     #[TestDox('User PATCH: access denied')]
@@ -49,7 +54,7 @@ class UserPatchActionTest extends ApiTestCase
         $this->signIn($user);
         $this->sendRequest($userPatched->getId());
 
-        $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
     #[TestDox('User PATCH: not found')]
@@ -59,7 +64,7 @@ class UserPatchActionTest extends ApiTestCase
         $this->signIn($user);
         $this->sendRequest(0);
 
-        $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+        self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
 
     private function sendRequest(int $id, array $content = []): Response

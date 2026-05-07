@@ -28,10 +28,10 @@ class UserDeleteActionTest extends ApiTestCase
         $this->signIn($user);
         $this->sendRequest($user->getId());
 
-        $this->assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
+        self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
 
         $deletedUser = $this->entityManager->getRepository(User::class)->find($user->getId());
-        $this->assertNull($deletedUser, 'User should be deleted from database.');
+        self::assertNull($deletedUser, 'User should be deleted from database.');
     }
 
     #[TestDox('User DELETE: access denied')]
@@ -42,7 +42,7 @@ class UserDeleteActionTest extends ApiTestCase
         $this->signIn($user);
         $this->sendRequest($userDeleted->getId());
 
-        $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
     #[TestDox('User DELETE: not found')]
@@ -52,7 +52,7 @@ class UserDeleteActionTest extends ApiTestCase
         $this->signIn($user);
         $this->sendRequest(0);
 
-        $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+        self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
 
     private function sendRequest(int $id): Response

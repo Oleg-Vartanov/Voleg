@@ -23,6 +23,7 @@ readonly class JWTCreatedListener
         $payload = $event->getData();
         $payload['id'] = $user->getId();
         $payload['displayName'] = $user->getDisplayName();
+        $payload['tag'] = $user->getTag();
 
         $event->setData($payload);
     }

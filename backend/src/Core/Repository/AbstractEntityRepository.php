@@ -45,4 +45,11 @@ abstract class AbstractEntityRepository extends ServiceEntityRepository
     {
         $this->getEntityManager()->flush();
     }
+
+    public function clearTable(): void
+    {
+        $this->getEntityManager()
+             ->createQuery('DELETE FROM '.$this->getClassName().' t')
+             ->execute();
+    }
 }

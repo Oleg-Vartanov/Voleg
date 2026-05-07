@@ -9,6 +9,7 @@ use App\User\Http\V1\Request\SignUpDto;
 use App\User\Http\V1\Request\UserDto;
 use App\User\Service\AuthService;
 use OpenApi\Attributes as OA;
+use Random\RandomException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,7 +38,7 @@ class AuthSignUpAction extends ApiController
     }
 
     /**
-     * @throws TransportExceptionInterface
+     * @throws TransportExceptionInterface|RandomException
      */
     public function __invoke(
         #[MapRequestPayload(validationGroups: [UserDto::SIGN_UP])] SignUpDto $dto,

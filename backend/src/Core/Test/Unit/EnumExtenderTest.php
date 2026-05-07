@@ -11,7 +11,7 @@ class EnumExtenderTest extends TestCase
     public function testValues(): void
     {
         $expected = ['first', 'second', 'third'];
-        $this->assertSame($expected, TestEnum::values());
+        self::assertSame($expected, TestEnum::values());
     }
 
     public function testOptions(): void
@@ -21,6 +21,6 @@ class EnumExtenderTest extends TestCase
             'second' => 'second',
             'third' => 'third',
         ];
-        $this->assertSame($expected, TestEnum::options());
+        self::assertSame($expected, TestEnum::options());
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\User\Test\Trait;
 
+use App\User\DataFixture\UserFixture;
 use App\User\Entity\User;
 use App\User\Repository\UserRepository;
 use App\User\Service\AuthService;
@@ -12,8 +13,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 trait UserTestTrait
 {
-    protected const string DEFAULT_PASSWORD = '!Qwerty1';
-
     protected KernelBrowser $client;
     protected UserService $userService;
     protected UserRepository $userRepository;
@@ -37,7 +36,7 @@ trait UserTestTrait
         $index = $lastUserId + 1;
         $defaults = [
             'email' => 'user' . $index . '@example.com',
-            'password' => self::DEFAULT_PASSWORD,
+            'password' => UserFixture::DEFAULT_PASSWORD,
             'displayName' => 'John Doe ' . $index,
             'tag' => 'john-doe-' . $index,
             'roles' => [],
@@ -52,12 +51,11 @@ trait UserTestTrait
             $userData['roles'],
         );
 
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
         if ($verified) {
-            $this->authService->verifyUser($user->getVerificationCode(), $user);
+            $user->setVerified(true);
         }
+
+        $this->userRepository->save($user, true);
 
         return $user;
     }
@@ -70,7 +68,7 @@ trait UserTestTrait
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode([
                 'email' => $user->getEmail(),
-                'password' => self::DEFAULT_PASSWORD,
+                'password' => UserFixture::DEFAULT_PASSWORD,
             ])
         );
 
