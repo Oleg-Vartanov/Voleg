@@ -36,7 +36,7 @@ const signIn = () => {
       ) {
         errorMessage.value = axiosError.response.data.message
       }
-      topAlerts.add(errorMessage, 'danger', 5)
+      topAlerts.add(errorMessage.value, 'danger', 5)
     })
     .finally(() => {
       isLoading.value = false

@@ -1,56 +1,59 @@
 security:
-    password_hashers:
-        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-    providers:
-        app_user_provider_email:
-            entity:
-                class: App\User\Entity\User
-                property: email
-        app_user_provider_id:
-            entity:
-                class: App\User\Entity\User
-                property: id
-    role_hierarchy:
-        ROLE_ADMIN: ROLE_USER
-        ROLE_GOD: ROLE_ADMIN
-    firewalls:
-        dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
-        public:
-            pattern:
-                - ^/v1/auth/sign-up
-            security: false
-        login:
-            pattern:
-                - ^/v1/auth/sign-in
-            stateless: true
-            provider: app_user_provider_email
-            user_checker: App\User\Security\UserChecker
-            json_login:
-                check_path: sign_in
-                username_path: email
-                password_path: password
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
-        secured:
-            lazy: true
-            stateless: true
-            provider: app_user_provider_id
-            jwt: ~
-    access_control:
-        - { path: ^/v1/fixtures/sync, roles: ROLE_ADMIN }
-        - { path: ^/v1/fixtures, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/v1/test, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/v1/users, roles: IS_AUTHENTICATED_FULLY, methods: [DELETE, PATCH] }
-        - { path: ^/v1/users, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/v1/auth, roles: PUBLIC_ACCESS }
-        - { path: ^/, roles: PUBLIC_ACCESS }
+  password_hashers:
+    Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+  providers:
+    app_user_provider_email:
+      entity:
+        class: App\User\Entity\User
+        property: email
+    app_user_provider_id:
+      entity:
+        class: App\User\Entity\User
+        property: id
+  role_hierarchy:
+    ROLE_ADMIN: ROLE_USER
+    ROLE_GOD: ROLE_ADMIN
+  firewalls:
+    dev:
+      pattern: ^/(_(profiler|wdt)|css|images|js)/
+      security: false
+    public:
+      pattern:
+        - ^/v1/auth/sign-up
+      security: false
+    login:
+      pattern:
+        - ^/v1/auth/sign-in
+      stateless: true
+      provider: app_user_provider_email
+      user_checker: App\User\Security\UserChecker
+      login_throttling:
+        max_attempts: 5
+        interval: '15 minutes'
+      json_login:
+        check_path: sign_in
+        username_path: email
+        password_path: password
+        success_handler: lexik_jwt_authentication.handler.authentication_success
+        failure_handler: lexik_jwt_authentication.handler.authentication_failure
+    secured:
+      lazy: true
+      stateless: true
+      provider: app_user_provider_id
+      jwt: ~
+  access_control:
+    - { path: ^/v1/fixtures/sync, roles: ROLE_ADMIN }
+    - { path: ^/v1/fixtures, roles: IS_AUTHENTICATED_FULLY }
+    - { path: ^/v1/test, roles: IS_AUTHENTICATED_FULLY }
+    - { path: ^/v1/users, roles: IS_AUTHENTICATED_FULLY, methods: [ DELETE, PATCH ] }
+    - { path: ^/v1/users, roles: PUBLIC_ACCESS, methods: [ GET ] }
+    - { path: ^/v1/auth, roles: PUBLIC_ACCESS }
+    - { path: ^/, roles: PUBLIC_ACCESS }
 when@test:
-    security:
-        password_hashers:
-            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
-                algorithm: auto
-                cost: 4 # Lowest possible value for bcrypt
-                time_cost: 3 # Lowest possible value for argon
-                memory_cost: 10 # Lowest possible value for argon
+  security:
+    password_hashers:
+      Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+        algorithm: auto
+        cost: 4 # Lowest possible value for bcrypt
+        time_cost: 3 # Lowest possible value for argon
+        memory_cost: 10 # Lowest possible value for argon

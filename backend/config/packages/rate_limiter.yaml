@@ -2,5 +2,5 @@ framework:
   rate_limiter:
     anti_enumeration:
       policy: sliding_window
-      limit: 5
+      limit: 3
       interval: 1 minute
