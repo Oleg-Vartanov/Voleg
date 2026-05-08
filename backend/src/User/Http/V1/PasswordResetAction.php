@@ -40,7 +40,7 @@ class PasswordResetAction extends ApiController
     public function __invoke(
         #[MapRequestPayload] PasswordResetDto $dto
     ): Response {
-        if ($this->limiter->limit('passwordReset'.$dto->selector)) {
+        if ($this->limiter->limit('passwordReset' . $dto->selector)) {
             return $this->limitResponse();
         }
 

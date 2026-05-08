@@ -49,7 +49,7 @@ abstract class AbstractEntityRepository extends ServiceEntityRepository
     public function clearTable(): void
     {
         $this->getEntityManager()
-             ->createQuery('DELETE FROM '.$this->getClassName().' t')
+             ->createQuery('DELETE FROM ' . $this->getClassName() . ' t')
              ->execute();
     }
 }

@@ -23,6 +23,9 @@ class UserToken
     #[ORM\Column]
     private readonly DateTimeImmutable $createdAt;
 
+    /**
+     * @param mixed[] $payload
+     */
     public function __construct(
         #[ORM\Column(enumType: UserTokenTypeEnum::class)]
         private readonly UserTokenTypeEnum $type,
@@ -80,6 +83,10 @@ class UserToken
     {
         if ($this->type !== UserTokenTypeEnum::EMAIL_CHANGE) {
             throw new LogicException('Token is not an email change token.');
+        }
+
+        if (!isset($this->payload['emailChange']) || !is_string($this->payload['emailChange'])) {
+            throw new LogicException('Token payload does not contain an email change token.');
         }
 
         return $this->payload['emailChange'];

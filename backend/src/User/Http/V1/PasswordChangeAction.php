@@ -44,7 +44,7 @@ class PasswordChangeAction extends ApiController
         #[CurrentUser] User $user,
         #[MapRequestPayload] PasswordChangeDto $dto
     ): Response {
-        if ($this->limiter->limit('passwordChange'.$user->getId())) {
+        if ($this->limiter->limit('passwordChange' . $user->getId())) {
             return $this->limitResponse();
         }
 

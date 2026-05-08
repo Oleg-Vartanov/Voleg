@@ -17,7 +17,8 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 #[TestDox('Auth')]
 class AuthVerifyEmailChangeActionTest extends ApiTestCase
 {
-    use UserTestTrait, UserTokenTestTrait;
+    use UserTestTrait;
+    use UserTokenTestTrait;
 
     private EmailChangeService $emailChangeService;
 
@@ -39,12 +40,12 @@ class AuthVerifyEmailChangeActionTest extends ApiTestCase
     public function testVerifyEmailChangeSuccess(): void
     {
         $user = $this->createUser();
-        $this->mockToken('selector'.$user->getId(), 'secret'.$user->getId());
+        $this->mockToken('selector' . $user->getId(), 'secret' . $user->getId());
         $this->emailChangeService->requestEmailChange($user, 'new-email@mail.com');
 
         $this->sendRequest([
-            'selector' => 'selector'.$user->getId(),
-            'secret' => 'secret'.$user->getId(),
+            'selector' => 'selector' . $user->getId(),
+            'secret' => 'secret' . $user->getId(),
         ]);
 
         self::assertSame('new-email@mail.com', $user->getEmail());
@@ -63,10 +64,10 @@ class AuthVerifyEmailChangeActionTest extends ApiTestCase
     {
         $user = $this->createUser();
         $oldEmail = $user->getEmail();
-        $this->mockToken('selector'.$user->getId());
+        $this->mockToken('selector' . $user->getId());
         $this->emailChangeService->requestEmailChange($user, 'new-email@mail.com');
 
-        $this->sendRequest(['selector' => 'selector'.$user->getId(), 'secret' => 'wrong-secret']);
+        $this->sendRequest(['selector' => 'selector' . $user->getId(), 'secret' => 'wrong-secret']);
 
         self::assertSame($oldEmail, $user->getEmail());
         self::assertResponseStatusCodeSame(Response::HTTP_SEE_OTHER);

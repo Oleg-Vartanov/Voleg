@@ -5,7 +5,7 @@ import { useAuth } from '@/modules/user/stores/useAuth'
 import { type Ref, ref, type UnwrapRef, onMounted, reactive, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import FormField from '@/modules/core/components/form/FormField.vue'
-import FormButton from '@/modules/core/components/form/FormButton.vue';
+import FormButton from '@/modules/core/components/form/FormButton.vue'
 
 const auth = useAuth()
 const route = useRoute()

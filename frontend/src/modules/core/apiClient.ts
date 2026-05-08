@@ -90,9 +90,13 @@ export default {
   },
 
   passwordForgot(email: string) {
-    return axios.post(`${apiBaseUrl}/auth/password-forgot`, { email }, {
-      headers: getHeader()
-    })
+    return axios.post(
+      `${apiBaseUrl}/auth/password-forgot`,
+      { email },
+      {
+        headers: getHeader()
+      }
+    )
   },
 
   passwordReset(selector: string, secret: string, password: string) {

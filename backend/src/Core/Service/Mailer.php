@@ -10,6 +10,8 @@ use Symfony\Component\Mailer\MailerInterface;
 readonly class Mailer
 {
     private string $noReply;
+
+    /** @var mixed[] */
     private array $context;
 
     public function __construct(
@@ -23,6 +25,7 @@ readonly class Mailer
     }
 
     /**
+     * @param mixed[] $context
      * @throws TransportExceptionInterface
      */
     public function send(

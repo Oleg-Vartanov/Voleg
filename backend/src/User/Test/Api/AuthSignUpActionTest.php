@@ -36,12 +36,12 @@ class AuthSignUpActionTest extends ApiTestCase
             'code' => 'sign-up-code',
         ];
 
-        $this->mockToken('selector'.$id, 'secret'.$id);
+        $this->mockToken('selector' . $id, 'secret' . $id);
         $response = $this->signUpRequest($testUser);
 
         self::assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
-        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'selector'.$id);
-        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'secret'.$id);
+        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'selector' . $id);
+        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'secret' . $id);
     }
 
     #[TestDox('Sign up action: validation error')]

@@ -10,8 +10,7 @@ readonly class AntiEnumerationLimiter
     public function __construct(
         #[Target('anti_enumeration')]
         private RateLimiterFactoryInterface $rateLimiter,
-    )
-    {
+    ) {
     }
 
     public function limit(?string $key): bool

@@ -14,6 +14,7 @@ class UserTokenService
     public const string TOKEN_EXPIRE_TIME = '+30 minutes';
 
     /**
+     * @param mixed[] $payload
      * @return array{UserToken, Secret}
      * @throws RandomException
      */
@@ -67,7 +68,6 @@ class UserTokenService
     public function generateSelector(): string
     {
         return bin2hex(random_bytes(16));
-
     }
 
     public function createExpiresAt(): DateTimeImmutable

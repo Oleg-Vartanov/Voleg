@@ -15,11 +15,7 @@ export interface Alert {
 export const useTopAlerts = defineStore('topAlerts', () => {
   const alerts = ref<Alert[]>([])
 
-  function createAlert(
-    text: string,
-    type: AlertType = 'primary',
-    timeout: number = 10
-  ): Alert {
+  function createAlert(text: string, type: AlertType = 'primary', timeout: number = 10): Alert {
     const countdown = ref(timeout)
 
     const alert: Alert = {
@@ -52,11 +48,7 @@ export const useTopAlerts = defineStore('topAlerts', () => {
     return alert
   }
 
-  const add = (
-    text: string,
-    type: AlertType = 'primary',
-    timeout: number = 10
-  ) => {
+  const add = (text: string, type: AlertType = 'primary', timeout: number = 10) => {
     const alert = createAlert(text, type, timeout)
 
     alert.id = generateNewAlertId()
@@ -65,7 +57,7 @@ export const useTopAlerts = defineStore('topAlerts', () => {
   }
 
   const remove = (alert: Alert): void => {
-    const index = alerts.value.findIndex(a => a.id === alert.id)
+    const index = alerts.value.findIndex((a) => a.id === alert.id)
 
     if (index !== -1) {
       arrayUtils.removeIndex(alerts.value, index)
@@ -75,9 +67,7 @@ export const useTopAlerts = defineStore('topAlerts', () => {
   const generateNewAlertId = (): number => {
     const highestAlertId = getHighestAlertId()
 
-    return highestAlertId !== null
-      ? highestAlertId + 1
-      : 0
+    return highestAlertId !== null ? highestAlertId + 1 : 0
   }
 
   const getHighestAlertId = (): number | null => {
@@ -86,8 +76,7 @@ export const useTopAlerts = defineStore('topAlerts', () => {
     }
 
     return alerts.value.reduce(
-      (max: number, alert: Alert): number =>
-        alert.id > max ? alert.id : max,
+      (max: number, alert: Alert): number => (alert.id > max ? alert.id : max),
       alerts.value[0].id
     )
   }

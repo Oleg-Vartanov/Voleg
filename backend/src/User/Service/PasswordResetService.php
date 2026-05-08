@@ -21,7 +21,8 @@ readonly class PasswordResetService
         private UserTokenService $tokenService,
         private Mailer $mailer,
         private ParameterBagInterface $parameterBag,
-    ) {}
+    ) {
+    }
 
 
     /**

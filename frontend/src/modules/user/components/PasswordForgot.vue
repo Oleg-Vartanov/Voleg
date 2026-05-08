@@ -10,7 +10,7 @@ const topAlerts = useTopAlerts()
 const router = useRouter()
 
 const isLoading = ref(false)
-const email = ref('');
+const email = ref('')
 
 const submit = () => {
   isLoading.value = true
@@ -39,7 +39,12 @@ const submit = () => {
       type="email"
       help-text="Provide the email address associated with your account."
     />
-    <FormButton label="Request Password Reset" variant="primary" :loading="isLoading" type="submit" />
+    <FormButton
+      label="Request Password Reset"
+      variant="primary"
+      :loading="isLoading"
+      type="submit"
+    />
   </form>
 </template>
 

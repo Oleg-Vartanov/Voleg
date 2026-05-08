@@ -12,7 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Auth')]
 class PasswordForgotActionTest extends ApiTestCase
 {
-    use UserTestTrait, UserTokenTestTrait;
+    use UserTestTrait;
+    use UserTokenTestTrait;
 
     public function setUp(): void
     {
@@ -25,12 +26,12 @@ class PasswordForgotActionTest extends ApiTestCase
     public function testSuccess(): void
     {
         $user = $this->createUser();
-        $this->mockToken('selector'.$user->getId(), 'secret'.$user->getId());
+        $this->mockToken('selector' . $user->getId(), 'secret' . $user->getId());
         $this->sendRequest(['email' => $user->getEmail()]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
-        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'selector'.$user->getId());
-        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'secret'.$user->getId());
+        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'selector' . $user->getId());
+        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'secret' . $user->getId());
     }
 
     #[TestDox('Password forgot: user not found')]

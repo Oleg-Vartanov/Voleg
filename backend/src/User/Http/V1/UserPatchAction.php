@@ -12,7 +12,6 @@ use App\User\Http\V1\Request\UserDto;
 use App\User\Http\V1\Trait\UserControllerTrait;
 use App\User\Repository\UserRepository;
 use App\User\Service\UserService;
-use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Random\RandomException;
@@ -43,7 +42,6 @@ class UserPatchAction extends ApiController
     use UserControllerTrait;
 
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
         private readonly UserRepository $userRepository,
         private readonly UserService $userService,
     ) {

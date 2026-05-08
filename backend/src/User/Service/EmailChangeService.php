@@ -22,8 +22,7 @@ readonly class EmailChangeService
         private UserTokenService $tokenService,
         private UserTokenRepository $tokenRepository,
         private UserRepository $userRepository,
-    )
-    {
+    ) {
     }
 
     /**

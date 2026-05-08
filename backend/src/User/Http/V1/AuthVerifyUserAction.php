@@ -41,7 +41,7 @@ class AuthVerifyUserAction extends ApiController
     public function __invoke(
         #[MapQueryString] UserTokenDto $dto,
     ): Response {
-        if ($this->limiter->limit('verifyUser'.$dto->selector)) {
+        if ($this->limiter->limit('verifyUser' . $dto->selector)) {
             return $this->limitResponse();
         }
 

@@ -96,7 +96,7 @@ const saveProfile = () => {
       auth.user.tag = response.data.tag
       isEditing.value = false
 
-      let message = 'Profile updated successfully.';
+      let message = 'Profile updated successfully.'
       if (payload.email !== undefined) {
         message += ' Please check your new email for verification.'
       }
@@ -132,13 +132,6 @@ onMounted(() => {
 
 <template>
   <h1 class="h4 mb-3 fw-normal">Profile info</h1>
-
-  <!-- TODO: Just remove? -->
-<!--  <div v-if="userData?.emailChange" class="alert alert-warning">-->
-<!--    Pending email verification: <strong>{{ userData?.emailChange }}</strong-->
-<!--    >.-->
-<!--  </div>-->
-
   <form @submit.prevent="saveProfile">
     <FormField
       id="displayName"

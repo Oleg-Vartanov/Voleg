@@ -16,7 +16,8 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Auth')]
 class PasswordResetActionTest extends ApiTestCase
 {
-    use UserTestTrait, UserTokenTestTrait;
+    use UserTestTrait;
+    use UserTokenTestTrait;
 
     private PasswordResetService $passwordResetService;
 
@@ -34,20 +35,20 @@ class PasswordResetActionTest extends ApiTestCase
     public function testSuccess(): void
     {
         $user = $this->createUser();
-        $this->mockToken('selector'.$user->getId(), 'secret'.$user->getId());
+        $this->mockToken('selector' . $user->getId(), 'secret' . $user->getId());
         $this->passwordResetService->requestReset($user);
 
         $this->sendRequest([
-            'selector' => 'selector'.$user->getId(),
-            'secret' => 'secret'.$user->getId(),
-            'password' => UserFixture::DEFAULT_PASSWORD.'new',
+            'selector' => 'selector' . $user->getId(),
+            'secret' => 'secret' . $user->getId(),
+            'password' => UserFixture::DEFAULT_PASSWORD . 'new',
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
         self::assertTrue(
             $this->userService->isPasswordValid(
                 $user,
-                UserFixture::DEFAULT_PASSWORD.'new'
+                UserFixture::DEFAULT_PASSWORD . 'new'
             )
         );
 
@@ -59,11 +60,11 @@ class PasswordResetActionTest extends ApiTestCase
     public function testWrongSecret(): void
     {
         $user = $this->createUser();
-        $this->mockToken('selector'.$user->getId(), 'secret'.$user->getId());
+        $this->mockToken('selector' . $user->getId(), 'secret' . $user->getId());
         $this->passwordResetService->requestReset($user);
 
         $this->sendRequest([
-            'selector' => 'selector'.$user->getId(),
+            'selector' => 'selector' . $user->getId(),
             'secret' => 'wrong-secret',
             'password' => UserFixture::DEFAULT_PASSWORD,
         ]);
@@ -76,15 +77,15 @@ class PasswordResetActionTest extends ApiTestCase
     {
         $user = $this->createUser();
         $this->mockToken(
-            'selector'.$user->getId(),
-            'secret'.$user->getId(),
+            'selector' . $user->getId(),
+            'secret' . $user->getId(),
             new DateTimeImmutable('-1 day'),
         );
         $this->passwordResetService->requestReset($user);
 
         $this->sendRequest([
-            'selector' => 'selector'.$user->getId(),
-            'secret' => 'secret'.$user->getId(),
+            'selector' => 'selector' . $user->getId(),
+            'secret' => 'secret' . $user->getId(),
             'password' => UserFixture::DEFAULT_PASSWORD,
         ]);
 
