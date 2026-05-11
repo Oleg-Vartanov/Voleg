@@ -3,11 +3,11 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\User\Entity\User;
+use App\Core\Test\Trait\ContainerTestTrait;
 use App\User\Enum\RoleEnum;
 use App\User\Enum\UserTokenTypeEnum;
+use App\User\Repository\UserRepository;
 use App\User\Repository\UserTokenRepository;
-use App\User\Test\Trait\UserTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,13 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('User')]
 class UserPatchActionTest extends ApiTestCase
 {
-    use UserTestTrait;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->bootUserTest();
-    }
+    use ContainerTestTrait;
 
     #[TestDox('User PATCH: success')]
     public function testUserPatchSuccess(): void
@@ -33,7 +27,7 @@ class UserPatchActionTest extends ApiTestCase
             'displayName' => 'patched-name',
             'tag' => 'patched-tag',
         ]);
-        $patchedUser = $this->userRepository->findById($user->getId());
+        $patchedUser = $this->getService(UserRepository::class)->findById($user->getId());
 
         /** @var UserTokenRepository $tokenRepository */
         $tokenRepository = static::getContainer()->get(UserTokenRepository::class);
@@ -60,7 +54,7 @@ class UserPatchActionTest extends ApiTestCase
     #[TestDox('User PATCH: not found')]
     public function testUserPatchNotFound(): void
     {
-        $user = $this->createUser(['roles' => [RoleEnum::ROLE_ADMIN->value]]);
+        $user = $this->createUser(isAdmin: true);
         $this->signIn($user);
         $this->sendRequest(0);
 

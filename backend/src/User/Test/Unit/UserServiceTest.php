@@ -23,11 +23,11 @@ class UserServiceTest extends TestCase
     public function setUp(): void
     {
         $this->emailChangeService = new EmailChangeService(
-            $this->createStub(Mailer::class),
-            $this->createStub(RouterInterface::class),
-            $this->createStub(UserTokenService::class),
-            $this->createStub(UserTokenRepository::class),
-            $this->createStub(UserRepository::class),
+            self::createStub(Mailer::class),
+            self::createStub(RouterInterface::class),
+            self::createStub(UserTokenService::class),
+            self::createStub(UserTokenRepository::class),
+            self::createStub(UserRepository::class),
         );
     }
 

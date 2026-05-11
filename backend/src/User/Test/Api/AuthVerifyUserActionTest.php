@@ -9,7 +9,6 @@ use App\User\Entity\UserToken;
 use App\User\Enum\UserTokenTypeEnum;
 use App\User\Repository\UserTokenRepository;
 use App\User\Service\UserTokenService;
-use App\User\Test\Trait\UserTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,14 +17,6 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Auth')]
 class AuthVerifyUserActionTest extends ApiTestCase
 {
-    use UserTestTrait;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->bootUserTest();
-    }
-
     #[TestDox('Verify user: success')]
     public function testSuccess(): void
     {
@@ -86,9 +77,9 @@ class AuthVerifyUserActionTest extends ApiTestCase
     #[TestDox('Verify user: rate limit')]
     public function testRateLimit(): void
     {
-        foreach (range(1, 6) as $i) {
+        foreach (range(1, 4) as $i) {
             $this->sendRequest(['selector' => 'verifyUserRateLimit', 'secret' => 'test']);
-            if ($i === 6) {
+            if ($i === 4) {
                 self::assertResponseStatusCodeSame(Response::HTTP_TOO_MANY_REQUESTS);
             } else {
                 self::assertResponseStatusCodeSame(Response::HTTP_SEE_OTHER);

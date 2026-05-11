@@ -6,7 +6,7 @@ use App\Core\Test\ApiTestCase;
 use App\User\DataFixture\UserFixture;
 use App\User\Enum\UserTokenTypeEnum;
 use App\User\Service\PasswordResetService;
-use App\User\Test\Trait\UserTestTrait;
+use App\User\Service\UserService;
 use App\User\Test\Trait\UserTokenTestTrait;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\TestDox;
@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Auth')]
 class PasswordResetActionTest extends ApiTestCase
 {
-    use UserTestTrait;
     use UserTokenTestTrait;
 
     private PasswordResetService $passwordResetService;
@@ -25,7 +24,6 @@ class PasswordResetActionTest extends ApiTestCase
     {
         parent::setUp();
         $this->tokenSetUp();
-        $this->bootUserTest();
         $this->passwordResetService = static::getContainer()->get(
             PasswordResetService::class
         );
@@ -46,7 +44,7 @@ class PasswordResetActionTest extends ApiTestCase
 
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
         self::assertTrue(
-            $this->userService->isPasswordValid(
+            static::getContainer()->get(UserService::class)->isPasswordValid(
                 $user,
                 UserFixture::DEFAULT_PASSWORD . 'new'
             )
@@ -107,13 +105,13 @@ class PasswordResetActionTest extends ApiTestCase
     #[TestDox('Password reset: rate limit')]
     public function testRateLimit(): void
     {
-        foreach (range(1, 6) as $i) {
+        foreach (range(1, 4) as $i) {
             $this->sendRequest([
                 'selector' => 'passwordResetRateLimitTest',
                 'secret' => 'test',
                 'password' => UserFixture::DEFAULT_PASSWORD,
             ]);
-            if ($i === 6) {
+            if ($i === 4) {
                 self::assertResponseStatusCodeSame(Response::HTTP_TOO_MANY_REQUESTS);
             } else {
                 self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);

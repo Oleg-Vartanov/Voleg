@@ -5,7 +5,6 @@ namespace App\FixturePredictions\Test\Api;
 use App\Core\Test\ApiTestCase;
 use App\FixturePredictions\DataFixture\SeasonFixture;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
-use App\User\Test\Trait\UserTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,19 +12,10 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Fixture Predictions')]
 class LeaderboardGetActionTest extends ApiTestCase
 {
-    use UserTestTrait;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->bootUserTest();
-    }
-
     #[TestDox('Leaderboard: success')]
     public function testSuccess(): void
     {
-        $user = $this->createUser();
-        $this->signIn($user);
+        $this->signIn($this->createUser());
 
         $response = $this->sendRequest();
         self::assertResponseIsSuccessful();
@@ -45,10 +35,8 @@ class LeaderboardGetActionTest extends ApiTestCase
     #[TestDox('Leaderboard: validation error')]
     public function testValidationError(): void
     {
-        $user = $this->createUser();
-        $this->signIn($user);
-
-        $this->sendRequest('invalid-date');
+        $this->signIn($this->createUser());
+        $this->sendRequest(start: 'invalid-date');
         self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
@@ -61,15 +49,13 @@ class LeaderboardGetActionTest extends ApiTestCase
 
     private function sendRequest(
         string $start = '2025-01-01',
-        string $end = '2025-01-02',
-        int $season = SeasonFixture::CURRENT_SEASON,
     ): Response {
         $this->client->request(
             method: Request::METHOD_GET,
             uri: $this->router->generate('fixtures_leaderboard', [
                 'start' => $start,
-                'end' => $end,
-                'season' => $season,
+                'end' => '2025-01-02',
+                'season' => SeasonFixture::CURRENT_SEASON,
                 'limit' => 20,
             ]),
         );

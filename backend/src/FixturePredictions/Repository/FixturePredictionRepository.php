@@ -2,6 +2,7 @@
 
 namespace App\FixturePredictions\Repository;
 
+use App\Core\Repository\AbstractEntityRepository;
 use App\FixturePredictions\Entity\Competition;
 use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\FixturePrediction;
@@ -9,13 +10,12 @@ use App\FixturePredictions\Entity\Season;
 use App\FixturePredictions\Http\V1\Leaderboard\LeaderboardRow;
 use App\User\Entity\User;
 use DateTimeImmutable;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<FixturePrediction>
+ * @extends AbstractEntityRepository<FixturePrediction>
  */
-class FixturePredictionRepository extends ServiceEntityRepository
+class FixturePredictionRepository extends AbstractEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

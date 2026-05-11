@@ -24,12 +24,12 @@ class AuthServiceTest extends TestCase
     public function setUp(): void
     {
         $this->authService = new AuthService(
-            $this->createStub(Mailer::class),
-            $this->createStub(RouterInterface::class),
-            $this->createStub(UserService::class),
-            $this->createStub(UserRepository::class),
-            $this->createStub(UserTokenService::class),
-            $this->createStub(UserTokenRepository::class),
+            self::createStub(Mailer::class),
+            self::createStub(RouterInterface::class),
+            self::createStub(UserService::class),
+            self::createStub(UserRepository::class),
+            self::createStub(UserTokenService::class),
+            self::createStub(UserTokenRepository::class),
         );
     }
 
@@ -39,10 +39,10 @@ class AuthServiceTest extends TestCase
     #[TestDox('Try to send verification email on verified user')]
     public function testSendVerificationEmailOnVerifiedUser(): void
     {
-        $user = $this->createStub(User::class);
+        $user = self::createStub(User::class);
         $user->method('isVerified')->willReturn(true);
 
-        $this->expectException(LogicException::class);
+        self::expectException(LogicException::class);
         $this->authService->sendVerificationEmail($user);
     }
 }

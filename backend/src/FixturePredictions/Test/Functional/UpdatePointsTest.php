@@ -24,14 +24,12 @@ class UpdatePointsTest extends KernelTestCase
     use ContainerTestTrait;
 
     private EntityManagerInterface $em;
-    private FixturePredictionRepository $predictionRepository;
     private PredictionsService $predictionsService;
 
     public function setUp(): void
     {
-        $this->predictionsService = $this->getService(PredictionsService::class);
         $this->em = $this->getService(EntityManagerInterface::class);
-        $this->predictionRepository = $this->getService(FixturePredictionRepository::class);
+        $this->predictionsService = $this->getService(PredictionsService::class);
     }
 
     /**
@@ -52,7 +50,8 @@ class UpdatePointsTest extends KernelTestCase
 
         $this->predictionsService->dispatchUpdatePoints($fixture);
 
-        $predictions = $this->predictionRepository->findByFixture($fixture);
+        $predictions = $this->getService(FixturePredictionRepository::class)
+                            ->findByFixture($fixture);
 
         self::assertCount(4, $predictions);
         if (count($predictions) === 4) {
@@ -69,7 +68,7 @@ class UpdatePointsTest extends KernelTestCase
     #[TestDox('Update points: handle non existent fixture')]
     public function testHandleNonExistentFixture(): void
     {
-        $fixture = $this->createStub(Fixture::class);
+        $fixture = self::createStub(Fixture::class);
         $fixture->method('getId')->willReturn(0);
         $fixture->method('canCalculatePoints')->willReturn(true);
 
@@ -86,7 +85,6 @@ class UpdatePointsTest extends KernelTestCase
         $f->setHomeScore($scoreHome);
         $f->setAwayScore($scoreAway);
         $f->setStartAt(new DateTimeImmutable('-1 day'));
-
         $f->setMatchday(1);
         $f->setCompetition($this->em->getReference(Competition::class, 1));
         $f->setSeason($this->em->getReference(Season::class, 1));
@@ -110,7 +108,6 @@ class UpdatePointsTest extends KernelTestCase
         $p->setFixture($fixture);
         $p->setHomeScore($scoreHome);
         $p->setAwayScore($scoreAway);
-
         $p->setUser($this->em->getReference(User::class, 1));
 
         $this->em->persist($p);

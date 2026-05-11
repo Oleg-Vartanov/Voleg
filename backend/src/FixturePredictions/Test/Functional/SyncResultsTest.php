@@ -23,7 +23,6 @@ class SyncResultsTest extends KernelTestCase
     use ContainerTestTrait;
 
     private MessageBusInterface $messageBus;
-    private FixtureProvider&MockObject $fixturesProviderMock;
 
     public function setUp(): void
     {
@@ -36,19 +35,17 @@ class SyncResultsTest extends KernelTestCase
     #[TestDox('Sync results: dispatch sync message')]
     public function testDispatchSyncMessage(): void
     {
-        $competitionRepository = $this->getService(CompetitionRepository::class);
-        $seasonRepository = $this->getService(SeasonRepository::class);
-
-        $competition = $competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
-        $season = $seasonRepository->findOneByYear(SeasonFixture::CURRENT_SEASON);
+        $competition = $this->getService(CompetitionRepository::class)
+                            ->findOneByCode(CompetitionCodeEnum::EPL->value);
+        $season = $this->getService(SeasonRepository::class)
+                       ->findOneByYear(SeasonFixture::CURRENT_SEASON);
         $from = new DateTimeImmutable('2025-01-01T00:00:00Z');
         $to = new DateTimeImmutable('2025-01-02T00:00:00Z');
 
-        $fixturesProviderMock = $this->mockFixturesProvider();
-        $fixturesProviderMock
-            ->expects(self::once())
-            ->method('sync')
-            ->with($competition, $season, $from, $to);
+        $this->mockFixturesProvider()
+             ->expects(self::once())
+             ->method('sync')
+             ->with($competition, $season, $from, $to);
 
         $this->messageBus->dispatch(new SyncMessage(from: $from, to: $to));
     }
@@ -59,8 +56,9 @@ class SyncResultsTest extends KernelTestCase
     #[TestDox('Sync results: dispatch sync message with default params')]
     public function testDispatchSyncMessageWithDefaultParams(): void
     {
-        $fixturesProviderMock = $this->mockFixturesProvider();
-        $fixturesProviderMock->expects(self::once())->method('sync');
+        $this->mockFixturesProvider()
+             ->expects(self::once())
+             ->method('sync');
 
         $this->messageBus->dispatch(new SyncMessage(year: SeasonFixture::CURRENT_SEASON));
     }
@@ -71,7 +69,7 @@ class SyncResultsTest extends KernelTestCase
     #[TestDox('Sync results: competition not found')]
     public function testCompetitionNotFound(): void
     {
-        $repo = $this->createStub(CompetitionRepository::class);
+        $repo = self::createStub(CompetitionRepository::class);
         $repo->method('findOneByCode')->willReturn(null);
         self::getContainer()->set(CompetitionRepository::class, $repo);
 
@@ -85,7 +83,7 @@ class SyncResultsTest extends KernelTestCase
     #[TestDox('Sync results: season not found')]
     public function testSeasonNotFound(): void
     {
-        $repo = $this->createStub(SeasonRepository::class);
+        $repo = self::createStub(SeasonRepository::class);
         $repo->method('findOneByYear')->willReturn(null);
         self::getContainer()->set(SeasonRepository::class, $repo);
 

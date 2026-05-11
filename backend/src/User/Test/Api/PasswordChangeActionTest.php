@@ -3,9 +3,10 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
+use App\Core\Test\Trait\ContainerTestTrait;
 use App\User\DataFixture\UserFixture;
 use App\User\Entity\User;
-use App\User\Test\Trait\UserTestTrait;
+use App\User\Repository\UserRepository;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,16 +15,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 #[TestDox('User')]
 class PasswordChangeActionTest extends ApiTestCase
 {
-    use UserTestTrait;
-
-    private UserPasswordHasherInterface $passwordHasher;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->bootUserTest();
-        $this->passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
-    }
+    use ContainerTestTrait;
 
     #[TestDox('User change password: success')]
     public function testSuccess(): void
@@ -35,11 +27,12 @@ class PasswordChangeActionTest extends ApiTestCase
             'newPassword' => '!NewPassword1',
         ]);
         /** @var User $patchedUser */
-        $updatedUser = $this->userRepository->findById($user->getId());
+        $updatedUser = $this->getService(UserRepository::class)->findById($user->getId());
 
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
         self::assertTrue(
-            $this->passwordHasher->isPasswordValid($updatedUser, '!NewPassword1')
+            $this->getService(UserPasswordHasherInterface::class)
+                 ->isPasswordValid($updatedUser, '!NewPassword1')
         );
     }
 
@@ -91,9 +84,9 @@ class PasswordChangeActionTest extends ApiTestCase
     {
         $user = $this->createUser(['password' => UserFixture::DEFAULT_PASSWORD]);
         $this->signIn($user);
-        foreach (range(1, 6) as $i) {
+        foreach (range(1, 4) as $i) {
             $this->sendRequest(['currentPassword' => 'wrong-password', 'newPassword' => '!NewPassword1',]);
-            if ($i === 6) {
+            if ($i === 4) {
                 self::assertResponseStatusCodeSame(Response::HTTP_TOO_MANY_REQUESTS);
             } else {
                 self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -101,7 +94,7 @@ class PasswordChangeActionTest extends ApiTestCase
         }
     }
 
-    private function sendRequest(array $content = []): Response
+    private function sendRequest(array $content = []): void
     {
         $this->client->request(
             method: Request::METHOD_POST,
@@ -109,7 +102,5 @@ class PasswordChangeActionTest extends ApiTestCase
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode($content),
         );
-
-        return $this->client->getResponse();
     }
 }

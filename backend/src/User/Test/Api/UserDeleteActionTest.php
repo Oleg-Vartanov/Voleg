@@ -3,9 +3,8 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\User\Entity\User;
 use App\User\Enum\RoleEnum;
-use App\User\Test\Trait\UserTestTrait;
+use App\User\Repository\UserRepository;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,12 +12,9 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('User')]
 class UserDeleteActionTest extends ApiTestCase
 {
-    use UserTestTrait;
-
     public function setUp(): void
     {
         parent::setUp();
-        $this->bootUserTest();
     }
 
     #[TestDox('User DELETE: success')]
@@ -30,7 +26,7 @@ class UserDeleteActionTest extends ApiTestCase
 
         self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
 
-        $deletedUser = $this->entityManager->getRepository(User::class)->find($user->getId());
+        $deletedUser = $this->getService(UserRepository::class)->findById($user->getId());
         self::assertNull($deletedUser, 'User should be deleted from database.');
     }
 
@@ -48,7 +44,7 @@ class UserDeleteActionTest extends ApiTestCase
     #[TestDox('User DELETE: not found')]
     public function testUserDeleteNotFound(): void
     {
-        $user = $this->createUser(['roles' => [RoleEnum::ROLE_ADMIN->value]]);
+        $user = $this->createUser(isAdmin: true);
         $this->signIn($user);
         $this->sendRequest(0);
 

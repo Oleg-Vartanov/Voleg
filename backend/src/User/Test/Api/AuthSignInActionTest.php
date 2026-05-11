@@ -5,7 +5,6 @@ namespace App\User\Test\Api;
 use App\Core\Test\ApiTestCase;
 use App\User\DataFixture\UserFixture;
 use App\User\Http\V1\AuthSignInAction;
-use App\User\Test\Trait\UserTestTrait;
 use LogicException;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,14 +13,6 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Auth')]
 class AuthSignInActionTest extends ApiTestCase
 {
-    use UserTestTrait;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->bootUserTest();
-    }
-
     #[TestDox('Sign in action: success')]
     public function testSignInSuccess(): void
     {
@@ -34,39 +25,34 @@ class AuthSignInActionTest extends ApiTestCase
 
         $data = json_decode($response->getContent(), true);
 
-        self::assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
         self::assertNotEmpty($data['token']);
     }
 
     #[TestDox('Sign in action: invalid credentials')]
     public function testSignInInvalidCredentials(): void
     {
-        $response = $this->sendRequest([
-            'email' => 'fail',
-            'password' => 'fail',
-        ]);
-
-        self::assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
+        $this->sendRequest(['email' => 'fail', 'password' => 'fail']);
+        self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
     }
 
     #[TestDox('Sign in action: unverified')]
     public function testSignInUnverified(): void
     {
         $user = $this->createUser(verified: false);
-
-        $response = $this->sendRequest([
+        $this->sendRequest([
             'email' => $user->getEmail(),
             'password' => UserFixture::DEFAULT_PASSWORD,
         ]);
 
-        self::assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
+        self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
     }
 
     #[TestDox('Sign in action: logic exception')]
     public function testSignInLogicException(): void
     {
         $controller = new AuthSignInAction();
-        $this->expectException(LogicException::class);
+        self::expectException(LogicException::class);
         $controller->__invoke();
     }
 

@@ -4,8 +4,6 @@ namespace App\FixturePredictions\Test\Api;
 
 use App\Core\Test\ApiTestCase;
 use App\FixturePredictions\Service\FixtureProvider;
-use App\User\Enum\RoleEnum;
-use App\User\Test\Trait\UserTestTrait;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,26 +12,17 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Fixture Predictions')]
 class SyncTest extends ApiTestCase
 {
-    use UserTestTrait;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->bootUserTest();
-    }
-
     #[TestDox('Sync request: success')]
     public function testSuccess(): void
     {
         $anyDate = new DateTimeImmutable()->format('Y-m-d\TH:i:sO');
 
         $this->client->disableReboot(); // For mocks in a controller.
-        $fixtureProviderMock = self::createMock(FixtureProvider::class);
-        $fixtureProviderMock->expects(self::once())->method('sync');
-        static::getContainer()->set(FixtureProvider::class, $fixtureProviderMock);
+        $fixtureProvider = self::createMock(FixtureProvider::class);
+        $fixtureProvider->expects(self::once())->method('sync');
+        static::getContainer()->set(FixtureProvider::class, $fixtureProvider);
 
-        $user = $this->createUser(['roles' => [RoleEnum::ROLE_ADMIN->value]]);
-        $this->signIn($user);
+        $this->signIn($this->createUser(isAdmin: true));
 
         $this->sendRequest([
             'competitionCode' => 'PL',
@@ -49,9 +38,7 @@ class SyncTest extends ApiTestCase
     {
         $anyDate = new DateTimeImmutable()->format('Y-m-d\TH:i:sO');
 
-        $user = $this->createUser(['roles' => [RoleEnum::ROLE_ADMIN->value]]);
-        $this->signIn($user);
-
+        $this->signIn($this->createUser(isAdmin: true));
         $this->sendRequest([
             'competitionCode' => 'PL',
             'seasonYear' => 1970,
@@ -64,11 +51,10 @@ class SyncTest extends ApiTestCase
     #[TestDox('Sync request: validation error')]
     public function testValidationError(): void
     {
-        $user = $this->createUser(['roles' => [RoleEnum::ROLE_ADMIN->value]]);
-        $this->signIn($user);
-
-        $this->sendRequest([
-            ['competitionCode' => 'InvalidCode', 'seasonYear' => -1]]);
+        $this->signIn($this->createUser(isAdmin: true));
+        $this->sendRequest(
+            [['competitionCode' => 'InvalidCode', 'seasonYear' => -1]]
+        );
         self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
@@ -77,7 +63,6 @@ class SyncTest extends ApiTestCase
     {
         $this->signIn($this->createUser());
         $this->sendRequest();
-
         self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
@@ -88,7 +73,7 @@ class SyncTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
     }
 
-    private function sendRequest(array $content = []): Response
+    private function sendRequest(array $content = []): void
     {
         $this->client->request(
             method: Request::METHOD_POST,
@@ -97,6 +82,6 @@ class SyncTest extends ApiTestCase
             content: json_encode($content),
         );
 
-        return $this->client->getResponse();
+        $this->client->getResponse();
     }
 }

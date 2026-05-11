@@ -11,7 +11,7 @@ trait ContainerTestTrait
      * @param class-string<T> $id
      * @return T
      */
-    private function getService(string $id): mixed
+    protected function getService(string $id): mixed
     {
         return static::getContainer()->get($id);
     }

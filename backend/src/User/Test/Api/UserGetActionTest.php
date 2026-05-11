@@ -4,7 +4,6 @@ namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
 use App\User\Enum\RoleEnum;
-use App\User\Test\Trait\UserTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,14 +11,6 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('User')]
 class UserGetActionTest extends ApiTestCase
 {
-    use UserTestTrait;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->bootUserTest();
-    }
-
     #[TestDox('User GET: success')]
     public function testUserGetSuccess(): void
     {
@@ -35,7 +26,7 @@ class UserGetActionTest extends ApiTestCase
     #[TestDox('User GET: success admin')]
     public function testUserGetSuccessAdmin(): void
     {
-        $user = $this->createUser(['roles' => [RoleEnum::ROLE_ADMIN->value]]);
+        $user = $this->createUser(isAdmin: true);
         $this->signIn($user);
 
         $response = $this->sendRequest($user->getId());

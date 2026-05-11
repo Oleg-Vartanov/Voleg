@@ -17,7 +17,7 @@ class UserCheckerTest extends TestCase
     public function testPreAuthVerifiedUser(): void
     {
         $checker = new UserChecker();
-        $user = $this->createStub(User::class);
+        $user = self::createStub(User::class);
         $user->method('isVerified')->willReturn(true);
 
         try {
@@ -32,10 +32,10 @@ class UserCheckerTest extends TestCase
     public function testPreAuthUnverifiedUser(): void
     {
         $checker = new UserChecker();
-        $user = $this->createStub(User::class);
+        $user = self::createStub(User::class);
         $user->method('isVerified')->willReturn(false);
 
-        $this->expectException(CustomUserMessageAccountStatusException::class);
+        self::expectException(CustomUserMessageAccountStatusException::class);
         $checker->checkPreAuth($user);
     }
 
@@ -43,12 +43,12 @@ class UserCheckerTest extends TestCase
     public function testPreAuthIncorrectUser(): void
     {
         $checker = new UserChecker();
-        $user = $this->createStub(UserInterface::class);
+        $user = self::createStub(UserInterface::class);
 
         try {
             $checker->checkPreAuth($user);
         } catch (Error $e) {
-            $this->fail($e->getMessage());
+            self::fail($e->getMessage());
         }
         self::assertTrue(true);
     }

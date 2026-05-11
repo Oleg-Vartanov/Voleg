@@ -10,10 +10,7 @@ use App\FixturePredictions\Repository\FixtureRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
 use App\FixturePredictions\Repository\TeamRepository;
 use App\FixturePredictions\Service\FootballDataOrgFixtureProvider;
-use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\TestDox;
-use PHPUnit\Framework\MockObject\Exception;
-use PHPUnit\Framework\MockObject\Stub;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -23,117 +20,62 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
 {
     use ContainerTestTrait;
 
-    private Stub&HttpClientInterface $httpClientStub;
-    private FootballDataOrgFixtureProvider $fixturesProvider;
-    private FixtureRepository $fixtureRepository;
-    private CompetitionRepository $competitionRepository;
-    private SeasonRepository $seasonRepository;
-    private TeamRepository $teamRepository;
-
-    /**
-     * @throws Exception
-     */
-    public function setUp(): void
-    {
-        $this->httpClientStub = $this->createStub(HttpClientInterface::class);
-        static::getContainer()->set(HttpClientInterface::class, $this->httpClientStub);
-
-        $this->fixturesProvider = $this->getService(FootballDataOrgFixtureProvider::class);
-        $this->teamRepository = $this->getService(TeamRepository::class);
-        $this->fixtureRepository = $this->getService(FixtureRepository::class);
-        $this->competitionRepository = $this->getService(CompetitionRepository::class);
-        $this->seasonRepository = $this->getService(SeasonRepository::class);
-    }
-
-    /**
-     * @throws Exception
-     */
-    #[AllowMockObjectsWithoutExpectations]
     #[TestDox('Provider: sync success')]
     public function testSyncSuccess(): void
     {
-        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
-        $season = $this->seasonRepository->findOneByYear(2025);
-
         $this->prepareProviderResponses([
             ['statusCode' => 200, 'content' => $this->teamsResponseContent()],
             ['statusCode' => 200, 'content' => $this->seasonResponseContent()],
             ['statusCode' => 200, 'content' => $this->fixturesResponseContent()],
         ]);
-        $this->fixturesProvider->sync($competition, $season);
+        $this->sync();
 
-        $teams = $this->teamRepository->findByProviderTeamIds([57, 58, 61]);
+        $teams = $this->getService(TeamRepository::class)
+                      ->findByProviderTeamIds([57, 58, 61]);
         self::assertCount(3, $teams);
 
-        $fixtures = $this->fixtureRepository->findByProviderFixtureIds([537793, 537794]);
+        $fixtures = $this->getService(FixtureRepository::class)
+                         ->findByProviderFixtureIds([537793, 537794]);
         self::assertCount(2, $fixtures);
     }
 
-    /**
-     * @throws Exception
-     */
-    #[AllowMockObjectsWithoutExpectations]
     #[TestDox('Provider: sync error invalid response data')]
     public function testSyncErrorInvalidData(): void
     {
-        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
-        $season = $this->seasonRepository->findOneByYear(2025);
-
         $this->prepareProviderResponses([
             ['statusCode' => 200, 'content' => 'invalid-data'],
         ]);
         self::expectException(FixtureProviderClientException::class);
         self::expectExceptionMessage('Invalid API response: expected array.');
-        $this->fixturesProvider->sync($competition, $season);
+        $this->sync();
     }
 
-    /**
-     * @throws Exception
-     */
-    #[AllowMockObjectsWithoutExpectations]
     #[TestDox('Provider: sync error fetching teams')]
     public function testSyncErrorFetchingTeams(): void
     {
-        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
-        $season = $this->seasonRepository->findOneByYear(2025);
-
         $this->prepareProviderResponses([
             ['statusCode' => 500, 'content' => 'test'],
         ]);
         self::expectException(FixtureProviderClientException::class);
         self::expectExceptionMessage('Failed to fetch teams.');
-        $this->fixturesProvider->sync($competition, $season);
+        $this->sync();
     }
 
-    /**
-     * @throws Exception
-     */
-    #[AllowMockObjectsWithoutExpectations]
     #[TestDox('Provider: sync error fetching seasons')]
     public function testSyncErrorFetchingSeasons(): void
     {
-        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
-        $season = $this->seasonRepository->findOneByYear(2025);
-
         $this->prepareProviderResponses([
             ['statusCode' => 200, 'content' => $this->teamsResponseContent()],
             ['statusCode' => 500, 'content' => 'test'],
         ]);
         self::expectException(FixtureProviderClientException::class);
         self::expectExceptionMessage('Failed to fetch seasons.');
-        $this->fixturesProvider->sync($competition, $season);
+        $this->sync();
     }
 
-    /**
-     * @throws Exception
-     */
-    #[AllowMockObjectsWithoutExpectations]
     #[TestDox('Provider: sync error fetching matches')]
     public function testSyncErrorFetchingMatches(): void
     {
-        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
-        $season = $this->seasonRepository->findOneByYear(2025);
-
         $this->prepareProviderResponses([
             ['statusCode' => 200, 'content' => $this->teamsResponseContent()],
             ['statusCode' => 200, 'content' => $this->seasonResponseContent()],
@@ -141,26 +83,35 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
         ]);
         self::expectException(FixtureProviderClientException::class);
         self::expectExceptionMessage('Failed to fetch matches.');
-        $this->fixturesProvider->sync($competition, $season);
+        $this->sync();
     }
 
-    /**
-     * @throws Exception
-     */
+    private function sync(): void
+    {
+        $competition = $this->getService(CompetitionRepository::class)
+                            ->findOneByCode(CompetitionCodeEnum::EPL->value);
+        $season = $this->getService(SeasonRepository::class)
+                       ->findOneByYear(2025);
+
+        $this->getService(FootballDataOrgFixtureProvider::class)
+             ->sync($competition, $season);
+    }
+
     private function prepareProviderResponses(array $responses): void
     {
         $stubResponses = [];
 
         foreach ($responses as $response) {
-            $stubResponse = $this->createStub(ResponseInterface::class);
+            $stubResponse = self::createStub(ResponseInterface::class);
             $stubResponse->method('getStatusCode')->willReturn($response['statusCode']);
             $stubResponse->method('getContent')->willReturn(json_encode($response['content']));
             $stubResponses[] = $stubResponse;
         }
 
-        $this->httpClientStub
-            ->method('request')
-            ->willReturnOnConsecutiveCalls(...$stubResponses);
+        $httpClientStub = self::createStub(HttpClientInterface::class);
+        static::getContainer()->set(HttpClientInterface::class, $httpClientStub);
+        $httpClientStub->method('request')
+                       ->willReturnOnConsecutiveCalls(...$stubResponses);
     }
 
     private function teamsResponseContent(): array
@@ -170,7 +121,7 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
                 ['id' => 57, 'shortName' => 'Arsenal'],
                 ['id' => 58, 'shortName' => 'Aston Villa'],
                 ['id' => 61, 'shortName' => 'Chelsea'],
-            ]
+            ],
         ];
     }
 
@@ -179,7 +130,7 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
         return [
             'seasons' => [
                 ['startDate' => '2025-01-01T00:00:00Z', 'endDate' => '2025-01-30T00:00:00Z'],
-            ]
+            ],
         ];
     }
 
@@ -205,7 +156,7 @@ class FootballDataOrgFixturesProviderTest extends KernelTestCase
                     'awayTeam' => ['id' => 61],
                     'score' => ['fullTime' => ['home' => 1, 'away' => 2]],
                 ],
-            ]
+            ],
         ];
     }
 }

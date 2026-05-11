@@ -5,9 +5,7 @@ namespace App\FixturePredictions\Test\Api;
 use App\Core\Test\ApiTestCase;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\FixturePredictions\Repository\FixtureRepository;
-use App\User\Test\Trait\UserTestTrait;
 use DateTimeImmutable;
-use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,34 +13,19 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Fixture Predictions')]
 class MakePredictionsActionTest extends ApiTestCase
 {
-    use UserTestTrait;
-
-    private EntityManagerInterface $em;
-    private FixtureRepository $fRepository;
-    private FixturePredictionRepository $fpRepository;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->bootUserTest();
-
-        $container = $this->getContainer();
-        $this->fRepository = $container->get(FixtureRepository::class);
-        $this->fpRepository = $container->get(FixturePredictionRepository::class);
-        $this->em = $container->get(EntityManagerInterface::class);
-    }
-
     #[TestDox('Make predictions: success')]
     public function testSuccess(): void
     {
-        $user = $this->createUser();
-        $this->signIn($user);
+        $fixtureRepository = $this->getService(FixtureRepository::class);
+        $fptRepository = $this->getService(FixturePredictionRepository::class);
 
-        $fixtures = $this->fRepository->findBy(['id' => [1, 2]]);
+        $user = $this->signIn($this->createUser());
+
+        $fixtures = $fixtureRepository->findBy(['id' => [1, 2]]);
         foreach ($fixtures as $fixture) {
             $fixture->setStartAt(new DateTimeImmutable('+1 day'));
         }
-        $this->em->flush();
+        $fixtureRepository->flush();
 
         $this->sendRequest([
             ['fixtureId' => 1, 'homeScore' => 10, 'awayScore' => 11],
@@ -50,20 +33,18 @@ class MakePredictionsActionTest extends ApiTestCase
         ]);
         self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
 
-        $fp1 = $this->fpRepository->findOneBy(['user' => $user, 'fixture' => $fixtures[0]]);
-        $fp2 = $this->fpRepository->findOneBy(['user' => $user, 'fixture' => $fixtures[1]]);
-        self::assertSame($fp1->getHomeScore(), 10);
-        self::assertSame($fp1->getAwayScore(), 11);
-        self::assertSame($fp2->getHomeScore(), 12);
-        self::assertSame($fp2->getAwayScore(), 13);
+        $fp1 = $fptRepository->findOneBy(['user' => $user, 'fixture' => $fixtures[0]]);
+        $fp2 = $fptRepository->findOneBy(['user' => $user, 'fixture' => $fixtures[1]]);
+        self::assertSame(10, $fp1->getHomeScore());
+        self::assertSame(11, $fp1->getAwayScore());
+        self::assertSame(12, $fp2->getHomeScore());
+        self::assertSame(13, $fp2->getAwayScore());
     }
 
     #[TestDox('Make predictions: fixture has already started error')]
     public function testFixtureHasAlreadyStartedError(): void
     {
-        $user = $this->createUser();
-        $this->signIn($user);
-
+        $this->signIn($this->createUser());
         $this->sendRequest([['fixtureId' => 3, 'homeScore' => 1, 'awayScore' => 1]]);
         self::assertResponseStatusCodeSame(Response::HTTP_CONFLICT);
     }
@@ -71,9 +52,7 @@ class MakePredictionsActionTest extends ApiTestCase
     #[TestDox('Make predictions: not found')]
     public function testNotFound(): void
     {
-        $user = $this->createUser();
-        $this->signIn($user);
-
+        $this->signIn($this->createUser());
         $nonExistentId = 1000;
         $this->sendRequest([['fixtureId' => $nonExistentId, 'homeScore' => 1, 'awayScore' => 1]]);
         self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
@@ -82,9 +61,7 @@ class MakePredictionsActionTest extends ApiTestCase
     #[TestDox('Make predictions: validation error')]
     public function testValidationError(): void
     {
-        $user = $this->createUser();
-        $this->signIn($user);
-
+        $this->signIn($this->createUser());
         $this->sendRequest([['fixtureId' => -1, 'homeScore' => -1]]);
         self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
@@ -96,7 +73,7 @@ class MakePredictionsActionTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
     }
 
-    private function sendRequest(array $content = []): Response
+    private function sendRequest(array $content = []): void
     {
         $this->client->request(
             method: Request::METHOD_POST,
@@ -105,6 +82,6 @@ class MakePredictionsActionTest extends ApiTestCase
             content: json_encode($content),
         );
 
-        return $this->client->getResponse();
+        $this->client->getResponse();
     }
 }

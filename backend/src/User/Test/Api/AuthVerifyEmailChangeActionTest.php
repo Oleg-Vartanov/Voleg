@@ -5,7 +5,6 @@ namespace App\User\Test\Api;
 use App\Core\Test\ApiTestCase;
 use App\User\Enum\UserTokenTypeEnum;
 use App\User\Service\EmailChangeService;
-use App\User\Test\Trait\UserTestTrait;
 use App\User\Test\Trait\UserTokenTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Random\RandomException;
@@ -17,7 +16,6 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 #[TestDox('Auth')]
 class AuthVerifyEmailChangeActionTest extends ApiTestCase
 {
-    use UserTestTrait;
     use UserTokenTestTrait;
 
     private EmailChangeService $emailChangeService;
@@ -29,7 +27,6 @@ class AuthVerifyEmailChangeActionTest extends ApiTestCase
     {
         parent::setUp();
         $this->tokenSetUp();
-        $this->bootUserTest();
         $this->emailChangeService = static::getContainer()->get(EmailChangeService::class);
     }
 
@@ -104,9 +101,9 @@ class AuthVerifyEmailChangeActionTest extends ApiTestCase
         $this->mockToken();
         $this->emailChangeService->requestEmailChange($user, 'new-email@mail.com');
 
-        foreach (range(1, 6) as $i) {
+        foreach (range(1, 4) as $i) {
             $this->sendRequest(['selector' => 'test', 'secret' => 'wrong-secret']);
-            if ($i === 6) {
+            if ($i === 4) {
                 self::assertResponseStatusCodeSame(Response::HTTP_TOO_MANY_REQUESTS);
             } else {
                 self::assertResponseStatusCodeSame(Response::HTTP_SEE_OTHER);

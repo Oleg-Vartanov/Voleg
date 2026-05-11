@@ -2,19 +2,24 @@
 
 namespace App\FixturePredictions\Repository;
 
+use App\Core\Repository\AbstractEntityRepository;
 use App\FixturePredictions\Entity\Competition;
 use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\Season;
 use App\User\Entity\User;
 use DateTimeImmutable;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Fixture>
+ * @extends AbstractEntityRepository<Fixture>
+ *
+ * @method Fixture|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Fixture|null findOneBy(mixed[] $criteria, mixed[] $orderBy = null)
+ * @method Fixture[] findAll()
+ * @method Fixture[] findBy(mixed[] $criteria, mixed[] $orderBy = null, $limit = null, $offset = null)
  */
-class FixtureRepository extends ServiceEntityRepository
+class FixtureRepository extends AbstractEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

@@ -28,9 +28,7 @@ class CsvReaderTest extends TestCase
         }
     }
 
-    /**
-     * @throws Exception
-     */
+    /** @throws Exception */
     #[TestDox('Write & read: success')]
     public function testWriteAndReadCsv(): void
     {

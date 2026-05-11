@@ -3,7 +3,6 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\User\Test\Trait\UserTestTrait;
 use App\User\Test\Trait\UserTokenTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,14 +11,12 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Auth')]
 class PasswordForgotActionTest extends ApiTestCase
 {
-    use UserTestTrait;
     use UserTokenTestTrait;
 
     public function setUp(): void
     {
         parent::setUp();
         $this->tokenSetUp();
-        $this->bootUserTest();
     }
 
     #[TestDox('Password forgot: success request')]
