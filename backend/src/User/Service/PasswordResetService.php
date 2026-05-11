@@ -48,7 +48,7 @@ readonly class PasswordResetService
         ]);
 
         $this->mailer->send(
-            template: 'email/password-reset.html.twig',
+            template: 'email/passwordReset.html.twig',
             to: $user->getEmail(),
             subject: 'Password Reset Request',
             context: [

@@ -75,7 +75,7 @@ readonly class AuthService
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $this->mailer->send(
-            template: 'email/sign-up.html.twig',
+            template: 'email/signUp.html.twig',
             to: $user->getEmail(),
             subject: 'Verify Sign Up',
             context: [

@@ -1,0 +1,22 @@
+{% extends 'email/layout/baseEmail.html.twig' %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block heading %}
+    Welcome!
+{% endblock %}
+
+{% block content %}
+    <p class="text">
+        To confirm your account, click the button below.
+    </p>
+
+    <p class="button-wrapper">
+        <a href="{{ verifyLink }}" class="button">Confirm account</a>
+    </p>
+
+    <p class="text-muted">
+        If you did not initiate this sign-up request, just ignore this email.
+        We apologize for any inconvenience.
+    </p>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% apply inline_css(source('email/layout/baseEmail.css')) %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>{% block title %}Email{% endblock %}</title>
+    </head>
+    <body>
+        <table class="email-container">
+            <tr>
+                <td class="email-content">
+
+                    <h2 class="heading">
+                        {% block heading %}{% endblock %}
+                    </h2>
+
+                    <p class="text">
+                        Hi {{ displayName }},
+                    </p>
+
+                    {% block content %}{% endblock %}
+
+                    <p class="text-muted">
+                        Support: {{ supportEmail }}
+                    </p>
+
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+{% endapply %}

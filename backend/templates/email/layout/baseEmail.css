@@ -1,0 +1,43 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f7f8fa;
+    padding: 24px;
+}
+
+.email-container {
+    max-width: 640px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #eceef3;
+    border-radius: 8px;
+}
+
+.email-content {
+    padding: 24px;
+}
+
+.heading {
+    margin-top: 0;
+    color: #111827;
+}
+
+.text {
+    color: #374151;
+}
+
+.text-muted {
+    color: #6b7280;
+}
+
+.button-wrapper {
+    margin: 24px 0;
+}
+
+.button {
+    display: inline-block;
+    background: #1746e0;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 12px 18px;
+    border-radius: 6px;
+}

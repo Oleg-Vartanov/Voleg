@@ -51,7 +51,7 @@ readonly class EmailChangeService
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $this->mailer->send(
-            template: 'email/email-change.html.twig',
+            template: 'email/emailChange.html.twig',
             to: $emailChange,
             subject: 'Verify Email Change',
             context: [
