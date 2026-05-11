@@ -8,7 +8,6 @@ use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\FixturePrediction;
 use App\FixturePredictions\Entity\Season;
 use App\FixturePredictions\Http\V1\Leaderboard\LeaderboardRow;
-use App\User\Entity\User;
 use DateTimeImmutable;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -49,8 +48,8 @@ class FixturePredictionRepository extends AbstractEntityRepository
                     SUM(CASE WHEN f.startAt >= :start AND f.startAt <= :end THEN fp.points ELSE 0 END)
                 )'
             )
-            ->from(User::class, 'u')
-            ->join('u.fixturePredictions', 'fp')
+            ->from(FixturePrediction::class, 'fp')
+            ->join('fp.user', 'u')
             ->join('fp.fixture', 'f');
 
         if ($competition !== null) {

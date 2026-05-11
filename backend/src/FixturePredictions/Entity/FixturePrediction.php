@@ -25,7 +25,7 @@ class FixturePrediction
     private Fixture $fixture;
 
     #[Groups([self::SHOW_PREDICTIONS])]
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'fixturePredictions')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
 

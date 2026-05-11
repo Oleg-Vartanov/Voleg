@@ -2,12 +2,9 @@
 
 namespace App\User\Entity;
 
-use App\FixturePredictions\Entity\FixturePrediction;
 use App\User\Enum\RoleEnum;
 use App\User\Repository\UserRepository;
 use DateTimeImmutable;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use InvalidArgumentException;
@@ -60,12 +57,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(options: ['default' => '1970-01-01 00:00:00'])]
     private DateTimeImmutable $createdAt;
 
-    /**
-     * @var Collection<int, FixturePrediction>
-     */
-    #[ORM\OneToMany(targetEntity: FixturePrediction::class, mappedBy: 'user')]
-    private Collection $fixturePredictions;
-
     #[Groups([self::SHOW])]
     #[ORM\Column(length: 255)]
     private string $tag;
@@ -73,7 +64,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->createdAt = new DateTimeImmutable();
-        $this->fixturePredictions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -190,14 +180,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function prePersist(): void
     {
         $this->setCreatedAt(new DateTimeImmutable());
-    }
-
-    /**
-     * @return Collection<int, FixturePrediction>
-     */
-    public function getFixturePredictions(): Collection
-    {
-        return $this->fixturePredictions;
     }
 
     public function getTag(): string
