@@ -8,6 +8,7 @@ use App\Core\ValueObject\Validator\Violation;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 abstract class ApiController extends AbstractController
 {
@@ -36,5 +37,10 @@ abstract class ApiController extends AbstractController
             'Too many attempts. Try again later.',
             Response::HTTP_TOO_MANY_REQUESTS
         );
+    }
+
+    protected function notFound(): void
+    {
+        throw new NotFoundHttpException();
     }
 }

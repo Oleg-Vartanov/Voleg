@@ -31,6 +31,7 @@ abstract class ApiTestCase extends WebTestCase
         array $userData = [],
         bool $verified = true,
         bool $isAdmin = false,
+        bool $flush = true,
     ): User {
         $index = bin2hex(random_bytes(6));
         $defaults = [
@@ -58,7 +59,7 @@ abstract class ApiTestCase extends WebTestCase
             $user->setVerified(true);
         }
 
-        static::getContainer()->get(UserRepository::class)->save($user, true);
+        $this->getService(UserRepository::class)->save($user, $flush);
 
         return $user;
     }
