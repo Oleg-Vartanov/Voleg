@@ -54,6 +54,12 @@ const index = createRouter({
               name: 'passwordChange',
               meta: { title: 'Password Change' },
               component: () => import('@/modules/user/components/PasswordChange.vue')
+            },
+            {
+              path: 'contacts',
+              name: 'contacts',
+              meta: { title: 'Contacts' },
+              component: () => import('@/modules/user/components/Contacts.vue')
             }
           ]
         },

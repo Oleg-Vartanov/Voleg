@@ -6,6 +6,13 @@ export interface ApiUser {
   createdAt: string
 }
 
+export interface ApiContact {
+  id: number
+  displayName: string
+  tag: string
+  createdAt: string
+}
+
 export interface ApiFixtureFilters {
   start: string
   end: string

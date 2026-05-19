@@ -83,6 +83,25 @@ export default {
     })
   },
 
+  listContacts(userId: number, offset = 0, limit = 100) {
+    return axios.get(`${apiBaseUrl}/users/${userId}/contacts`, {
+      headers: getHeader(),
+      params: { offset, limit }
+    })
+  },
+
+  addContact(userId: number, contactId: number) {
+    return axios.post(`${apiBaseUrl}/users/${userId}/contacts/${contactId}`, null, {
+      headers: getHeader()
+    })
+  },
+
+  deleteContact(userId: number, contactId: number) {
+    return axios.delete(`${apiBaseUrl}/users/${userId}/contacts/${contactId}`, {
+      headers: getHeader()
+    })
+  },
+
   passwordChange(params: object) {
     return axios.post(`${apiBaseUrl}/auth/password-change`, params, {
       headers: getHeader()

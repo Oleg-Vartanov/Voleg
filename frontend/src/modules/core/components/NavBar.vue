@@ -88,7 +88,7 @@ const activeMenuItem = computed((): menuItemType | null => {
             v-if="auth.user.isSignedIn"
             v-model:is-open="isProfileDropdownOpen"
             :text="auth.user.displayName ?? 'User'"
-            :active="route.name === 'profileInfo'"
+            :active="route.name === 'profileInfo' || route.name === 'contacts'"
           >
             <NavBarDropdownItem>
               <router-link
@@ -97,6 +97,16 @@ const activeMenuItem = computed((): menuItemType | null => {
                 :to="{ name: 'profileInfo' }"
               >
                 Profile
+              </router-link>
+            </NavBarDropdownItem>
+
+            <NavBarDropdownItem>
+              <router-link
+                class="dropdown-item"
+                :class="{ active: route.name === 'contacts' }"
+                :to="{ name: 'contacts' }"
+              >
+                Contacts
               </router-link>
             </NavBarDropdownItem>
 
