@@ -59,7 +59,7 @@ const index = createRouter({
               path: 'contacts',
               name: 'contacts',
               meta: { title: 'Contacts' },
-              component: () => import('@/modules/user/components/Contacts.vue')
+              component: () => import('@/modules/user/pages/ContactsPage.vue')
             }
           ]
         },

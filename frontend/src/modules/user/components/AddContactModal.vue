@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { ApiContact } from '@/modules/core/apiType'
+import type { ApiUser } from '@/modules/core/apiType'
 
 defineProps<{
   searchTag: string
-  searchUsers: ApiContact[]
+  searchUsers: ApiUser[]
   searchError: string
   isLoading: boolean
 }>()
@@ -11,17 +11,12 @@ defineProps<{
 const emit = defineEmits<{
   'update:searchTag': [value: string]
   search: []
-  add: [user: ApiContact]
+  add: [user: ApiUser]
 }>()
 </script>
 
 <template>
-  <div
-    id="addContactModal"
-    class="modal fade"
-    tabindex="-1"
-    aria-labelledby="addContactModalLabel"
-  >
+  <div id="addContactModal" class="modal fade" tabindex="-1" aria-labelledby="addContactModalLabel">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
@@ -35,7 +30,7 @@ const emit = defineEmits<{
         </div>
         <div class="modal-body">
           <div class="input-group mb-3 has-validation">
-            <span class="input-group-text rounded-0">User Tag</span>
+            <span class="input-group-text p-2">User Tag</span>
             <input
               :value="searchTag"
               type="text"
@@ -47,7 +42,7 @@ const emit = defineEmits<{
               @keyup.enter="searchTag !== '' && !isLoading && emit('search')"
             />
             <button
-              class="btn btn-outline-primary rounded-0"
+              class="btn btn-outline-primary p-2"
               type="button"
               :disabled="searchTag === '' || isLoading"
               @click="emit('search')"

@@ -8,7 +8,7 @@ export interface FixtureFilters {
   end: Ref<string | null>
   competition: Ref<CompetitionCode>
   season: Ref<number | null>
-  updateByResponse: (filters: ApiFixtureFilters) => void
+  onLoadTable: (filters: ApiFixtureFilters) => void
   reset: () => void
   routeQuery: () => object
 }
@@ -35,7 +35,7 @@ export function useFilters() {
     season.value = defaults.season
   }
 
-  function updateByResponse(filters: ApiFixtureFilters): void {
+  function onLoadTable(filters: ApiFixtureFilters): void {
     start.value = filters.start
     end.value = filters.end
     competition.value = filters.competition
@@ -56,7 +56,7 @@ export function useFilters() {
     end,
     competition,
     season,
-    updateByResponse,
+    onLoadTable,
     reset,
     routeQuery
   }

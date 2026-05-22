@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { type HeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead'
+import { type Versus } from '@/modules/fixturePredictions/composables/useVersus.ts'
+import { type Tables } from '@/modules/fixturePredictions/composables/useTables'
 import { useAuth } from '@/modules/user/stores/useAuth'
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts'
 import { inject } from 'vue'
 
-const tables: HeadToHead = inject('tables')
-const h2h: HeadToHead = inject('h2h')
+const tables = inject<Tables>('tables')!
+const vs = inject<Versus>('vs')!
 const auth = useAuth()
 const topAlerts = useTopAlerts()
 
@@ -14,23 +15,17 @@ function addUser(user) {
     topAlerts.add("It's you :)", 'info')
     return
   }
-  h2h.addUser(user)
+  vs.addUser(user)
   tables.updateLoadedTables()
 }
 </script>
 
 <template>
-  <div
-    id="go"
-    class="modal fade"
-    tabindex="-1"
-    aria-labelledby="h2hModalLabel"
-    data-bs-backdrop="static"
-  >
+  <div id="go" class="modal fade" tabindex="-1" aria-labelledby="vsModalLabel">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 id="h2hModalLabel" class="modal-title fs-5">Head To Head</h1>
+          <h1 id="vsModalLabel" class="modal-title fs-5">Versus</h1>
           <button
             type="button"
             class="btn-close"
@@ -41,10 +36,10 @@ function addUser(user) {
         <div class="modal-body">
           <ul class="list-group list-group-flush mb-3">
             <li
-              v-for="user in h2h.users.value"
+              v-for="user in vs.users.value"
               :key="user.id"
-              class="h2h-user list-group-item list-group-item-action"
-              @click="h2h.removeUser(user)"
+              class="vs-user list-group-item list-group-item-action"
+              @click="vs.removeUser(user)"
             >
               {{ user.displayName }} (@{{ user.tag }})
               <i class="bi bi-x-lg text-danger" style="font-size: 20px"></i>
@@ -52,38 +47,46 @@ function addUser(user) {
           </ul>
 
           <div class="input-group mb-3 has-validation">
-            <span id="addon-wrapping" class="input-group-text rounded-0">User Tag</span>
+            <span id="addon-wrapping" class="input-group-text p-2">User Tag</span>
             <input
-              v-model="h2h.input.value.value"
+              v-model="vs.input.value.value"
               type="text"
-              :class="[h2h.input.value.error === '' ? '' : 'is-invalid']"
+              :class="[vs.input.value.error === '' ? '' : 'is-invalid']"
               class="form-control"
-              aria-describedby="go-h2h validation-go-h2h"
+              aria-describedby="go-vs validation-go-vs"
               @keyup.enter="
-                h2h.input.value.value === '' || h2h.isLoading.value ? '' : h2h.searchUser()
+                vs.input.value.value === '' || vs.isLoading.value ? '' : vs.searchUser()
               "
             />
             <button
-              id="go-h2h"
-              :disabled="h2h.input.value.value === '' || h2h.isLoading.value"
-              class="btn btn btn-outline-primary rounded-0"
+              id="go-vs"
+              :disabled="vs.input.value.value === '' || vs.isLoading.value"
+              class="btn btn btn-outline-primary rounded-end p-2 me-2"
               type="button"
-              @click="h2h.searchUser()"
+              @click="vs.searchUser()"
             >
               Search
             </button>
-            <div id="validation-go-h2h" class="invalid-feedback">{{ h2h.input.value.error }}</div>
+            <div id="validation-go-vs" class="invalid-feedback">{{ vs.input.value.error }}</div>
+            <button
+              type="button"
+              class="btn btn btn-outline-primary rounded p-2"
+              :disabled="vs.isLoading.value"
+              @click="vs.showContacts()"
+            >
+              Contacts
+            </button>
           </div>
 
-          <div v-if="h2h.isLoading.value" class="spinner-border text-primary mt-3" role="status">
+          <div v-if="vs.isLoading.value" class="spinner-border text-primary mt-3" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
 
           <ul class="list-group list-group-flush">
             <li
-              v-for="user in h2h.searchUsers.value"
+              v-for="user in vs.searchUsers.value"
               :key="user.id"
-              class="h2h-user list-group-item list-group-item-action"
+              class="vs-user list-group-item list-group-item-action"
               @click="addUser(user)"
             >
               {{ user.displayName }} (@{{ user.tag }})
@@ -100,7 +103,7 @@ function addUser(user) {
 </template>
 
 <style scoped>
-.h2h-user {
+.vs-user {
   cursor: pointer;
 }
 </style>

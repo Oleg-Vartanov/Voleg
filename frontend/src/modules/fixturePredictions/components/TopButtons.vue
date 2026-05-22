@@ -17,6 +17,11 @@ defineProps<{
         Filters
       </button>
 
+      <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#go">
+        <i class="bi bi-people-fill"></i>
+        VS
+      </button>
+
       <button
         class="btn btn-outline-primary"
         data-bs-toggle="modal"

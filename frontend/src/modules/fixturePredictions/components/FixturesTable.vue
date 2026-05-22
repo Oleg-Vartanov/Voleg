@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import TeamLogo from '@/modules/fixturePredictions/components/TeamLogo.vue'
 import { useAuth } from '@/modules/user/stores/useAuth'
-import { type HeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead'
+import { type Versus } from '@/modules/fixturePredictions/composables/useVersus.ts'
 import { type Tables } from '@/modules/fixturePredictions/composables/useTables'
 import { type Predictions } from '@/modules/fixturePredictions/composables/usePredictions'
 import { inject } from 'vue'
 
 const tables: Tables = inject('tables')
-const h2h: HeadToHead = inject('h2h')
+const vs: Versus = inject('vs')
 const predictions: Predictions = inject('predictions')
 const auth = useAuth()
 </script>
@@ -19,11 +19,11 @@ const auth = useAuth()
         <th scope="col">Match</th>
         <th scope="col">Score</th>
         <th scope="col">
-          {{ h2h.users.value.length === 0 ? 'Prediction' : auth.user.displayName }}
+          {{ vs.users.value.length === 0 ? 'Prediction' : auth.user.displayName }}
         </th>
-        <th v-if="h2h.users.value.length === 0" scope="col">Points</th>
-        <th v-for="h2hUser in h2h.users.value" :key="h2hUser.id" scope="col">
-          {{ h2hUser.displayName }}
+        <th v-if="vs.users.value.length === 0" scope="col">Points</th>
+        <th v-for="vsUser in vs.users.value" :key="vsUser.id" scope="col">
+          {{ vsUser.displayName }}
         </th>
         <th scope="col">Start</th>
       </tr>
@@ -65,18 +65,18 @@ const auth = useAuth()
         </td>
 
         <!-- Points -->
-        <td v-if="h2h.users.value.length === 0">
+        <td v-if="vs.users.value.length === 0">
           {{ predictions.getPrediction(fixture.id, auth.user.id)?.points ?? '-' }}
         </td>
 
-        <!-- Head to Head users predictions -->
+        <!-- Versus users predictions -->
         <td
-          v-for="h2hUser in h2h.users.value"
-          :key="h2hUser.id"
-          :class="predictions.scoreColorClass(predictions.getPrediction(fixture.id, h2hUser.id))"
+          v-for="vsUser in vs.users.value"
+          :key="vsUser.id"
+          :class="predictions.scoreColorClass(predictions.getPrediction(fixture.id, vsUser.id))"
         >
-          {{ predictions.getPrediction(fixture.id, h2hUser.id)?.homeScore ?? '-' }}<br />
-          {{ predictions.getPrediction(fixture.id, h2hUser.id)?.awayScore ?? '-' }}
+          {{ predictions.getPrediction(fixture.id, vsUser.id)?.homeScore ?? '-' }}<br />
+          {{ predictions.getPrediction(fixture.id, vsUser.id)?.awayScore ?? '-' }}
         </td>
 
         <!-- Fixture Start Date -->

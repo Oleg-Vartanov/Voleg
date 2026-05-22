@@ -79,13 +79,6 @@ const filters: FixtureFilters = inject('filters')
           </div>
 
           <div class="col-auto mb-2 p-1">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#go">
-              <i class="bi bi-people-fill"></i>
-              H2H
-            </button>
-          </div>
-
-          <div class="col-auto mb-2 p-1">
             <button
               class="btn btn-outline-primary"
               type="button"

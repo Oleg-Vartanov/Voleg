@@ -1,15 +1,15 @@
 import { ref } from 'vue'
 import client from '@/modules/core/apiClient'
-import type { ApiContact } from '@/modules/core/apiType'
+import type { ApiUser } from '@/modules/core/apiType'
 import { useAuth } from '@/modules/user/stores/useAuth'
-import { useTopAlerts } from '@/modules/core/stores/useTopAlerts.ts';
+import { useTopAlerts } from '@/modules/core/stores/useTopAlerts.ts'
 
 export function useContacts() {
   const auth = useAuth()
   const topAlerts = useTopAlerts()
 
-  const users = ref<ApiContact[]>([])
-  const searchUsers = ref<ApiContact[]>([])
+  const users = ref<ApiUser[]>([])
+  const searchUsers = ref<ApiUser[]>([])
   const searchTag = ref('')
   const searchError = ref('')
   const isLoading = ref(false)
@@ -36,7 +36,7 @@ export function useContacts() {
       const response = await client.listUsers(searchTag.value)
       const contactIds = new Set(users.value.map((c) => c.id))
       searchUsers.value = response.data.filter(
-        (user: ApiContact) => user.id !== auth.user.id && !contactIds.has(user.id)
+        (user: ApiUser) => user.id !== auth.user.id && !contactIds.has(user.id)
       )
     } catch {
       searchError.value = 'Failed to search users.'
@@ -46,7 +46,7 @@ export function useContacts() {
     }
   }
 
-  async function addContact(user: ApiContact) {
+  async function addContact(user: ApiUser) {
     if (auth.user.id === null) return
     if (auth.user.id === user.id) {
       topAlerts.add("It's you :)", 'info')
@@ -66,7 +66,7 @@ export function useContacts() {
     }
   }
 
-  async function removeContact(user: ApiContact) {
+  async function removeContact(user: ApiUser) {
     if (auth.user.id === null) return
 
     isLoading.value = true

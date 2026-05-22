@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import Client from '@/modules/core/apiClient'
 import { type FixtureFilters } from '@/modules/fixturePredictions/composables/useFilters'
-import { type HeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead'
+import { type Versus } from '@/modules/fixturePredictions/composables/useVersus.ts'
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts'
 import type { Fixture, LeaderboardUser } from '@/modules/fixturePredictions/type'
 import { useRouter } from 'vue-router'
@@ -25,7 +25,7 @@ export interface Tables {
   loadLeaderboard: () => Promise<void>
 }
 
-export function useTables(filters: FixtureFilters, h2h: HeadToHead): Tables {
+export function useTables(filters: FixtureFilters, vs: Versus): Tables {
   const router = useRouter()
   const topAlerts = useTopAlerts()
 
@@ -65,12 +65,12 @@ export function useTables(filters: FixtureFilters, h2h: HeadToHead): Tables {
         filters.start.value,
         filters.end.value,
         filters.competition.value,
-        h2h.getUserIds(),
+        vs.getUserIds(),
         filters.season.value
       )
       fixtures.value = response.data.fixtures
-      filters.updateByResponse(response.data.filters)
-      h2h.updateByResponse(response)
+      filters.onLoadTable(response.data.filters)
+      vs.onLoadFixtures(response.data.filters.users)
       updateRouteQuery()
     } catch (err) {
       if (err?.response?.status === 422) {
@@ -94,7 +94,7 @@ export function useTables(filters: FixtureFilters, h2h: HeadToHead): Tables {
         filters.season.value
       )
       leaderboard.value = response.data.users
-      filters.updateByResponse(response.data.filters)
+      filters.onLoadTable(response.data.filters)
       updateRouteQuery()
     } catch (err) {
       if (err?.response?.status === 422) {
@@ -119,7 +119,7 @@ export function useTables(filters: FixtureFilters, h2h: HeadToHead): Tables {
       query: {
         ...router.query,
         ...filters.routeQuery(),
-        ...h2h.routeQuery()
+        ...vs.routeQuery()
       }
     })
   }

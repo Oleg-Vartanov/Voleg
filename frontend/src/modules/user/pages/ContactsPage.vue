@@ -2,9 +2,9 @@
 import AddContactModal from '@/modules/user/components/AddContactModal.vue'
 import { useContacts } from '@/modules/user/composables/useContacts'
 
-const contacts = useContacts();
+const contacts = useContacts()
 
-contacts.loadContacts();
+contacts.loadContacts()
 </script>
 
 <template>

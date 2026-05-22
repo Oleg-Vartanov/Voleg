@@ -4,23 +4,23 @@ import PredictionsModal from '@/modules/fixturePredictions/components/Prediction
 import LeaderboardTable from '@/modules/fixturePredictions/components/LeaderboardTable.vue'
 import FixturesTable from '@/modules/fixturePredictions/components/FixturesTable.vue'
 import FixtureFilters from '@/modules/fixturePredictions/components/FixtureFilters.vue'
-import HeadToHeadModal from '@/modules/fixturePredictions/components/HeadToHeadModal.vue'
+import VersusModal from '@/modules/fixturePredictions/components/VersusModal.vue'
 import { computed, provide } from 'vue'
 import { useTables } from '@/modules/fixturePredictions/composables/useTables'
 import TopButtons from '@/modules/fixturePredictions/components/TopButtons.vue'
 import TabNavigationButton from '@/modules/fixturePredictions/components/TabNavigationButton.vue'
 import Tab from '@/modules/fixturePredictions/components/TabView.vue'
 import { useFilters } from '@/modules/fixturePredictions/composables/useFilters'
-import { useHeadToHead } from '@/modules/fixturePredictions/composables/useHeadToHead'
+import { useVersus } from '@/modules/fixturePredictions/composables/useVersus.ts'
 import { usePredictions } from '@/modules/fixturePredictions/composables/usePredictions'
 
 const filters = useFilters()
-const h2h = useHeadToHead()
-const tables = useTables(filters, h2h)
+const vs = useVersus()
+const tables = useTables(filters, vs)
 const predictions = usePredictions(tables)
 provide('filters', filters)
 provide('tables', tables)
-provide('h2h', h2h)
+provide('vs', vs)
 provide('predictions', predictions)
 
 tables.loadFixtures()
@@ -34,10 +34,10 @@ const disablePredictions = computed(() => {
   <div class="ov-center">
     <div class="container">
       <FixtureFilters />
-      <HeadToHeadModal />
+      <VersusModal />
       <PredictionsModal />
 
-      <TopButtons :disable-predictions="disablePredictions" />
+      <TopButtons :vs="vs" :disable-predictions="disablePredictions" />
 
       <nav>
         <div id="nav-tab" class="nav nav-tabs justify-content-center" role="tablist">
