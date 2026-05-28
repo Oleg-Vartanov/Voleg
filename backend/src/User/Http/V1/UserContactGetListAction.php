@@ -25,7 +25,7 @@ use Symfony\Component\Routing\Attribute\Route;
             type: User::class,
             responseCode: Response::HTTP_OK,
             description: 'User contacts',
-            groups: [Group::PUBLIC],
+            groups: [Group::public->value],
         ),
         new NotFoundResponse('User not found'),
     ],

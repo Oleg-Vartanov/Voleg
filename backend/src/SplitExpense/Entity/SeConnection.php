@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 use InvalidArgumentException;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-#[Groups([Group::PUBLIC])]
+#[Groups([Group::public->value])]
 #[ORM\Entity(repositoryClass: SeConnectionRepository::class)]
 #[ORM\UniqueConstraint(
     name: 'UNIQ_SE_CONNECTION_PAIR',

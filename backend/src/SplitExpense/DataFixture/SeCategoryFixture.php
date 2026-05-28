@@ -10,13 +10,13 @@ class SeCategoryFixture extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
+        $category = new SeCategory(tag: 'other', title: 'Other');
+        $manager->persist($category);
+        $this->addReference('se-category', $category);
+
         foreach (range(1, 5) as $i) {
-            $manager->persist(
-                new SeCategory(
-                    tag: 'other'.$i,
-                    title: 'Other'.$i,
-                )
-            );
+            $category = new SeCategory(tag: 'other'.$i, title: 'Other'.$i);
+            $manager->persist($category);
         }
         $manager->flush();
     }

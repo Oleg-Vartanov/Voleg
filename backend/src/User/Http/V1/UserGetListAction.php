@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
             type: User::class,
             responseCode: Response::HTTP_OK,
             description: 'Users',
-            groups: [Group::PUBLIC],
+            groups: [Group::public->value],
         )
     ],
 )]

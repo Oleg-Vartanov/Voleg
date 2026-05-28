@@ -22,14 +22,14 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups([Group::PUBLIC])]
+    #[Groups([Group::public->value])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     /** @var non-empty-string */
-    #[Groups([Group::ADMIN, Group::OWNER])]
+    #[Groups([Group::admin->value, Group::owner->value])]
     #[ORM\Column(length: 180)]
     private string $email;
 
@@ -41,18 +41,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private string $password;
 
-    #[Groups([Group::PUBLIC])]
+    #[Groups([Group::public->value])]
     #[ORM\Column(length: 255)]
     private string $displayName;
 
     #[ORM\Column]
     private bool $verified = false;
 
-    #[Groups([Group::PUBLIC])]
+    #[Groups([Group::public->value])]
     #[ORM\Column(options: ['default' => '1970-01-01 00:00:00'])]
     private DateTimeImmutable $createdAt;
 
-    #[Groups([Group::PUBLIC])]
+    #[Groups([Group::public->value])]
     #[ORM\Column(length: 255)]
     private string $tag;
 

@@ -10,7 +10,7 @@ use DateTimeImmutable;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-#[Groups([Group::PUBLIC])]
+#[Groups([Group::public->value])]
 class LeaderboardFiltersResponse
 {
     #[OA\Property(example: '2024-12-31')]

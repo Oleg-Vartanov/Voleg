@@ -11,13 +11,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Table(name: "fp_team")]
 class Team
 {
-    #[Groups([Group::PUBLIC])]
+    #[Groups([Group::public->value])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups([Group::PUBLIC])]
+    #[Groups([Group::public->value])]
     #[ORM\Column(length: 100)]
     private string $name;
 
