@@ -46,6 +46,7 @@ security:
     - { path: ^/v1/fixtures, roles: IS_AUTHENTICATED_FULLY }
     - { path: ^/v1/test, roles: IS_AUTHENTICATED_FULLY }
     - { path: ^/v1/users/\d+/contacts, roles: IS_AUTHENTICATED_FULLY }
+    - { path: ^/v1/split-expense, roles: IS_AUTHENTICATED_FULLY }
     - { path: ^/v1/users, roles: IS_AUTHENTICATED_FULLY, methods: [ DELETE, PATCH ] }
     - { path: ^/v1/users, roles: PUBLIC_ACCESS, methods: [ GET ] }
     - { path: ^/v1/auth, roles: PUBLIC_ACCESS }

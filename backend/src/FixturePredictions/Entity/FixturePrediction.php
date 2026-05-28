@@ -2,6 +2,7 @@
 
 namespace App\FixturePredictions\Entity;
 
+use App\Core\Enum\Group;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\User\Entity\User;
 use Doctrine\DBAL\Types\Types;
@@ -12,9 +13,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Table(name: "fp_fixture_prediction")]
 class FixturePrediction
 {
-    public const string SHOW_PREDICTIONS = 'ShowPredictions';
-
-    #[Groups([self::SHOW_PREDICTIONS])]
+    #[Groups([Group::PUBLIC])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -24,20 +23,20 @@ class FixturePrediction
     #[ORM\JoinColumn(nullable: false)]
     private Fixture $fixture;
 
-    #[Groups([self::SHOW_PREDICTIONS])]
+    #[Groups([Group::PUBLIC])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
 
-    #[Groups([self::SHOW_PREDICTIONS])]
+    #[Groups([Group::PUBLIC])]
     #[ORM\Column(nullable: false)]
     private int $homeScore;
 
-    #[Groups([self::SHOW_PREDICTIONS])]
+    #[Groups([Group::PUBLIC])]
     #[ORM\Column(nullable: false)]
     private int $awayScore;
 
-    #[Groups([self::SHOW_PREDICTIONS])]
+    #[Groups([Group::PUBLIC])]
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $points = null;
 
@@ -51,11 +50,9 @@ class FixturePrediction
         return $this->fixture;
     }
 
-    public function setFixture(Fixture $fixture): static
+    public function setFixture(Fixture $fixture): void
     {
         $this->fixture = $fixture;
-
-        return $this;
     }
 
     public function getUser(): User
@@ -63,11 +60,9 @@ class FixturePrediction
         return $this->user;
     }
 
-    public function setUser(User $user): static
+    public function setUser(User $user): void
     {
         $this->user = $user;
-
-        return $this;
     }
 
     public function getHomeScore(): int
@@ -75,11 +70,9 @@ class FixturePrediction
         return $this->homeScore;
     }
 
-    public function setHomeScore(int $homeScore): static
+    public function setHomeScore(int $homeScore): void
     {
         $this->homeScore = $homeScore;
-
-        return $this;
     }
 
     public function getAwayScore(): int
@@ -87,11 +80,9 @@ class FixturePrediction
         return $this->awayScore;
     }
 
-    public function setAwayScore(int $awayScore): static
+    public function setAwayScore(int $awayScore): void
     {
         $this->awayScore = $awayScore;
-
-        return $this;
     }
 
     public function getPoints(): ?int
@@ -99,10 +90,8 @@ class FixturePrediction
         return $this->points;
     }
 
-    public function setPoints(?int $points): static
+    public function setPoints(?int $points): void
     {
         $this->points = $points;
-
-        return $this;
     }
 }

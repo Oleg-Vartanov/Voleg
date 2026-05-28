@@ -2,6 +2,7 @@
 
 namespace App\FixturePredictions\Http\V1\Predictions;
 
+use App\Core\Enum\Group;
 use App\FixturePredictions\Entity\Competition;
 use App\FixturePredictions\Entity\Season;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
@@ -10,11 +11,9 @@ use DateTimeImmutable;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-#[Groups([PredictionsFiltersResponse::GROUP])]
+#[Groups([Group::PUBLIC])]
 class PredictionsFiltersResponse
 {
-    public const string GROUP = 'filters';
-
     #[OA\Property(example: '2024-12-31')]
     public ?string $start;
 

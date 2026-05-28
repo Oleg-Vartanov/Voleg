@@ -11,3 +11,8 @@ api.v1.User:
   resource: ../src/User/Http/V1/
   type: attribute
   prefix: /v1
+
+api.v1.SplitExpense:
+  resource: ../src/SplitExpense/Http/V1/
+  type: attribute
+  prefix: /v1

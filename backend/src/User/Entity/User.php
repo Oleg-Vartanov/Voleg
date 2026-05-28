@@ -2,6 +2,7 @@
 
 namespace App\User\Entity;
 
+use App\Core\Enum\Group;
 use App\User\Enum\RoleEnum;
 use App\User\Repository\UserRepository;
 use DateTimeImmutable;
@@ -21,20 +22,14 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    public const string SHOW = 'show';
-    public const string SHOW_ADMIN = 'show:admin';
-    public const string SHOW_OWNER = 'show:owner';
-    /** @var string[] */
-    public const array SHOW_ALL = [self::SHOW, self::SHOW_ADMIN, self::SHOW_OWNER];
-
-    #[Groups([self::SHOW])]
+    #[Groups([Group::PUBLIC])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     /** @var non-empty-string */
-    #[Groups([self::SHOW_ADMIN, self::SHOW_OWNER])]
+    #[Groups([Group::ADMIN, Group::OWNER])]
     #[ORM\Column(length: 180)]
     private string $email;
 
@@ -46,18 +41,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private string $password;
 
-    #[Groups([self::SHOW])]
+    #[Groups([Group::PUBLIC])]
     #[ORM\Column(length: 255)]
     private string $displayName;
 
     #[ORM\Column]
     private bool $verified = false;
 
-    #[Groups([self::SHOW])]
+    #[Groups([Group::PUBLIC])]
     #[ORM\Column(options: ['default' => '1970-01-01 00:00:00'])]
     private DateTimeImmutable $createdAt;
 
-    #[Groups([self::SHOW])]
+    #[Groups([Group::PUBLIC])]
     #[ORM\Column(length: 255)]
     private string $tag;
 

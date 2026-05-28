@@ -4,11 +4,11 @@ namespace App\FixturePredictions\Http\V1\Leaderboard;
 
 use App\Core\Documentation\Attribute\Response\UnauthorizedResponse;
 use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
+use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
-use App\User\Entity\User;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,7 +32,7 @@ use Symfony\Component\Routing\Attribute\Route;
                 new OA\Property(
                     property: 'users',
                     type: 'array',
-                    items: new OA\Items(ref: new Model(type: LeaderboardRow::class, groups: User::SHOW_ALL))
+                    items: new OA\Items(ref: new Model(type: LeaderboardRow::class, groups: [Group::PUBLIC]))
                 ),
             ]),
         ),
@@ -48,8 +48,6 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 class LeaderboardGetAction extends ApiController
 {
-    public const string GROUP = 'leaderboard';
-
     public function __construct(
         private readonly CompetitionRepository $competitionRepository,
         private readonly SeasonRepository $seasonRepository,
@@ -86,6 +84,6 @@ class LeaderboardGetAction extends ApiController
         return $this->json([
             'filters' => $filters,
             'users' => $leaderboard,
-        ], context: ['groups' => [User::SHOW, self::GROUP]]);
+        ], context: ['groups' => [Group::PUBLIC]]);
     }
 }

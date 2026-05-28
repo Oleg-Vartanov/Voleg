@@ -4,6 +4,7 @@ namespace App\FixturePredictions\Http\V1\Predictions;
 
 use App\Core\Documentation\Attribute\Response\UnauthorizedResponse;
 use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
+use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
 use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\FixturePrediction;
@@ -95,13 +96,7 @@ class PredictionsGetAction extends ApiController
                 'filters' => $filters,
                 'fixtures' => $fixtures,
             ],
-            context: [
-                'groups' => [
-                    FixturePrediction::SHOW_PREDICTIONS,
-                    User::SHOW,
-                    PredictionsFiltersResponse::GROUP,
-                ],
-            ],
+            context: ['groups' => [Group::PUBLIC]],
         );
     }
 }

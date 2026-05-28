@@ -2,25 +2,37 @@
 
 namespace App\User\Http\V1\Trait;
 
+use App\Core\Enum\Group;
 use App\User\Entity\User;
 use App\User\Enum\RoleEnum;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
+
+/**
+ * @method User|null getUser()
+ */
 trait UserControllerTrait
 {
     protected function checkModifyAccess(int $id): void
     {
-        if (!$this->isGranted(RoleEnum::ROLE_ADMIN->value) && !$this->isOwner($id)) {
+        if (!$this->isAdmin() && !$this->isOwner($id)) {
             throw new AccessDeniedHttpException();
         }
     }
 
-    protected function isOwner(int $userId): bool
+    protected function isAdmin(): bool
     {
-        /** @var User|null $user */
-        $user = $this->getUser();
+        return $this->isGranted(RoleEnum::ROLE_ADMIN->value);
+    }
 
-        return $user?->getId() === $userId;
+    protected function isCurrentUser(int $id): bool
+    {
+        return $this->getUser()?->getId() === $id;
+    }
+
+    protected function isOwner(int $id): bool
+    {
+        return $this->isCurrentUser($id);
     }
 
     /**
@@ -28,12 +40,12 @@ trait UserControllerTrait
      */
     protected function showGroups(?int $userIdToShow = null): array
     {
-        $groups = [User::SHOW];
+        $groups = [Group::PUBLIC];
         if ($this->isGranted(RoleEnum::ROLE_ADMIN->value)) {
-            $groups[] = User::SHOW_ADMIN;
+            $groups[] = Group::ADMIN;
         }
         if (!is_null($userIdToShow) && $this->isOwner($userIdToShow)) {
-            $groups[] = User::SHOW_OWNER;
+            $groups[] = Group::OWNER;
         }
 
         return $groups;

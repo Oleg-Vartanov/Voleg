@@ -21,6 +21,11 @@ doctrine:
         type: attribute
         dir: '%kernel.project_dir%/src/User/Entity'
         prefix: 'App\User\Entity'
+      SplitExpense:
+        is_bundle: false
+        type: attribute
+        dir: '%kernel.project_dir%/src/SplitExpense/Entity'
+        prefix: 'App\SplitExpense\Entity'
     dql:
       string_functions:
         regexp: DoctrineExtensions\Query\Mysql\Regexp

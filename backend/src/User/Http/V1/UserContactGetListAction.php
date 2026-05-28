@@ -2,13 +2,14 @@
 
 namespace App\User\Http\V1;
 
+use App\Core\Documentation\Attribute\Response\ArrayResponse;
 use App\Core\Documentation\Attribute\Response\NotFoundResponse;
+use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
 use App\User\Entity\User;
 use App\User\Http\V1\Trait\UserControllerTrait;
 use App\User\Repository\UserContactRepository;
 use App\User\Repository\UserRepository;
-use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,13 +21,11 @@ use Symfony\Component\Routing\Attribute\Route;
     security: [['Bearer' => []]],
     tags: ['User'],
     responses: [
-        new OA\Response(
-            response: Response::HTTP_OK,
+        new ArrayResponse(
+            type: User::class,
+            responseCode: Response::HTTP_OK,
             description: 'User contacts',
-            content: new OA\JsonContent(
-                type: 'array',
-                items: new OA\Items(ref: new Model(type: User::class, groups: [User::SHOW]))
-            )
+            groups: [Group::PUBLIC],
         ),
         new NotFoundResponse('User not found'),
     ],

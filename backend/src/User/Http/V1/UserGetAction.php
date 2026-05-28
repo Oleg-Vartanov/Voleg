@@ -3,6 +3,7 @@
 namespace App\User\Http\V1;
 
 use App\Core\Documentation\Attribute\Response\NotFoundResponse;
+use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
 use App\User\Entity\User;
 use App\User\Http\V1\Trait\UserControllerTrait;
@@ -21,7 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
         new OA\Response(
             response: Response::HTTP_OK,
             description: 'User',
-            content: new Model(type: User::class, groups: User::SHOW_ALL),
+            content: new Model(type: User::class, groups: Group::ALL),
         ),
         new NotFoundResponse('User not found'),
     ],

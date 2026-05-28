@@ -1,13 +1,11 @@
 <?php
 
-namespace App\User\Http\V1;
+namespace App\SplitExpense\Http\V1;
 
 use App\Core\Documentation\Attribute\Response\ArrayResponse;
-use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
-use App\User\Entity\User;
-use App\User\Http\V1\Trait\UserControllerTrait;
-use App\User\Repository\UserRepository;
+use App\SplitExpense\Entity\SeCategory;
+use App\SplitExpense\Repository\SeCategoryRepository;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,33 +14,30 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Get(
-    tags: ['User'],
+    security: [['Bearer' => []]],
+    tags: ['Split Expense'],
     responses: [
         new ArrayResponse(
-            type: User::class,
+            type: SeCategory::class,
             responseCode: Response::HTTP_OK,
-            description: 'Users',
-            groups: [Group::PUBLIC],
+            description: 'Categories',
         )
     ],
 )]
-#[Route('/users', name: 'user_get_list', methods: [Request::METHOD_GET])]
-class UserGetListAction extends ApiController
+#[Route('/split-expense/categories', name: 'se_category_get_list', methods: [Request::METHOD_GET])]
+class SeCategoryGetListAction extends ApiController
 {
-    use UserControllerTrait;
-
-    public function __construct(private readonly UserRepository $userRepository)
-    {
+    public function __construct(
+        private readonly SeCategoryRepository $categoryRepository,
+    ) {
     }
 
     public function __invoke(
-        #[MapQueryParameter] ?string $tag,
         #[MapQueryParameter] int $offset = 0,
         #[MapQueryParameter] int $limit = 100,
     ): JsonResponse {
         return $this->json(
-            $this->userRepository->list($tag, $offset, $limit),
-            context: ['groups' => $this->showGroups()]
+            $this->categoryRepository->list($offset, $limit),
         );
     }
 }

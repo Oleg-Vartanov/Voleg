@@ -8,6 +8,7 @@ use App\Core\ValueObject\Validator\Violation;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 abstract class ApiController extends AbstractController
@@ -42,5 +43,10 @@ abstract class ApiController extends AbstractController
     protected function notFound(): void
     {
         throw new NotFoundHttpException();
+    }
+
+    protected function accessDenied(): void
+    {
+        throw new AccessDeniedHttpException();
     }
 }

@@ -3,8 +3,10 @@
 namespace App\User\Http\V1;
 
 use App\Core\Documentation\Attribute\Response\AccessDeniedResponse;
+use App\Core\Documentation\Attribute\Response\ItemResponse;
 use App\Core\Documentation\Attribute\Response\NotFoundResponse;
 use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
+use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
 use App\User\Entity\User;
 use App\User\Http\V1\Request\UpdateDto;
@@ -12,7 +14,6 @@ use App\User\Http\V1\Request\UserDto;
 use App\User\Http\V1\Trait\UserControllerTrait;
 use App\User\Repository\UserRepository;
 use App\User\Service\UserService;
-use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Random\RandomException;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,10 +27,11 @@ use Symfony\Component\Routing\Attribute\Route;
     security: [['Bearer' => []]],
     tags: ['User'],
     responses: [
-        new OA\Response(
-            response: Response::HTTP_OK,
+        new ItemResponse(
+            type: User::class,
+            responseCode: Response::HTTP_OK,
             description: 'User Updated',
-            content: new Model(type: User::class, groups: User::SHOW_ALL),
+            groups: Group::ALL,
         ),
         new AccessDeniedResponse(),
         new NotFoundResponse('User not found'),

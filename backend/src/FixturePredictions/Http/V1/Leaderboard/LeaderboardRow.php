@@ -2,10 +2,11 @@
 
 namespace App\FixturePredictions\Http\V1\Leaderboard;
 
+use App\Core\Enum\Group;
 use App\User\Entity\User;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-#[Groups([LeaderboardGetAction::GROUP])]
+#[Groups([Group::PUBLIC])]
 class LeaderboardRow
 {
     public function __construct(
