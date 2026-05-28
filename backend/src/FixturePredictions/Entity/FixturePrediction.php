@@ -13,7 +13,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Table(name: "fp_fixture_prediction")]
 class FixturePrediction
 {
-    #[Groups([Group::PUBLIC])]
+    #[Groups([Group::public->value])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -23,20 +23,20 @@ class FixturePrediction
     #[ORM\JoinColumn(nullable: false)]
     private Fixture $fixture;
 
-    #[Groups([Group::PUBLIC])]
+    #[Groups([Group::public->value])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
 
-    #[Groups([Group::PUBLIC])]
+    #[Groups([Group::public->value])]
     #[ORM\Column(nullable: false)]
     private int $homeScore;
 
-    #[Groups([Group::PUBLIC])]
+    #[Groups([Group::public->value])]
     #[ORM\Column(nullable: false)]
     private int $awayScore;
 
-    #[Groups([Group::PUBLIC])]
+    #[Groups([Group::public->value])]
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $points = null;
 

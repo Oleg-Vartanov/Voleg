@@ -7,7 +7,7 @@ use App\SplitExpense\Repository\SeCategoryRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-#[Groups([Group::PUBLIC])]
+#[Groups([Group::public->value])]
 #[ORM\Entity(repositoryClass: SeCategoryRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_SE_CATEGORY_TAG', fields: ['tag'])]
 class SeCategory

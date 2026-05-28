@@ -2,27 +2,26 @@
 
 namespace App\User\Http\V1;
 
+use App\Core\Documentation\Attribute\Response\ItemResponse;
 use App\Core\Documentation\Attribute\Response\NotFoundResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
 use App\User\Entity\User;
 use App\User\Http\V1\Trait\UserControllerTrait;
 use App\User\Repository\UserRepository;
-use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Get(
     tags: ['User'],
     responses: [
-        new OA\Response(
-            response: Response::HTTP_OK,
+        new ItemResponse(
+            type: User::class,
             description: 'User',
-            content: new Model(type: User::class, groups: Group::ALL),
+            groups: [Group::class, 'values']
         ),
         new NotFoundResponse('User not found'),
     ],

@@ -11,7 +11,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-#[Groups([Group::PUBLIC])]
+#[Groups([Group::public->value])]
 #[ORM\Entity(repositoryClass: FixtureRepository::class)]
 #[ORM\Table(name: "fp_fixture")]
 class Fixture

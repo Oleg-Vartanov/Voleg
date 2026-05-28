@@ -2,15 +2,22 @@
 
 namespace App\Core\Enum;
 
-/**
- * Serializer groups for API access.
- */
-class Group
-{
-    public const string PUBLIC = 'public';
-    public const string ADMIN = 'admin';
-    public const string OWNER = 'owner';
+use App\Core\Trait\EnumExtender;
 
-    /** @var string[] */
-    public const array ALL = [self::PUBLIC, self::ADMIN, self::OWNER];
+/**
+ * Serialization group.
+ */
+enum Group: string
+{
+    use EnumExtender;
+
+    /** Access */
+    case public = 'public';
+    case admin = 'admin';
+    case owner = 'owner';
+
+    /** Action */
+    case read = 'read';
+    case update = 'update';
+    case create = 'create';
 }

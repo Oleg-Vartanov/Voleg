@@ -6,7 +6,7 @@ use App\Core\Enum\Group;
 use App\User\Entity\User;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-#[Groups([Group::PUBLIC])]
+#[Groups([Group::public->value])]
 class LeaderboardRow
 {
     public function __construct(

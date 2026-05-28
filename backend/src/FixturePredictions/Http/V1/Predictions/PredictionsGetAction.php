@@ -7,7 +7,6 @@ use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
 use App\FixturePredictions\Entity\Fixture;
-use App\FixturePredictions\Entity\FixturePrediction;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\FixtureRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
@@ -96,7 +95,7 @@ class PredictionsGetAction extends ApiController
                 'filters' => $filters,
                 'fixtures' => $fixtures,
             ],
-            context: ['groups' => [Group::PUBLIC]],
+            context: ['groups' => [Group::public->value]],
         );
     }
 }

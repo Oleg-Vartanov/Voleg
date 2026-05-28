@@ -3,10 +3,11 @@
 namespace App\SplitExpense\Http\V1;
 
 use App\Core\Documentation\Attribute\Response\ArrayResponse;
+use App\Core\Documentation\Attribute\Response\UnauthorizedResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
-use App\SplitExpense\Entity\SeConnection;
-use App\SplitExpense\Repository\SeConnectionRepository;
+use App\SplitExpense\Entity\SeExpense;
+use App\SplitExpense\Repository\SeExpenseRepository;
 use App\User\Entity\User;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,17 +21,18 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
     tags: ['Split Expense'],
     responses: [
         new ArrayResponse(
-            type: SeConnection::class,
-            description: 'Split expense connections',
-            groups: [Group::public->value]
+            type: SeExpense::class,
+            description: 'Split expenses',
+            groups: [Group::public->value],
         ),
+        new UnauthorizedResponse(),
     ],
 )]
-#[Route('/split-expense/connections', name: 'se_connection_get_list', methods: [Request::METHOD_GET])]
-class SeConnectionGetListAction extends ApiController
+#[Route('/split-expense/expenses', name: 'se_expense_get_list', methods: [Request::METHOD_GET])]
+class SeExpenseGetListAction extends ApiController
 {
     public function __construct(
-        private readonly SeConnectionRepository $conRepository,
+        private readonly SeExpenseRepository $expenseRepository,
     ) {
     }
 
@@ -40,7 +42,7 @@ class SeConnectionGetListAction extends ApiController
         #[MapQueryParameter] int $limit = 100,
     ): JsonResponse {
         return $this->json(
-            $this->conRepository->listForUser($user, $offset, $limit),
+            $this->expenseRepository->listForUser($user, $offset, $limit),
             context: ['groups' => Group::public->value],
         );
     }

@@ -15,6 +15,8 @@ class CurrencyFixture extends Fixture
         $manager->persist($usd);
         $manager->persist($eur);
 
+        $this->addReference('currency-USD', $usd);
+
         foreach (range(1, 50) as $i) {
             $manager->persist(new Currency('C'.$i, 2, 'S'.$i));
         }

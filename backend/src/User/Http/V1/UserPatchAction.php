@@ -31,7 +31,7 @@ use Symfony\Component\Routing\Attribute\Route;
             type: User::class,
             responseCode: Response::HTTP_OK,
             description: 'User Updated',
-            groups: Group::ALL,
+            groups: [Group::class, 'values'],
         ),
         new AccessDeniedResponse(),
         new NotFoundResponse('User not found'),

@@ -32,7 +32,12 @@ use Symfony\Component\Routing\Attribute\Route;
                 new OA\Property(
                     property: 'users',
                     type: 'array',
-                    items: new OA\Items(ref: new Model(type: LeaderboardRow::class, groups: [Group::PUBLIC]))
+                    items: new OA\Items(
+                        ref: new Model(
+                            type: LeaderboardRow::class,
+                            groups: [Group::public->value]
+                        )
+                    )
                 ),
             ]),
         ),
@@ -84,6 +89,6 @@ class LeaderboardGetAction extends ApiController
         return $this->json([
             'filters' => $filters,
             'users' => $leaderboard,
-        ], context: ['groups' => [Group::PUBLIC]]);
+        ], context: ['groups' => [Group::public->value]]);
     }
 }
