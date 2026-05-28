@@ -11,12 +11,12 @@ use OpenApi\Attributes\Response;
 class MessageResponse extends Response
 {
     public function __construct(
-        int $responseCode = 200,
+        int $code = 200,
         string $description = 'Success',
         ?string $message = null,
     ) {
         parent::__construct(
-            response: $responseCode,
+            response: $code,
             description: $description,
             content: new OA\JsonContent(
                 ref: new Model(type: MessageResponseDto::class),

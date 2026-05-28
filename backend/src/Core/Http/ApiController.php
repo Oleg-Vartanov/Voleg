@@ -15,9 +15,9 @@ abstract class ApiController extends AbstractController
 {
     protected function messageResponse(
         string $message = '',
-        int $responseCode = Response::HTTP_OK
+        int $code = Response::HTTP_OK
     ): JsonResponse {
-        return $this->json(new MessageResponse($message), $responseCode);
+        return $this->json(new MessageResponse($message), $code);
     }
 
     /**

@@ -3,31 +3,34 @@
 namespace App\SplitExpense\Test\Api;
 
 use App\Core\Test\ApiTestCase;
+use App\User\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 #[TestDox('Split Expense')]
-class SeCategoryGetListActionTest extends ApiTestCase
+class SeConnectionGetListActionTest extends ApiTestCase
 {
-    #[TestDox('Categories GET list: success')]
+    /**
+     * @throws ORMException
+     */
+    #[TestDox('Connection GET list: success')]
     public function testSuccess(): void
     {
-        $this->signIn($this->createUser());
+        $em = $this->getService(EntityManagerInterface::class);
+        $user = $em->getReference('user1', User::class);
+
+        $this->signIn($user);
         $response = $this->sendRequest();
 
         $data = json_decode($response->getContent(), true);
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
-        self::assertCount(5, $data);
-
-        /** @see \App\SplitExpense\DataFixture\SeCategoryFixture */
-        self::assertSame('other1', $data[0]['tag']);
-        self::assertSame('Other1', $data[0]['title']);
-        self::assertSame('other5', $data[4]['tag']);
-        self::assertSame('Other5', $data[4]['title']);
+        self::assertCount(9, $data);
     }
 
-    #[TestDox('Categories GET list: unauthorized')]
+    #[TestDox('Connection GET list: unauthorized')]
     public function testUnauthorized(): void
     {
         $this->sendRequest();
@@ -38,7 +41,7 @@ class SeCategoryGetListActionTest extends ApiTestCase
     {
         $this->client->request(
             method: Request::METHOD_GET,
-            uri: $this->router->generate('se_category_get_list'),
+            uri: $this->router->generate('se_connection_get_list'),
         );
 
         return $this->client->getResponse();

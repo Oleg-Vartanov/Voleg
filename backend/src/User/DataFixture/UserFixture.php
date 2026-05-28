@@ -40,6 +40,29 @@ class UserFixture extends Fixture
             ],
         ];
 
+        foreach (range(1, 10) as $i) {
+            $users[] = [
+                'email' => "user{$i}@user.com",
+                'password' => self::DEFAULT_PASSWORD,
+                'displayName' => "User {$i}",
+                'tag' => "user{$i}",
+                'roles' => [RoleEnum::ROLE_USER->value],
+                'verified' => true,
+                'reference' => "user{$i}",
+            ];
+        }
+
+        foreach (range(1, 100) as $i) {
+            $users[] = [
+                'email' => "user{$i}@user.com",
+                'password' => self::DEFAULT_PASSWORD,
+                'displayName' => "User {$i}",
+                'tag' => "user{$i}",
+                'roles' => [RoleEnum::ROLE_USER->value],
+                'verified' => true,
+            ];
+        }
+
         foreach ($users as $user) {
             $u = new User();
             $u->setEmail($user['email']);
@@ -51,7 +74,9 @@ class UserFixture extends Fixture
 
             $manager->persist($u);
 
-            $this->addReference($user['reference'], $u);
+            if (isset($user['reference'])) {
+                $this->addReference($user['reference'], $u);
+            }
         }
 
         $manager->flush();
