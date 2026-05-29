@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Post(
     security: [['Bearer' => []]],
-    tags: ['Authorization'],
+    tags: ['User: Auth'],
     responses: [
         new MessageResponse(Response::HTTP_OK, PasswordResetAction::MESSAGE),
         new MessageResponse(Response::HTTP_FORBIDDEN, PasswordResetAction::MESSAGE_INVALID),

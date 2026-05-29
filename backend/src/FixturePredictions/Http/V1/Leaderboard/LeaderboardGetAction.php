@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Get(
     security: [['Bearer' => []]],
-    tags: ['Fixtures'],
+    tags: ['FixturePredictions'],
     responses: [
         new OA\Response(
             response: Response::HTTP_OK,

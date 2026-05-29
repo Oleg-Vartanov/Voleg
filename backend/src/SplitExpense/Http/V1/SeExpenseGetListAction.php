@@ -18,7 +18,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[OA\Get(
     security: [['Bearer' => []]],
-    tags: ['Split Expense'],
+    tags: ['Split Expense: Expense'],
     responses: [
         new ArrayResponse(
             type: SeExpense::class,

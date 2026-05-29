@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Get(
     security: [['Bearer' => []]],
-    tags: ['User Contacts'],
+    tags: ['User: Contacts'],
     responses: [
         new ArrayResponse(
             type: User::class,

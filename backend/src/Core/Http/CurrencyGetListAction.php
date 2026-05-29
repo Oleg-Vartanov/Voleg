@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Get(
     security: [['Bearer' => []]],
-    tags: ['Split Expense'],
+    tags: ['Core'],
     responses: [
         new ArrayResponse(type: Currency::class, description: 'Currencies'),
         new UnauthorizedResponse(),

@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Delete(
     security: [['Bearer' => []]],
-    tags: ['User Contacts'],
+    tags: ['User: Contacts'],
     responses: [
         new MessageResponse(Response::HTTP_NO_CONTENT, 'Contact removed'),
         new AccessDeniedResponse(),

@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Get(
-    tags: ['Authorization'],
+    tags: ['User: Auth'],
     responses: [
         new OA\Response(
             response: Response::HTTP_SEE_OTHER,

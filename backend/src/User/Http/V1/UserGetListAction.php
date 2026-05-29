@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Get(
-    tags: ['User'],
+    tags: ['User: Users'],
     responses: [
         new ArrayResponse(
             type: User::class,

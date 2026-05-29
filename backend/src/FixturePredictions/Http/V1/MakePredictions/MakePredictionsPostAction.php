@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Post(
     security: [['Bearer' => []]],
-    tags: ['Fixtures'],
+    tags: ['FixturePredictions'],
     responses: [
         new MessageResponse(Response::HTTP_CREATED, 'Success'),
         new UnauthorizedResponse(),

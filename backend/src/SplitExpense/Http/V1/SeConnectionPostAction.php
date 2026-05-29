@@ -27,7 +27,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[OA\Post(
     security: [['Bearer' => []]],
-    tags: ['Split Expense'],
+    tags: ['Split Expense: Connection'],
     responses: [
         new ItemResponse(
             type: SeConnection::class,

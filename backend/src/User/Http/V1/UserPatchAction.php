@@ -25,7 +25,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Patch(
     security: [['Bearer' => []]],
-    tags: ['User'],
+    tags: ['User: Users'],
     responses: [
         new ItemResponse(
             type: User::class,

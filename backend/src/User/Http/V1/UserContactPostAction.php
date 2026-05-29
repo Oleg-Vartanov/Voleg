@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Post(
     security: [['Bearer' => []]],
-    tags: ['User Contacts'],
+    tags: ['User: Contacts'],
     responses: [
         new MessageResponse(Response::HTTP_OK, 'Contact added'),
         new MessageResponse(Response::HTTP_BAD_REQUEST, 'Invalid data'),

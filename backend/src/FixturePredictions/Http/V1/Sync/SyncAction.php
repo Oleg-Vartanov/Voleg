@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Post(
     security: [['Bearer' => []]],
-    tags: ['Fixtures'],
+    tags: ['FixturePredictions'],
     responses: [
         new MessageResponse(description: 'Synced'),
         new UnauthorizedResponse(),

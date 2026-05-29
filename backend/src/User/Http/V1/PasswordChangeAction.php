@@ -21,7 +21,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[OA\Post(
     security: [['Bearer' => []]],
-    tags: ['Authorization'],
+    tags: ['User: Auth'],
     responses: [
         new MessageResponse(Response::HTTP_OK, PasswordChangeAction::MESSAGE),
         new ValidationErrorResponse(),

@@ -23,7 +23,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[OA\Get(
     security: [['Bearer' => []]],
-    tags: ['Fixtures'],
+    tags: ['FixturePredictions'],
     responses: [
         new OA\Response(
             response: Response::HTTP_OK,

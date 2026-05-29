@@ -18,7 +18,7 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Post(
-    tags: ['Authorization'],
+    tags: ['User: Auth'],
     responses: [
         new MessageResponse(
             Response::HTTP_CREATED,

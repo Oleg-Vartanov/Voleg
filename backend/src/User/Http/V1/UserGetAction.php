@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Get(
-    tags: ['User'],
+    tags: ['User: Users'],
     responses: [
         new ItemResponse(
             type: User::class,

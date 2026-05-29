@@ -16,7 +16,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[OA\Delete(
     security: [['Bearer' => []]],
-    tags: ['Split Expense'],
+    tags: ['Split Expense: Expense'],
     responses: [
         new MessageResponse(Response::HTTP_NO_CONTENT, 'Expense deleted'),
         new NotFoundResponse('Expense not found'),

@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Delete(
     security: [['Bearer' => []]],
-    tags: ['User'],
+    tags: ['User: Users'],
     responses: [
         new MessageResponse(Response::HTTP_NO_CONTENT, 'Deleted'),
         new AccessDeniedResponse(),

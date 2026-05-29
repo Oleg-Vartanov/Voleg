@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Attribute\Route;
             ]
         ),
     ),
-    tags: ['Authorization'],
+    tags: ['User: Auth'],
     responses: [
         new OA\Response(
             response: Response::HTTP_OK,
