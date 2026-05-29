@@ -66,28 +66,38 @@ abstract class ApiTestCase extends WebTestCase
 
     protected function signIn(User $user): User
     {
-        $this->client->request(
+        $this->client->jsonRequest(
             method: Request::METHOD_POST,
             uri: $this->router->generate('sign_in'),
-            server: ['CONTENT_TYPE' => 'application/json'],
-            content: json_encode([
+            parameters: [
                 'email' => $user->getEmail(),
                 'password' => UserFixture::DEFAULT_PASSWORD,
-            ])
+            ]
         );
 
-        $response = $this->client->getResponse();
-
-        if ($response->getStatusCode() !== 200) {
-            throw new RuntimeException('Sign in fail: ' . $response->getContent());
+        if ($this->getResponseStatusCode() !== 200) {
+            throw new RuntimeException('Sign in fail: ' . $this->getResponseContent());
         }
 
-        $data = json_decode($response->getContent(), true);
-
-        if ($token = $data['token'] ?? null) {
+        if ($token = $this->getResponseData()['token'] ?? null) {
             $this->client->setServerParameter('HTTP_AUTHORIZATION', sprintf('Bearer %s', $token));
         }
 
         return $user;
+    }
+
+    public function getResponseStatusCode(): int
+    {
+        return $this->client->getResponse()->getStatusCode();
+    }
+
+    public function getResponseContent(): string
+    {
+        return $this->client->getResponse()->getContent();
+    }
+
+    public function getResponseData(): mixed
+    {
+        return json_decode($this->getResponseContent(), true);
     }
 }

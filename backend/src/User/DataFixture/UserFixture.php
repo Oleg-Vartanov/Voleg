@@ -51,8 +51,7 @@ class UserFixture extends Fixture
                 'reference' => "user{$i}",
             ];
         }
-
-        foreach (range(1, 100) as $i) {
+        foreach (range(11, 100) as $i) {
             $users[] = [
                 'email' => "user{$i}@user.com",
                 'password' => self::DEFAULT_PASSWORD,

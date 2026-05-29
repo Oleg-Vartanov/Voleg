@@ -5,7 +5,6 @@ namespace App\User\Test\Api;
 use App\Core\Test\ApiTestCase;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 #[TestDox('User')]
 class UserGetListActionTest extends ApiTestCase
@@ -15,32 +14,24 @@ class UserGetListActionTest extends ApiTestCase
     {
         $user = $this->createUser();
 
-        $response = $this->sendRequest(
+        $this->sendRequest(
             $user->getTag()
         );
 
-        $data = json_decode($response->getContent(), true);
-        $responseUser = $data[0];
-
         self::assertResponseIsSuccessful();
-        self::assertEquals($user->getTag(), $responseUser['tag']);
+        self::assertEquals($user->getTag(), $this->getResponseData()[0]['tag']);
     }
 
-    private function sendRequest(
-        ?string $tag,
-        int $offset = 0,
-        int $limit = 100,
-    ): Response {
+    private function sendRequest(?string $tag): void
+    {
         $this->client->request(
             method: Request::METHOD_GET,
             uri: $this->router->generate('user_get_list'),
             parameters: [
                 'tag' => $tag,
-                'offset' => $offset,
-                'limit' => $limit,
+                'offset' => 0,
+                'limit' => 100,
             ]
         );
-
-        return $this->client->getResponse();
     }
 }

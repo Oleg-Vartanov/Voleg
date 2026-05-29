@@ -3,7 +3,6 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\User\Repository\UserRepository;
 use App\User\Test\Trait\UserTokenTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,57 +13,49 @@ class AuthSignUpActionTest extends ApiTestCase
 {
     use UserTokenTestTrait;
 
-    private UserRepository $userRepository;
-
     public function setUp(): void
     {
         parent::setUp();
         $this->tokenSetUp();
-        $this->userRepository = static::getContainer()->get(UserRepository::class);
     }
 
     #[TestDox('Sign up action: success')]
     public function testSuccess(): void
     {
-        $id = ($this->userRepository->lastId() ?? 0) + 1;
-
         $testUser = [
-            'email' => 'user' . $id . '@example.com',
+            'email' => 'user-auth-test@example.com',
             'password' => '!Qwerty1',
             'displayName' => 'John Doe',
-            'tag' => 'user' . $id,
+            'tag' => 'user-auth-test',
             'code' => 'sign-up-code',
         ];
 
-        $this->mockToken('selector' . $id, 'secret' . $id);
-        $response = $this->signUpRequest($testUser);
+        $this->mockToken('selector-auth-test', 'secret-auth-test');
+        $this->signUpRequest($testUser);
 
-        self::assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
-        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'selector' . $id);
-        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'secret' . $id);
+        self::assertResponseStatusCodeSame(Response::HTTP_CREATED);;
+        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'selector-auth-test');
+        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'secret-auth-test');
     }
 
     #[TestDox('Sign up action: validation error')]
     public function testValidationError(): void
     {
-        $response = $this->signUpRequest([
+        $this->signUpRequest([
             'email' => 'john.doe',
             'password' => 'qwert y',
             'displayName' => '',
         ]);
 
-        self::assertEquals(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);;
     }
 
-    private function signUpRequest(array $array): Response
+    private function signUpRequest(array $params): void
     {
-        $this->client->request(
+        $this->client->jsonRequest(
             method: Request::METHOD_POST,
             uri: $this->router->generate('sign_up'),
-            server: ['CONTENT_TYPE' => 'application/json'],
-            content: json_encode($array)
+            parameters: $params
         );
-
-        return $this->client->getResponse();
     }
 }

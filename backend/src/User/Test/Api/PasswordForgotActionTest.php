@@ -45,13 +45,12 @@ class PasswordForgotActionTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    private function sendRequest(array $content = []): Response
+    private function sendRequest(array $params = []): Response
     {
-        $this->client->request(
+        $this->client->jsonRequest(
             method: Request::METHOD_POST,
             uri: $this->router->generate('password_forgot'),
-            server: ['CONTENT_TYPE' => 'application/json'],
-            content: json_encode($content),
+            parameters: $params
         );
 
         return $this->client->getResponse();

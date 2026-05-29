@@ -25,7 +25,7 @@ readonly class SeConnectionService
     public function create(User $userA, User $userB): SeConnection
     {
         if ($userA->getId() === $userB->getId()) {
-            throw new InvalidArgumentException('Cannot add self as connection.');
+            throw new LogicException('Cannot add self as connection.');
         }
 
         if ($this->repository->findOneByUsers($userA, $userB) !== null) {

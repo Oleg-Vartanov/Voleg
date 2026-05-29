@@ -3,6 +3,7 @@
 namespace App\SplitExpense\Http\V1\Request;
 
 use App\Core\Enum\Group;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -43,7 +44,7 @@ class SeExpenseDto
     /** @var SeExpenseSplitDto[] */
     #[OA\Property(
         type: 'array',
-        items: new OA\Items(ref: '#/components/schemas/SeExpenseSplitDto'),
+        items: new OA\Items(ref: new Model(type: SeExpenseSplitDto::class))
     )]
     #[Assert\NotBlank(groups: [Group::create->value])]
     #[Assert\Count(min: 1)]

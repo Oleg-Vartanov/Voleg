@@ -4,6 +4,7 @@ namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
 use App\User\Enum\UserTokenTypeEnum;
+use App\User\Repository\UserTokenRepository;
 use App\User\Service\EmailChangeService;
 use App\User\Test\Trait\UserTokenTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
@@ -52,7 +53,8 @@ class AuthVerifyEmailChangeActionTest extends ApiTestCase
             $this->getParameter('client.url.email-change-success'),
         );
 
-        $token = $this->userTokenRepository->findOneByUser($user, UserTokenTypeEnum::EMAIL_CHANGE);
+        $token = $this->getService(UserTokenRepository::class)
+                      ->findOneByUser($user, UserTokenTypeEnum::EMAIL_CHANGE);
         self::assertNull($token);
     }
 

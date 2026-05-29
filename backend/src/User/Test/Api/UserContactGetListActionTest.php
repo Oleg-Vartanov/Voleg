@@ -31,11 +31,10 @@ class UserContactGetListActionTest extends ApiTestCase
 
 
         $this->signIn($admin);
-        $response = $this->sendRequest($admin->getId());
+        $this->sendRequest($admin->getId());
 
-        $data = json_decode($response->getContent(), true);
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
-        self::assertCount($count, $data);
+        self::assertCount($count, $this->getResponseData());
     }
 
     #[TestDox('GET list: user not found')]
@@ -66,7 +65,7 @@ class UserContactGetListActionTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
     }
 
-    private function sendRequest(int $id): Response
+    private function sendRequest(int $id): void
     {
         $this->client->request(
             method: Request::METHOD_GET,
@@ -75,7 +74,5 @@ class UserContactGetListActionTest extends ApiTestCase
                 parameters: ['id' => $id],
             ),
         );
-
-        return $this->client->getResponse();
     }
 }

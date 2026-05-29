@@ -17,9 +17,9 @@ class SplitExpenseFixture extends Fixture
     public function load(ObjectManager $manager): void
     {
         $category = $this->getReference('se-category', SeCategory::class);
-        $currency = $this->getReference('currency-USD', Currency::class);
+        $currency = $this->getReference(CurrencyFixture::CURRENCY, Currency::class);
 
-        foreach (range(1, 10) as $i) {
+        foreach (range(1, 9) as $i) {
             $userA = $this->getReference('user'.$i, User::class);
             $userB = $this->getReference('user'.($i + 1), User::class);
 

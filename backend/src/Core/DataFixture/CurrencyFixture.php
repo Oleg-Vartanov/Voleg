@@ -8,17 +8,17 @@ use Doctrine\Persistence\ObjectManager;
 
 class CurrencyFixture extends Fixture
 {
+    public const string CURRENCY = 'currency';
+
     public function load(ObjectManager $manager): void
     {
-        $usd = new Currency('USD', 2, '$');
-        $eur = new Currency('EUR', 2, '€');
-        $manager->persist($usd);
-        $manager->persist($eur);
-
-        $this->addReference('currency-USD', $usd);
-
         foreach (range(1, 50) as $i) {
-            $manager->persist(new Currency('C'.$i, 2, 'S'.$i));
+            $c = new Currency('C'.$i, 2, 'S'.$i);
+            $manager->persist($c);
+
+            if ($i === 1) {
+                $this->addReference(self::CURRENCY, $c);
+            }
         }
 
         $manager->flush();

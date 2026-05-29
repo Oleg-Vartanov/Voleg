@@ -24,7 +24,7 @@ class UserContactPostActionTest extends ApiTestCase
         $this->sendRequest($user->getId(), $contact->getId());
 
         self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
-        self::assertNotEmpty($repository->findOneByUsers($user, $contact));
+        self::assertNotNull($repository->findOneByUsers($user, $contact));
     }
 
     #[TestDox('POST: user not found')]
@@ -98,7 +98,7 @@ class UserContactPostActionTest extends ApiTestCase
 
     private function sendRequest(int $id, int $contactId): void
     {
-        $this->client->request(
+        $this->client->jsonRequest(
             method: Request::METHOD_POST,
             uri: $this->router->generate('user_contact_post', [
                 'id' => $id,

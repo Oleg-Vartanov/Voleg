@@ -14,24 +14,21 @@ class CurrencyGetListActionTest extends ApiTestCase
     public function testSuccess(): void
     {
         $this->signIn($this->createUser());
-        $response = $this->sendRequest();
+        $this->sendRequest();
 
-        $data = json_decode($response->getContent(), true);
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
-
+        $data = $this->getResponseData();
         /** @see \App\Core\DataFixture\CurrencyFixture */
-        self::assertCount(52, $data);
-        self::assertSame('USD', $data[0]['code']);
-        self::assertSame('EUR', $data[1]['code']);
+        self::assertCount(50, $data);
+        self::assertSame('C1', $data[0]['code']);
+        self::assertSame('C10', $data[1]['code']);
     }
 
-    private function sendRequest(): Response
+    private function sendRequest(): void
     {
         $this->client->request(
             method: Request::METHOD_GET,
             uri: $this->router->generate('currency_get_list'),
         );
-
-        return $this->client->getResponse();
     }
 }

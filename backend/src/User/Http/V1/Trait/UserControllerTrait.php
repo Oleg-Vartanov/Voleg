@@ -13,6 +13,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  */
 trait UserControllerTrait
 {
+    // todo: rename || refactor || remove ?
     protected function checkModifyAccess(int $id): void
     {
         if (!$this->isAdmin() && !$this->isOwner($id)) {
@@ -40,12 +41,13 @@ trait UserControllerTrait
      */
     protected function showGroups(?int $userIdToShow = null): array
     {
-        $groups = [Group::PUBLIC];
+        // TODO: refactor ?
+        $groups = [Group::public->value];
         if ($this->isGranted(RoleEnum::ROLE_ADMIN->value)) {
-            $groups[] = Group::ADMIN;
+            $groups[] = Group::admin->value;
         }
         if (!is_null($userIdToShow) && $this->isOwner($userIdToShow)) {
-            $groups[] = Group::OWNER;
+            $groups[] = Group::owner->value;
         }
 
         return $groups;

@@ -73,13 +73,12 @@ class MakePredictionsActionTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
     }
 
-    private function sendRequest(array $content = []): void
+    private function sendRequest(array $params = []): void
     {
-        $this->client->request(
+        $this->client->jsonRequest(
             method: Request::METHOD_POST,
             uri: $this->router->generate('make_predictions'),
-            server: ['CONTENT_TYPE' => 'application/json'],
-            content: json_encode($content),
+            parameters: $params,
         );
 
         $this->client->getResponse();

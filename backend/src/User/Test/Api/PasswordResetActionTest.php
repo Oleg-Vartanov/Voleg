@@ -5,6 +5,7 @@ namespace App\User\Test\Api;
 use App\Core\Test\ApiTestCase;
 use App\User\DataFixture\UserFixture;
 use App\User\Enum\UserTokenTypeEnum;
+use App\User\Repository\UserTokenRepository;
 use App\User\Service\PasswordResetService;
 use App\User\Service\UserService;
 use App\User\Test\Trait\UserTokenTestTrait;
@@ -50,7 +51,8 @@ class PasswordResetActionTest extends ApiTestCase
             )
         );
 
-        $token = $this->userTokenRepository->findOneByUser($user, UserTokenTypeEnum::PASSWORD_RESET);
+        $token = $this->getService(UserTokenRepository::class)
+                      ->findOneByUser($user, UserTokenTypeEnum::PASSWORD_RESET);
         self::assertNull($token);
     }
 
@@ -119,13 +121,12 @@ class PasswordResetActionTest extends ApiTestCase
         }
     }
 
-    private function sendRequest(array $content = []): Response
+    private function sendRequest(array $params = []): Response
     {
-        $this->client->request(
+        $this->client->jsonRequest(
             method: Request::METHOD_POST,
             uri: $this->router->generate('password_reset'),
-            server: ['CONTENT_TYPE' => 'application/json'],
-            content: json_encode($content),
+            parameters: $params
         );
 
         return $this->client->getResponse();

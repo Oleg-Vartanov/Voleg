@@ -17,10 +17,10 @@ class LeaderboardGetActionTest extends ApiTestCase
     {
         $this->signIn($this->createUser());
 
-        $response = $this->sendRequest();
+        $this->sendRequest();
         self::assertResponseIsSuccessful();
 
-        $content = json_decode($response->getContent(), true);
+        $data = $this->getResponseData();
 
         self::assertSame([
             'start' => '2025-01-01',
@@ -28,8 +28,8 @@ class LeaderboardGetActionTest extends ApiTestCase
             'competition' => CompetitionCodeEnum::EPL->value,
             'season' => SeasonFixture::CURRENT_SEASON,
             'limit' => 20,
-        ], $content['filters']);
-        self::assertNotEmpty($content['users']);
+        ], $data['filters']);
+        self::assertNotEmpty($data['users']);
     }
 
     #[TestDox('Leaderboard: validation error')]
@@ -49,7 +49,7 @@ class LeaderboardGetActionTest extends ApiTestCase
 
     private function sendRequest(
         string $start = '2025-01-01',
-    ): Response {
+    ): void {
         $this->client->request(
             method: Request::METHOD_GET,
             uri: $this->router->generate('fixtures_leaderboard', [
@@ -59,7 +59,5 @@ class LeaderboardGetActionTest extends ApiTestCase
                 'limit' => 20,
             ]),
         );
-
-        return $this->client->getResponse();
     }
 }

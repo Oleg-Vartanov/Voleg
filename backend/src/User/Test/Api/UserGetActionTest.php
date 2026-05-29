@@ -3,7 +3,6 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\User\Enum\RoleEnum;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,11 +15,10 @@ class UserGetActionTest extends ApiTestCase
     {
         $user = $this->createUser();
 
-        $response = $this->sendRequest($user->getId());
-        $responseUser = json_decode($response->getContent(), true);
+        $this->sendRequest($user->getId());
 
         self::assertResponseIsSuccessful();
-        self::assertEquals($user->getTag(), $responseUser['tag']);
+        self::assertEquals($user->getTag(), $this->getResponseData()['tag']);
     }
 
     #[TestDox('User GET: success admin')]
@@ -29,22 +27,21 @@ class UserGetActionTest extends ApiTestCase
         $user = $this->createUser(isAdmin: true);
         $this->signIn($user);
 
-        $response = $this->sendRequest($user->getId());
-        $responseUser = json_decode($response->getContent(), true);
+        $this->sendRequest($user->getId());
 
         self::assertResponseIsSuccessful();
-        self::assertEquals($user->getEmail(), $responseUser['email']);
+        self::assertEquals($user->getEmail(), $this->getResponseData()['email']);
     }
 
     #[TestDox('User GET: not found')]
     public function testUserGetNotFound(): void
     {
-        $response = $this->sendRequest(0);
+        $this->sendRequest(0);
 
-        self::assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+        self::assertEquals(Response::HTTP_NOT_FOUND, $this->getResponseStatusCode());
     }
 
-    private function sendRequest(int $id): Response
+    private function sendRequest(int $id): void
     {
         $this->client->request(
             method: Request::METHOD_GET,
@@ -52,7 +49,5 @@ class UserGetActionTest extends ApiTestCase
                 'id' => $id,
             ]),
         );
-
-        return $this->client->getResponse();
     }
 }

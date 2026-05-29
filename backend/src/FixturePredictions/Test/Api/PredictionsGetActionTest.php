@@ -17,18 +17,18 @@ class PredictionsGetActionTest extends ApiTestCase
     {
         $user = $this->signIn($this->createUser());
 
-        $response = $this->sendRequest(userIds: [$user->getId()]);
+        $this->sendRequest(userIds: [$user->getId()]);
         self::assertResponseIsSuccessful();
 
-        $content = json_decode($response->getContent(), true);
-        $filters = $content['filters'];
+        $data = $this->getResponseData();
+        $filters = $data['filters'];
         self::assertSame('2025-01-01', $filters['start']);
         self::assertSame('2025-01-02', $filters['end']);
         self::assertSame(CompetitionCodeEnum::EPL->value, $filters['competition']);
         self::assertSame(SeasonFixture::CURRENT_SEASON, $filters['season']);
         self::assertSame(20, $filters['limit']);
         self::assertSame($user->getId(), array_first($filters['users'])['id']);
-        self::assertSame(20, count($content['fixtures']));
+        self::assertSame(20, count($data['fixtures']));
     }
 
     #[TestDox('Predictions GET: validation error')]
@@ -48,7 +48,7 @@ class PredictionsGetActionTest extends ApiTestCase
 
     private function sendRequest(
         array $userIds = [],
-    ): Response {
+    ): void {
         $this->client->request(
             method: Request::METHOD_GET,
             uri: $this->router->generate('fixtures_predictions', [
@@ -59,7 +59,5 @@ class PredictionsGetActionTest extends ApiTestCase
                 'userIds' => $userIds,
             ]),
         );
-
-        return $this->client->getResponse();
     }
 }

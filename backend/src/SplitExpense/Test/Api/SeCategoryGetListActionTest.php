@@ -14,17 +14,17 @@ class SeCategoryGetListActionTest extends ApiTestCase
     public function testSuccess(): void
     {
         $this->signIn($this->createUser());
-        $response = $this->sendRequest();
+        $this->sendRequest();
 
-        $data = json_decode($response->getContent(), true);
+        $data = $this->getResponseData();
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
-        self::assertCount(5, $data);
+        self::assertCount(6, $data);
 
         /** @see \App\SplitExpense\DataFixture\SeCategoryFixture */
-        self::assertSame('other1', $data[0]['tag']);
-        self::assertSame('Other1', $data[0]['title']);
-        self::assertSame('other5', $data[4]['tag']);
-        self::assertSame('Other5', $data[4]['title']);
+        self::assertSame('other', $data[0]['tag']);
+        self::assertSame('Other', $data[0]['title']);
+        self::assertSame('other4', $data[4]['tag']);
+        self::assertSame('Other4', $data[4]['title']);
     }
 
     #[TestDox('Categories GET list: unauthorized')]
@@ -34,13 +34,11 @@ class SeCategoryGetListActionTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
     }
 
-    private function sendRequest(): Response
+    private function sendRequest(): void
     {
         $this->client->request(
             method: Request::METHOD_GET,
             uri: $this->router->generate('se_category_get_list'),
         );
-
-        return $this->client->getResponse();
     }
 }

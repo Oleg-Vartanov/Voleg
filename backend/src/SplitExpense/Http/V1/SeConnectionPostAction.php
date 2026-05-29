@@ -16,7 +16,7 @@ use App\SplitExpense\Service\SeConnectionService;
 use App\User\Entity\User;
 use App\User\Http\V1\Trait\UserControllerTrait;
 use App\User\Repository\UserRepository;
-use InvalidArgumentException;
+use LogicException;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -55,13 +55,13 @@ class SeConnectionPostAction extends ApiController
 
     public function __invoke(
         #[CurrentUser] User $user,
-        #[MapRequestPayload] SeConnectionCreateDto $dto,
+        #[MapRequestPayload(validationFailedStatusCode: 422)] SeConnectionCreateDto $dto,
     ): JsonResponse {
         $requestedUser = $this->userRepository->find($dto->connectionUserId) ?? $this->notFound();
 
         try {
             $connection = $this->service->create($user, $requestedUser);
-        } catch (InvalidArgumentException $e) {
+        } catch (LogicException $e) {
             return $this->messageResponse($e->getMessage(), 400);
         }
         $this->connectionRepository->save($connection, true);

@@ -18,15 +18,13 @@ class AuthSignInActionTest extends ApiTestCase
     {
         $user = $this->createUser();
 
-        $response = $this->sendRequest([
+        $this->sendRequest([
             'email' => $user->getEmail(),
             'password' => UserFixture::DEFAULT_PASSWORD,
         ]);
 
-        $data = json_decode($response->getContent(), true);
-
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
-        self::assertNotEmpty($data['token']);
+        self::assertNotEmpty($this->getResponseData()['token']);
     }
 
     #[TestDox('Sign in action: invalid credentials')]
@@ -56,15 +54,12 @@ class AuthSignInActionTest extends ApiTestCase
         $controller->__invoke();
     }
 
-    private function sendRequest(array $content): Response
+    private function sendRequest(array $params): void
     {
-        $this->client->request(
+        $this->client->jsonRequest(
             method: Request::METHOD_POST,
             uri: $this->router->generate('sign_in'),
-            server: ['CONTENT_TYPE' => 'application/json'],
-            content: json_encode($content)
+            parameters: $params
         );
-
-        return $this->client->getResponse();
     }
 }
