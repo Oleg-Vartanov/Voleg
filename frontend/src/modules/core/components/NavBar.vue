@@ -13,6 +13,7 @@ type menuItemType = { name: string; title: string; roles?: string[] }
 
 const menuItems: menuItemType[] = [
   { name: 'about', title: 'About' },
+  { name: 'splitExpense', title: 'Split Expense' },
   { name: 'footballPredictions', title: 'Football Predictions' },
   { name: 'pricing', title: 'Pricing' },
   { name: 'admin', title: 'Admin', roles: ['ROLE_ADMIN'] }
@@ -123,3 +124,9 @@ const activeMenuItem = computed((): menuItemType | null => {
     </div>
   </nav>
 </template>
+
+<style scoped>
+.navbar {
+  border-bottom: 1px solid var(--bs-primary);
+}
+</style>

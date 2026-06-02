@@ -25,6 +25,13 @@ const index = createRouter({
           component: () => import('@/modules/fixturePredictions/pages/FootballPredictionsPage.vue')
         },
         {
+          path: 'split-expense',
+          name: 'splitExpense',
+          meta: { title: 'Split Expense' },
+          beforeEnter: [guards.isAuthenticated],
+          component: () => import('@/modules/splitExpense/pages/SplitExpensePage.vue')
+        },
+        {
           path: 'about',
           name: 'about',
           meta: { title: 'About' },
