@@ -17,10 +17,10 @@ class SeExpenseDto
     #[Assert\Positive]
     public ?int $categoryId = null;
 
-    #[OA\Property(example: '100.0000')]
+    #[OA\Property(description: 'Amount in minor currency units (e.g. cents for USD)', example: 10000)]
     #[Assert\NotBlank(groups: [Group::create->value])]
-    #[Assert\Regex(pattern: '/^\d+(\.\d{1,4})?$/')]
-    public string $amount;
+    #[Assert\Positive]
+    public int $amount;
 
     #[OA\Property(example: 'Dinner')]
     #[Assert\NotBlank(groups: [Group::create->value])]

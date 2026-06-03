@@ -4,6 +4,7 @@ namespace App\SplitExpense\Entity;
 
 use App\Core\Entity\Currency;
 use App\Core\Enum\Group;
+use App\Core\Util\MoneyUtil;
 use App\SplitExpense\Repository\SeExpenseRepository;
 use App\User\Entity\User;
 use DateTimeImmutable;
@@ -41,8 +42,8 @@ class SeExpense
         #[ORM\ManyToOne]
         #[ORM\JoinColumn(nullable: false)]
         private SeCategory $category,
-        #[ORM\Column(type: Types::DECIMAL, precision: 19, scale: 4)]
-        private string $amount,
+        #[ORM\Column(type: Types::INTEGER)]
+        private int $amount,
         #[ORM\Column(length: 255)]
         private string $title,
         #[ORM\ManyToOne]
@@ -82,14 +83,20 @@ class SeExpense
         $this->category = $category;
     }
 
-    public function getAmount(): string
+    public function getAmount(): int
     {
         return $this->amount;
     }
 
-    public function setAmount(string $amount): void
+    public function setAmount(int $amount): void
     {
         $this->amount = $amount;
+    }
+
+    #[Groups([Group::public->value])]
+    public function getAmountDisplay(): string
+    {
+        return MoneyUtil::fromMinorUnits($this->amount, $this->currency->getDecimalPlaces());
     }
 
     public function getTitle(): string

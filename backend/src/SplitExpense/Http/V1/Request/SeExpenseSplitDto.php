@@ -13,8 +13,8 @@ class SeExpenseSplitDto
     #[Assert\Positive]
     public int $userId;
 
-    #[OA\Property(example: '25.5000')]
+    #[OA\Property(description: 'Amount in minor currency units (e.g. cents for USD)', example: 5000)]
     #[Assert\NotBlank(groups: [Group::create->value])]
-    #[Assert\Regex(pattern: '/^\d+(\.\d{1,4})?$/')]
-    public string $amount;
+    #[Assert\Positive]
+    public int $amount;
 }

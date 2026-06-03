@@ -45,6 +45,7 @@ class SeExpenseRepository extends AbstractEntityRepository
         return $this->createQueryBuilder('e')
             ->distinct()
             ->leftJoin('e.splits', 's')
+            ->leftJoin('e.currency', 'c')
             ->where('e.paidByUser = :user OR s.user = :user')
             ->setParameter('user', $user)
             ->orderBy('e.expenseDate', 'DESC')

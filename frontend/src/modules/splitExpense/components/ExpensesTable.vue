@@ -2,6 +2,7 @@
 import  { useExpenses } from '@/modules/splitExpense/composables/useExpenses'
 import type { ApiSeExpense } from '@/modules/splitExpense/types'
 import { computed } from 'vue'
+import { categories } from '@/modules/splitExpense/categories.ts';
 
 type ExpenseMonthGroup = { month: string, label: string, items: ApiSeExpense[] }
 
@@ -23,9 +24,8 @@ function formatDate(value: string): string {
   return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
 }
 
-function formatAmount(expense: { amount: string; currency?: { code: string } }): string {
-  const code = expense.currency?.code
-  return code ? `${expense.amount} ${code}` : expense.amount
+function formatAmount(expense: ApiSeExpense): string {
+  return `${expense.amountDisplay} ${expense.currency.symbol}`
 }
 
 const expensesByMonth = computed((): ExpenseMonthGroup[] => {
@@ -80,8 +80,8 @@ function monthKey(value: string): string {
       <thead>
         <tr>
           <th scope="col">Date</th>
-          <th scope="col">Title</th>
           <th scope="col">Category</th>
+          <th scope="col">Title</th>
           <th scope="col">Amount</th>
           <th scope="col">Paid by</th>
         </tr>
@@ -96,8 +96,11 @@ function monthKey(value: string): string {
           </tr>
           <tr v-for="expense in group.items" :key="expense.id">
             <td>{{ formatDate(expense.expenseDate) }}</td>
+            <td>
+              <i class="bi fs-5" :class="categories[expense.category?.tag ?? 'other']"></i>
+
+            </td>
             <td>{{ expense.title }}</td>
-            <td>{{ expense.category.title }}</td>
             <td>{{ formatAmount(expense) }}</td>
             <td>{{ expense.paidByUser.displayName }}</td>
           </tr>

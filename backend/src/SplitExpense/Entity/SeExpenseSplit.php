@@ -28,8 +28,8 @@ class SeExpenseSplit
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
         private User $user,
         #[Groups(Group::public->value)]
-        #[ORM\Column(type: Types::DECIMAL, precision: 19, scale: 4)]
-        private string $amount,
+        #[ORM\Column(type: Types::INTEGER)]
+        private int $amount,
     ) {
     }
 
@@ -58,12 +58,12 @@ class SeExpenseSplit
         $this->user = $user;
     }
 
-    public function getAmount(): string
+    public function getAmount(): int
     {
         return $this->amount;
     }
 
-    public function setAmount(string $amount): void
+    public function setAmount(int $amount): void
     {
         $this->amount = $amount;
     }

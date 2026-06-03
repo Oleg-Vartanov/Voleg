@@ -26,7 +26,7 @@ class SplitExpenseFixture extends Fixture
             $expense = new SeExpense(
                 paidByUser: $userA,
                 category: $category,
-                amount: '100.00',
+                amount: 10000,
                 title: 'Test expense',
                 currency: $currency,
                 expenseDate: new \DateTimeImmutable(),
@@ -37,14 +37,14 @@ class SplitExpenseFixture extends Fixture
                 new SeExpenseSplit(
                     expense: $expense,
                     user: $userA,
-                    amount: '50.00',
+                    amount: 5000,
                 )
             );
             $expense->addSplit(
                 new SeExpenseSplit(
                     expense: $expense,
                     user: $userB,
-                    amount: '50.00',
+                    amount: 5000,
                 )
             );
 

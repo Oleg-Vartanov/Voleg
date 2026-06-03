@@ -2,9 +2,12 @@
 
 namespace App\Core\Entity;
 
+use App\Core\Enum\Group;
 use App\Core\Repository\CurrencyRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
+#[Groups([Group::public->value])]
 #[ORM\Entity(repositoryClass: CurrencyRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_CURRENCY_CODE', fields: ['code'])]
 class Currency

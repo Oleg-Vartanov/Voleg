@@ -143,12 +143,12 @@ readonly class SeExpenseService
 
     private function assertSplitTotalMatches(SeExpense $expense): void
     {
-        $total = '0';
+        $total = 0;
         foreach ($expense->getSplits() as $split) {
-            $total = bcadd($total, $split->getAmount(), 4);
+            $total += $split->getAmount();
         }
 
-        if (bccomp($total, $expense->getAmount(), 4) !== 0) {
+        if ($total !== $expense->getAmount()) {
             throw new LogicException('Split amounts must sum to the expense amount.');
         }
     }
