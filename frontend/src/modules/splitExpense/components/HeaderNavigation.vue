@@ -1,19 +1,24 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-
-type SplitExpenseTab = { tag: string; title: string; icon: string }
+import { type SplitExpenseTab } from '@/modules/splitExpense/types'
+import { useRouter } from 'vue-router';
 
 const tabs: SplitExpenseTab[] = [
-  { tag: 'balance', title: 'Balance', icon: 'bi-plus-slash-minus' },
-  { tag: 'expenses', title: 'Expenses', icon: 'bi-wallet2' },
-  { tag: 'contacts', title: 'Contacts', icon: 'bi-people-fill' },
-  { tag: 'charts', title: 'Charts', icon: 'bi-clipboard2-data' }
+  { tag: 'balance', title: 'Balance', route: 'seBalance', icon: 'bi-plus-slash-minus' },
+  { tag: 'expenses', title: 'Expenses', route: 'seExpenses', icon: 'bi-wallet2' },
+  { tag: 'contacts', title: 'Contacts', route: 'seContacts', icon: 'bi-people-fill' },
+  { tag: 'charts', title: 'Charts', route: 'seCharts', icon: 'bi-clipboard2-data' }
 ]
 
-const activeTab = ref(tabs[0])
-
-const isOpen = ref(false)
+const router = useRouter()
 const root = ref<HTMLElement | null>(null)
+const isOpen = ref(false)
+const activeTab = ref(getActiveTab())
+
+function getActiveTab() {
+  const route = router.currentRoute.value.name
+  return tabs.find(t => t.route === route);
+}
 
 function toggle() {
   isOpen.value = !isOpen.value
@@ -21,6 +26,7 @@ function toggle() {
 
 function selectTab(tab: SplitExpenseTab) {
   activeTab.value = tab
+  router.push({ name: tab.route })
 }
 
 function onOutsideClick(e: MouseEvent) {

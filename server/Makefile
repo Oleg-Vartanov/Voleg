@@ -56,6 +56,9 @@ cache:
 	$(PHP_CONTAINER) php bin/console cache:clear
 	$(PHP_CONTAINER) php bin/console cache:warmup
 
+fixtures:
+	$(PHP_CONTAINER) php bin/console doctrine:fixtures:load --no-interaction
+
 test:
 	$(PHP_CONTAINER) php bin/console --env=test cache:clear
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:drop --force || true

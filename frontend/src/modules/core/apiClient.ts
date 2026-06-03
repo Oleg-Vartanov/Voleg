@@ -129,5 +129,12 @@ export default {
     return axios.post(`${apiBaseUrl}/fixtures/make-predictions`, params, {
       headers: getHeader()
     })
+  },
+
+  listSplitExpenses(offset = 0, limit = 100) {
+    return axios.get(`${apiBaseUrl}/split-expense/expenses`, {
+      headers: getHeader(),
+      params: { offset, limit }
+    })
   }
 }
