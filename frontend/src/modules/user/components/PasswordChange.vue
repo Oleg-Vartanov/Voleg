@@ -2,7 +2,7 @@
 import client from '@/modules/core/apiClient.ts'
 import { ref, reactive } from 'vue'
 import { useApiValidation } from '@/modules/core/composables/form/useApiValidation.ts'
-import FormField from '@/modules/core/components/form/FormField.vue'
+import FormInput from '@/modules/core/components/form/FormInput.vue'
 import FormButton from '@/modules/core/components/form/FormButton.vue'
 import { useRouter } from 'vue-router'
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts.ts'
@@ -51,7 +51,7 @@ const changePassword = () => {
 <template>
   <h1 class="h4 mb-3 fw-normal">Password</h1>
   <form @submit.prevent="changePassword">
-    <FormField
+    <FormInput
       id="currentPassword"
       v-model="model.currentPassword"
       label="Current Password"
@@ -59,7 +59,7 @@ const changePassword = () => {
       :is-valid="validation.isValid('currentPassword')"
       :error-text="validation.getError('currentPassword')"
     />
-    <FormField
+    <FormInput
       id="newPassword"
       v-model="model.newPassword"
       label="New Password"

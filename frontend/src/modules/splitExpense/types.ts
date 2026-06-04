@@ -1,4 +1,6 @@
-export type SplitExpenseTabTag = 'balance' | 'expenses' | 'contacts' | 'charts'
+import type { ApiUser } from '@/modules/core/apiType.ts'
+
+export type SplitExpenseTabTag = 'expenses' | 'contacts' | 'charts'
 
 export type SplitExpenseTab = {
   tag: SplitExpenseTabTag
@@ -24,9 +26,35 @@ export interface ApiSeExpense {
   id: number
   title: string
   amount: string
+  amountDisplay: string
   expenseDate: string
   description: string | null
-  paidByUser: { id: number; displayName: string; tag: string }
+  paidByUser: ApiUser
   category: ApiSeCategory
   currency: ApiSeCurrency
+  splits: ApiSeExpenseSplit[]
+}
+
+export interface ApiSeExpenseSplit {
+  id: number
+  amount: string
+  user: ApiUser
+}
+
+export interface ApiSeConnection {
+  id: number
+  status: 'accepted' | 'rejected' | 'pending' | 'blocked'
+  userA: ApiUser
+  userB: ApiUser
+}
+
+export interface SeExpenseCreatePayload {
+  title: string
+  amount: number
+  currencyId: number
+  expenseDate: string
+  description?: string | null
+  paidByUserId?: number
+  categoryId?: number
+  splits: { userId: number; amount: number }[]
 }

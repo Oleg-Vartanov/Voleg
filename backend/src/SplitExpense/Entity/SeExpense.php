@@ -4,7 +4,6 @@ namespace App\SplitExpense\Entity;
 
 use App\Core\Entity\Currency;
 use App\Core\Enum\Group;
-use App\Core\Util\MoneyUtil;
 use App\SplitExpense\Repository\SeExpenseRepository;
 use App\User\Entity\User;
 use DateTimeImmutable;
@@ -91,12 +90,6 @@ class SeExpense
     public function setAmount(int $amount): void
     {
         $this->amount = $amount;
-    }
-
-    #[Groups([Group::public->value])]
-    public function getAmountDisplay(): string
-    {
-        return MoneyUtil::fromMinorUnits($this->amount, $this->currency->getDecimalPlaces());
     }
 
     public function getTitle(): string

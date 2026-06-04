@@ -136,5 +136,32 @@ export default {
       headers: getHeader(),
       params: { offset, limit }
     })
+  },
+
+  listSplitExpenseCategories(offset = 0, limit = 100) {
+    return axios.get(`${apiBaseUrl}/split-expense/categories`, {
+      headers: getHeader(),
+      params: { offset, limit }
+    })
+  },
+
+  listSplitExpenseConnections(offset = 0, limit = 100) {
+    return axios.get(`${apiBaseUrl}/split-expense/connections`, {
+      headers: getHeader(),
+      params: { offset, limit }
+    })
+  },
+
+  listCurrencies(offset = 0, limit = 100) {
+    return axios.get(`${apiBaseUrl}/currencies`, {
+      headers: getHeader(),
+      params: { offset, limit }
+    })
+  },
+
+  createSplitExpense(payload: object) {
+    return axios.post(`${apiBaseUrl}/split-expense/expenses/0`, payload, {
+      headers: getHeader()
+    })
   }
 }

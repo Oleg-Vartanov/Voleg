@@ -1,143 +1,109 @@
 <script setup lang="ts">
-import  { useExpenses } from '@/modules/splitExpense/composables/useExpenses'
-import type { ApiSeExpense } from '@/modules/splitExpense/types'
-import { computed } from 'vue'
-import { categories } from '@/modules/splitExpense/categories.ts';
-
-type ExpenseMonthGroup = { month: string, label: string, items: ApiSeExpense[] }
+import AddExpenseModal from '@/modules/splitExpense/components/AddExpenseModal.vue'
+import ExpenseDetailPanel from '@/modules/splitExpense/components/ExpenseDetailPanel.vue'
+import ExpenseRow from '@/modules/splitExpense/components/ExpenseRow.vue'
+import { useExpenses } from '@/modules/splitExpense/composables/useExpenses'
+import { groupExpensesByMonth } from '@/modules/splitExpense/utils/expenseDates'
+import { computed, onMounted, ref } from 'vue'
+import type { ApiSeExpense } from '@/modules/splitExpense/types.ts';
 
 const expensesState = useExpenses()
-expensesState.load()
 
-function formatMonthLabel(key: string): string {
-  const [year, month] = key.split('-').map(Number)
-  if (!year || !month) return key
-  return new Date(year, month - 1, 1).toLocaleDateString(undefined, {
-    month: 'long',
-    year: 'numeric'
-  })
+const isEmpty = computed(() => (expensesState.expenses.value?.length ?? 0) === 0)
+const expandedExpenseId = ref<number | null>(null)
+const expensesByMonth = computed(() => groupExpensesByMonth(expensesState.expenses.value ?? []))
+
+function toggleExpense(expense: ApiSeExpense) {
+  expandedExpenseId.value = expandedExpenseId.value === expense.id ? null : expense.id
 }
 
-function formatDate(value: string): string {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+function isExpanded(expense: ApiSeExpense) {
+  return expandedExpenseId.value === expense.id
 }
 
-function formatAmount(expense: ApiSeExpense): string {
-  return `${expense.amountDisplay} ${expense.currency.symbol}`
-}
-
-const expensesByMonth = computed((): ExpenseMonthGroup[] => {
-  const list = expensesState.expenses.value ?? []
-  const byMonth = new Map<string, ApiSeExpense[]>()
-
-  for (const expense of list) {
-    const key = monthKey(expense.expenseDate)
-    const group = byMonth.get(key)
-    if (group) {
-      group.push(expense)
-    } else {
-      byMonth.set(key, [expense])
-    }
-  }
-
-  const groups: ExpenseMonthGroup[] = []
-  const seen = new Set<string>()
-
-  for (const expense of list) {
-    const key = monthKey(expense.expenseDate)
-    if (seen.has(key)) continue
-    seen.add(key)
-    groups.push({
-      month: key,
-      label: formatMonthLabel(key),
-      items: byMonth.get(key) ?? []
-    })
-  }
-
-  return groups
+onMounted(() => {
+  expensesState.load()
 })
-
-function monthKey(value: string): string {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  return `${year}-${month}`
-}
 </script>
 
 <template>
-  <div v-if="expensesState.isLoading.value" class="text-center py-3">
+  <button
+    type="button"
+    class="btn btn-outline-primary w-100"
+    data-bs-toggle="modal"
+    data-bs-target="#addExpenseModal"
+  >
+    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+    Add expense
+  </button>
+
+  <AddExpenseModal :expenses="expensesState" />
+
+  <div v-if="expensesState.isLoading.value" class="text-center py-3 mt-3">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading expenses…</span>
     </div>
   </div>
 
-  <div v-else class="table-responsive expenses-table-scroll">
-    <table class="table table-sm table-hover mb-0">
-      <thead>
-        <tr>
-          <th scope="col">Date</th>
-          <th scope="col">Category</th>
-          <th scope="col">Title</th>
-          <th scope="col">Amount</th>
-          <th scope="col">Paid by</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-if="expensesState.expenses.value?.length === 0">
-          <td colspan="5" class="text-center py-3 text-muted">No expenses yet</td>
-        </tr>
-        <template v-for="group in expensesByMonth" :key="group.month">
-          <tr class="month-group-row no-hover">
-            <th colspan="5" scope="colgroup">{{ group.label }}</th>
-          </tr>
-          <tr v-for="expense in group.items" :key="expense.id">
-            <td>{{ formatDate(expense.expenseDate) }}</td>
-            <td>
-              <i class="bi fs-5" :class="categories[expense.category?.tag ?? 'other']"></i>
+  <div v-else class="expenses-list-scroll mt-3">
+    <div class="expenses-list">
+      <p v-if="isEmpty" class="expenses-empty">No expenses yet</p>
 
-            </td>
-            <td>{{ expense.title }}</td>
-            <td>{{ formatAmount(expense) }}</td>
-            <td>{{ expense.paidByUser.displayName }}</td>
-          </tr>
-        </template>
-      </tbody>
-    </table>
+      <template v-for="group in expensesByMonth" :key="group.month">
+        <div class="expenses-month-header">{{ group.label }}</div>
+
+        <article
+          v-for="expense in group.items"
+          :key="expense.id"
+          class="expense-item"
+          :class="{ 'is-expanded': isExpanded(expense) }"
+        >
+          <ExpenseRow
+            :expense="expense"
+            :expanded="isExpanded(expense)"
+            @toggle="toggleExpense(expense)"
+          />
+          <ExpenseDetailPanel :expense="expense" :open="isExpanded(expense)" />
+        </article>
+      </template>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.expenses-table-scroll {
+.expenses-list-scroll {
   -webkit-overflow-scrolling: touch;
+  max-width: 100%;
 }
 
-.expenses-table-scroll .table {
-  width: max-content;
-  min-width: 100%;
+.expenses-list {
+  width: 100%;
+  --bs-table-hover-bg: rgba(var(--bs-emphasis-color-rgb), 0.075);
+  --bs-table-hover-color: var(--bs-emphasis-color);
 }
 
-.expenses-table-scroll .table :is(th, td) {
-  white-space: nowrap;
-}
-
-.text-muted {
+.expenses-empty {
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+  color: var(--bs-secondary-color);
   opacity: 0.9;
 }
 
-.month-group-row th {
+.expenses-month-header {
+  padding: 0.2rem 0.5rem;
   background-color: var(--bs-secondary-bg);
   font-weight: 600;
-  font-size: 0.9rem;
-  border-bottom-width: 1px;
-  text-align: left;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
 }
 
-.table-hover > tbody > tr.no-hover:hover > td,
-.table-hover > tbody > tr.no-hover:hover > th {
-  box-shadow: none;
+.expense-item:not(.is-expanded) :deep(.expense-row) {
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.expense-item.is-expanded {
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
 }
 </style>

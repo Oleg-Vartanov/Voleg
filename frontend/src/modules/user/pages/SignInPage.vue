@@ -4,7 +4,7 @@ import { useTopAlerts } from '@/modules/core/stores/useTopAlerts.ts'
 import { useAuth } from '@/modules/user/stores/useAuth'
 import { type Ref, ref, type UnwrapRef, onMounted, reactive, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import FormField from '@/modules/core/components/form/FormField.vue'
+import FormInput from '@/modules/core/components/form/FormInput.vue'
 import FormButton from '@/modules/core/components/form/FormButton.vue'
 
 const auth = useAuth()
@@ -62,14 +62,14 @@ onMounted(() => {
 
 <template>
   <form @submit.prevent="signIn">
-    <FormField
+    <FormInput
       id="email"
       v-model="model.email"
       type="email"
       label="Email address"
       :is-valid="isError ? false : null"
     />
-    <FormField
+    <FormInput
       id="password"
       v-model="model.password"
       type="password"

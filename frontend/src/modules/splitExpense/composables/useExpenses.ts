@@ -22,7 +22,9 @@ export function useExpenses() {
         topAlerts.add('Failed to load expenses.', 'danger', 5)
         expenses.value = []
       })
-      .finally(() => {isLoading.value = false})
+      .finally(() => {
+        isLoading.value = false
+      })
   }
 
   return {

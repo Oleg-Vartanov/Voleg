@@ -3,7 +3,7 @@ import Client from '@/modules/core/apiClient'
 import { type Router, useRouter } from 'vue-router'
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts'
 import { ref, reactive } from 'vue'
-import FormField from '@/modules/core/components/form/FormField.vue'
+import FormInput from '@/modules/core/components/form/FormInput.vue'
 import { useApiValidation } from '@/modules/core/composables/form/useApiValidation.ts'
 
 const topAlerts = useTopAlerts()
@@ -46,7 +46,7 @@ const signUp = () => {
 
 <template>
   <form @submit.prevent="signUp">
-    <FormField
+    <FormInput
       id="displayName"
       v-model="model.displayName"
       label="Display Name"
@@ -55,7 +55,7 @@ const signUp = () => {
       help-text="Your public name displayed on the platform."
     />
 
-    <FormField
+    <FormInput
       id="tag"
       v-model="model.tag"
       label="Tag"
@@ -64,7 +64,7 @@ const signUp = () => {
       help-text="A unique tag used for search purposes."
     />
 
-    <FormField
+    <FormInput
       id="email"
       v-model="model.email"
       label="Email address"
@@ -74,7 +74,7 @@ const signUp = () => {
       help-text="Your email will stay private, it wont be shared."
     />
 
-    <FormField
+    <FormInput
       id="password"
       v-model="model.password"
       label="Password"

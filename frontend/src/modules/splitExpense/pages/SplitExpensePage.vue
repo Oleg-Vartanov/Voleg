@@ -3,11 +3,11 @@ import HeaderNavigation from '@/modules/splitExpense/components/HeaderNavigation
 </script>
 
 <template>
-  <HeaderNavigation/>
+  <HeaderNavigation />
 
   <div class="ov-center">
     <div class="container d-flex flex-column gap-3">
-      <router-view/>
+      <router-view />
     </div>
   </div>
 </template>

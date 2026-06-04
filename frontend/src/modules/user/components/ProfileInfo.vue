@@ -4,7 +4,7 @@ import { useTopAlerts } from '@/modules/core/stores/useTopAlerts'
 import { useAuth } from '@/modules/user/stores/useAuth'
 import { onMounted, provide, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import FormField from '@/modules/core/components/form/FormField.vue'
+import FormInput from '@/modules/core/components/form/FormInput.vue'
 import type { ApiUser } from '@/modules/core/apiType.ts'
 import { useApiValidation } from '@/modules/core/composables/form/useApiValidation.ts'
 import FormButton from '@/modules/core/components/form/FormButton.vue'
@@ -133,7 +133,7 @@ onMounted(() => {
 <template>
   <h1 class="h4 mb-3 fw-normal">Profile info</h1>
   <form @submit.prevent="saveProfile">
-    <FormField
+    <FormInput
       id="displayName"
       v-model="editForm.displayName"
       label="Display Name"
@@ -143,7 +143,7 @@ onMounted(() => {
       :disabled="!isEditing"
     />
 
-    <FormField
+    <FormInput
       id="tag"
       v-model="editForm.tag"
       label="Tag"
@@ -153,7 +153,7 @@ onMounted(() => {
       :disabled="!isEditing"
     />
 
-    <FormField
+    <FormInput
       id="email"
       v-model="editForm.email"
       label="Email address"

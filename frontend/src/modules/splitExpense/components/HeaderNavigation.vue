@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { type SplitExpenseTab } from '@/modules/splitExpense/types'
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'
 
 const tabs: SplitExpenseTab[] = [
-  { tag: 'balance', title: 'Balance', route: 'seBalance', icon: 'bi-plus-slash-minus' },
-  { tag: 'expenses', title: 'Expenses', route: 'seExpenses', icon: 'bi-wallet2' },
-  { tag: 'contacts', title: 'Contacts', route: 'seContacts', icon: 'bi-people-fill' },
+  { tag: 'expenses', title: 'Expenses', route: 'seExpenses', icon: 'bi-plus-slash-minus' },
+  { tag: 'connections', title: 'Connections', route: 'seConnections', icon: 'bi-people-fill' },
   { tag: 'charts', title: 'Charts', route: 'seCharts', icon: 'bi-clipboard2-data', disabled: true }
 ]
 
@@ -17,7 +16,7 @@ const activeTab = ref(getActiveTab())
 
 function getActiveTab() {
   const route = router.currentRoute.value.name
-  return tabs.find(t => t.route === route);
+  return tabs.find((t) => t.route === route)
 }
 
 function toggle() {
@@ -39,18 +38,10 @@ onMounted(() => document.addEventListener('click', onOutsideClick))
 </script>
 
 <template>
-  <nav
-    ref="root"
-    class="se-nav navbar"
-    aria-label="Split expense sections"
-    @click="toggle"
-  >
+  <nav ref="root" class="se-nav navbar" aria-label="Split expense sections" @click="toggle">
     <div class="container-fluid justify-content-center py-0">
       <div class="dropdown">
-        <button
-          type="button"
-          class="se-nav-btn nav-link dropdown-toggle"
-        >
+        <button type="button" class="se-nav-btn nav-link dropdown-toggle">
           <i class="bi" :class="activeTab.icon" aria-hidden="true"></i>
           {{ activeTab.title }}
         </button>
