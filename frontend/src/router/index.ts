@@ -54,7 +54,8 @@ const index = createRouter({
               path: 'charts',
               name: 'seCharts',
               meta: { title: 'Split Expense' },
-              component: () => import('@/modules/splitExpense/components/Charts.vue')
+              component: () => import('@/modules/splitExpense/components/Charts.vue'),
+              redirect: { name: 'seBalance' },
             },
           ]
         },

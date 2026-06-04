@@ -4,6 +4,7 @@ export type SplitExpenseTab = {
   tag: SplitExpenseTabTag
   title: string
   icon: string
+  disabled?: boolean
 }
 
 export interface ApiSeCategory {

@@ -7,7 +7,7 @@ const tabs: SplitExpenseTab[] = [
   { tag: 'balance', title: 'Balance', route: 'seBalance', icon: 'bi-plus-slash-minus' },
   { tag: 'expenses', title: 'Expenses', route: 'seExpenses', icon: 'bi-wallet2' },
   { tag: 'contacts', title: 'Contacts', route: 'seContacts', icon: 'bi-people-fill' },
-  { tag: 'charts', title: 'Charts', route: 'seCharts', icon: 'bi-clipboard2-data' }
+  { tag: 'charts', title: 'Charts', route: 'seCharts', icon: 'bi-clipboard2-data', disabled: true }
 ]
 
 const router = useRouter()
@@ -59,7 +59,7 @@ onMounted(() => document.addEventListener('click', onOutsideClick))
             <button
               type="button"
               class="dropdown-item"
-              :class="{ active: activeTab.tag === tab.tag }"
+              :class="{ active: activeTab.tag === tab.tag, disabled: tab.disabled }"
               @click="selectTab(tab)"
             >
               <i class="bi" :class="tab.icon" aria-hidden="true"></i>

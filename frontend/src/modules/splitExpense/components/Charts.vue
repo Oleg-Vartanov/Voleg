@@ -3,7 +3,7 @@
 </script>
 
 <template>
-   Contacts
+
 </template>
 
 <style scoped>
