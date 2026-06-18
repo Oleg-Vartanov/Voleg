@@ -1,22 +1,32 @@
 <script setup lang="ts">
+import { ref, inject } from 'vue'
+import UserSearch from '@/modules/core/components/UserSearch.vue'
 import { type Versus } from '@/modules/fixturePredictions/composables/useVersus.ts'
 import { type Tables } from '@/modules/fixturePredictions/composables/useTables'
 import { useAuth } from '@/modules/user/stores/useAuth'
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts'
-import { inject } from 'vue'
+import type { ApiUser } from '@/modules/core/apiType'
 
 const tables = inject<Tables>('tables')!
 const vs = inject<Versus>('vs')!
 const auth = useAuth()
 const topAlerts = useTopAlerts()
+const selectedUsers = ref<ApiUser[]>([])
 
-function addUser(user) {
+function addUser(user: ApiUser) {
   if (auth.user.id === user.id) {
     topAlerts.add("It's you :)", 'info')
     return
   }
   vs.addUser(user)
   tables.updateLoadedTables()
+}
+
+function addSelected() {
+  for (const user of selectedUsers.value) {
+    addUser(user)
+  }
+  selectedUsers.value = []
 }
 </script>
 
@@ -34,76 +44,42 @@ function addUser(user) {
           ></button>
         </div>
         <div class="modal-body">
-          <ul class="list-group list-group-flush mb-3">
+          <ul v-if="vs.users.value.length > 0" class="list-group list-group-flush mb-3">
             <li
               v-for="user in vs.users.value"
               :key="user.id"
-              class="vs-user list-group-item list-group-item-action"
-              @click="vs.removeUser(user)"
+              class="list-group-item d-flex justify-content-between align-items-center gap-2"
             >
-              {{ user.displayName }} (@{{ user.tag }})
-              <i class="bi bi-x-lg text-danger" style="font-size: 20px"></i>
+              <span class="text-truncate">{{ user.displayName }} (@{{ user.tag }})</span>
+              <button
+                type="button"
+                class="btn btn-outline-danger btn-sm flex-shrink-0"
+                :aria-label="`Remove ${user.displayName}`"
+                @click="vs.removeUser(user)"
+              >
+                Remove
+              </button>
             </li>
           </ul>
 
-          <div class="input-group mb-3 has-validation">
-            <span id="addon-wrapping" class="input-group-text p-2">User Tag</span>
-            <input
-              v-model="vs.input.value.value"
-              type="text"
-              :class="[vs.input.value.error === '' ? '' : 'is-invalid']"
-              class="form-control"
-              aria-describedby="go-vs validation-go-vs"
-              @keyup.enter="
-                vs.input.value.value === '' || vs.isLoading.value ? '' : vs.searchUser()
-              "
-            />
-            <button
-              id="go-vs"
-              :disabled="vs.input.value.value === '' || vs.isLoading.value"
-              class="btn btn btn-outline-primary rounded-end p-2 me-2"
-              type="button"
-              @click="vs.searchUser()"
-            >
-              Search
-            </button>
-            <div id="validation-go-vs" class="invalid-feedback">{{ vs.input.value.error }}</div>
-            <button
-              type="button"
-              class="btn btn btn-outline-primary rounded p-2"
-              :disabled="vs.isLoading.value"
-              @click="vs.showContacts()"
-            >
-              Contacts
-            </button>
-          </div>
-
-          <div v-if="vs.isLoading.value" class="spinner-border text-primary mt-3" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-
-          <ul class="list-group list-group-flush">
-            <li
-              v-for="user in vs.searchUsers.value"
-              :key="user.id"
-              class="vs-user list-group-item list-group-item-action"
-              @click="addUser(user)"
-            >
-              {{ user.displayName }} (@{{ user.tag }})
-              <i class="bi bi-person-plus text-primary" style="font-size: 20px"></i>
-            </li>
-          </ul>
+          <UserSearch
+            v-model:selected-users="selectedUsers"
+            :exclude-user-ids="() => vs.users.value.map((user) => user.id)"
+            validation-id="go-vs-validation"
+          />
         </div>
         <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            :disabled="selectedUsers.length === 0"
+            @click="addSelected"
+          >
+            Add
+          </button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.vs-user {
-  cursor: pointer;
-}
-</style>

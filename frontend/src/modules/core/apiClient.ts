@@ -152,6 +152,28 @@ export default {
     })
   },
 
+  createSplitExpenseConnection(connectionUserId: number) {
+    return axios.post(
+      `${apiBaseUrl}/split-expense/connections`,
+      { connectionUserId },
+      { headers: getHeader() }
+    )
+  },
+
+  patchSplitExpenseConnection(id: number, status: 'accepted' | 'rejected') {
+    return axios.patch(
+      `${apiBaseUrl}/split-expense/connections/${id}`,
+      { status },
+      { headers: getHeader() }
+    )
+  },
+
+  deleteSplitExpenseConnection(id: number) {
+    return axios.delete(`${apiBaseUrl}/split-expense/connections/${id}`, {
+      headers: getHeader()
+    })
+  },
+
   listCurrencies(offset = 0, limit = 100) {
     return axios.get(`${apiBaseUrl}/currencies`, {
       headers: getHeader(),

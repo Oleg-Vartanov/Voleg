@@ -39,13 +39,13 @@ onMounted(() => {
 
   <AddExpenseModal :expenses="expensesState" />
 
-  <div v-if="expensesState.isLoading.value" class="text-center py-3 mt-3">
+  <div v-if="expensesState.isLoading.value" class="text-center py-3">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading expenses…</span>
     </div>
   </div>
 
-  <div v-else class="expenses-list-scroll mt-3">
+  <div v-else class="expenses-list-scroll">
     <div class="expenses-list">
       <p v-if="isEmpty" class="expenses-empty">No expenses yet</p>
 

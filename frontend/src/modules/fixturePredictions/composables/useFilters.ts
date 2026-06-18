@@ -1,17 +1,9 @@
-import { type Ref, ref } from 'vue'
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { CompetitionCode } from '@/modules/fixturePredictions/enum'
 import type { ApiFixtureFilters } from '@/modules/core/apiType.ts'
 
-export interface FixtureFilters {
-  start: Ref<string | null>
-  end: Ref<string | null>
-  competition: Ref<CompetitionCode>
-  season: Ref<number | null>
-  onLoadTable: (filters: ApiFixtureFilters) => void
-  reset: () => void
-  routeQuery: () => object
-}
+export type FixtureFilters = ReturnType<typeof useFilters>
 
 export function useFilters() {
   const defaults = {
@@ -25,7 +17,7 @@ export function useFilters() {
 
   const start = ref<string | null>(route.query.start ?? defaults.start)
   const end = ref<string | null>(route.query.end ?? defaults.end)
-  const competition = ref(route.query.competition ?? defaults.competition)
+  const competition = ref<CompetitionCode>(route.query.competition ?? defaults.competition)
   const season = ref<number | null>(route.query.season ?? defaults.season)
 
   function reset(): void {

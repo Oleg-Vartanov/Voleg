@@ -1,0 +1,42 @@
+@import 'ov-colors';
+
+// Light theme — map semantic roles to palette colors
+$ov-light-text: $ov-color-gray-900;
+$ov-light-text-muted: $ov-color-gray-600;
+$ov-light-surface: $ov-color-gray-100;
+$ov-light-surface-hover: $ov-color-gray-200;
+$ov-light-chrome-bg: $ov-color-gray-100;
+$ov-light-border: $ov-color-gray-300;
+
+// Dark theme
+$ov-dark-text: $ov-color-gray-100;
+$ov-dark-text-muted: $ov-color-gray-500;
+$ov-dark-surface: $ov-color-gray-900;
+$ov-dark-surface-hover: $ov-color-gray-700;
+$ov-dark-chrome-bg: $ov-color-gray-800;
+$ov-dark-border: $ov-color-gray-700;
+
+:root {
+  // Brand — available everywhere, theme-independent
+  --ov-color-primary: #{$ov-color-primary};
+  --ov-color-secondary: #{$ov-color-secondary};
+  --ov-color-white: #{$ov-color-white};
+  --ov-color-black: #{$ov-color-black};
+
+  // Semantic — swap per theme
+  --ov-text: #{$ov-light-text};
+  --ov-text-muted: #{$ov-light-text-muted};
+  --ov-surface: #{$ov-light-surface};
+  --ov-surface-hover: #{$ov-light-surface-hover};
+  --ov-chrome-bg: #{$ov-light-chrome-bg};
+  --ov-border: #{$ov-light-border};
+}
+
+[data-bs-theme='dark'] {
+  --ov-text: #{$ov-dark-text};
+  --ov-text-muted: #{$ov-dark-text-muted};
+  --ov-surface: #{$ov-dark-surface};
+  --ov-surface-hover: #{$ov-dark-surface-hover};
+  --ov-chrome-bg: #{$ov-dark-chrome-bg};
+  --ov-border: #{$ov-dark-border};
+}

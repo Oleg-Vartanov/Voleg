@@ -39,8 +39,8 @@ const index = createRouter({
               component: () => import('@/modules/splitExpense/components/ExpensesTable.vue')
             },
             {
-              path: 'connections',
-              name: 'seConnections',
+              path: 'users',
+              name: 'seUsers',
               meta: { title: 'Split Expense' },
               component: () => import('@/modules/splitExpense/components/Connections.vue')
             },

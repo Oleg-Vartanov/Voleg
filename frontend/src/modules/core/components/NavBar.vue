@@ -1,132 +1,56 @@
 <script setup lang="ts">
-import ColorThemeToggle from './ColorThemeToggle.vue'
-import NavBarDropdown from '@/modules/core/components/NavBarDropdown.vue'
-import NavBarDropdownItem from '@/modules/core/components/NavBarDropdownItem.vue'
-import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { useAuth } from '@/modules/user/stores/useAuth'
+defineProps<{
+  collapsed: boolean
+  sidebarCollapsed: boolean
+}>()
 
-const route = useRoute()
-const auth = useAuth()
-
-type menuItemType = { name: string; title: string; roles?: string[] }
-
-const menuItems: menuItemType[] = [
-  { name: 'about', title: 'About' },
-  { name: 'splitExpense', title: 'Split Expense' },
-  { name: 'footballPredictions', title: 'Football Predictions' },
-  { name: 'pricing', title: 'Pricing' },
-  { name: 'admin', title: 'Admin', roles: ['ROLE_ADMIN'] }
-]
-
-const isMenuDropdownOpen = ref(false)
-const isProfileDropdownOpen = ref(false)
-
-const activeMenuItem = computed((): menuItemType | null => {
-  return menuItems.find((nav) => nav.name === route.name) ?? null
-})
+const emit = defineEmits<{
+  toggle: []
+}>()
 </script>
 
 <template>
-  <nav class="navbar navbar-expand-md bg-body-tertiary" aria-label="Navbar">
-    <div class="container-fluid">
-      <div class="d-flex d-md-none w-100">
+  <header class="app-navbar navbar">
+    <div class="app-navbar__row">
+      <div
+        class="app-navbar__sidebar-col"
+        :class="{ 'app-navbar__sidebar-col--narrow': sidebarCollapsed }"
+      >
         <button
-          class="btn"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbars"
-          aria-controls="navbars"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
+          class="app-navbar__toggle side-nav__link"
+          :aria-label="collapsed ? 'Show sidebar' : 'Hide sidebar'"
+          @click="emit('toggle')"
         >
-          <span class="navbar-toggler-icon"></span>
+          <i
+            class="bi"
+            :class="collapsed ? 'bi-chevron-right' : 'bi-chevron-left'"
+            aria-hidden="true"
+          ></i>
         </button>
-
-        <div class="navbar-brand p-0 pe-2 m-0">
-          <img src="/logo-voleg.svg" width="100" height="40" alt="logo" />
-        </div>
       </div>
-
-      <div id="navbars" class="collapse navbar-collapse justify-content-center w-100">
-        <div class="navbar-brand p-0 pe-2 m-0 d-none d-md-block">
-          <img src="/logo-voleg.svg" width="100" height="40" alt="logo" />
-        </div>
-
-        <ul class="navbar-nav">
-          <!-- Menu Navigation-->
-          <NavBarDropdown
-            v-model:is-open="isMenuDropdownOpen"
-            :text="activeMenuItem?.title ?? 'Menu'"
-            :active="activeMenuItem !== null"
-          >
-            <NavBarDropdownItem v-for="menuItem in menuItems" :key="menuItem.name">
-              <router-link
-                v-if="!menuItem.roles || auth.hasRole(menuItem.roles)"
-                class="dropdown-item"
-                :class="{ active: menuItem.name === route.name }"
-                :to="{ name: menuItem.name }"
-              >
-                {{ menuItem.title }}
-              </router-link>
-            </NavBarDropdownItem>
-          </NavBarDropdown>
-
-          <!-- Sign In -->
-          <li class="nav-item">
-            <router-link
-              v-if="!auth.user.isSignedIn"
-              class="nav-link"
-              :to="{ name: 'signIn' }"
-              :class="{ active: 'signIn' === route.name }"
-            >
-              Sign In
-            </router-link>
-          </li>
-
-          <!-- Profile Navigation-->
-          <NavBarDropdown
-            v-if="auth.user.isSignedIn"
-            v-model:is-open="isProfileDropdownOpen"
-            :text="auth.user.displayName ?? 'User'"
-            :active="route.name === 'profileInfo' || route.name === 'contacts'"
-          >
-            <NavBarDropdownItem>
-              <router-link
-                class="dropdown-item"
-                :class="{ active: route.name === 'profileInfo' }"
-                :to="{ name: 'profileInfo' }"
-              >
-                Profile
-              </router-link>
-            </NavBarDropdownItem>
-
-            <NavBarDropdownItem>
-              <router-link
-                class="dropdown-item"
-                :class="{ active: route.name === 'contacts' }"
-                :to="{ name: 'contacts' }"
-              >
-                Contacts
-              </router-link>
-            </NavBarDropdownItem>
-
-            <NavBarDropdownItem>
-              <a class="dropdown-item" href="#" @click="auth.signOut()">Sign Out</a>
-            </NavBarDropdownItem>
-          </NavBarDropdown>
-
-          <li class="nav-item nav-link">
-            <ColorThemeToggle></ColorThemeToggle>
-          </li>
-        </ul>
-      </div>
+      <img
+        class="app-navbar__brand"
+        src="/logo-voleg.svg"
+        width="100"
+        height="40"
+        alt="Voleg"
+      />
     </div>
-  </nav>
+  </header>
 </template>
 
 <style scoped>
-.navbar {
-  border-bottom: 1px solid var(--bs-primary);
+.app-navbar {
+  padding: 0;
+  min-height: 0;
+  background-color: var(--ov-chrome-bg);
+  border-bottom: 1px solid var(--ov-color-primary);
+}
+
+@media (min-width: 768px) {
+  .app-navbar {
+    border-bottom: none;
+  }
 }
 </style>

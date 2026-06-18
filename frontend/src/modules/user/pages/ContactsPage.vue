@@ -42,11 +42,7 @@ contacts.loadContacts()
   </ul>
 
   <AddContactModal
-    v-model:search-tag="contacts.searchTag.value"
-    :search-users="contacts.searchUsers.value"
-    :search-error="contacts.searchError.value"
-    :is-loading="contacts.isLoading.value"
-    @search="contacts.searchUser"
+    :exclude-user-ids="() => contacts.users.value.map((contact) => contact.id)"
     @add="contacts.addContact"
   />
 </template>

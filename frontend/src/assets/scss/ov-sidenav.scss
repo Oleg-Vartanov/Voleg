@@ -1,0 +1,218 @@
+$ov-sidenav-link-padding-y: 0.2rem;
+$ov-sidenav-link-padding-x: 1rem;
+$ov-sidenav-padding-x: 0.75rem;
+$ov-sidenav-radius: 3rem;
+$ov-sidenav-mobile-shadow: 0.25rem 0 0.5rem rgba(0, 0, 0, 0.15);
+$ov-chrome-toggle-icon-size: 1rem;
+
+.app-layout {
+  --app-navbar-height: calc(
+    #{$ov-sidenav-link-padding-y * 2} + #{$ov-chrome-toggle-icon-size}
+  );
+}
+
+.side-nav {
+  width: var(--app-sidebar-width, 240px);
+  flex-shrink: 0;
+  background-color: var(--ov-chrome-bg);
+  border-right: 1px solid var(--ov-color-primary);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.side-nav__content {
+  padding: 0 $ov-sidenav-padding-x $ov-sidenav-padding-x;
+}
+
+.side-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.side-nav__item {
+  margin: 0;
+}
+
+.side-nav__link {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: $ov-sidenav-link-padding-y $ov-sidenav-link-padding-x;
+  border: 1px solid transparent;
+  border-radius: $ov-sidenav-radius;
+  background: none;
+  color: var(--ov-text);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out;
+
+  &:hover {
+    background-color: var(--ov-surface-hover);
+  }
+
+  &--active {
+    color: var(--ov-text);
+    border-color: var(--ov-color-primary);
+    background-color: var(--ov-surface-hover);
+
+    &:hover {
+      color: var(--ov-text);
+      border-color: var(--ov-color-primary);
+      background-color: var(--ov-surface-hover);
+    }
+  }
+
+  &--user {
+    font-weight: 600;
+    color: var(--ov-text-muted);
+    cursor: default;
+    pointer-events: none;
+  }
+
+  &--icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    text-align: center;
+  }
+}
+
+.side-nav__divider {
+  margin: 0.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--ov-border);
+}
+
+.side-nav__theme {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0;
+  padding: $ov-sidenav-link-padding-y $ov-sidenav-link-padding-x;
+  border: 1px solid transparent;
+  border-radius: $ov-sidenav-radius;
+  color: var(--ov-text);
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+
+  &.form-switch {
+    padding-left: $ov-sidenav-link-padding-x;
+  }
+
+  &.form-switch .form-check-input {
+    margin-left: 0;
+    flex-shrink: 0;
+  }
+
+  &:hover,
+  &:focus-within {
+    background-color: var(--ov-surface-hover);
+  }
+}
+
+@media (min-width: 768px) {
+  .side-nav {
+    transition:
+      width 0.25s ease-in-out,
+      min-width 0.25s ease-in-out,
+      border-color 0.25s ease-in-out;
+  }
+
+  .side-nav--collapsed {
+    width: 0;
+    min-width: 0;
+    border-right-color: transparent;
+    overflow: hidden;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .side-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1045;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease-in-out;
+    box-shadow: $ov-sidenav-mobile-shadow;
+  }
+
+  .side-nav--open {
+    transform: translateX(0);
+  }
+}
+
+.app-navbar__row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 0;
+}
+
+.app-navbar.navbar {
+  padding: 0;
+  min-height: 0;
+}
+
+.app-navbar__sidebar-col {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 var(--app-sidebar-width, 240px);
+  width: var(--app-sidebar-width, 240px);
+  box-sizing: border-box;
+  padding: 0;
+  transition:
+    width 0.25s ease-in-out,
+    flex-basis 0.25s ease-in-out;
+}
+
+.app-navbar__sidebar-col--narrow {
+  flex-basis: auto;
+  width: auto;
+}
+
+.app-navbar__brand {
+  display: block;
+  flex-shrink: 0;
+  width: auto;
+  height: 2rem;
+  margin-left: auto;
+  padding-right: $ov-sidenav-padding-x;
+  pointer-events: none;
+  user-select: none;
+}
+
+.app-navbar__toggle.side-nav__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: calc(100% - #{$ov-sidenav-padding-x * 2});
+  margin: 0 $ov-sidenav-padding-x;
+  border-radius: $ov-sidenav-radius;
+}
+
+.app-navbar__sidebar-col--narrow .app-navbar__toggle.side-nav__link {
+  width: auto;
+}
+
+@media (max-width: 767.98px) {
+  .app-navbar__sidebar-col {
+    flex-basis: auto;
+    width: auto;
+  }
+
+  .app-navbar__toggle.side-nav__link {
+    width: auto;
+  }
+}

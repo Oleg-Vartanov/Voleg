@@ -9,9 +9,6 @@ export function useContacts() {
   const topAlerts = useTopAlerts()
 
   const users = ref<ApiUser[]>([])
-  const searchUsers = ref<ApiUser[]>([])
-  const searchTag = ref('')
-  const searchError = ref('')
   const isLoading = ref(false)
   const isListLoading = ref(false)
 
@@ -29,23 +26,6 @@ export function useContacts() {
     }
   }
 
-  async function searchUser() {
-    isLoading.value = true
-    searchError.value = ''
-    try {
-      const response = await client.listUsers(searchTag.value)
-      const contactIds = new Set(users.value.map((c) => c.id))
-      searchUsers.value = response.data.filter(
-        (user: ApiUser) => user.id !== auth.user.id && !contactIds.has(user.id)
-      )
-    } catch {
-      searchError.value = 'Failed to search users.'
-      searchUsers.value = []
-    } finally {
-      isLoading.value = false
-    }
-  }
-
   async function addContact(user: ApiUser) {
     if (auth.user.id === null) return
     if (auth.user.id === user.id) {
@@ -57,7 +37,6 @@ export function useContacts() {
     try {
       await client.addContact(auth.user.id, user.id)
       users.value.push(user)
-      searchUsers.value = searchUsers.value.filter((u) => u.id !== user.id)
       topAlerts.add('Contact added.', 'success', 3)
     } catch {
       topAlerts.add('Failed to add contact.', 'danger', 5)
@@ -72,7 +51,7 @@ export function useContacts() {
     isLoading.value = true
     try {
       await client.deleteContact(auth.user.id, user.id)
-      users.value = users.value.filter((c) => c.id !== user.id)
+      users.value = users.value.filter((contact) => contact.id !== user.id)
       topAlerts.add('Contact removed.', 'success', 3)
     } catch {
       topAlerts.add('Failed to remove contact.', 'danger', 5)
@@ -83,13 +62,9 @@ export function useContacts() {
 
   return {
     users,
-    searchUsers,
-    searchTag,
-    searchError,
     isLoading,
     isListLoading,
     loadContacts,
-    searchUser,
     addContact,
     removeContact
   }

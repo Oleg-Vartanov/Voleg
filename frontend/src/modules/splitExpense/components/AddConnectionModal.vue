@@ -8,25 +8,25 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  add: [user: ApiUser]
+  send: [user: ApiUser]
 }>()
 
 const selectedUsers = ref<ApiUser[]>([])
 
-function addSelected() {
+function sendSelected() {
   for (const user of selectedUsers.value) {
-    emit('add', user)
+    emit('send', user)
   }
   selectedUsers.value = []
 }
 </script>
 
 <template>
-  <div id="addContactModal" class="modal fade" tabindex="-1" aria-labelledby="addContactModalLabel">
+  <div id="addConnectionModal" class="modal fade" tabindex="-1" aria-labelledby="addConnectionModalLabel">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 id="addContactModalLabel" class="modal-title fs-5">Add contact</h1>
+          <h1 id="addConnectionModalLabel" class="modal-title fs-5">Add connection</h1>
           <button
             type="button"
             class="btn-close"
@@ -38,7 +38,7 @@ function addSelected() {
           <UserSearch
             v-model:selected-users="selectedUsers"
             :exclude-user-ids="excludeUserIds"
-            validation-id="contacts-search-validation"
+            validation-id="connections-search-validation"
           />
         </div>
         <div class="modal-footer">
@@ -46,9 +46,9 @@ function addSelected() {
             type="button"
             class="btn btn-outline-primary"
             :disabled="selectedUsers.length === 0"
-            @click="addSelected"
+            @click="sendSelected"
           >
-            Add
+            Request
           </button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>

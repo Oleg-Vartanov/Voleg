@@ -1,10 +1,11 @@
 import type { ApiUser } from '@/modules/core/apiType.ts'
 
-export type SplitExpenseTabTag = 'expenses' | 'contacts' | 'charts'
+export type SplitExpenseTabTag = 'expenses' | 'connections' | 'charts'
 
 export type SplitExpenseTab = {
   tag: SplitExpenseTabTag
   title: string
+  route: string
   icon: string
   disabled?: boolean
 }
@@ -44,6 +45,7 @@ export interface ApiSeExpenseSplit {
 export interface ApiSeConnection {
   id: number
   status: 'accepted' | 'rejected' | 'pending' | 'blocked'
+  requestedBy: ApiUser
   userA: ApiUser
   userB: ApiUser
 }

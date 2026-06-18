@@ -26,17 +26,8 @@ watch(isDark, async (isChecked) => {
 </script>
 
 <template>
-  <div class="form-check form-switch">
-    <input
-      id="flexSwitchCheckChecked"
-      v-model="isDark"
-      class="form-check-input"
-      type="checkbox"
-      role="switch"
-      checked
-    />
-    <label class="form-check-label" for="flexSwitchCheckChecked">
-      <i class="bi" :class="[isDark ? 'bi-moon-stars-fill' : 'bi-moon-stars']"></i>
-    </label>
-  </div>
+  <label class="color-theme-toggle form-check form-switch">
+    <input v-model="isDark" class="form-check-input" type="checkbox" role="switch" />
+    <i class="bi" :class="[isDark ? 'bi-moon-stars-fill' : 'bi-moon-stars']"></i>
+  </label>
 </template>

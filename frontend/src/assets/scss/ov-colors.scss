@@ -1,0 +1,17 @@
+// Core palette — the only place to set raw color values.
+// Components should use semantic tokens from ov-theme.scss, not these directly.
+
+$ov-color-primary: #0d6efd;
+$ov-color-secondary: #6c757d;
+
+$ov-color-white: #ffffff;
+$ov-color-black: #000000;
+
+$ov-color-gray-100: #f8f9fa;
+$ov-color-gray-200: #e9ecef;
+$ov-color-gray-300: #dee2e6;
+$ov-color-gray-500: #adb5bd;
+$ov-color-gray-600: #6c757d;
+$ov-color-gray-700: #495057;
+$ov-color-gray-800: #2b3035;
+$ov-color-gray-900: #212529;
