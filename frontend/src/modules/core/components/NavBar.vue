@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import LogoVoleg from './LogoVoleg.vue'
+
 defineProps<{
   collapsed: boolean
   sidebarCollapsed: boolean
@@ -29,13 +31,7 @@ const emit = defineEmits<{
           ></i>
         </button>
       </div>
-      <img
-        class="app-navbar__brand"
-        src="/logo-voleg.svg"
-        width="100"
-        height="40"
-        alt="Voleg"
-      />
+      <LogoVoleg class="app-navbar__brand" />
     </div>
   </header>
 </template>

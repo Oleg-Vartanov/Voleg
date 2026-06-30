@@ -1,0 +1,25 @@
+@import 'ov-colors';
+
+// Bootstrap bakes button colors at compile time, so swap primary for dark theme after bootstrap loads.
+[data-bs-theme='dark'] {
+  --bs-primary: #{$ov-color-white};
+  --bs-primary-rgb: #{red($ov-color-white)}, #{green($ov-color-white)}, #{blue($ov-color-white)};
+
+  .btn-primary {
+    @include button-variant($ov-color-white, $ov-color-white);
+  }
+
+  .btn-outline-primary {
+    @include button-outline-variant($ov-color-white);
+  }
+
+  .text-bg-primary {
+    color: color-contrast($ov-color-white) if($enable-important-utilities, !important, null);
+  }
+
+  .pagination {
+    --bs-pagination-active-color: #{$ov-color-black};
+    --bs-pagination-active-bg: #{$ov-color-white};
+    --bs-pagination-active-border-color: #{$ov-color-white};
+  }
+}

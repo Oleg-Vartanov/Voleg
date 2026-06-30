@@ -5,7 +5,7 @@ import ExpenseRow from '@/modules/splitExpense/components/ExpenseRow.vue'
 import { useExpenses } from '@/modules/splitExpense/composables/useExpenses'
 import { groupExpensesByMonth } from '@/modules/splitExpense/utils/expenseDates'
 import { computed, onMounted, ref } from 'vue'
-import type { ApiSeExpense } from '@/modules/splitExpense/types.ts';
+import type { ApiSeExpense } from '@/modules/splitExpense/types'
 
 const expensesState = useExpenses()
 
@@ -27,45 +27,49 @@ onMounted(() => {
 </script>
 
 <template>
-  <button
-    type="button"
-    class="btn btn-outline-primary w-100"
-    data-bs-toggle="modal"
-    data-bs-target="#addExpenseModal"
-  >
-    <i class="bi bi-plus-lg" aria-hidden="true"></i>
-    Add expense
-  </button>
+  <div class="ov-center">
+    <div class="container d-flex flex-column gap-2">
+      <button
+        type="button"
+        class="btn btn-outline-primary w-100"
+        data-bs-toggle="modal"
+        data-bs-target="#addExpenseModal"
+      >
+        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        Add expense
+      </button>
 
-  <AddExpenseModal :expenses="expensesState" />
+      <AddExpenseModal :expenses="expensesState" />
 
-  <div v-if="expensesState.isLoading.value" class="text-center py-3">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading expenses…</span>
-    </div>
-  </div>
+      <div v-if="expensesState.isLoading.value" class="text-center py-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading expenses…</span>
+        </div>
+      </div>
 
-  <div v-else class="expenses-list-scroll">
-    <div class="expenses-list">
-      <p v-if="isEmpty" class="expenses-empty">No expenses yet</p>
+      <div v-else class="expenses-list-scroll">
+        <div class="expenses-list">
+          <p v-if="isEmpty" class="expenses-empty">No expenses yet</p>
 
-      <template v-for="group in expensesByMonth" :key="group.month">
-        <div class="expenses-month-header">{{ group.label }}</div>
+          <template v-for="group in expensesByMonth" :key="group.month">
+            <div class="expenses-month-header">{{ group.label }}</div>
 
-        <article
-          v-for="expense in group.items"
-          :key="expense.id"
-          class="expense-item"
-          :class="{ 'is-expanded': isExpanded(expense) }"
-        >
-          <ExpenseRow
-            :expense="expense"
-            :expanded="isExpanded(expense)"
-            @toggle="toggleExpense(expense)"
-          />
-          <ExpenseDetailPanel :expense="expense" :open="isExpanded(expense)" />
-        </article>
-      </template>
+            <article
+              v-for="expense in group.items"
+              :key="expense.id"
+              class="expense-item"
+              :class="{ 'is-expanded': isExpanded(expense) }"
+            >
+              <ExpenseRow
+                :expense="expense"
+                :expanded="isExpanded(expense)"
+                @toggle="toggleExpense(expense)"
+              />
+              <ExpenseDetailPanel :expense="expense" :open="isExpanded(expense)" />
+            </article>
+          </template>
+        </div>
+      </div>
     </div>
   </div>
 </template>

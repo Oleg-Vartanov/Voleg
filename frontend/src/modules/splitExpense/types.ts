@@ -1,15 +1,5 @@
 import type { ApiUser } from '@/modules/core/apiType.ts'
 
-export type SplitExpenseTabTag = 'expenses' | 'connections' | 'charts'
-
-export type SplitExpenseTab = {
-  tag: SplitExpenseTabTag
-  title: string
-  route: string
-  icon: string
-  disabled?: boolean
-}
-
 export interface ApiSeCategory {
   id: number
   tag: string

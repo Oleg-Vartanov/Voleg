@@ -28,30 +28,40 @@ const index = createRouter({
           path: 'split-expense',
           name: 'splitExpense',
           meta: { title: 'Split Expense' },
-          redirect: { name: 'seExpenses' },
+          redirect: { name: 'seExpenses' }
+        },
+        {
+          path: 'split-expense/expenses',
+          name: 'seExpenses',
+          meta: { title: 'Split Expense' },
           beforeEnter: [guards.isAuthenticated],
-          component: () => import('@/modules/splitExpense/pages/SplitExpensePage.vue'),
-          children: [
-            {
-              path: 'expenses',
-              name: 'seExpenses',
-              meta: { title: 'Split Expense' },
-              component: () => import('@/modules/splitExpense/components/ExpensesTable.vue')
-            },
-            {
-              path: 'users',
-              name: 'seUsers',
-              meta: { title: 'Split Expense' },
-              component: () => import('@/modules/splitExpense/components/Connections.vue')
-            },
-            {
-              path: 'charts',
-              name: 'seCharts',
-              meta: { title: 'Split Expense' },
-              component: () => import('@/modules/splitExpense/components/Charts.vue'),
-              redirect: { name: 'splitExpense' }
-            }
-          ]
+          component: () => import('@/modules/splitExpense/pages/ExpensesPage.vue')
+        },
+        {
+          path: 'split-expense/connections',
+          name: 'seConnections',
+          meta: { title: 'Split Expense' },
+          beforeEnter: [guards.isAuthenticated],
+          component: () => import('@/modules/splitExpense/pages/ConnectionsPage.vue')
+        },
+        {
+          path: 'split-expense/requests',
+          name: 'seRequests',
+          meta: { title: 'Split Expense' },
+          beforeEnter: [guards.isAuthenticated],
+          component: () => import('@/modules/splitExpense/pages/RequestsPage.vue')
+        },
+        {
+          path: 'split-expense/users',
+          redirect: { name: 'seConnections' }
+        },
+        {
+          path: 'split-expense/charts',
+          name: 'seCharts',
+          meta: { title: 'Split Expense' },
+          beforeEnter: [guards.isAuthenticated],
+          component: () => import('@/modules/splitExpense/pages/ChartsPage.vue'),
+          redirect: { name: 'seExpenses' }
         },
         {
           path: 'about',

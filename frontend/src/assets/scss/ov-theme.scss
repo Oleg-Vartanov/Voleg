@@ -18,8 +18,7 @@ $ov-dark-border: $ov-color-gray-700;
 
 :root {
   // Brand — available everywhere, theme-independent
-  --ov-color-primary: #{$ov-color-primary};
-  --ov-color-secondary: #{$ov-color-secondary};
+  --ov-color-primary: #{$ov-color-black};
   --ov-color-white: #{$ov-color-white};
   --ov-color-black: #{$ov-color-black};
 
@@ -30,13 +29,18 @@ $ov-dark-border: $ov-color-gray-700;
   --ov-surface-hover: #{$ov-light-surface-hover};
   --ov-chrome-bg: #{$ov-light-chrome-bg};
   --ov-border: #{$ov-light-border};
+  --ov-logo-fill-primary: #{$ov-color-black};
+  --ov-logo-fill-secondary: #{$ov-color-white};
 }
 
 [data-bs-theme='dark'] {
+  --ov-color-primary: #{$ov-color-white};
   --ov-text: #{$ov-dark-text};
   --ov-text-muted: #{$ov-dark-text-muted};
   --ov-surface: #{$ov-dark-surface};
   --ov-surface-hover: #{$ov-dark-surface-hover};
   --ov-chrome-bg: #{$ov-dark-chrome-bg};
   --ov-border: #{$ov-dark-border};
+  --ov-logo-fill-primary: #{$ov-color-white};
+  --ov-logo-fill-secondary: #{$ov-color-black};
 }
