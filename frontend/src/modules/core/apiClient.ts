@@ -152,17 +152,17 @@ export default {
     })
   },
 
-  createSplitExpenseConnection(connectionUserId: number) {
+  requestSplitExpenseConnection(connectionUserId: number) {
     return axios.post(
-      `${apiBaseUrl}/split-expense/connections`,
+      `${apiBaseUrl}/split-expense/connections/request`,
       { connectionUserId },
       { headers: getHeader() }
     )
   },
 
-  patchSplitExpenseConnection(id: number, status: 'accepted' | 'rejected') {
-    return axios.patch(
-      `${apiBaseUrl}/split-expense/connections/${id}`,
+  respondSplitExpenseConnection(id: number, status: 'accepted' | 'rejected') {
+    return axios.post(
+      `${apiBaseUrl}/split-expense/connections/${id}/response`,
       { status },
       { headers: getHeader() }
     )

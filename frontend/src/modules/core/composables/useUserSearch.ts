@@ -3,7 +3,7 @@ import client from '@/modules/core/apiClient'
 import type { ApiUser } from '@/modules/core/apiType'
 import { useAuth } from '@/modules/user/stores/useAuth'
 
-export function useUserSearch(excludeUserIds: () => number[]) {
+export function useUserSearch(excludeUserIds: () => number[], excludeSelf = true) {
   const auth = useAuth()
 
   const users = ref<ApiUser[]>([])
@@ -13,7 +13,10 @@ export function useUserSearch(excludeUserIds: () => number[]) {
 
   function filterResults(results: ApiUser[]): ApiUser[] {
     const excluded = new Set(
-      [auth.user.id, ...excludeUserIds()].filter((id): id is number => id !== null)
+      [
+        ...(excludeSelf && auth.user.id !== null ? [auth.user.id] : []),
+        ...excludeUserIds(),
+      ].filter((id): id is number => id !== null),
     )
     return results.filter((user) => !excluded.has(user.id))
   }

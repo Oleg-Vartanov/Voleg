@@ -7,18 +7,24 @@ const PAGE_SIZE = 5
 
 const props = withDefaults(
   defineProps<{
-    excludeUserIds: () => number[]
+    excludeUserIds?: () => number[]
     validationId?: string
+    singleSelect?: boolean
+    excludeSelf?: boolean
   }>(),
   {
-    validationId: 'user-search-validation'
+    excludeUserIds: () => [],
+    validationId: 'user-search-validation',
+    singleSelect: false,
+    excludeSelf: true,
   }
 )
 
 const selectedUsers = defineModel<ApiUser[]>('selectedUsers', { default: () => [] })
 
 const { users, searchTag, searchError, isLoading, searchUser } = useUserSearch(
-  () => props.excludeUserIds()
+  () => props.excludeUserIds(),
+  props.excludeSelf,
 )
 
 const currentPage = ref(1)
@@ -37,6 +43,11 @@ function isSelected(user: ApiUser) {
 function toggleUser(user: ApiUser) {
   if (isSelected(user)) {
     selectedUsers.value = selectedUsers.value.filter((selected) => selected.id !== user.id)
+    return
+  }
+
+  if (props.singleSelect) {
+    selectedUsers.value = [user]
     return
   }
 
@@ -105,7 +116,8 @@ watch(
         <label class="d-flex align-items-center gap-2 user-search-row mb-0 px-3 py-2 w-100">
           <input
             class="form-check-input flex-shrink-0 mt-0"
-            type="checkbox"
+            :type="singleSelect ? 'radio' : 'checkbox'"
+            :name="singleSelect ? `${validationId}-user` : undefined"
             :checked="isSelected(user)"
             @change="toggleUser(user)"
           />

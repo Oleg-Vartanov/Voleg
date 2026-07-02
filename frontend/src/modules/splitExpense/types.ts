@@ -34,7 +34,7 @@ export interface ApiSeExpenseSplit {
 
 export interface ApiSeConnection {
   id: number
-  status: 'accepted' | 'rejected' | 'pending' | 'blocked'
+  status: 'accepted' | 'rejected' | 'pending'
   requestedBy: ApiUser
   userA: ApiUser
   userB: ApiUser

@@ -1,9 +1,9 @@
 import { computed, ref } from 'vue';
+import axios from 'axios';
 import client from '@/modules/core/apiClient';
 import type { ApiUser } from '@/modules/core/apiType';
 import type { ApiSeConnection } from '@/modules/splitExpense/types';
 import {
-  getConnectionPartner,
   isIncomingRequest,
   isOutgoingRequest,
 } from '@/modules/splitExpense/utils/connections';
@@ -38,6 +38,16 @@ export function useConnections() {
     );
   });
 
+  const rejectedConnections = computed(() => {
+    if (auth.user.id === null) return [];
+
+    return connections.value.filter(
+      (connection) =>
+        connection.status === 'rejected' &&
+        (connection.userA.id === auth.user.id || connection.userB.id === auth.user.id),
+    );
+  });
+
   async function loadConnections() {
     isListLoading.value = true;
     client.listSplitExpenseConnections()
@@ -56,11 +66,14 @@ export function useConnections() {
   async function sendRequest(user: ApiUser) {
     isLoading.value = true;
     try {
-      const response = await client.createSplitExpenseConnection(user.id);
+      const response = await client.requestSplitExpenseConnection(user.id);
       connections.value.unshift(response.data);
       topAlerts.add('Connection request sent.', 'success', 3);
-    } catch {
-      topAlerts.add('Failed to send connection request.', 'danger', 5);
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : undefined;
+      topAlerts.add(message ?? 'Failed to send connection request.', 'danger', 5);
     } finally {
       isLoading.value = false;
     }
@@ -69,7 +82,7 @@ export function useConnections() {
   async function acceptRequest(connection: ApiSeConnection) {
     isLoading.value = true;
     try {
-      const response = await client.patchSplitExpenseConnection(connection.id, 'accepted');
+      const response = await client.respondSplitExpenseConnection(connection.id, 'accepted');
       connections.value = connections.value.map((item) =>
         item.id === connection.id ? response.data : item,
       );
@@ -84,7 +97,7 @@ export function useConnections() {
   async function rejectRequest(connection: ApiSeConnection) {
     isLoading.value = true;
     try {
-      const response = await client.patchSplitExpenseConnection(connection.id, 'rejected');
+      const response = await client.respondSplitExpenseConnection(connection.id, 'rejected');
       connections.value = connections.value.map((item) =>
         item.id === connection.id ? response.data : item,
       );
@@ -127,6 +140,7 @@ export function useConnections() {
     acceptedConnections,
     incomingRequests,
     outgoingRequests,
+    rejectedConnections,
     isLoading,
     isListLoading,
     loadConnections,

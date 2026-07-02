@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 #[TestDox('Split Expense')]
-class SeConnectionPatchActionTest extends ApiTestCase
+class SeConnectionResponseActionTest extends ApiTestCase
 {
     private UserRepository $userRepo;
     private SeConnectionRepository $conRepo;
@@ -24,7 +24,7 @@ class SeConnectionPatchActionTest extends ApiTestCase
         $this->conRepo = $this->getService(SeConnectionRepository::class);
     }
 
-    #[TestDox('Connection PATCH: accept success')]
+    #[TestDox('Connection response: accept success')]
     public function testAcceptSuccess(): void
     {
         $userA = $this->userRepo->findByTag('user1');
@@ -43,7 +43,7 @@ class SeConnectionPatchActionTest extends ApiTestCase
         );
     }
 
-    #[TestDox('Connection PATCH: reject success')]
+    #[TestDox('Connection response: reject success')]
     public function testRejectSuccess(): void
     {
         $userA = $this->createUser(flush: false);
@@ -61,7 +61,7 @@ class SeConnectionPatchActionTest extends ApiTestCase
         );
     }
 
-    #[TestDox('Connection PATCH: only requested user can respond')]
+    #[TestDox('Connection response: only requested user can respond')]
     public function testOnlyRequestedUserCanRespond(): void
     {
         $userA = $this->createUser(flush: false);
@@ -78,8 +78,8 @@ class SeConnectionPatchActionTest extends ApiTestCase
     private function sendRequest(int $id, string $status): void
     {
         $this->client->jsonRequest(
-            method: Request::METHOD_PATCH,
-            uri: $this->router->generate('se_connection_patch', ['id' => $id]),
+            method: Request::METHOD_POST,
+            uri: $this->router->generate('se_connection_response', ['id' => $id]),
             parameters: ['status' => $status],
         );
     }

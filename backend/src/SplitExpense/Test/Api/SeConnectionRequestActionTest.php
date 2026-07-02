@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 #[TestDox('Split Expense')]
-class SeConnectionPostActionTest extends ApiTestCase
+class SeConnectionRequestActionTest extends ApiTestCase
 {
     private SeConnectionRepository $conRepo;
 
@@ -21,7 +21,7 @@ class SeConnectionPostActionTest extends ApiTestCase
         $this->conRepo = $this->getService(SeConnectionRepository::class);
     }
 
-    #[TestDox('Connection POST: success')]
+    #[TestDox('Connection request: success')]
     public function testSuccess(): void
     {
         $userA = $this->createUser(flush: false);
@@ -42,7 +42,7 @@ class SeConnectionPostActionTest extends ApiTestCase
         );
     }
 
-    #[TestDox('Connection POST: requested user not found')]
+    #[TestDox('Connection request: requested user not found')]
     public function testRequestedUserNotFound(): void
     {
         $this->signIn($this->createUser());
@@ -50,7 +50,7 @@ class SeConnectionPostActionTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
 
-    #[TestDox('Connection POST: same user error')]
+    #[TestDox('Connection request: same user error')]
     public function testSameUserError(): void
     {
         $user = $this->createUser();
@@ -59,7 +59,7 @@ class SeConnectionPostActionTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
     }
 
-    #[TestDox('Connection POST: already exists error')]
+    #[TestDox('Connection request: already exists error')]
     public function testAlreadyExistsError(): void
     {
         $userA = $this->createUser();
@@ -74,7 +74,7 @@ class SeConnectionPostActionTest extends ApiTestCase
     {
         $this->client->jsonRequest(
             method: Request::METHOD_POST,
-            uri: $this->router->generate('se_connection_post'),
+            uri: $this->router->generate('se_connection_request'),
             parameters: ['connectionUserId' => $connectionUserId],
         );
     }

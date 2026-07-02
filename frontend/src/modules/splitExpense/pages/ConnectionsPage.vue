@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AddConnectionModal from '@/modules/splitExpense/components/AddConnectionModal.vue'
 import { useConnections } from '@/modules/splitExpense/composables/useConnections'
-import { getConnectionPartner, getConnectionPartnerName } from '@/modules/splitExpense/utils/connections'
+import { getConnectionPartnerName } from '@/modules/splitExpense/utils/connections'
 import { useAuth } from '@/modules/user/stores/useAuth'
 
 const auth = useAuth()
@@ -52,23 +52,13 @@ function partnerName(connection: Parameters<typeof getConnectionPartnerName>[0])
           :disabled="connections.isLoading.value"
           @click="connections.removeConnection(connection)"
         >
-          <i class="bi bi-x-lg" aria-hidden="true"></i>
+          Remove
         </button>
       </li>
     </ul>
   </div>
 
-  <AddConnectionModal
-    :exclude-user-ids="
-      () =>
-        auth.user.id === null
-          ? []
-          : connections.connections.value.map((connection) =>
-              getConnectionPartner(connection, auth.user.id!).id
-            )
-    "
-    @send="connections.sendRequest"
-  />
+  <AddConnectionModal @send="connections.sendRequest" />
     </div>
   </div>
 </template>

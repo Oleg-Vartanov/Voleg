@@ -6,7 +6,6 @@ use App\SplitExpense\Entity\SeConnection;
 use App\SplitExpense\Enum\SeConnectionStatusEnum;
 use App\SplitExpense\Repository\SeConnectionRepository;
 use App\User\Entity\User;
-use InvalidArgumentException;
 use LogicException;
 
 readonly class SeConnectionService
@@ -29,8 +28,12 @@ readonly class SeConnectionService
             throw new LogicException('Cannot add self as connection.');
         }
 
-        if ($this->repository->findOneByUsers($userA, $userB) !== null) {
-            throw new LogicException('Connection already exists.');
+        $connection = $this->repository->findOneByUsers($userA, $userB);
+        if ($connection !== null) {
+            if ($connection->getStatus() === SeConnectionStatusEnum::ACCEPTED) {
+                throw new LogicException('Connection already exists.');
+            }
+            throw new LogicException('Connection request already exists.');
         }
 
         return new SeConnection($userA, $userB);

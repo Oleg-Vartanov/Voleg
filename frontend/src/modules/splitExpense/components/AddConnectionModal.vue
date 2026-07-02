@@ -3,10 +3,6 @@ import { ref } from 'vue'
 import UserSearch from '@/modules/core/components/UserSearch.vue'
 import type { ApiUser } from '@/modules/core/apiType'
 
-defineProps<{
-  excludeUserIds: () => number[]
-}>()
-
 const emit = defineEmits<{
   send: [user: ApiUser]
 }>()
@@ -14,9 +10,10 @@ const emit = defineEmits<{
 const selectedUsers = ref<ApiUser[]>([])
 
 function sendSelected() {
-  for (const user of selectedUsers.value) {
-    emit('send', user)
-  }
+  const user = selectedUsers.value[0]
+  if (!user) return
+
+  emit('send', user)
   selectedUsers.value = []
 }
 </script>
@@ -37,7 +34,8 @@ function sendSelected() {
         <div class="modal-body">
           <UserSearch
             v-model:selected-users="selectedUsers"
-            :exclude-user-ids="excludeUserIds"
+            :exclude-self="false"
+            single-select
             validation-id="connections-search-validation"
           />
         </div>
