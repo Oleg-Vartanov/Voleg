@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useUserSearch } from '@/modules/core/composables/useUserSearch'
 import type { ApiUser } from '@/modules/core/apiType'
+import { useAuth } from '@/modules/user/stores/useAuth'
 
 const PAGE_SIZE = 5
 
@@ -9,49 +10,97 @@ const props = withDefaults(
   defineProps<{
     excludeUserIds?: () => number[]
     validationId?: string
-    singleSelect?: boolean
     excludeSelf?: boolean
+    users?: ApiUser[]
+    embedded?: boolean
+    actionLabel?: string
   }>(),
   {
     excludeUserIds: () => [],
     validationId: 'user-search-validation',
-    singleSelect: false,
     excludeSelf: true,
+    embedded: false,
+    actionLabel: 'Select',
   }
 )
 
-const selectedUsers = defineModel<ApiUser[]>('selectedUsers', { default: () => [] })
+const emit = defineEmits<{
+  action: [user: ApiUser]
+}>()
 
-const { users, searchTag, searchError, isLoading, searchUser } = useUserSearch(
+const isLocalMode = computed(() => props.users !== undefined)
+const auth = useAuth()
+const localSearchTag = ref('')
+
+const {
+  users: apiUsers,
+  searchTag: apiSearchTag,
+  searchError: apiSearchError,
+  isLoading: apiIsLoading,
+} = useUserSearch(
   () => props.excludeUserIds(),
   props.excludeSelf,
+  !isLocalMode.value
 )
+
+const searchQuery = computed({
+  get() {
+    return isLocalMode.value ? localSearchTag.value : apiSearchTag.value
+  },
+  set(value: string) {
+    if (isLocalMode.value) {
+      localSearchTag.value = value
+      return
+    }
+
+    apiSearchTag.value = value
+  },
+})
+
+function excludedUserIds(): Set<number> {
+  return new Set(
+    [
+      ...(props.excludeSelf && auth.user.id !== null ? [auth.user.id] : []),
+      ...props.excludeUserIds(),
+    ].filter((id): id is number => id !== null)
+  )
+}
+
+const localFilteredUsers = computed(() => {
+  const excluded = excludedUserIds()
+  let filtered = (props.users ?? []).filter((user) => !excluded.has(user.id))
+
+  const query = localSearchTag.value.trim().toLowerCase()
+  if (query !== '') {
+    filtered = filtered.filter(
+      (user) =>
+        (user.displayName ?? '').toLowerCase().includes(query) ||
+        user.tag.toLowerCase().includes(query)
+    )
+  }
+
+  return filtered
+})
+
+const displayUsers = computed(() =>
+  isLocalMode.value ? localFilteredUsers.value : apiUsers.value
+)
+
+const isLoading = computed(() => (isLocalMode.value ? false : apiIsLoading.value))
+
+const searchError = computed(() => (isLocalMode.value ? '' : apiSearchError.value))
 
 const currentPage = ref(1)
 
-const totalPages = computed(() => Math.max(1, Math.ceil(users.value.length / PAGE_SIZE)))
+const totalPages = computed(() => Math.max(1, Math.ceil(displayUsers.value.length / PAGE_SIZE)))
 
 const pagedUsers = computed(() => {
   const start = (currentPage.value - 1) * PAGE_SIZE
-  return users.value.slice(start, start + PAGE_SIZE)
+  return displayUsers.value.slice(start, start + PAGE_SIZE)
 })
 
-function isSelected(user: ApiUser) {
-  return selectedUsers.value.some((selected) => selected.id === user.id)
-}
-
-function toggleUser(user: ApiUser) {
-  if (isSelected(user)) {
-    selectedUsers.value = selectedUsers.value.filter((selected) => selected.id !== user.id)
-    return
-  }
-
-  if (props.singleSelect) {
-    selectedUsers.value = [user]
-    return
-  }
-
-  selectedUsers.value = [...selectedUsers.value, user]
+function onAction(user: ApiUser) {
+  emit('action', user)
 }
 
 function goToPage(page: number) {
@@ -60,7 +109,7 @@ function goToPage(page: number) {
 }
 
 watch(
-  () => users.value.map((user) => user.id).join(','),
+  () => displayUsers.value.map((user) => user.id).join(','),
   () => {
     currentPage.value = 1
   }
@@ -71,36 +120,18 @@ watch(totalPages, (pages) => {
     currentPage.value = pages
   }
 })
-
-watch(
-  () => props.excludeUserIds().join(','),
-  (joined) => {
-    const excluded = new Set(joined === '' ? [] : joined.split(',').map(Number))
-    selectedUsers.value = selectedUsers.value.filter((user) => !excluded.has(user.id))
-  }
-)
 </script>
 
 <template>
-  <div class="input-group mb-3 has-validation">
-    <span class="input-group-text p-2">User Tag</span>
+  <div class="has-validation" :class="{ 'mb-3': !embedded }">
     <input
-      v-model="searchTag"
+      v-model="searchQuery"
       type="text"
       class="form-control"
-      :class="{ 'is-invalid': searchError !== '' }"
-      placeholder="Search by tag"
+      :class="{ 'is-invalid': !isLocalMode && searchError !== '' }"
+      :placeholder="isLocalMode ? 'Search by name or tag' : 'Search by tag'"
       :aria-describedby="validationId"
-      @keyup.enter="searchTag !== '' && !isLoading && searchUser()"
     />
-    <button
-      class="btn btn-outline-primary p-2"
-      type="button"
-      :disabled="searchTag === '' || isLoading"
-      @click="searchUser()"
-    >
-      Search
-    </button>
     <div :id="validationId" class="invalid-feedback">{{ searchError }}</div>
   </div>
 
@@ -108,21 +139,24 @@ watch(
     <span class="visually-hidden">Loading…</span>
   </div>
 
-  <p v-else-if="users.length === 0" class="text-muted mb-0">No users found.</p>
+  <p v-else-if="displayUsers.length === 0" class="text-muted mb-0">No users found.</p>
 
   <template v-else>
     <ul class="list-group list-group-flush">
-      <li v-for="user in pagedUsers" :key="user.id" class="list-group-item p-0">
-        <label class="d-flex align-items-center gap-2 user-search-row mb-0 px-3 py-2 w-100">
-          <input
-            class="form-check-input flex-shrink-0 mt-0"
-            :type="singleSelect ? 'radio' : 'checkbox'"
-            :name="singleSelect ? `${validationId}-user` : undefined"
-            :checked="isSelected(user)"
-            @change="toggleUser(user)"
-          />
-          <span class="text-truncate">{{ user.displayName }} (@{{ user.tag }})</span>
-        </label>
+      <li
+        v-for="user in pagedUsers"
+        :key="user.id"
+        class="list-group-item d-flex justify-content-between align-items-center gap-2"
+      >
+        <span class="text-truncate">{{ user.displayName }} (@{{ user.tag }})</span>
+        <button
+          type="button"
+          class="btn btn-outline-primary btn-sm flex-shrink-0"
+          :aria-label="`${actionLabel} ${user.displayName}`"
+          @click="onAction(user)"
+        >
+          {{ actionLabel }}
+        </button>
       </li>
     </ul>
 
@@ -162,14 +196,3 @@ watch(
     </nav>
   </template>
 </template>
-
-<style scoped>
-.user-search-row {
-  cursor: pointer;
-}
-
-.user-search-row:hover {
-  background-color: var(--bs-list-group-action-hover-bg);
-  color: var(--bs-list-group-action-hover-color);
-}
-</style>

@@ -23,3 +23,11 @@
     --bs-pagination-active-border-color: #{$ov-color-white};
   }
 }
+
+.form-text {
+  margin-top: 0;
+}
+
+.invalid-feedback.d-block {
+  margin-top: 0;
+}

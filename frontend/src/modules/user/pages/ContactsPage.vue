@@ -33,10 +33,9 @@ contacts.loadContacts()
         type="button"
         class="btn btn-outline-danger btn-sm flex-shrink-0"
         :disabled="contacts.isLoading.value"
-        :aria-label="`Remove ${contact.displayName}`"
         @click="contacts.removeContact(contact)"
       >
-        <i class="bi bi-x-lg" aria-hidden="true"></i>
+        Remove
       </button>
     </li>
   </ul>

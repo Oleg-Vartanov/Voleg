@@ -1,21 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import UserSearch from '@/modules/core/components/UserSearch.vue'
 import type { ApiUser } from '@/modules/core/apiType'
 
 const emit = defineEmits<{
   send: [user: ApiUser]
 }>()
-
-const selectedUsers = ref<ApiUser[]>([])
-
-function sendSelected() {
-  const user = selectedUsers.value[0]
-  if (!user) return
-
-  emit('send', user)
-  selectedUsers.value = []
-}
 </script>
 
 <template>
@@ -33,21 +22,13 @@ function sendSelected() {
         </div>
         <div class="modal-body">
           <UserSearch
-            v-model:selected-users="selectedUsers"
+            action-label="Request"
             :exclude-self="false"
-            single-select
             validation-id="connections-search-validation"
+            @action="emit('send', $event)"
           />
         </div>
         <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-outline-primary"
-            :disabled="selectedUsers.length === 0"
-            @click="sendSelected"
-          >
-            Request
-          </button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>

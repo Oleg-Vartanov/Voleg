@@ -1,17 +1,29 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import FormInput from '@/modules/core/components/form/FormInput.vue'
 import FormInputAmount from '@/modules/core/components/form/FormInputAmount.vue'
 import FormSelect from '@/modules/core/components/form/FormSelect.vue'
 import FormTextarea from '@/modules/core/components/form/FormTextarea.vue'
-import  { useCreateExpense } from '@/modules/splitExpense/composables/useCreateExpense'
-import type { Expenses } from '@/modules/splitExpense/composables/useExpenses.ts';
-import { onMounted } from 'vue';
+import FormUserSelect from '@/modules/core/components/form/FormUserSelect.vue'
+import UserSearch from '@/modules/core/components/UserSearch.vue'
+import type { ApiUser } from '@/modules/core/apiType'
+import { useCreateExpense } from '@/modules/splitExpense/composables/useCreateExpense'
+import type { Expenses } from '@/modules/splitExpense/composables/useExpenses.ts'
 
 const { expenses } = defineProps<{
   expenses: Expenses
 }>()
 
 const form = useCreateExpense()
+const isAddParticipantOpen = ref(false)
+
+function addParticipant(user: ApiUser) {
+  form.addSplitWith(user)
+}
+
+function toggleAddParticipant() {
+  isAddParticipantOpen.value = !isAddParticipantOpen.value
+}
 
 function submit() {
   form.submit().then(() => {
@@ -86,11 +98,11 @@ onMounted(() => {
                 v-bind="form.fieldAttrs('categoryId')"
               />
 
-              <FormSelect
+              <FormUserSelect
                 id="expense-paid-by"
                 v-model="form.fields.paidByUserId"
                 label="Paid by"
-                :options="form.payerSelectOptions"
+                :users="form.payerOptions"
                 v-bind="form.fieldAttrs('paidByUserId')"
               />
 
@@ -104,36 +116,73 @@ onMounted(() => {
 
               <fieldset class="mb-0">
                 <legend class="form-label fs-6 mb-2">Split equally with</legend>
-                <div class="form-check">
-                  <input
-                    id="expense-split-self"
-                    class="form-check-input"
-                    type="checkbox"
-                    checked
-                    disabled
-                  />
-                  <label class="form-check-label" for="expense-split-self">You</label>
-                </div>
+
                 <div
-                  v-for="partner in form.connectionPartners"
-                  :key="partner.id"
-                  class="form-check"
+                  class="split-with-block border rounded overflow-hidden bg-body-tertiary mb-1"
+                  :class="{ 'split-with-block--add-open': isAddParticipantOpen }"
                 >
-                  <input
-                    :id="`expense-split-${partner.id}`"
-                    class="form-check-input"
-                    type="checkbox"
-                    :checked="form.ui.splitWithUserIds.includes(partner.id)"
-                    @change="
-                      form.toggleSplitWith(partner.id, ($event.target as HTMLInputElement).checked)
-                    "
-                  />
-                  <label class="form-check-label" :for="`expense-split-${partner.id}`">
-                    {{ partner.displayName }}
-                  </label>
+                  <ul class="list-group list-group-flush mb-0">
+                    <li
+                      v-if="form.currentUser"
+                      class="list-group-item d-flex justify-content-between align-items-center gap-2"
+                    >
+                      <span class="text-truncate">
+                        {{ form.currentUser.displayName }} (@{{ form.currentUser.tag }})
+                      </span>
+                      <span class="badge text-bg-secondary flex-shrink-0">You</span>
+                    </li>
+                    <li
+                      v-for="user in form.ui.splitWithUsers"
+                      :key="user.id"
+                      class="list-group-item d-flex justify-content-between align-items-center gap-2"
+                    >
+                      <span class="text-truncate">{{ user.displayName }} (@{{ user.tag }})</span>
+                      <button
+                        type="button"
+                        class="btn btn-outline-danger btn-sm flex-shrink-0"
+                        @click="form.removeSplitWith(user.id)"
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  </ul>
+
+                  <div class="split-with-add">
+                    <button
+                      type="button"
+                      class="split-with-add-trigger btn btn-link text-decoration-none w-100 text-start d-flex align-items-center justify-content-between gap-2"
+                      :aria-expanded="isAddParticipantOpen"
+                      :disabled="form.splitPartnerOptions.length === 0"
+                      aria-controls="expense-add-participant"
+                      @click="toggleAddParticipant"
+                    >
+                      <span>Add participant</span>
+                      <i
+                        class="bi flex-shrink-0"
+                        :class="isAddParticipantOpen ? 'bi-chevron-up' : 'bi-chevron-down'"
+                        aria-hidden="true"
+                      ></i>
+                    </button>
+
+                    <div
+                      v-if="isAddParticipantOpen"
+                      id="expense-add-participant"
+                      class="split-with-add-panel"
+                    >
+                      <UserSearch
+                        action-label="Add"
+                        :users="form.splitPartnerOptions"
+                        :exclude-user-ids="form.splitExcludeUserIds"
+                        embedded
+                        validation-id="expense-split-validation"
+                        @action="addParticipant"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <p v-if="form.connectionPartners.length === 0" class="form-text mb-0">
-                  Add contacts to split expenses with others.
+
+                <p v-if="form.splitPartnerOptions.length === 0" class="form-text mb-0">
+                  Add connections to split expenses with others.
                 </p>
                 <div
                   v-if="form.validation.isValid('splits') === false"
@@ -167,3 +216,31 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.split-with-add-trigger {
+  padding: 0.75rem 1rem;
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: 0;
+  color: var(--bs-body-color);
+}
+
+.split-with-add-trigger:hover,
+.split-with-add-trigger:focus {
+  color: var(--bs-primary);
+  background-color: var(--bs-body-bg);
+}
+
+.split-with-block--add-open .split-with-add-trigger {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-primary);
+}
+
+.split-with-add-panel {
+  padding: 0.75rem;
+  background-color: var(--bs-body-bg);
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+}
+</style>

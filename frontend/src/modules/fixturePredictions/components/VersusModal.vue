@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, inject } from 'vue'
+import { inject } from 'vue'
 import UserSearch from '@/modules/core/components/UserSearch.vue'
 import { type Versus } from '@/modules/fixturePredictions/composables/useVersus.ts'
 import { type Tables } from '@/modules/fixturePredictions/composables/useTables'
@@ -11,7 +11,6 @@ const tables = inject<Tables>('tables')!
 const vs = inject<Versus>('vs')!
 const auth = useAuth()
 const topAlerts = useTopAlerts()
-const selectedUsers = ref<ApiUser[]>([])
 
 function addUser(user: ApiUser) {
   if (auth.user.id === user.id) {
@@ -20,13 +19,6 @@ function addUser(user: ApiUser) {
   }
   vs.addUser(user)
   tables.updateLoadedTables()
-}
-
-function addSelected() {
-  for (const user of selectedUsers.value) {
-    addUser(user)
-  }
-  selectedUsers.value = []
 }
 </script>
 
@@ -63,20 +55,13 @@ function addSelected() {
           </ul>
 
           <UserSearch
-            v-model:selected-users="selectedUsers"
+            action-label="Add"
             :exclude-user-ids="() => vs.users.value.map((user) => user.id)"
             validation-id="go-vs-validation"
+            @action="addUser"
           />
         </div>
         <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-outline-primary"
-            :disabled="selectedUsers.length === 0"
-            @click="addSelected"
-          >
-            Add
-          </button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>

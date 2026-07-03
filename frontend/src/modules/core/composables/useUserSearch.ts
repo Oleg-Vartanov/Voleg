@@ -1,15 +1,23 @@
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import client from '@/modules/core/apiClient'
 import type { ApiUser } from '@/modules/core/apiType'
 import { useAuth } from '@/modules/user/stores/useAuth'
 
-export function useUserSearch(excludeUserIds: () => number[], excludeSelf = true) {
+const SEARCH_DEBOUNCE_MS = 300
+
+export function useUserSearch(
+  excludeUserIds: () => number[],
+  excludeSelf = true,
+  enabled = true
+) {
   const auth = useAuth()
 
   const users = ref<ApiUser[]>([])
   const searchTag = ref('')
   const searchError = ref('')
   const isLoading = ref(false)
+
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
   function filterResults(results: ApiUser[]): ApiUser[] {
     const excluded = new Set(
@@ -29,10 +37,21 @@ export function useUserSearch(excludeUserIds: () => number[], excludeSelf = true
   )
 
   watch(searchTag, (value) => {
-    if (value !== '') return
+    if (debounceTimer !== null) {
+      clearTimeout(debounceTimer)
+      debounceTimer = null
+    }
 
-    searchError.value = ''
-    loadContacts()
+    if (value === '') {
+      searchError.value = ''
+      loadContacts()
+      return
+    }
+
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null
+      searchUser()
+    }, SEARCH_DEBOUNCE_MS)
   })
 
   async function searchUser() {
@@ -67,7 +86,15 @@ export function useUserSearch(excludeUserIds: () => number[], excludeSelf = true
   }
 
   onMounted(() => {
-    loadContacts()
+    if (enabled) {
+      loadContacts()
+    }
+  })
+
+  onUnmounted(() => {
+    if (debounceTimer !== null) {
+      clearTimeout(debounceTimer)
+    }
   })
 
   return {

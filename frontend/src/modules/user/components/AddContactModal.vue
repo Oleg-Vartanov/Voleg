@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import UserSearch from '@/modules/core/components/UserSearch.vue'
 import type { ApiUser } from '@/modules/core/apiType'
 
@@ -10,15 +9,6 @@ defineProps<{
 const emit = defineEmits<{
   add: [user: ApiUser]
 }>()
-
-const selectedUsers = ref<ApiUser[]>([])
-
-function addSelected() {
-  for (const user of selectedUsers.value) {
-    emit('add', user)
-  }
-  selectedUsers.value = []
-}
 </script>
 
 <template>
@@ -36,20 +26,13 @@ function addSelected() {
         </div>
         <div class="modal-body">
           <UserSearch
-            v-model:selected-users="selectedUsers"
+            action-label="Add"
             :exclude-user-ids="excludeUserIds"
             validation-id="contacts-search-validation"
+            @action="emit('add', $event)"
           />
         </div>
         <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-outline-primary"
-            :disabled="selectedUsers.length === 0"
-            @click="addSelected"
-          >
-            Add
-          </button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>

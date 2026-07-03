@@ -65,7 +65,7 @@ export function useCreateExpense() {
   const ui = reactive({
     isOptionsLoading: false,
     isSubmitting: false,
-    splitWithUserIds: [] as number[]
+    splitWithUsers: [] as ApiUser[]
   })
 
   const acceptedConnections = computed(() =>
@@ -80,18 +80,24 @@ export function useCreateExpense() {
     )
   })
 
-  const payerOptions = computed((): ApiUser[] => {
-    if (auth.user.id === null) return []
+  const splitPartnerOptions = computed(() => connectionPartners.value)
 
-    const currentUser: ApiUser = {
+  const currentUser = computed((): ApiUser | null => {
+    if (auth.user.id === null) return null
+
+    return {
       id: auth.user.id,
       displayName: auth.user.displayName ?? 'Me',
       tag: auth.user.tag ?? '',
       email: '',
       createdAt: ''
     }
+  })
 
-    return [currentUser, ...connectionPartners.value]
+  const payerOptions = computed((): ApiUser[] => {
+    if (currentUser.value === null) return []
+
+    return [currentUser.value, ...connectionPartners.value]
   })
 
   const categoryOptions = computed(() =>
@@ -105,13 +111,6 @@ export function useCreateExpense() {
     currencies.value.map((currency) => ({
       value: currency.id,
       label: `${currency.code} (${currency.symbol})`
-    }))
-  )
-
-  const payerSelectOptions = computed(() =>
-    payerOptions.value.map((user) => ({
-      value: user.id!,
-      label: user.displayName ?? ''
     }))
   )
 
@@ -169,19 +168,23 @@ export function useCreateExpense() {
   function reset() {
     validation.reset()
     Object.assign(fields, createEmptyFields())
-    ui.splitWithUserIds = []
+    ui.splitWithUsers = []
     applyDefaultSelections()
   }
 
-  function toggleSplitWith(userId: number, checked: boolean) {
-    if (checked) {
-      if (!ui.splitWithUserIds.includes(userId)) {
-        ui.splitWithUserIds.push(userId)
-      }
-      return
-    }
+  function splitExcludeUserIds(): number[] {
+    return ui.splitWithUsers.map((user) => user.id)
+  }
 
-    ui.splitWithUserIds = ui.splitWithUserIds.filter((id) => id !== userId)
+  function addSplitWith(user: ApiUser) {
+    if (auth.user.id === user.id) return
+    if (ui.splitWithUsers.some((entry) => entry.id === user.id)) return
+
+    ui.splitWithUsers.push(user)
+  }
+
+  function removeSplitWith(userId: number) {
+    ui.splitWithUsers = ui.splitWithUsers.filter((user) => user.id !== userId)
   }
 
   function closeModal() {
@@ -198,7 +201,7 @@ export function useCreateExpense() {
 
     const participantIds = [
       auth.user.id,
-      ...ui.splitWithUserIds.filter((id) => id !== auth.user.id)
+      ...ui.splitWithUsers.map((user) => user.id)
     ]
     const uniqueParticipantIds = [...new Set(participantIds)]
     const amountMinor = moneyUtils.toMinorUnits(fields.amount, selectedCurrency.value.decimalPlaces)
@@ -241,16 +244,19 @@ export function useCreateExpense() {
   return reactive({
     fields,
     ui,
-    connectionPartners,
+    currentUser,
+    splitPartnerOptions,
     categoryOptions,
     currencyOptions,
-    payerSelectOptions,
+    payerOptions,
     amountDecimalPlaces,
     validation,
     fieldAttrs,
     loadOptions,
     reset,
-    toggleSplitWith,
+    splitExcludeUserIds,
+    addSplitWith,
+    removeSplitWith,
     submit
   })
 }
