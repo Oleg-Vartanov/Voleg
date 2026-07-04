@@ -1,4 +1,5 @@
 import type { ApiUser } from '@/modules/core/apiType.ts'
+import type { CategoryKey } from '@/modules/splitExpense/categories'
 
 export interface ApiSeCategory {
   id: number
@@ -49,4 +50,10 @@ export interface SeExpenseCreatePayload {
   paidByUserId?: number
   categoryId?: number
   splits: { userId: number; amount: number }[]
+}
+
+export interface SeCategory {
+  icon: CategoryKey
+  title: string
+  tag: string
 }

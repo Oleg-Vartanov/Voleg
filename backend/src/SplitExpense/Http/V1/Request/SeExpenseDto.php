@@ -10,8 +10,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 class SeExpenseDto
 {
     #[OA\Property(example: 1)]
+    #[Assert\NotBlank(groups: [Group::create->value])]
     #[Assert\Positive]
-    public ?int $paidByUserId = null;
+    public int $paidByUserId;
 
     #[OA\Property(example: 1)]
     #[Assert\Positive]

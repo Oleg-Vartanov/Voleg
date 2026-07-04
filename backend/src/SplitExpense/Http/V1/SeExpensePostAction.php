@@ -9,7 +9,9 @@ use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
 use App\Core\Repository\CurrencyRepository;
+use App\Core\ValueObject\Validator\Violation;
 use App\SplitExpense\Entity\SeExpense;
+use App\SplitExpense\Exception\SeExpenseSplitException;
 use App\SplitExpense\Http\V1\Request\SeExpenseDto;
 use App\SplitExpense\Repository\SeExpenseRepository;
 use App\SplitExpense\Service\SeExpenseService;
@@ -65,6 +67,10 @@ class SeExpensePostAction extends ApiController
             $expense = $this->service->create($user, $dto);
         } catch (LogicException|DateMalformedStringException $e) {
             return $this->messageResponse($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (SeExpenseSplitException $e) {
+            return $this->validationErrorResponse(
+                new Violation('splits', $e->getMessage())
+            );
         }
 
         $this->expenseRepository->save($expense, true);

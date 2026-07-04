@@ -1,46 +1,40 @@
 <script setup lang="ts">
 import type { ApiSeExpense } from '@/modules/splitExpense/types'
-import { formatDateParts } from '@/modules/splitExpense/utils/expenseDates'
+import { formatShortDate } from '@/modules/splitExpense/utils/expenseDates'
 import { useExpenseDisplay } from '@/modules/splitExpense/composables/useExpenseDisplay'
 import { computed } from 'vue'
 
 const props = defineProps<{
   expense: ApiSeExpense
-  expanded: boolean
 }>()
 
 const emit = defineEmits<{ toggle: [] }>()
 
-const { categoryFor, amountColor, formatAmount } = useExpenseDisplay()
-const dateParts = computed(() => formatDateParts(props.expense.expenseDate))
+const ed = useExpenseDisplay()
+const date = computed(() => formatShortDate(props.expense.expenseDate))
 </script>
 
 <template>
   <div
     class="expense-row"
-    :class="{ 'expense-row-expanded': expanded }"
     role="button"
     tabindex="0"
-    :aria-expanded="expanded"
-    @mousedown="onMouseDown"
     @click="emit('toggle')"
-    @keydown.enter.prevent="emit('toggle')"
-    @keydown.space.prevent="emit('toggle')"
   >
     <div class="expense-date-cell">
       <span class="expense-date">
-        <span class="expense-date-day">{{ dateParts.day }}</span>
-        <span class="expense-date-month">{{ dateParts.month }}</span>
+        <span class="expense-date-day">{{ date.day }}</span>
+        <span class="expense-date-month">{{ date.month }}</span>
       </span>
     </div>
     <div class="expense-type-cell">
-      <i class="bi fs-4" :class="categoryFor(expense).icon"></i>
+      <i class="bi fs-4" :class="ed.mapCategory(expense).icon"></i>
     </div>
     <div class="expense-title-cell">
       <span class="expense-title-text">{{ expense.title }}</span>
     </div>
-    <div class="expense-amount-cell" :class="amountColor(expense)">
-      {{ formatAmount(expense) }}
+    <div class="expense-amount-cell" :class="ed.amountColor(expense)">
+      {{ ed.currentUserSplitBalance(expense) }}
     </div>
   </div>
 </template>

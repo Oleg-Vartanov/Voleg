@@ -39,6 +39,9 @@ class SeExpense
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
         private User $paidByUser,
         #[ORM\ManyToOne]
+        #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+        private readonly User $createdByUser,
+        #[ORM\ManyToOne]
         #[ORM\JoinColumn(nullable: false)]
         private SeCategory $category,
         #[ORM\Column(type: Types::INTEGER)]
@@ -70,6 +73,11 @@ class SeExpense
     public function setPaidByUser(User $paidByUser): void
     {
         $this->paidByUser = $paidByUser;
+    }
+
+    public function getCreatedByUser(): User
+    {
+        return $this->createdByUser;
     }
 
     public function getCategory(): SeCategory

@@ -1,4 +1,4 @@
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import axios from 'axios'
 import { Modal } from 'bootstrap'
 import client from '@/modules/core/apiClient'
@@ -100,6 +100,12 @@ export function useCreateExpense() {
     return [currentUser.value, ...connectionPartners.value]
   })
 
+  const selectedPayer = computed((): ApiUser | null => {
+    if (fields.paidByUserId === null) return null
+
+    return payerOptions.value.find((user) => user.id === fields.paidByUserId) ?? null
+  })
+
   const categoryOptions = computed(() =>
     categories.value.map((category) => ({
       value: category.id,
@@ -173,10 +179,21 @@ export function useCreateExpense() {
   }
 
   function splitExcludeUserIds(): number[] {
-    return ui.splitWithUsers.map((user) => user.id)
+    const excluded = ui.splitWithUsers.map((user) => user.id)
+
+    if (fields.paidByUserId !== null) {
+      excluded.push(fields.paidByUserId)
+    }
+
+    if (auth.user.id !== null) {
+      excluded.push(auth.user.id)
+    }
+
+    return excluded
   }
 
   function addSplitWith(user: ApiUser) {
+    if (fields.paidByUserId === user.id) return
     if (auth.user.id === user.id) return
     if (ui.splitWithUsers.some((entry) => entry.id === user.id)) return
 
@@ -194,12 +211,13 @@ export function useCreateExpense() {
     Modal.getInstance(el)?.hide()
   }
 
-  async function submit() {
-    if (auth.user.id === null || ui.isSubmitting) return
+  async function submit(): Promise<boolean> {
+    if (auth.user.id === null || fields.paidByUserId === null || ui.isSubmitting) return false
 
     validation.reset()
 
     const participantIds = [
+      fields.paidByUserId,
       auth.user.id,
       ...ui.splitWithUsers.map((user) => user.id)
     ]
@@ -223,28 +241,40 @@ export function useCreateExpense() {
       topAlerts.add('Expense created.', 'success', 3)
       reset()
       closeModal()
+      return true
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 422) {
           validation.applyErrors(error.response.data.violations)
-          return
+          return false
         }
 
         const message = error.response?.data?.message ?? 'Failed to create expense.'
         topAlerts.add(message, 'danger', 5)
-        return
+        return false
       }
 
       topAlerts.add('Failed to create expense.', 'danger', 5)
+      return false
     } finally {
       ui.isSubmitting = false
     }
   }
 
+  watch(
+    () => fields.paidByUserId,
+    (paidByUserId) => {
+      if (paidByUserId === null) return
+
+      ui.splitWithUsers = ui.splitWithUsers.filter((user) => user.id !== paidByUserId)
+    }
+  )
+
   return reactive({
     fields,
     ui,
     currentUser,
+    selectedPayer,
     splitPartnerOptions,
     categoryOptions,
     currencyOptions,

@@ -7,6 +7,7 @@ use App\Core\Util\PropertyAccessor;
 use App\SplitExpense\Entity\SeCategory;
 use App\SplitExpense\Entity\SeExpense;
 use App\SplitExpense\Entity\SeExpenseSplit;
+use App\SplitExpense\Exception\SeExpenseSplitException;
 use App\SplitExpense\Http\V1\Request\SeExpenseDto;
 use App\SplitExpense\Http\V1\Request\SeExpenseSplitDto;
 use App\SplitExpense\Repository\SeCategoryRepository;
@@ -44,10 +45,11 @@ readonly class SeExpenseService
 
     /**
      * @throws DateMalformedStringException
+     * @throws SeExpenseSplitException
      */
-    public function create(User $owner, SeExpenseDto $dto): SeExpense
+    public function create(User $createdBy, SeExpenseDto $dto): SeExpense
     {
-        $paidBy = $this->userRepository->find($dto->paidByUserId ?? $owner->getId())
+        $paidBy = $this->userRepository->find($dto->paidByUserId)
             ?? throw new LogicException('Payer not found.');
         $category = $this->categoryRepository->find($dto->categoryId ?? SeCategory::DEFAULT_ID)
             ?? throw new LogicException('Category not found.');
@@ -56,6 +58,7 @@ readonly class SeExpenseService
 
         $expense = new SeExpense(
             paidByUser: $paidBy,
+            createdByUser: $createdBy,
             category: $category,
             amount: $dto->amount,
             title: $dto->title,
@@ -70,7 +73,7 @@ readonly class SeExpenseService
     }
 
     /**
-     * @throws LogicException|DateMalformedStringException
+     * @throws LogicException|DateMalformedStringException|SeExpenseSplitException
      */
     public function patch(SeExpense $expense, SeExpenseDto $dto): SeExpense
     {
@@ -125,6 +128,8 @@ readonly class SeExpenseService
 
     /**
      * @param SeExpenseSplitDto[] $dtos
+     *
+     * @throws SeExpenseSplitException
      */
     private function applySplits(SeExpense $expense, array $dtos): void
     {
@@ -135,21 +140,46 @@ readonly class SeExpenseService
             $expense->addSplit(new SeExpenseSplit($expense, $user, $dto->amount));
         }
 
-        // TODO: assert users: unique, not self,
-        //  a proper split between paidBy and splits
-
-        $this->assertSplitTotalMatches($expense);
+        $this->assertSplit($expense);
     }
 
-    private function assertSplitTotalMatches(SeExpense $expense): void
+    /**
+     * @throws SeExpenseSplitException
+     */
+    private function assertSplit(SeExpense $expense): void
     {
         $total = 0;
+        $splitHasPaidBy = false;
+        $splitsUserIds = [];
+
         foreach ($expense->getSplits() as $split) {
             $total += $split->getAmount();
+
+            if ($split->getUser()->getId() === $expense->getPaidByUser()->getId()) {
+                $splitHasPaidBy = true;
+            }
+
+            $splitsUserIds[] = $split->getUser()->getId();
+        }
+
+        if (count($expense->getSplits()) < 2) {
+            throw new SeExpenseSplitException('Split must include at least 2 users.');
         }
 
         if ($total !== $expense->getAmount()) {
-            throw new LogicException('Split amounts must sum to the expense amount.');
+            throw new SeExpenseSplitException('Split amounts must sum to the expense amount.');
+        }
+
+        if (!$splitHasPaidBy) {
+            throw new SeExpenseSplitException('Split must include the paidBy user.');
+        }
+
+        if (count($splitsUserIds) !== count(array_unique($splitsUserIds))) {
+            throw new SeExpenseSplitException('Split must include unique users.');
+        }
+
+        if (!in_array($expense->getCreatedByUser()->getId(), $splitsUserIds)) {
+            throw new SeExpenseSplitException('Split must include who created the expense.');
         }
     }
 }

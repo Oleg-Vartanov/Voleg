@@ -16,3 +16,5 @@ export const categories = {
   games: 'bi-controller',
   hobby: 'bi-brush'
 }
+
+export type CategoryKey = keyof typeof categories;

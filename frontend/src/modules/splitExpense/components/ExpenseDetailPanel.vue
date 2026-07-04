@@ -11,26 +11,8 @@ const props = defineProps<{
 }>()
 
 const ed = useExpenseDisplay()
-const category = computed(() => ed.categoryFor(props.expense))
-
-const participants = computed(() => [
-  {
-    key: 'paid',
-    name: props.expense.paidByUser.displayName,
-    badge: 'Paid',
-    amount: ed.formatPaid(props.expense),
-    amountClass: '',
-    isTotal: true
-  },
-  ...props.expense.splits.map((split) => ({
-    key: String(split.id),
-    name: split.user.displayName,
-    badge: null as string | null,
-    amount: ed.formatSplitMoney(split.user.id, split.amount, props.expense),
-    amountClass: ed.splitColor(split.user.id),
-    isTotal: false
-  }))
-])
+const category = computed(() => ed.mapCategory(props.expense))
+const participants = computed(() => ed.participantsFor(props.expense))
 </script>
 
 <template>
@@ -57,7 +39,9 @@ const participants = computed(() => [
         </ExpenseDetailField>
 
         <ExpenseDetailField label="Your split balance">
-          <span :class="ed.amountColor(expense)">{{ ed.formatAmount(expense) }}</span>
+          <span :class="ed.amountColor(expense)">
+            {{ ed.currentUserSplitBalance(expense) }}
+          </span>
         </ExpenseDetailField>
 
         <ul class="expense-participants list-unstyled mb-0">
@@ -65,17 +49,15 @@ const participants = computed(() => [
             v-for="participant in participants"
             :key="participant.key"
             class="expense-participant"
-            :class="{ 'expense-participant-total': participant.isTotal }"
           >
-            <span class="expense-participant-name">
-              <span class="expense-participant-name-text">{{ participant.name }}</span>
-              <span v-if="participant.badge" class="expense-participant-badge">{{
-                participant.badge
-              }}</span>
+            <span class="expense-participant-text">
+              <strong>{{ participant.name }}</strong
+              ><template v-if="participant.paidAmount"
+                > paid <strong>{{ participant.paidAmount }}</strong></template
+              ><template v-if="participant.splitAmount"
+                > {{ participant.splitLabel }} <strong>{{ participant.splitAmount }}</strong></template
+              >
             </span>
-            <span class="expense-participant-amount" :class="participant.amountClass">{{
-              participant.amount
-            }}</span>
           </li>
         </ul>
       </div>
@@ -146,58 +128,18 @@ const participants = computed(() => [
 }
 
 .expense-participant {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
   padding: 0.35rem 0.5rem;
   font-size: 0.85rem;
-  line-height: 1.2;
+  line-height: 1.35;
 }
 
 .expense-participant + .expense-participant {
   border-top: 1px solid var(--bs-border-color-translucent);
 }
 
-.expense-participant-total {
-  padding: 0.45rem 0.5rem;
-  font-weight: 600;
-  background-color: var(--bs-secondary-bg);
-  border-bottom: 2px solid var(--bs-border-color);
-}
-
-.expense-participants .expense-participant:last-child {
-  padding-bottom: 0.35rem;
-}
-
-.expense-participant-name {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.35rem;
-  flex: 1 1 auto;
+.expense-participant-text {
+  display: block;
   min-width: 0;
-}
-
-.expense-participant-name-text {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.expense-participant-badge {
-  flex-shrink: 0;
-  font-size: 0.64rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--bs-secondary-color);
-}
-
-.expense-participant-amount {
-  flex: 0 0 auto;
-  font-variant-numeric: tabular-nums;
-  font-weight: 500;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 </style>

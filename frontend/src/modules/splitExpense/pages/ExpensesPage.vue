@@ -55,14 +55,13 @@ onMounted(() => {
             <div class="expenses-month-header">{{ group.label }}</div>
 
             <article
-              v-for="expense in group.items"
+              v-for="expense in group.expenses"
               :key="expense.id"
               class="expense-item"
               :class="{ 'is-expanded': isExpanded(expense) }"
             >
               <ExpenseRow
                 :expense="expense"
-                :expanded="isExpanded(expense)"
                 @toggle="toggleExpense(expense)"
               />
               <ExpenseDetailPanel :expense="expense" :open="isExpanded(expense)" />

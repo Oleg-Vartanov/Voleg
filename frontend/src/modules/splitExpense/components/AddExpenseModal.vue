@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import FormInput from '@/modules/core/components/form/FormInput.vue'
 import FormInputAmount from '@/modules/core/components/form/FormInputAmount.vue'
 import FormSelect from '@/modules/core/components/form/FormSelect.vue'
@@ -16,6 +16,7 @@ const { expenses } = defineProps<{
 
 const form = useCreateExpense()
 const isAddParticipantOpen = ref(false)
+const splitsIsInvalid = computed(() => form.validation.isValid('splits') === false)
 
 function addParticipant(user: ApiUser) {
   form.addSplitWith(user)
@@ -25,10 +26,10 @@ function toggleAddParticipant() {
   isAddParticipantOpen.value = !isAddParticipantOpen.value
 }
 
-function submit() {
-  form.submit().then(() => {
+async function submit() {
+  if (await form.submit()) {
     expenses.load()
-  })
+  }
 }
 
 onMounted(() => {
@@ -119,11 +120,28 @@ onMounted(() => {
 
                 <div
                   class="split-with-block border rounded overflow-hidden bg-body-tertiary mb-1"
-                  :class="{ 'split-with-block--add-open': isAddParticipantOpen }"
+                  :class="{
+                    'split-with-block--add-open': isAddParticipantOpen,
+                    'split-with-block--invalid': splitsIsInvalid
+                  }"
                 >
                   <ul class="list-group list-group-flush mb-0">
                     <li
-                      v-if="form.currentUser"
+                      v-if="form.selectedPayer"
+                      class="list-group-item d-flex justify-content-between align-items-center gap-2"
+                    >
+                      <span class="text-truncate">
+                        {{ form.selectedPayer.displayName }} (@{{ form.selectedPayer.tag }})
+                      </span>
+                      <span class="badge text-bg-secondary flex-shrink-0">
+                        {{ form.selectedPayer.id === form.currentUser?.id ? 'You' : 'Paid by' }}
+                      </span>
+                    </li>
+                    <li
+                      v-if="
+                        form.currentUser &&
+                        form.currentUser.id !== form.selectedPayer?.id
+                      "
                       class="list-group-item d-flex justify-content-between align-items-center gap-2"
                     >
                       <span class="text-truncate">
@@ -185,7 +203,8 @@ onMounted(() => {
                   Add connections to split expenses with others.
                 </p>
                 <div
-                  v-if="form.validation.isValid('splits') === false"
+                  v-if="splitsIsInvalid"
+                  id="expense-split-validation"
                   class="invalid-feedback d-block"
                 >
                   {{ form.validation.getError('splits') }}
@@ -218,6 +237,11 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.split-with-block--invalid {
+  border-color: var(--bs-form-invalid-border-color);
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-danger-rgb), 0.25);
+}
+
 .split-with-add-trigger {
   padding: 0.75rem 1rem;
   border-top: var(--bs-border-width) solid var(--bs-border-color);
