@@ -1,6 +1,5 @@
 import { computed, reactive, ref, watch } from 'vue'
 import axios from 'axios'
-import { Modal } from 'bootstrap'
 import client from '@/modules/core/apiClient'
 import { useApiValidation } from '@/modules/core/composables/form/useApiValidation'
 import moneyUtils from '@/modules/core/utils/moneyUtils'
@@ -204,13 +203,6 @@ export function useCreateExpense() {
     ui.splitWithUsers = ui.splitWithUsers.filter((user) => user.id !== userId)
   }
 
-  function closeModal() {
-    const el = document.getElementById('addExpenseModal')
-    if (!el) return
-
-    Modal.getInstance(el)?.hide()
-  }
-
   async function submit(): Promise<boolean> {
     if (auth.user.id === null || fields.paidByUserId === null || ui.isSubmitting) return false
 
@@ -240,7 +232,6 @@ export function useCreateExpense() {
       await client.createSplitExpense(payload)
       topAlerts.add('Expense created.', 'success', 3)
       reset()
-      closeModal()
       return true
     } catch (error) {
       if (axios.isAxiosError(error)) {

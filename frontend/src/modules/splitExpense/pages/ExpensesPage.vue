@@ -8,6 +8,7 @@ import { computed, onMounted, ref } from 'vue'
 import type { ApiSeExpense } from '@/modules/splitExpense/types'
 
 const expensesState = useExpenses()
+const isAddExpenseOpen = ref(false)
 
 const isEmpty = computed(() => (expensesState.expenses.value?.length ?? 0) === 0)
 const expandedExpenseId = ref<number | null>(null)
@@ -32,14 +33,13 @@ onMounted(() => {
       <button
         type="button"
         class="btn btn-outline-primary w-100"
-        data-bs-toggle="modal"
-        data-bs-target="#addExpenseModal"
+        @click="isAddExpenseOpen = true"
       >
         <i class="bi bi-plus-lg" aria-hidden="true"></i>
         Add expense
       </button>
 
-      <AddExpenseModal :expenses="expensesState" />
+      <AddExpenseModal v-model:open="isAddExpenseOpen" :expenses="expensesState" />
 
       <div v-if="expensesState.isLoading.value" class="text-center py-3">
         <div class="spinner-border text-primary" role="status">

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import AppModal from '@/modules/core/components/AppModal.vue'
 import FormInput from '@/modules/core/components/form/FormInput.vue'
 import FormInputAmount from '@/modules/core/components/form/FormInputAmount.vue'
 import FormSelect from '@/modules/core/components/form/FormSelect.vue'
@@ -10,6 +11,8 @@ import type { ApiUser } from '@/modules/core/apiType'
 import { useCreateExpense } from '@/modules/splitExpense/composables/useCreateExpense'
 import type { Expenses } from '@/modules/splitExpense/composables/useExpenses.ts'
 
+const open = defineModel<boolean>('open', { required: true })
+
 const { expenses } = defineProps<{
   expenses: Expenses
 }>()
@@ -17,6 +20,10 @@ const { expenses } = defineProps<{
 const form = useCreateExpense()
 const isAddParticipantOpen = ref(false)
 const splitsIsInvalid = computed(() => form.validation.isValid('splits') === false)
+
+function close() {
+  open.value = false
+}
 
 function addParticipant(user: ApiUser) {
   form.addSplitWith(user)
@@ -29,30 +36,22 @@ function toggleAddParticipant() {
 async function submit() {
   if (await form.submit()) {
     expenses.load()
+    close()
   }
 }
 
-onMounted(() => {
-  form.loadOptions()
+watch(open, (isOpen) => {
+  if (isOpen) {
+    form.loadOptions()
+    isAddParticipantOpen.value = false
+  }
 })
 </script>
 
 <template>
-  <div id="addExpenseModal" class="modal fade" tabindex="-1" aria-labelledby="addExpenseModalLabel">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 id="addExpenseModalLabel" class="modal-title fs-5">Add Expense</h1>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-
-        <div class="modal-body">
-          <form id="addExpenseForm" @submit.prevent="submit">
+  <AppModal v-model:open="open" title="Add Expense">
+    <div class="modal-body">
+      <form id="addExpenseForm" @submit.prevent="submit">
             <div v-if="form.ui.isOptionsLoading" class="d-flex justify-content-center py-4">
               <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading form…</span>
@@ -212,28 +211,26 @@ onMounted(() => {
               </fieldset>
             </template>
           </form>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button
-            type="submit"
-            form="addExpenseForm"
-            class="btn btn-primary"
-            :disabled="form.ui.isOptionsLoading || form.ui.isSubmitting"
-          >
-            <span
-              v-if="form.ui.isSubmitting"
-              class="spinner-border spinner-border-sm me-1"
-              role="status"
-              aria-hidden="true"
-            ></span>
-            Create expense
-          </button>
-        </div>
-      </div>
     </div>
-  </div>
+
+    <template #footer>
+      <button type="button" class="btn btn-secondary" @click="close">Cancel</button>
+      <button
+        type="submit"
+        form="addExpenseForm"
+        class="btn btn-primary"
+        :disabled="form.ui.isOptionsLoading || form.ui.isSubmitting"
+      >
+        <span
+          v-if="form.ui.isSubmitting"
+          class="spinner-border spinner-border-sm me-1"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Create expense
+      </button>
+    </template>
+  </AppModal>
 </template>
 
 <style scoped>
