@@ -1,6 +1,6 @@
 import moneyUtils from '@/modules/core/utils/moneyUtils'
 import { categories, type CategoryKey } from '@/modules/splitExpense/categories'
-import type { ApiSeExpense, SeCategory } from '@/modules/splitExpense/types';
+import type { ApiSeExpense, SeCategory, SeExpenseSplitUser } from '@/modules/splitExpense/types';
 import { useAuth } from '@/modules/user/stores/useAuth'
 
 export function useExpenseDisplay() {
@@ -10,6 +10,28 @@ export function useExpenseDisplay() {
     const tag = expense.category?.tag ?? categories.other
     const icon = tag in categories ? categories[tag as CategoryKey] : categories.other
     return { icon, title: expense.category?.title ?? 'Other', tag }
+  }
+
+  function mapSplitUsers(expense: ApiSeExpense): SeExpenseSplitUser[] {
+    const result: SeExpenseSplitUser[] = []
+
+    for (const split of expense.splits) {
+      if (split.user.id === expense.paidByUser.id) {
+        result.unshift({
+          user: split.user,
+          paidAmount: formatMoney(expense.amount, expense),
+          splitAmount: formatMoney(split.amount, expense)
+        })
+      } else {
+        result.push({
+          user: split.user,
+          paidAmount: null,
+          splitAmount: formatMoney(split.amount, expense)
+        })
+      }
+    }
+
+    return result
   }
 
   function amountColor(expense: ApiSeExpense): string {
@@ -46,52 +68,10 @@ export function useExpenseDisplay() {
     return formatSignedMoney('-', split?.amount ?? 0, expense)
   }
 
-  function participantsFor(expense: ApiSeExpense) {
-    const payerId = expense.paidByUser.id
-    const seen = new Set<number>()
-    const result: {
-      key: string
-      name: string
-      paidAmount: string | null
-      splitLabel: 'share' | 'owes'
-      splitAmount: string | null
-    }[] = []
-
-    for (const split of expense.splits) {
-      if (seen.has(split.user.id)) continue
-      seen.add(split.user.id)
-
-      result.push({
-        key: String(split.user.id),
-        name: split.user.displayName,
-        paidAmount: split.user.id === payerId ? formatMoney(expense.amount, expense) : null,
-        splitLabel: split.user.id === payerId ? 'share' : 'owes',
-        splitAmount: formatMoney(split.amount, expense)
-      })
-    }
-
-    if (!seen.has(payerId)) {
-      result.push({
-        key: String(payerId),
-        name: expense.paidByUser.displayName,
-        paidAmount: formatMoney(expense.amount, expense),
-        splitLabel: 'share',
-        splitAmount: null
-      })
-    }
-
-    return result.sort((a, b) => {
-      const aIsPayer = a.key === String(payerId)
-      const bIsPayer = b.key === String(payerId)
-      if (aIsPayer === bIsPayer) return 0
-      return aIsPayer ? -1 : 1
-    })
-  }
-
   return {
     mapCategory,
     amountColor,
     currentUserSplitBalance,
-    participantsFor
+    mapSplitUsers
   }
 }

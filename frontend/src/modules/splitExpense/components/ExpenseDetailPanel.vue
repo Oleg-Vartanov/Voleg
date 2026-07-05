@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import ExpenseDetailField from '@/modules/splitExpense/components/ExpenseDetailField.vue'
 import { useExpenseDisplay } from '@/modules/splitExpense/composables/useExpenseDisplay'
 import type { ApiSeExpense } from '@/modules/splitExpense/types'
 import { formatFullDate } from '@/modules/splitExpense/utils/expenseDates'
@@ -12,54 +11,54 @@ const props = defineProps<{
 
 const ed = useExpenseDisplay()
 const category = computed(() => ed.mapCategory(props.expense))
-const participants = computed(() => ed.participantsFor(props.expense))
+const splitUsers = computed(() => ed.mapSplitUsers(props.expense))
 </script>
 
 <template>
   <div class="expense-detail-panel" :class="{ 'is-open': open }">
     <div class="expense-detail-collapse">
       <div class="expense-detail-inner">
-        <ExpenseDetailField label="Title">
-          {{ expense.title }}
-        </ExpenseDetailField>
+        <div class="expense-detail-content">
+          <p class="expense-detail-title">
+            <strong>{{ expense.title }}</strong>
+          </p>
 
-        <ExpenseDetailField v-if="expense.description" label="Description">
-          {{ expense.description }}
-        </ExpenseDetailField>
+          <p v-if="expense.description" class="expense-detail-description">
+            {{ expense.description }}
+          </p>
 
-        <ExpenseDetailField label="Date">
-          {{ formatFullDate(expense.expenseDate) }}
-        </ExpenseDetailField>
+          <p class="expense-detail-meta">
+            Added by <strong>{{ expense.createdByUser.displayName }}</strong> on
+            {{ formatFullDate(expense.expenseDate) }}
+          </p>
 
-        <ExpenseDetailField label="Category">
-          <span class="expense-detail-category">
-            <i class="bi" :class="category.icon"></i>
+          <p class="expense-detail-category-line">
+            <i class="bi" :class="category.icon" aria-hidden="true"></i>
             {{ category.title }}
-          </span>
-        </ExpenseDetailField>
+          </p>
+        </div>
 
-        <ExpenseDetailField label="Your split balance">
-          <span :class="ed.amountColor(expense)">
-            {{ ed.currentUserSplitBalance(expense) }}
-          </span>
-        </ExpenseDetailField>
+        <div class="expense-detail-side">
+          <p class="expense-split-balance">
+            Your split balance <strong :class="ed.amountColor(expense)">{{ ed.currentUserSplitBalance(expense) }}</strong>
+          </p>
 
-        <ul class="expense-participants list-unstyled mb-0">
-          <li
-            v-for="participant in participants"
-            :key="participant.key"
-            class="expense-participant"
-          >
-            <span class="expense-participant-text">
-              <strong>{{ participant.name }}</strong
-              ><template v-if="participant.paidAmount"
-                > paid <strong>{{ participant.paidAmount }}</strong></template
-              ><template v-if="participant.splitAmount"
-                > {{ participant.splitLabel }} <strong>{{ participant.splitAmount }}</strong></template
-              >
-            </span>
-          </li>
-        </ul>
+          <ul class="expense-split-users list-unstyled mb-0">
+            <li
+              v-for="splitUser in splitUsers"
+              :key="splitUser.user.id"
+              class="expense-split-user"
+            >
+              <span class="expense-split-user-text">
+                <strong>{{ splitUser.user.displayName }}</strong>
+                <template v-if="splitUser.paidAmount"> paid <strong>{{ splitUser.paidAmount }}</strong></template>
+                <span v-if="splitUser.paidAmount"> share </span>
+                <span v-else> owes </span>
+                <strong>{{ splitUser.splitAmount }}</strong>
+              </span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -89,9 +88,10 @@ const participants = computed(() => ed.participantsFor(props.expense))
 }
 
 .expense-detail-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.75rem 0;
+  align-items: start;
   min-width: 0;
   overflow: hidden;
   overflow-wrap: anywhere;
@@ -102,6 +102,28 @@ const participants = computed(() => ed.participantsFor(props.expense))
     padding 0.3s ease;
 }
 
+.expense-detail-content,
+.expense-detail-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.expense-detail-content {
+  align-items: flex-end;
+  text-align: end;
+  padding-inline-end: 1rem;
+  border-inline-end: 1px solid var(--bs-border-color-translucent);
+}
+
+.expense-detail-side {
+  align-items: flex-start;
+  text-align: start;
+  padding-inline-start: 1rem;
+}
+
 .expense-detail-panel.is-open .expense-detail-inner {
   padding: 0.75rem 1rem;
   opacity: 1;
@@ -110,36 +132,66 @@ const participants = computed(() => ed.participantsFor(props.expense))
     padding 0.3s ease;
 }
 
-.expense-detail-category {
+.expense-detail-title {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.expense-detail-description {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--bs-secondary-color);
+}
+
+.expense-detail-meta,
+.expense-detail-category-line,
+.expense-split-balance,
+.expense-split-user {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.expense-detail-category-line {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
 }
 
-.expense-participants {
+.expense-split-users {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
   width: 100%;
-  padding: 0;
-  border-radius: 0.375rem;
-  background-color: var(--bs-body-bg);
-  border: 1px solid var(--bs-border-color-translucent);
-  overflow: hidden;
+  min-width: 0;
 }
 
-.expense-participant {
-  padding: 0.35rem 0.5rem;
-  font-size: 0.85rem;
-  line-height: 1.35;
-}
-
-.expense-participant + .expense-participant {
-  border-top: 1px solid var(--bs-border-color-translucent);
-}
-
-.expense-participant-text {
+.expense-split-user-text {
   display: block;
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+@media (max-width: 767.98px) {
+  .expense-detail-inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .expense-detail-content {
+    align-items: flex-start;
+    text-align: start;
+    padding-inline-end: 0;
+    padding-bottom: 0.75rem;
+    border-inline-end: none;
+    border-bottom: 1px solid var(--bs-border-color-translucent);
+  }
+
+  .expense-detail-side {
+    padding-inline-start: 0;
+  }
 }
 </style>

@@ -37,7 +37,6 @@ export function formatFullDate(value: string): string {
   const date = parseExpenseDate(value)
   if (!date) return value
   return date.toLocaleDateString(undefined, {
-    weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric'

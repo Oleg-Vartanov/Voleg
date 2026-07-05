@@ -22,6 +22,7 @@ export interface ApiSeExpense {
   expenseDate: string
   description: string | null
   paidByUser: ApiUser
+  createdByUser: ApiUser
   category: ApiSeCategory
   currency: ApiSeCurrency
   splits: ApiSeExpenseSplit[]
@@ -56,4 +57,10 @@ export interface SeCategory {
   icon: CategoryKey
   title: string
   tag: string
+}
+
+export interface SeExpenseSplitUser {
+  user: ApiUser
+  paidAmount: string | null
+  splitAmount: string
 }
