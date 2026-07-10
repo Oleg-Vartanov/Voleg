@@ -4,6 +4,7 @@ namespace App\SplitExpense\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
 use App\SplitExpense\Entity\SeConnection;
+use App\SplitExpense\Enum\SeConnectionStatusEnum;
 use App\User\Entity\User;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -46,14 +47,20 @@ class SeConnectionRepository extends AbstractEntityRepository
         User $user,
         int $offset = 0,
         int $limit = 100,
+        ?SeConnectionStatusEnum $status = null,
     ): array {
-        return $this->createQueryBuilder('c')
+        $qb = $this->createQueryBuilder('c')
             ->where('c.userA = :user OR c.userB = :user')
             ->setParameter('user', $user)
             ->orderBy('c.createdAt', 'DESC')
             ->setFirstResult($offset)
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
+            ->setMaxResults($limit);
+
+        if ($status !== null) {
+            $qb->andWhere('c.status = :status');
+            $qb->setParameter('status', $status);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 }

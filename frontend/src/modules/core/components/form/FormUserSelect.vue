@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
   excludeSelf: false
 })
 
-const modelValue = defineModel<number | null>({ required: true })
+const modelValue = defineModel<ApiUser | null>({ required: true })
 
 const rootEl = ref<HTMLElement | null>(null)
 const isOpen = ref(false)
@@ -28,18 +28,14 @@ const isOpen = ref(false)
 const fieldValidationClass = computed(() => validationClass(props.isValid))
 const isInvalid = computed(() => props.isValid === false)
 
-const selectedUser = computed(
-  () => props.users.find((user) => user.id === modelValue.value) ?? null
-)
-
 const displayLabel = computed(() => {
-  const user = selectedUser.value
+  const user = modelValue.value
   if (!user) return 'Select user…'
   return `${user.displayName} (@${user.tag})`
 })
 
 function selectUser(user: ApiUser) {
-  modelValue.value = user.id
+  modelValue.value = user
   isOpen.value = false
 }
 

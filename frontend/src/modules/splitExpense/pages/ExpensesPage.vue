@@ -39,7 +39,7 @@ onMounted(() => {
         Add expense
       </button>
 
-      <AddExpenseModal v-model:open="isAddExpenseOpen" :expenses="expensesState" />
+      <AddExpenseModal v-model:open="isAddExpenseOpen" @created="expensesState.load()" />
 
       <div v-if="expensesState.isLoading.value" class="text-center py-3">
         <div class="spinner-border text-primary" role="status">

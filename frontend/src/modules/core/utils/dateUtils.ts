@@ -23,5 +23,8 @@ export default {
     const offsetMins = pad(Math.abs(offsetMinutes) % 60)
 
     return `${offsetSign}${offsetHours}:${offsetMins}`
+  },
+  todayIsoDate(): string {
+    return new Date().toISOString().slice(0, 10)
   }
 }

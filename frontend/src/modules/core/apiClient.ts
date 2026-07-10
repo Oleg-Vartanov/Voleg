@@ -145,10 +145,15 @@ export default {
     })
   },
 
-  listSplitExpenseConnections(offset = 0, limit = 100) {
+  listSplitExpenseConnections(
+    offset = 0,
+    limit = 100,
+    status: 'accepted' | null = null,
+    usersOnly: boolean = false,
+  ) {
     return axios.get(`${apiBaseUrl}/split-expense/connections`, {
       headers: getHeader(),
-      params: { offset, limit }
+      params: { offset, limit, status, usersOnly }
     })
   },
 
@@ -183,6 +188,12 @@ export default {
 
   createSplitExpense(payload: object) {
     return axios.post(`${apiBaseUrl}/split-expense/expenses/0`, payload, {
+      headers: getHeader()
+    })
+  },
+
+  updateSplitExpense(id: number, payload: object) {
+    return axios.patch(`${apiBaseUrl}/split-expense/expenses/${id}`, payload, {
       headers: getHeader()
     })
   }

@@ -6,6 +6,7 @@ use App\Core\Documentation\Attribute\Response\ArrayResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
 use App\SplitExpense\Entity\SeConnection;
+use App\SplitExpense\Enum\SeConnectionStatusEnum;
 use App\SplitExpense\Repository\SeConnectionRepository;
 use App\User\Entity\User;
 use OpenApi\Attributes as OA;
@@ -38,9 +39,22 @@ class SeConnectionGetListAction extends ApiController
         #[CurrentUser] User $user,
         #[MapQueryParameter] int $offset = 0,
         #[MapQueryParameter] int $limit = 100,
+        #[MapQueryParameter] ?SeConnectionStatusEnum $status = null,
+        #[MapQueryParameter] bool $usersOnly = false,
     ): JsonResponse {
+        $connections = $this->conRepository->listForUser($user, $offset, $limit, $status);
+
+        if ($usersOnly) {
+            $users = [];
+            foreach ($connections as $connection) {
+                $users[] = $user->getId() === $connection->getUserA()->getId()
+                    ? $connection->getUserB()
+                    : $connection->getUserA();
+            }
+        }
+
         return $this->json(
-            $this->conRepository->listForUser($user, $offset, $limit),
+            $usersOnly ? $users : $connections,
             context: ['groups' => Group::public->value],
         );
     }

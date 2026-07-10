@@ -42,7 +42,7 @@ export interface ApiSeConnection {
   userB: ApiUser
 }
 
-export interface SeExpenseCreatePayload {
+export interface ApiSeExpenseCreatePayload {
   title: string
   amount: number
   currencyId: number
