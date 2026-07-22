@@ -71,5 +71,6 @@ services:
     working_dir: /var/www/html/frontend
     volumes:
       - ../frontend:/var/www/html/frontend
+      - ./prod/node/command.sh:/command.sh
     env_file: [ ./.env, ./.env.prod, ./.env.local ]
-    command: tail -f /dev/null
+    command: [ "/command.sh" ]

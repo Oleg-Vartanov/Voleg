@@ -9,4 +9,6 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 \
   -nodes -keyout /certificates/${DOMAIN}.key -out /certificates/${DOMAIN}.crt \
   -subj "/CN=${DOMAIN}" -addext "subjectAltName=DNS:${DOMAIN},DNS:*.${DOMAIN},IP:10.0.0.1"
 
+npm install
+npm run build-only
 npm run dev -- --host
