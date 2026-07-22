@@ -55,6 +55,9 @@ cache:
 	$(PHP_CONTAINER) php bin/console cache:warmup
 
 fixtures:
+ifeq ($(SERVER_ENV),prod)
+	$(error fixtures is disabled in prod)
+endif
 	$(PHP_CONTAINER) php bin/console doctrine:fixtures:load --no-interaction
 
 test:

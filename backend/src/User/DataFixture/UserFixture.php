@@ -22,7 +22,7 @@ class UserFixture extends Fixture
         $users = [
             [
                 'email' => 'admin@admin.com',
-                'password' => 'admin',
+                'password' => self::DEFAULT_PASSWORD,
                 'displayName' => 'Admin',
                 'tag' => 'admin',
                 'roles' => [RoleEnum::ROLE_ADMIN->value],
@@ -31,7 +31,7 @@ class UserFixture extends Fixture
             ],
             [
                 'email' => 'user@user.com',
-                'password' => 'user',
+                'password' => self::DEFAULT_PASSWORD,
                 'displayName' => 'User',
                 'tag' => 'user',
                 'roles' => [RoleEnum::ROLE_USER->value],
