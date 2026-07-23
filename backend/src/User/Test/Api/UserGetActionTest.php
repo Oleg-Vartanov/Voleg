@@ -18,7 +18,7 @@ class UserGetActionTest extends ApiTestCase
         $this->sendRequest($user->getId());
 
         self::assertResponseIsSuccessful();
-        self::assertEquals($user->getTag(), $this->getResponseData()['tag']);
+        self::assertEquals($user->getUsername(), $this->getResponseData()['username']);
     }
 
     #[TestDox('User GET: success admin')]

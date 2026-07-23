@@ -28,7 +28,7 @@ contacts.loadContacts()
       :key="contact.id"
       class="list-group-item d-flex justify-content-between align-items-center gap-2"
     >
-      <span class="text-truncate">{{ contact.displayName }} (@{{ contact.tag }})</span>
+      <span class="text-truncate">@{{ contact.username }}</span>
       <button
         type="button"
         class="btn btn-outline-danger btn-sm flex-shrink-0"

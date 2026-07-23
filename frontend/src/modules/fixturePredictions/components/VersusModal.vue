@@ -42,11 +42,11 @@ function addUser(user: ApiUser) {
               :key="user.id"
               class="list-group-item d-flex justify-content-between align-items-center gap-2"
             >
-              <span class="text-truncate">{{ user.displayName }} (@{{ user.tag }})</span>
+              <span class="text-truncate">@{{ user.username }}</span>
               <button
                 type="button"
                 class="btn btn-outline-danger btn-sm flex-shrink-0"
-                :aria-label="`Remove ${user.displayName}`"
+                :aria-label="`Remove ${user.username}`"
                 @click="vs.removeUser(user)"
               >
                 Remove

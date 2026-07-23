@@ -17,8 +17,7 @@ class JWTCreatedListenerTest extends TestCase
     {
         $user = self::createStub(User::class);
         $user->method('getId')->willReturn(1);
-        $user->method('getDisplayName')->willReturn('testName');
-        $user->method('getTag')->willReturn('testTag');
+        $user->method('getUsername')->willReturn('testUsername');
 
         $security = self::createStub(Security::class);
         $security->method('getUser')->willReturn($user);
@@ -30,8 +29,7 @@ class JWTCreatedListenerTest extends TestCase
         $event->method('getData')->willReturn([]);
         $event->expects(self::once())->method('setData')->with([
             'id' => 1,
-            'displayName' => 'testName',
-            'tag' => 'testTag',
+            'username' => 'testUsername',
         ]);
 
         $listener->onJWTCreated($event);

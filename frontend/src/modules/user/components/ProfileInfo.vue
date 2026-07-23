@@ -19,25 +19,20 @@ const isLoading = ref(false)
 const isEditing = ref(false)
 const userData = ref<ApiUser>({})
 const editForm = reactive({
-  displayName: '',
-  tag: '',
+  username: '',
   email: ''
 })
 provide('isLoading', isLoading)
 
 const fillForm = () => {
-  editForm.displayName = userData.value.displayName
-  editForm.tag = userData.value.tag
+  editForm.username = userData.value.username
   editForm.email = userData.value.email
 }
 
 const buildUpdatePayload = (): Record<string, string> | null => {
   const payload: Record<string, string> = {}
-  if (editForm.displayName !== userData.value.displayName) {
-    payload.displayName = editForm.displayName
-  }
-  if (editForm.tag !== userData.value.tag) {
-    payload.tag = editForm.tag
+  if (editForm.username !== userData.value.username) {
+    payload.username = editForm.username
   }
   if (editForm.email !== userData.value.email) {
     payload.email = editForm.email
@@ -92,8 +87,7 @@ const saveProfile = () => {
     .then((response) => {
       userData.value = response.data
       fillForm()
-      auth.user.displayName = response.data.displayName
-      auth.user.tag = response.data.tag
+      auth.user.username = response.data.username
       isEditing.value = false
 
       let message = 'Profile updated successfully.'
@@ -134,22 +128,12 @@ onMounted(() => {
   <h1 class="h4 mb-3 fw-normal">Profile info</h1>
   <form @submit.prevent="saveProfile">
     <FormInput
-      id="displayName"
-      v-model="editForm.displayName"
-      label="Display Name"
-      :is-valid="validation.isValid('displayName')"
-      :error-text="validation.getError('displayName')"
-      help-text="Your public name displayed on the platform."
-      :disabled="!isEditing"
-    />
-
-    <FormInput
-      id="tag"
-      v-model="editForm.tag"
-      label="Tag"
-      :is-valid="validation.isValid('tag')"
-      :error-text="validation.getError('tag')"
-      help-text="A unique tag used for search purposes."
+      id="username"
+      v-model="editForm.username"
+      label="Username"
+      :is-valid="validation.isValid('username')"
+      :error-text="validation.getError('username')"
+      help-text="Your unique public name used for display and search."
       :disabled="!isEditing"
     />
 

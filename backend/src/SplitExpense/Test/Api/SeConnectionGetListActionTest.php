@@ -15,7 +15,7 @@ class SeConnectionGetListActionTest extends ApiTestCase
     #[TestDox('Connection GET list: success')]
     public function testSuccess(): void
     {
-        $user = $this->getService(UserRepository::class)->findByTag('user1');
+        $user = $this->getService(UserRepository::class)->findByUsername('user1');
         $connections = $this->getService(SeConnectionRepository::class)->listForUser($user);
 
         $this->signIn($user);

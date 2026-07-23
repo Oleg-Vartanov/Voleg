@@ -37,8 +37,7 @@ abstract class ApiTestCase extends WebTestCase
         $defaults = [
             'email' => 'user' . $index . '@example.com',
             'password' => UserFixture::DEFAULT_PASSWORD,
-            'displayName' => 'John Doe ' . $index,
-            'tag' => 'john-doe-' . $index,
+            'username' => 'john-doe-' . $index,
             'roles' => [],
         ];
         $userData = array_merge($defaults, $userData);
@@ -50,8 +49,7 @@ abstract class ApiTestCase extends WebTestCase
         $user = static::getContainer()->get(UserService::class)->create(
             $userData['email'],
             $userData['password'],
-            $userData['displayName'],
-            $userData['tag'],
+            $userData['username'],
             $userData['roles'],
         );
 

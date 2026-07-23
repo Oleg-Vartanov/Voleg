@@ -25,8 +25,7 @@ class AuthSignUpActionTest extends ApiTestCase
         $testUser = [
             'email' => 'user-auth-test@example.com',
             'password' => '!Qwerty1',
-            'displayName' => 'John Doe',
-            'tag' => 'user-auth-test',
+            'username' => 'user-auth-test',
             'code' => 'sign-up-code',
         ];
 
@@ -44,7 +43,7 @@ class AuthSignUpActionTest extends ApiTestCase
         $this->signUpRequest([
             'email' => 'john.doe',
             'password' => 'qwert y',
-            'displayName' => '',
+            'username' => '',
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);;

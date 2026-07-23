@@ -15,20 +15,20 @@ class UserGetListActionTest extends ApiTestCase
         $user = $this->createUser();
 
         $this->sendRequest(
-            $user->getTag()
+            $user->getUsername()
         );
 
         self::assertResponseIsSuccessful();
-        self::assertEquals($user->getTag(), $this->getResponseData()[0]['tag']);
+        self::assertEquals($user->getUsername(), $this->getResponseData()[0]['username']);
     }
 
-    private function sendRequest(?string $tag): void
+    private function sendRequest(?string $username): void
     {
         $this->client->request(
             method: Request::METHOD_GET,
             uri: $this->router->generate('user_get_list'),
             parameters: [
-                'tag' => $tag,
+                'username' => $username,
                 'offset' => 0,
                 'limit' => 100,
             ]

@@ -4,7 +4,6 @@ namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
 use App\Core\Test\Trait\ContainerTestTrait;
-use App\User\Enum\RoleEnum;
 use App\User\Enum\UserTokenTypeEnum;
 use App\User\Repository\UserRepository;
 use App\User\Repository\UserTokenRepository;
@@ -24,8 +23,7 @@ class UserPatchActionTest extends ApiTestCase
         $this->signIn($user);
         $this->sendRequest($user->getId(), [
             'email' => 'patched-email@mail.com',
-            'displayName' => 'patched-name',
-            'tag' => 'patched-tag',
+            'username' => 'patched-username',
         ]);
         $patchedUser = $this->getService(UserRepository::class)->findById($user->getId());
 
@@ -36,8 +34,7 @@ class UserPatchActionTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
         self::assertSame($user->getEmail(), $patchedUser->getEmail());
         self::assertSame('patched-email@mail.com', $emailChangeToken->getEmailChange());
-        self::assertSame('patched-name', $patchedUser->getDisplayName());
-        self::assertSame('patched-tag', $patchedUser->getTag());
+        self::assertSame('patched-username', $patchedUser->getUsername());
     }
 
     #[TestDox('User PATCH: access denied')]

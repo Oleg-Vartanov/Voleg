@@ -33,21 +33,6 @@ class UserDto
     public string $password;
 
     #[Groups(self::ALL)]
-    #[OA\Property(example: 'Cool Name')]
-    #[
-        Assert\NotBlank(groups: [self::SIGN_UP]),
-        Assert\Type('string', groups: self::ALL),
-        Assert\Length(min: 1, groups: self::ALL),
-        Assert\Length(max: 255, groups: self::ALL),
-        Assert\Regex(
-            pattern: '/[a-z0-9]/',
-            message: 'The value must contain at least one letter or number.',
-            groups: self::ALL,
-        )
-    ]
-    public string $displayName;
-
-    #[Groups(self::ALL)]
     #[OA\Property(example: 'cool-name')]
     #[
         Assert\NotBlank(groups: [self::SIGN_UP]),
@@ -61,7 +46,7 @@ class UserDto
             message: 'The value must contain at least one letter or number.',
             groups: self::ALL,
         ),
-        CustomAssert\UniqueEntityField(entityClass: User::class, field: 'tag', groups: self::ALL),
+        CustomAssert\UniqueEntityField(entityClass: User::class, field: 'username', groups: self::ALL),
     ]
-    public string $tag;
+    public string $username;
 }

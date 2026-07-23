@@ -163,7 +163,7 @@ watch(
         <template v-else>
           <li class="side-nav__item">
             <span class="side-nav__link side-nav__link--user">
-              {{ auth.user.displayName ?? 'User' }}
+              {{ auth.user.username ?? 'User' }}
             </span>
           </li>
           <li class="side-nav__item">

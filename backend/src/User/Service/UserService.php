@@ -23,16 +23,14 @@ readonly class UserService
     public function create(
         string $email,
         string $plaintextPassword,
-        string $displayName,
-        string $tag,
+        string $username,
         array $roles = [],
     ): User {
         $user = new User();
 
         $user->setEmail($email);
         $this->setHashedPassword($user, $plaintextPassword);
-        $user->setDisplayName($displayName);
-        $user->setTag($tag);
+        $user->setUsername($username);
         $user->setRoles($roles);
 
         return $user;
@@ -43,8 +41,7 @@ readonly class UserService
         return $this->create(
             email: $dto->email,
             plaintextPassword: $dto->password,
-            displayName: $dto->displayName,
-            tag: $dto->tag,
+            username: $dto->username,
         );
     }
 
@@ -58,11 +55,8 @@ readonly class UserService
         if (isset($props['email']) && $dto->email !== $user->getEmail()) {
             $this->emailChangeService->requestEmailChange($user, $dto->email);
         }
-        if (isset($props['displayName'])) {
-            $user->setDisplayName($dto->displayName);
-        }
-        if (isset($props['tag'])) {
-            $user->setTag($dto->tag);
+        if (isset($props['username'])) {
+            $user->setUsername($dto->username);
         }
 
         return $user;

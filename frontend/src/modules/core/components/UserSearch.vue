@@ -30,11 +30,11 @@ const emit = defineEmits<{
 
 const isLocalMode = computed(() => props.users !== undefined)
 const auth = useAuth()
-const localSearchTag = ref('')
+const localSearchUsername = ref('')
 
 const {
   users: apiUsers,
-  searchTag: apiSearchTag,
+  searchUsername: apiSearchUsername,
   searchError: apiSearchError,
   isLoading: apiIsLoading,
 } = useUserSearch(
@@ -45,15 +45,15 @@ const {
 
 const searchQuery = computed({
   get() {
-    return isLocalMode.value ? localSearchTag.value : apiSearchTag.value
+    return isLocalMode.value ? localSearchUsername.value : apiSearchUsername.value
   },
   set(value: string) {
     if (isLocalMode.value) {
-      localSearchTag.value = value
+      localSearchUsername.value = value
       return
     }
 
-    apiSearchTag.value = value
+    apiSearchUsername.value = value
   },
 })
 
@@ -70,12 +70,10 @@ const localFilteredUsers = computed(() => {
   const excluded = excludedUserIds()
   let filtered = (props.users ?? []).filter((user) => !excluded.has(user.id))
 
-  const query = localSearchTag.value.trim().toLowerCase()
+  const query = localSearchUsername.value.trim().toLowerCase()
   if (query !== '') {
-    filtered = filtered.filter(
-      (user) =>
-        (user.displayName ?? '').toLowerCase().includes(query) ||
-        user.tag.toLowerCase().includes(query)
+    filtered = filtered.filter((user) =>
+      user.username.toLowerCase().includes(query)
     )
   }
 
@@ -129,7 +127,7 @@ watch(totalPages, (pages) => {
       type="text"
       class="form-control"
       :class="{ 'is-invalid': !isLocalMode && searchError !== '' }"
-      :placeholder="isLocalMode ? 'Search by name or tag' : 'Search by tag'"
+      placeholder="Search by username"
       :aria-describedby="validationId"
     />
     <div :id="validationId" class="invalid-feedback">{{ searchError }}</div>
@@ -148,11 +146,11 @@ watch(totalPages, (pages) => {
         :key="user.id"
         class="list-group-item d-flex justify-content-between align-items-center gap-2"
       >
-        <span class="text-truncate">{{ user.displayName }} (@{{ user.tag }})</span>
+        <span class="text-truncate">@{{ user.username }}</span>
         <button
           type="button"
           class="btn btn-outline-primary btn-sm flex-shrink-0"
-          :aria-label="`${actionLabel} ${user.displayName}`"
+          :aria-label="`${actionLabel} ${user.username}`"
           @click="onAction(user)"
         >
           {{ actionLabel }}

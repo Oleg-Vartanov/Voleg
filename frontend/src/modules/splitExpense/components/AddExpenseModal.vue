@@ -140,7 +140,7 @@ watch(open, (isOpen) => {
                       class="list-group-item d-flex justify-content-between align-items-center gap-2"
                     >
                       <span class="text-truncate">
-                        {{ user.displayName }} (@{{ user.tag }})
+                        @{{ user.username }}
                       </span>
                       <span
                         v-if="user.id === fields.paidByUser?.id || user.id === auth.user.id"

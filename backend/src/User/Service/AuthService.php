@@ -80,7 +80,7 @@ readonly class AuthService
             subject: 'Verify Sign Up',
             context: [
                 'verifyLink' => $verifyLink,
-                'displayName' => $user->getDisplayName(),
+                'username' => $user->getUsername(),
             ],
         );
     }

@@ -21,19 +21,17 @@ class UserFixture extends Fixture
     {
         $users = [
             [
-                'email' => 'admin@admin.com',
+                'email' => 'admin@test.com',
                 'password' => self::DEFAULT_PASSWORD,
-                'displayName' => 'Admin',
-                'tag' => 'admin',
+                'username' => 'admin',
                 'roles' => [RoleEnum::ROLE_ADMIN->value],
                 'verified' => true,
                 'reference' => 'admin',
             ],
             [
-                'email' => 'user@user.com',
+                'email' => 'user@test.com',
                 'password' => self::DEFAULT_PASSWORD,
-                'displayName' => 'User',
-                'tag' => 'user',
+                'username' => 'user',
                 'roles' => [RoleEnum::ROLE_USER->value],
                 'verified' => true,
                 'reference' => 'user',
@@ -42,10 +40,9 @@ class UserFixture extends Fixture
 
         foreach (range(1, 10) as $i) {
             $users[] = [
-                'email' => "user{$i}@user.com",
+                'email' => "user{$i}@test.com",
                 'password' => self::DEFAULT_PASSWORD,
-                'displayName' => "User {$i}",
-                'tag' => "user{$i}",
+                'username' => "user{$i}",
                 'roles' => [RoleEnum::ROLE_USER->value],
                 'verified' => true,
                 'reference' => "user{$i}",
@@ -53,10 +50,9 @@ class UserFixture extends Fixture
         }
         foreach (range(11, 100) as $i) {
             $users[] = [
-                'email' => "user{$i}@user.com",
+                'email' => "user{$i}@test.com",
                 'password' => self::DEFAULT_PASSWORD,
-                'displayName' => "User {$i}",
-                'tag' => "user{$i}",
+                'username' => "user{$i}",
                 'roles' => [RoleEnum::ROLE_USER->value],
                 'verified' => true,
             ];
@@ -66,8 +62,7 @@ class UserFixture extends Fixture
             $u = new User();
             $u->setEmail($user['email']);
             $this->userService->setHashedPassword($u, $user['password']);
-            $u->setDisplayName($user['displayName']);
-            $u->setTag($user['tag']);
+            $u->setUsername($user['username']);
             $u->setRoles($user['roles']);
             $u->setVerified($user['verified']);
 

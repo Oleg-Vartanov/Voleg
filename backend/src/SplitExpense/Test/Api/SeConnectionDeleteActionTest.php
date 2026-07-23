@@ -25,8 +25,8 @@ class SeConnectionDeleteActionTest extends ApiTestCase
     #[TestDox('Connection DELETE: success')]
     public function testSuccess(): void
     {
-        $userA = $this->userRepo->findByTag('user1');
-        $userB = $this->userRepo->findByTag('user2');
+        $userA = $this->userRepo->findByUsername('user1');
+        $userB = $this->userRepo->findByUsername('user2');
         $connection = $this->conRepo->findOneByUsers($userA, $userB);
         self::assertNotNull($connection);
 
@@ -41,12 +41,12 @@ class SeConnectionDeleteActionTest extends ApiTestCase
     public function testAccessDenied(): void
     {
         $connection = $this->conRepo->findOneByUsers(
-            $this->userRepo->findByTag('user1'),
-            $this->userRepo->findByTag('user3'),
+            $this->userRepo->findByUsername('user1'),
+            $this->userRepo->findByUsername('user3'),
         );
         self::assertNotNull($connection);
 
-        $this->signIn($this->userRepo->findByTag('user2'));
+        $this->signIn($this->userRepo->findByUsername('user2'));
 
         $this->sendRequest($connection->getId());
         self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);

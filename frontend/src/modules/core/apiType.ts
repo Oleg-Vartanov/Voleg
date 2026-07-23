@@ -1,7 +1,6 @@
 export interface ApiUser {
   id: number
-  displayName: string
-  tag: string
+  username: string
   email: string
   createdAt: string
 }

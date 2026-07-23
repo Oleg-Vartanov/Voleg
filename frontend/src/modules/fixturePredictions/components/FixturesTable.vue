@@ -19,11 +19,11 @@ const auth = useAuth()
         <th scope="col">Match</th>
         <th scope="col">Score</th>
         <th scope="col">
-          {{ vs.users.value.length === 0 ? 'Prediction' : auth.user.displayName }}
+          {{ vs.users.value.length === 0 ? 'Prediction' : auth.user.username }}
         </th>
         <th v-if="vs.users.value.length === 0" scope="col">Points</th>
         <th v-for="vsUser in vs.users.value" :key="vsUser.id" scope="col">
-          {{ vsUser.displayName }}
+          {{ vsUser.username }}
         </th>
         <th scope="col">Start</th>
       </tr>

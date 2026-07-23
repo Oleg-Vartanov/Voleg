@@ -64,10 +64,10 @@ export default {
     })
   },
 
-  listUsers(userTag: null | string = null) {
+  listUsers(username: null | string = null) {
     return axios.get(`${apiBaseUrl}/users`, {
       headers: getHeader(),
-      params: { tag: userTag }
+      params: { username }
     })
   },
 

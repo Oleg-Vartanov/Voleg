@@ -53,7 +53,7 @@ readonly class PasswordResetService
             subject: 'Password Reset Request',
             context: [
                 'resetLink' => $resetLink,
-                'displayName' => $user->getDisplayName(),
+                'username' => $user->getUsername(),
             ]
         );
     }

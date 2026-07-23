@@ -34,9 +34,9 @@ class UserRepository extends AbstractEntityRepository implements PasswordUpgrade
         return $this->findOneBy(['email' => $email]);
     }
 
-    public function findByTag(string $value): ?User
+    public function findByUsername(string $value): ?User
     {
-        return $this->findOneBy(['tag' => $value]);
+        return $this->findOneBy(['username' => $value]);
     }
 
     /** Used to upgrade (rehash) the user's password automatically over time. */
@@ -53,12 +53,12 @@ class UserRepository extends AbstractEntityRepository implements PasswordUpgrade
     /**
      * @return User[]
      */
-    public function list(?string $tag, int $offset = 0, int $limit = 100): array
+    public function list(?string $username, int $offset = 0, int $limit = 100): array
     {
         $qb = $this->createQueryBuilder('u');
 
-        if ($tag !== null) {
-            $qb->where('u.tag = :tag')->setParameter('tag', $tag);
+        if ($username !== null) {
+            $qb->where('u.username = :username')->setParameter('username', $username);
         }
 
         /** @var User[] $users */

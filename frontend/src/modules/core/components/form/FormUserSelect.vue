@@ -31,7 +31,7 @@ const isInvalid = computed(() => props.isValid === false)
 const displayLabel = computed(() => {
   const user = modelValue.value
   if (!user) return 'Select user…'
-  return `${user.displayName} (@${user.tag})`
+  return `@${user.username}`
 })
 
 function selectUser(user: ApiUser) {

@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[OA\Schema(title: 'User')]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_USER_EMAIL', fields: ['email'])]
-#[ORM\UniqueConstraint(name: 'UNIQ_USER_TAG', fields: ['tag'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_USER_USERNAME', fields: ['username'])]
 #[HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -41,10 +41,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private string $password;
 
-    #[Groups([Group::public->value])]
-    #[ORM\Column(length: 255)]
-    private string $displayName;
-
     #[ORM\Column]
     private bool $verified = false;
 
@@ -54,7 +50,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[Groups([Group::public->value])]
     #[ORM\Column(length: 255)]
-    private string $tag;
+    private string $username;
 
     public function __construct()
     {
@@ -135,18 +131,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    public function getDisplayName(): string
-    {
-        return $this->displayName;
-    }
-
-    public function setDisplayName(string $displayName): static
-    {
-        $this->displayName = trim($displayName);
-
-        return $this;
-    }
-
     public function isVerified(): bool
     {
         return $this->verified;
@@ -177,14 +161,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->setCreatedAt(new DateTimeImmutable());
     }
 
-    public function getTag(): string
+    public function getUsername(): string
     {
-        return $this->tag;
+        return $this->username;
     }
 
-    public function setTag(string $tag): static
+    public function setUsername(string $username): static
     {
-        $this->tag = trim($tag);
+        $this->username = trim($username);
 
         return $this;
     }

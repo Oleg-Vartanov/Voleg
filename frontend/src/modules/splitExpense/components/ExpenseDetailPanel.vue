@@ -28,7 +28,7 @@ const splitUsers = computed(() => ed.mapSplitUsers(props.expense))
           </p>
 
           <p class="expense-detail-meta">
-            Added by <strong>{{ expense.createdByUser.displayName }}</strong> on
+            Added by <strong>{{ expense.createdByUser.username }}</strong> on
             {{ formatFullDate(expense.expenseDate) }}
           </p>
 
@@ -50,7 +50,7 @@ const splitUsers = computed(() => ed.mapSplitUsers(props.expense))
               class="expense-split-user"
             >
               <span class="expense-split-user-text">
-                <strong>{{ splitUser.user.displayName }}</strong>
+                <strong>{{ splitUser.user.username }}</strong>
                 <template v-if="splitUser.paidAmount"> paid <strong>{{ splitUser.paidAmount }}</strong></template>
                 <span v-if="splitUser.paidAmount"> share </span>
                 <span v-else> owes </span>

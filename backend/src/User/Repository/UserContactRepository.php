@@ -40,7 +40,7 @@ class UserContactRepository extends AbstractEntityRepository
             ->innerJoin(UserContact::class, 'uc', 'WITH', 'uc.contact = contact')
             ->where('uc.user = :user')
             ->setParameter('user', $user)
-            ->orderBy('contact.tag')
+            ->orderBy('contact.username')
             ->setFirstResult($offset)
             ->setMaxResults($limit)
             ->getQuery()

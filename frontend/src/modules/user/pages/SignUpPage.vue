@@ -12,8 +12,7 @@ const validation = useApiValidation()
 
 const isLoading = ref(false)
 const model = reactive({
-  displayName: '',
-  tag: '',
+  username: '',
   email: '',
   password: ''
 })
@@ -47,21 +46,12 @@ const signUp = () => {
 <template>
   <form @submit.prevent="signUp">
     <FormInput
-      id="displayName"
-      v-model="model.displayName"
-      label="Display Name"
-      :is-valid="validation.isValid('displayName')"
-      :error-text="validation.getError('displayName')"
-      help-text="Your public name displayed on the platform."
-    />
-
-    <FormInput
-      id="tag"
-      v-model="model.tag"
-      label="Tag"
-      :is-valid="validation.isValid('tag')"
-      :error-text="validation.getError('tag')"
-      help-text="A unique tag used for search purposes."
+      id="username"
+      v-model="model.username"
+      label="Username"
+      :is-valid="validation.isValid('username')"
+      :error-text="validation.getError('username')"
+      help-text="Your unique public name used for display and search."
     />
 
     <FormInput

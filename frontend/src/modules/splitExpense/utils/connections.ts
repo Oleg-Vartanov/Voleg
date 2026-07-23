@@ -10,7 +10,7 @@ export function getConnectionPartnerName(
   currentUserId: number
 ): string {
   const partner = getConnectionPartner(connection, currentUserId)
-  return `${partner.displayName} (@${partner.tag})`
+  return `@${partner.username}`
 }
 
 export function isIncomingRequest(connection: ApiSeConnection, currentUserId: number): boolean {

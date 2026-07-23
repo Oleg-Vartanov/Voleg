@@ -36,12 +36,12 @@ class UserGetListAction extends ApiController
     }
 
     public function __invoke(
-        #[MapQueryParameter] ?string $tag,
+        #[MapQueryParameter] ?string $username,
         #[MapQueryParameter] int $offset = 0,
         #[MapQueryParameter] int $limit = 100,
     ): JsonResponse {
         return $this->json(
-            $this->userRepository->list($tag, $offset, $limit),
+            $this->userRepository->list($username, $offset, $limit),
             context: ['groups' => $this->showGroups()]
         );
     }

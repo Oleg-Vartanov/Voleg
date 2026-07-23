@@ -9,7 +9,7 @@ import { jwtDecode, type JwtPayload } from 'jwt-decode'
 
 interface apiJwtPayload extends JwtPayload {
   id: number
-  displayName: string
+  username: string
   roles: string[]
 }
 
@@ -18,9 +18,8 @@ const localStorageKey = 'voleg-jwt'
 const defaultUser: User = {
   isSignedIn: false,
   id: null,
-  displayName: null,
+  username: null,
   roles: [],
-  tag: null
 }
 
 export const useAuth = defineStore('auth', () => {
@@ -35,9 +34,8 @@ export const useAuth = defineStore('auth', () => {
       const decodedToken: apiJwtPayload = jwtDecode(token)
       user.isSignedIn = isTokenValid()
       user.id = decodedToken['id'] ?? null
-      user.displayName = decodedToken['displayName'] ?? null
+      user.username = decodedToken['username'] ?? null
       user.roles = decodedToken['roles'] ?? []
-      user.tag = decodedToken['tag'] ?? []
     }
   }
 

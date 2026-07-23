@@ -56,7 +56,7 @@ readonly class EmailChangeService
             subject: 'Verify Email Change',
             context: [
                 'verifyLink' => $verifyLink,
-                'displayName' => $user->getDisplayName(),
+                'username' => $user->getUsername(),
             ],
         );
     }

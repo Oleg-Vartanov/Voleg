@@ -13,7 +13,7 @@ export function useUserSearch(
   const auth = useAuth()
 
   const users = ref<ApiUser[]>([])
-  const searchTag = ref('')
+  const searchUsername = ref('')
   const searchError = ref('')
   const isLoading = ref(false)
 
@@ -36,7 +36,7 @@ export function useUserSearch(
     }
   )
 
-  watch(searchTag, (value) => {
+  watch(searchUsername, (value) => {
     if (debounceTimer !== null) {
       clearTimeout(debounceTimer)
       debounceTimer = null
@@ -55,12 +55,12 @@ export function useUserSearch(
   })
 
   async function searchUser() {
-    if (searchTag.value === '') return
+    if (searchUsername.value === '') return
 
     isLoading.value = true
     searchError.value = ''
     try {
-      const response = await client.listUsers(searchTag.value)
+      const response = await client.listUsers(searchUsername.value)
       users.value = filterResults(response.data)
     } catch {
       searchError.value = 'Failed to search users.'
@@ -99,10 +99,9 @@ export function useUserSearch(
 
   return {
     users,
-    searchTag,
+    searchUsername,
     searchError,
     isLoading,
-    searchUser,
     loadContacts
   }
 }

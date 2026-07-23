@@ -24,7 +24,7 @@ const tables: Tables = inject('tables')
       <!-- Leaderboard -->
       <tr v-for="(user, index) in tables.leaderboard.value" :key="user.user.id">
         <th scope="row">{{ index + 1 }}</th>
-        <td>{{ user.user.displayName }}</td>
+        <td>{{ user.user.username }}</td>
         <td>{{ user.periodPoints ?? '-' }}</td>
         <td>{{ user.totalPoints ?? '-' }}</td>
       </tr>
