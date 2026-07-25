@@ -40,8 +40,5 @@ contacts.loadContacts()
     </li>
   </ul>
 
-  <AddContactModal
-    :exclude-user-ids="() => contacts.users.value.map((contact) => contact.id)"
-    @add="contacts.addContact"
-  />
+  <AddContactModal @add="contacts.addContact" />
 </template>

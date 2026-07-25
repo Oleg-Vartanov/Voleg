@@ -32,11 +32,30 @@ class SeConnectionGetListActionTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
     }
 
-    private function sendRequest(): void
+    #[TestDox('Connection GET list: filter by partner username')]
+    public function testFilterByUsername(): void
+    {
+        $user = $this->getService(UserRepository::class)->findByUsername('user1');
+
+        $this->signIn($user);
+        $this->sendRequest(['username' => 'user', 'usersOnly' => true, 'status' => 'accepted']);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
+        $usernames = array_column($this->getResponseData(), 'username');
+        foreach ($usernames as $username) {
+            self::assertStringContainsStringIgnoringCase('user', $username);
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $parameters
+     */
+    private function sendRequest(array $parameters = []): void
     {
         $this->client->request(
             method: Request::METHOD_GET,
             uri: $this->router->generate('se_connection_get_list'),
+            parameters: $parameters,
         );
     }
 }

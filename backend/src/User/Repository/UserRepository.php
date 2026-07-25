@@ -57,8 +57,10 @@ class UserRepository extends AbstractEntityRepository implements PasswordUpgrade
     {
         $qb = $this->createQueryBuilder('u');
 
-        if ($username !== null) {
-            $qb->where('u.username = :username')->setParameter('username', $username);
+        if ($username !== null && $username !== '') {
+            $qb->where('LOWER(u.username) LIKE LOWER(:username)')
+                ->setParameter('username', '%' . $username . '%')
+                ->orderBy('u.username', 'ASC');
         }
 
         /** @var User[] $users */

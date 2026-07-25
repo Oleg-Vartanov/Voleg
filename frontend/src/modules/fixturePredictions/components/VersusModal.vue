@@ -1,25 +1,21 @@
 <script setup lang="ts">
-import { inject } from 'vue'
-import UserSearch from '@/modules/core/components/UserSearch.vue'
+import { computed, inject } from 'vue'
+import FormSelectUsers from '@/modules/core/components/form/FormSelectUsers.vue'
+import { searchUsers } from '@/modules/core/api/searchUsers'
+import type { ApiUser } from '@/modules/core/apiType'
 import { type Versus } from '@/modules/fixturePredictions/composables/useVersus.ts'
 import { type Tables } from '@/modules/fixturePredictions/composables/useTables'
-import { useAuth } from '@/modules/user/stores/useAuth'
-import { useTopAlerts } from '@/modules/core/stores/useTopAlerts'
-import type { ApiUser } from '@/modules/core/apiType'
 
 const tables = inject<Tables>('tables')!
 const vs = inject<Versus>('vs')!
-const auth = useAuth()
-const topAlerts = useTopAlerts()
 
-function addUser(user: ApiUser) {
-  if (auth.user.id === user.id) {
-    topAlerts.add("It's you :)", 'info')
-    return
-  }
-  vs.addUser(user)
-  tables.updateLoadedTables()
-}
+const versusUsers = computed({
+  get: () => vs.users.value,
+  set: (value: ApiUser[] | ApiUser | null) => {
+    vs.setUsers(Array.isArray(value) ? value : [])
+    tables.updateLoadedTables()
+  },
+})
 </script>
 
 <template>
@@ -36,29 +32,12 @@ function addUser(user: ApiUser) {
           ></button>
         </div>
         <div class="modal-body">
-          <ul v-if="vs.users.value.length > 0" class="list-group list-group-flush mb-3">
-            <li
-              v-for="user in vs.users.value"
-              :key="user.id"
-              class="list-group-item d-flex justify-content-between align-items-center gap-2"
-            >
-              <span class="text-truncate">@{{ user.username }}</span>
-              <button
-                type="button"
-                class="btn btn-outline-danger btn-sm flex-shrink-0"
-                :aria-label="`Remove ${user.username}`"
-                @click="vs.removeUser(user)"
-              >
-                Remove
-              </button>
-            </li>
-          </ul>
-
-          <UserSearch
-            action-label="Add"
-            :exclude-user-ids="() => vs.users.value.map((user) => user.id)"
-            validation-id="go-vs-validation"
-            @action="addUser"
+          <FormSelectUsers
+            id="versus-users"
+            v-model="versusUsers"
+            multiple
+            label="Compare with"
+            :search="searchUsers"
           />
         </div>
         <div class="modal-footer">

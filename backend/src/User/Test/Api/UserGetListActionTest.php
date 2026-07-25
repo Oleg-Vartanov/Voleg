@@ -22,6 +22,18 @@ class UserGetListActionTest extends ApiTestCase
         self::assertEquals($user->getUsername(), $this->getResponseData()[0]['username']);
     }
 
+    #[TestDox('User GET list: partial username match')]
+    public function testUserGetListPartialUsernameMatch(): void
+    {
+        $user = $this->createUser();
+
+        $this->sendRequest(substr($user->getUsername(), 0, 4));
+
+        self::assertResponseIsSuccessful();
+        $usernames = array_column($this->getResponseData(), 'username');
+        self::assertContains($user->getUsername(), $usernames);
+    }
+
     private function sendRequest(?string $username): void
     {
         $this->client->request(

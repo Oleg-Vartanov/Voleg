@@ -48,8 +48,11 @@ class SeConnectionRepository extends AbstractEntityRepository
         int $offset = 0,
         int $limit = 100,
         ?SeConnectionStatusEnum $status = null,
+        ?string $username = null,
     ): array {
         $qb = $this->createQueryBuilder('c')
+            ->innerJoin('c.userA', 'userA')
+            ->innerJoin('c.userB', 'userB')
             ->where('c.userA = :user OR c.userB = :user')
             ->setParameter('user', $user)
             ->orderBy('c.createdAt', 'DESC')
@@ -59,6 +62,13 @@ class SeConnectionRepository extends AbstractEntityRepository
         if ($status !== null) {
             $qb->andWhere('c.status = :status');
             $qb->setParameter('status', $status);
+        }
+
+        if ($username !== null && $username !== '') {
+            $qb->andWhere(
+                '(c.userA = :user AND LOWER(userB.username) LIKE LOWER(:username))
+                 OR (c.userB = :user AND LOWER(userA.username) LIKE LOWER(:username))'
+            )->setParameter('username', '%' . $username . '%');
         }
 
         return $qb->getQuery()->getResult();

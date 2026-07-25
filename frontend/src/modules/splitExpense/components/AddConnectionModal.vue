@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UserSearch from '@/modules/core/components/UserSearch.vue'
+import SelectUsersAction from '@/modules/core/components/SelectUsersAction.vue'
 import type { ApiUser } from '@/modules/core/apiType'
 
 const emit = defineEmits<{
@@ -21,10 +21,8 @@ const emit = defineEmits<{
           ></button>
         </div>
         <div class="modal-body">
-          <UserSearch
+          <SelectUsersAction
             action-label="Request"
-            :exclude-self="false"
-            validation-id="connections-search-validation"
             @action="emit('send', $event)"
           />
         </div>

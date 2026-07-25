@@ -41,8 +41,9 @@ class SeConnectionGetListAction extends ApiController
         #[MapQueryParameter] int $limit = 100,
         #[MapQueryParameter] ?SeConnectionStatusEnum $status = null,
         #[MapQueryParameter] bool $usersOnly = false,
+        #[MapQueryParameter] ?string $username = null,
     ): JsonResponse {
-        $connections = $this->conRepository->listForUser($user, $offset, $limit, $status);
+        $connections = $this->conRepository->listForUser($user, $offset, $limit, $status, $username);
 
         if ($usersOnly) {
             $users = [];

@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import UserSearch from '@/modules/core/components/UserSearch.vue'
+import SelectUsersAction from '@/modules/core/components/SelectUsersAction.vue'
 import type { ApiUser } from '@/modules/core/apiType'
-
-defineProps<{
-  excludeUserIds: () => number[]
-}>()
 
 const emit = defineEmits<{
   add: [user: ApiUser]
@@ -25,10 +21,8 @@ const emit = defineEmits<{
           ></button>
         </div>
         <div class="modal-body">
-          <UserSearch
+          <SelectUsersAction
             action-label="Add"
-            :exclude-user-ids="excludeUserIds"
-            validation-id="contacts-search-validation"
             @action="emit('add', $event)"
           />
         </div>

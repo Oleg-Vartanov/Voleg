@@ -1,4 +1,4 @@
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import client from '@/modules/core/apiClient'
 import { useApiValidation } from '@/modules/core/composables/form/useApiValidation'
 import { useCurrency } from '@/modules/core/composables/useCurrency'
@@ -6,12 +6,12 @@ import { useCategories } from '@/modules/splitExpense/composables/useCategories'
 import moneyUtils from '@/modules/core/utils/moneyUtils'
 import dateUtils from '@/modules/core/utils/dateUtils'
 import type { ApiUser } from '@/modules/core/apiType'
+import type { FormSelectOption } from '@/modules/core/components/form/types'
 import type { ApiSeExpenseCreatePayload } from '@/modules/splitExpense/types'
 import { buildEqualSplits } from '@/modules/splitExpense/utils/splitAmounts'
 import { useAuth } from '@/modules/user/stores/useAuth'
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts.ts'
-import { useConnectedUsers } from '@/modules/splitExpense/composables/useConnectedUsers.ts';
-import arrayUtils from '@/modules/core/utils/arrayUtils.ts';
+import arrayUtils from '@/modules/core/utils/arrayUtils.ts'
 
 export interface ExpenseFormFields {
   title: string
@@ -42,22 +42,43 @@ export function useAddExpenseForm() {
 
   const currency = useCurrency()
   const categories = useCategories()
-  const connectedUsers = useConnectedUsers()
 
   const fields = reactive<ExpenseFormFields>(defaultFields())
   const isLoaded = ref(false)
   const isLoading = ref(false)
 
   const splitUsersSelected = ref<ApiUser[]>([])
-  const splitUsers = computed(() => {
-    const splitUsersDefault = fields.paidByUser === null || fields.paidByUser.id === auth.user.id
-      ? [auth.user]
-      : [auth.user, fields.paidByUser]
-    return arrayUtils.uniqueBy<ApiUser>([...splitUsersDefault, ...splitUsersSelected.value], (user) => user.id)
+  const splitUsersLocked = computed(() => [auth.user])
+  const splitUsers = computed(() =>
+    arrayUtils.uniqueBy<ApiUser>([...splitUsersLocked.value, ...splitUsersSelected.value], (user) => user.id)
+  )
+
+  const paidBySelectOptions = computed<FormSelectOption[]>(() =>
+    splitUsers.value.map((user) => ({
+      value: user.id,
+      label: user.id === auth.user.id ? `@${user.username} (You)` : `@${user.username}`,
+    }))
+  )
+
+  const paidByUserId = computed({
+    get: () => fields.paidByUser?.id ?? null,
+    set: (id: string | number | null) => {
+      const user = splitUsers.value.find((entry) => entry.id === Number(id))
+      fields.paidByUser = user ?? auth.user
+    },
   })
 
-  const splitUsersIsOpen = ref(false)
-  const splitUsersIsInvalid = computed(() => validation.isValid('splits') === false)
+  watch(
+    splitUsers,
+    (users) => {
+      if (fields.paidByUser !== null && users.some((user) => user.id === fields.paidByUser?.id)) {
+        return
+      }
+      fields.paidByUser = auth.user
+    },
+    { immediate: true }
+  )
+
   const amountDecimalPlaces = computed(() => currency.decimalPlacesById(fields.currencyId))
 
   async function load() {
@@ -67,7 +88,6 @@ export function useAddExpenseForm() {
     await Promise.all([
       categories.load(),
       currency.load(),
-      connectedUsers.load()
     ])
     .then(() => {
       reset()
@@ -88,18 +108,6 @@ export function useAddExpenseForm() {
     fields.categoryId = categories.defaultCategoryId()
     fields.paidByUser = auth.user
     splitUsersSelected.value = []
-    splitUsersIsOpen.value = false
-  }
-
-  function splitUsersAdd(user: ApiUser) {
-    if (splitUsers.value.some((entry) => entry.id === user.id)) return
-    if (user.id === auth.user.id) return
-    if (user.id === fields.paidByUser?.id) return
-    splitUsersSelected.value.push(user)
-  }
-
-  function splitUsersRemove(userId: number) {
-    splitUsersSelected.value = splitUsersSelected.value.filter((user) => user.id !== userId)
   }
 
   async function submit(): Promise<boolean> {
@@ -146,15 +154,12 @@ export function useAddExpenseForm() {
     load,
     reset,
     splitUsers,
-    splitUsersIsOpen,
-    splitUsersIsInvalid,
-    splitUsersAdd,
-    splitUsersRemove,
+    splitUsersSelected,
+    splitUsersLocked,
+    paidByUserId,
+    paidBySelectOptions,
     submit,
     currencyOptions: currency.currencyOptions,
     categoryOptions: categories.categoryOptions,
-    payerOptions: connectedUsers.payerOptions,
-    splitUserOptions: connectedUsers.users,
   }
 }
-

@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 import { useAuth } from '@/modules/user/stores/useAuth'
-import arrayUtils from '@/modules/core/utils/arrayUtils'
 import { useRoute, useRouter } from 'vue-router'
 import type { ApiUser } from '@/modules/core/apiType'
+import arrayUtils from '@/modules/core/utils/arrayUtils'
 
 export type Versus = ReturnType<typeof useVersus>
 
@@ -14,15 +14,7 @@ export function useVersus(): Versus {
   const wasRequested = ref(false)
   const users = ref<ApiUser[]>([])
 
-  function addUser(user: ApiUser) {
-    if (!users.value.includes(user) && auth.user.id !== user.id) {
-      users.value.push(user)
-    }
-  }
-
-  function removeUser(user: ApiUser) {
-    arrayUtils.removeItem(users.value, user)
-
+  function syncRoute() {
     router.replace({
       query: {
         ...route.query,
@@ -31,11 +23,17 @@ export function useVersus(): Versus {
     })
   }
 
+  function setUsers(next: ApiUser[]) {
+    users.value = arrayUtils.uniqueBy(
+      next.filter((user) => user.id !== auth.user.id),
+      (user) => user.id
+    )
+    syncRoute()
+  }
+
   function onLoadFixtures(apiUsers: ApiUser[]): void {
     wasRequested.value = true
-    users.value = apiUsers.filter(function (user) {
-      return user.id !== auth.user.id
-    })
+    users.value = apiUsers.filter((user) => user.id !== auth.user.id)
   }
 
   function routeQuery() {
@@ -58,8 +56,7 @@ export function useVersus(): Versus {
 
   return {
     users,
-    addUser,
-    removeUser,
+    setUsers,
     onLoadFixtures,
     routeQuery,
     getUserIds
