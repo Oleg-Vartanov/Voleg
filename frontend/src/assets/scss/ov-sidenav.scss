@@ -1,5 +1,5 @@
 $ov-sidenav-link-padding-y: 0.2rem;
-$ov-sidenav-link-padding-x: 1rem;
+$ov-sidenav-link-padding-x: 0.5rem;
 $ov-sidenav-padding-x: 0.75rem;
 $ov-sidenav-item-gap: 0.25rem;
 $ov-sidenav-radius: 3rem;
@@ -75,8 +75,9 @@ $ov-chrome-toggle-icon-size: 1rem;
   width: 100%;
   box-sizing: border-box;
   padding: $ov-sidenav-link-padding-y $ov-sidenav-link-padding-x;
-  border: 1px solid transparent;
-  border-radius: $ov-sidenav-radius;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 0;
   background: none;
   color: var(--ov-text);
   font: inherit;
@@ -85,7 +86,8 @@ $ov-chrome-toggle-icon-size: 1rem;
   cursor: pointer;
   transition:
     background-color 0.15s ease-in-out,
-    border-color 0.15s ease-in-out;
+    border-color 0.15s ease-in-out,
+    font-weight 0.15s ease-in-out;
 
   &:hover {
     background-color: var(--ov-surface-hover);
@@ -93,12 +95,13 @@ $ov-chrome-toggle-icon-size: 1rem;
 
   &--active {
     color: var(--ov-text);
-    border-color: var(--ov-color-primary);
-    background-color: var(--ov-surface-hover);
+    border-left-color: var(--ov-color-primary);
+    background-color: transparent;
+    font-weight: 700;
 
     &:hover {
       color: var(--ov-text);
-      border-color: var(--ov-color-primary);
+      border-left-color: var(--ov-color-primary);
       background-color: var(--ov-surface-hover);
     }
   }
@@ -120,7 +123,6 @@ $ov-chrome-toggle-icon-size: 1rem;
 
   &--sub {
     font-size: 0.9em;
-    padding-left: calc(#{$ov-sidenav-link-padding-x} + 0.5rem);
   }
 
   &--disabled {
