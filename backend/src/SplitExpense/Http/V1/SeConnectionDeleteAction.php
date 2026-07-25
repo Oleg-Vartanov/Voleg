@@ -5,6 +5,7 @@ namespace App\SplitExpense\Http\V1;
 use App\Core\Documentation\Attribute\Response\MessageResponse;
 use App\Core\Documentation\Attribute\Response\NotFoundResponse;
 use App\Core\Http\ApiController;
+use App\SplitExpense\Enum\SeConnectionStatusEnum;
 use App\SplitExpense\Repository\SeConnectionRepository;
 use App\User\Entity\User;
 use OpenApi\Attributes as OA;
@@ -37,6 +38,16 @@ class SeConnectionDeleteAction extends ApiController
 
         if (!$connection->hasUser($user)) {
             $this->accessDenied();
+        }
+
+        if (
+            $connection->getStatus() === SeConnectionStatusEnum::REJECTED
+            && $connection->getRequestedBy()->getId() === $user->getId()
+        ) {
+            return $this->messageResponse(
+                'You cannot delete your connection request after it has been rejected by the recipient.',
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         $this->conRepository->remove($connection, true);

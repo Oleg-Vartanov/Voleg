@@ -117,6 +117,7 @@ function partnerName(connection: Parameters<typeof getConnectionPartnerName>[0])
           >
             <span class="text-truncate">{{ partnerName(connection) }}</span>
             <button
+              v-if="connection.requestedBy.id !== auth.user.id"
               type="button"
               class="btn btn-outline-secondary btn-sm flex-shrink-0"
               :disabled="connections.isLoading.value"
