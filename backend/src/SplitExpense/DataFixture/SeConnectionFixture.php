@@ -11,6 +11,16 @@ use Doctrine\Persistence\ObjectManager;
 
 class SeConnectionFixture extends Fixture
 {
+    /**
+     * @return class-string[]
+     */
+    public function getDependencies(): array
+    {
+        return [
+            UserFixture::class,
+        ];
+    }
+
     public function load(ObjectManager $manager): void
     {
         $userA = $this->getReference('user1', User::class);
@@ -32,12 +42,5 @@ class SeConnectionFixture extends Fixture
         }
 
         $manager->flush();
-    }
-
-    public function getDependencies(): array
-    {
-        return [
-            UserFixture::class,
-        ];
     }
 }

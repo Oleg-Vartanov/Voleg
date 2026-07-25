@@ -28,7 +28,7 @@ class SeConnectionResponseActionTest extends ApiTestCase
     public function testAcceptSuccess(): void
     {
         $userA = $this->userRepo->findByUsername('user1');
-        $userB = $this->userRepo->findByUsername('user2');
+        $userB = $this->userRepo->findByUsername('user3');
         $connection = $this->conRepo->findOneByUsers($userA, $userB);
         self::assertNotNull($connection);
         self::assertSame(SeConnectionStatusEnum::PENDING, $connection->getStatus());

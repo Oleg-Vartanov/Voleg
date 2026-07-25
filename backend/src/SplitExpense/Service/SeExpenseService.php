@@ -45,8 +45,7 @@ readonly class SeExpenseService
     }
 
     /**
-     * @throws DateMalformedStringException
-     * @throws SeExpenseSplitException
+     * @throws DateMalformedStringException|SeExpenseSplitException|LogicException
      */
     public function create(User $createdBy, SeExpenseDto $dto): SeExpense
     {

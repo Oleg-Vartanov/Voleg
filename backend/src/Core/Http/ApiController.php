@@ -40,12 +40,12 @@ abstract class ApiController extends AbstractController
         );
     }
 
-    protected function notFound(): void
+    protected function notFound(): never
     {
         throw new NotFoundHttpException();
     }
 
-    protected function accessDenied(): void
+    protected function accessDenied(): never
     {
         throw new AccessDeniedHttpException();
     }

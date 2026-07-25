@@ -8,7 +8,6 @@ use App\Core\Documentation\Attribute\Response\NotFoundResponse;
 use App\Core\Http\ApiController;
 use App\User\Http\V1\Trait\UserControllerTrait;
 use App\User\Repository\UserContactRepository;
-use App\User\Repository\UserRepository;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,7 +29,6 @@ class UserContactDeleteAction extends ApiController
 
     public function __construct(
         private readonly UserContactRepository $contactRepository,
-        private readonly UserRepository $userRepository,
     ) {
     }
 

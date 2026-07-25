@@ -14,6 +14,18 @@ use Doctrine\Persistence\ObjectManager;
 
 class FixtureFixture extends Fixture implements DependentFixtureInterface
 {
+    /**
+     * @return class-string[]
+     */
+    public function getDependencies(): array
+    {
+        return [
+            TeamFixture::class,
+            SeasonFixture::class,
+            CompetitionFixture::class,
+        ];
+    }
+
     public function load(ObjectManager $manager): void
     {
         $teams = [];
@@ -49,14 +61,5 @@ class FixtureFixture extends Fixture implements DependentFixtureInterface
         }
 
         $manager->flush();
-    }
-
-    public function getDependencies(): array
-    {
-        return [
-            TeamFixture::class,
-            SeasonFixture::class,
-            CompetitionFixture::class,
-        ];
     }
 }

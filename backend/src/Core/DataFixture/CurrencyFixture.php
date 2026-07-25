@@ -13,7 +13,7 @@ class CurrencyFixture extends Fixture
     public function load(ObjectManager $manager): void
     {
         foreach (range(1, 50) as $i) {
-            $c = new Currency('C'.$i, 2, 'S'.$i);
+            $c = new Currency('C' . $i, 2, 'S' . $i);
             $manager->persist($c);
 
             if ($i === 1) {

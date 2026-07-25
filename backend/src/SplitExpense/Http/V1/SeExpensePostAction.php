@@ -8,7 +8,6 @@ use App\Core\Documentation\Attribute\Response\NotFoundResponse;
 use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
-use App\Core\Repository\CurrencyRepository;
 use App\Core\ValueObject\Validator\Violation;
 use App\SplitExpense\Entity\SeExpense;
 use App\SplitExpense\Exception\SeExpenseSplitException;
@@ -17,7 +16,6 @@ use App\SplitExpense\Repository\SeExpenseRepository;
 use App\SplitExpense\Service\SeExpenseService;
 use App\User\Entity\User;
 use App\User\Http\V1\Trait\UserControllerTrait;
-use App\User\Repository\UserRepository;
 use DateMalformedStringException;
 use LogicException;
 use OpenApi\Attributes as OA;
@@ -50,8 +48,6 @@ class SeExpensePostAction extends ApiController
     public function __construct(
         private readonly SeExpenseService $service,
         private readonly SeExpenseRepository $expenseRepository,
-        private readonly CurrencyRepository $currencyRepository,
-        private readonly UserRepository $userRepository,
     ) {
     }
 
@@ -65,7 +61,7 @@ class SeExpensePostAction extends ApiController
     ): JsonResponse {
         try {
             $expense = $this->service->create($user, $dto);
-        } catch (LogicException|DateMalformedStringException $e) {
+        } catch (LogicException | DateMalformedStringException $e) {
             return $this->messageResponse($e->getMessage(), Response::HTTP_BAD_REQUEST);
         } catch (SeExpenseSplitException $e) {
             return $this->validationErrorResponse(

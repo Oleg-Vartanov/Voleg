@@ -12,6 +12,17 @@ use Doctrine\Persistence\ObjectManager;
 
 class FixturePredictionFixture extends Fixture implements DependentFixtureInterface
 {
+    /**
+     * @return class-string[]
+     */
+    public function getDependencies(): array
+    {
+        return [
+            UserFixture::class,
+            FixtureFixture::class,
+        ];
+    }
+
     public function load(ObjectManager $manager): void
     {
         $fixtures = [];
@@ -38,13 +49,5 @@ class FixturePredictionFixture extends Fixture implements DependentFixtureInterf
         }
 
         $manager->flush();
-    }
-
-    public function getDependencies(): array
-    {
-        return [
-            UserFixture::class,
-            FixtureFixture::class,
-        ];
     }
 }

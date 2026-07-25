@@ -8,7 +8,6 @@ use App\Core\Documentation\Attribute\Response\NotFoundResponse;
 use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
-use App\Core\Repository\CurrencyRepository;
 use App\SplitExpense\Entity\SeExpense;
 use App\SplitExpense\Http\V1\Request\SeExpenseDto;
 use App\SplitExpense\Repository\SeExpenseRepository;
@@ -47,7 +46,6 @@ class SeExpensePatchAction extends ApiController
     public function __construct(
         private readonly SeExpenseService $service,
         private readonly SeExpenseRepository $expenseRepository,
-        private readonly CurrencyRepository $currencyRepository,
     ) {
     }
 
@@ -64,7 +62,7 @@ class SeExpensePatchAction extends ApiController
 
         try {
             $expense = $this->service->patch($user, $expense, $dto);
-        } catch (LogicException|DateMalformedStringException $e) {
+        } catch (LogicException | DateMalformedStringException $e) {
             return $this->messageResponse($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
 

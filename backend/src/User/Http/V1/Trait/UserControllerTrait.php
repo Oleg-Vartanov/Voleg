@@ -7,7 +7,6 @@ use App\User\Entity\User;
 use App\User\Enum\RoleEnum;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-
 /**
  * @method User|null getUser()
  */

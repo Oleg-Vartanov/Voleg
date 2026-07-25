@@ -25,11 +25,14 @@ class CurrencyRepository extends AbstractEntityRepository
      */
     public function list(int $offset = 0, int $limit = 100): array
     {
-        return $this->createQueryBuilder('c')
+        $qb = $this->createQueryBuilder('c')
             ->orderBy('c.code')
             ->setFirstResult($offset)
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
+            ->setMaxResults($limit);
+
+        /** @var Currency[] $rows */
+        $rows = $qb->getQuery()->getResult();
+
+        return $rows;
     }
 }

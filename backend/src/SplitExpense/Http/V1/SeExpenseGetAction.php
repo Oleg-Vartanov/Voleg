@@ -38,7 +38,6 @@ class SeExpenseGetAction extends ApiController
     public function __construct(
         private readonly SeExpenseRepository $expenseRepository,
         private readonly SeExpenseService $service,
-
     ) {
     }
 

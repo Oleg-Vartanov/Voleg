@@ -24,14 +24,17 @@ class SeExpenseRepository extends AbstractEntityRepository
 
     public function findOneForUser(int $userId, int $expenseId): ?SeExpense
     {
-        return $this->createQueryBuilder('e')
+        $qb = $this->createQueryBuilder('e')
             ->leftJoin('e.splits', 's')
             ->where('e.id = :expenseId')
             ->andWhere('e.paidByUser = :userId OR s.user = :userId')
             ->setParameter('expenseId', $expenseId)
-            ->setParameter('userId', $userId)
-            ->getQuery()
-            ->getOneOrNullResult();
+            ->setParameter('userId', $userId);
+
+        /** @var SeExpense|null $result */
+        $result = $qb->getQuery()->getOneOrNullResult();
+
+        return $result;
     }
 
     /**
@@ -42,7 +45,7 @@ class SeExpenseRepository extends AbstractEntityRepository
         int $offset = 0,
         int $limit = 100
     ): array {
-        return $this->createQueryBuilder('e')
+        $qb = $this->createQueryBuilder('e')
             ->distinct()
             ->leftJoin('e.splits', 's')
             ->leftJoin('e.currency', 'c')
@@ -51,8 +54,11 @@ class SeExpenseRepository extends AbstractEntityRepository
             ->orderBy('e.expenseDate', 'DESC')
             ->addOrderBy('e.id', 'DESC')
             ->setFirstResult($offset)
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
+            ->setMaxResults($limit);
+
+        /** @var SeExpense[] $rows */
+        $rows = $qb->getQuery()->getResult();
+
+        return $rows;
     }
 }

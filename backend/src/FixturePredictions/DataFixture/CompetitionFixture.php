@@ -12,6 +12,17 @@ use Doctrine\Persistence\ObjectManager;
 
 class CompetitionFixture extends Fixture implements DependentFixtureInterface
 {
+    /**
+     * @return class-string[]
+     */
+    public function getDependencies(): array
+    {
+        return [
+            CountryFixture::class,
+            SeasonFixture::class,
+        ];
+    }
+
     public function load(ObjectManager $manager): void
     {
         $country = $this->getReference('country-GB', Country::class);
@@ -27,13 +38,5 @@ class CompetitionFixture extends Fixture implements DependentFixtureInterface
         $manager->flush();
 
         $this->addReference('competition_PL', $c);
-    }
-
-    public function getDependencies(): array
-    {
-        return [
-            CountryFixture::class,
-            SeasonFixture::class,
-        ];
     }
 }

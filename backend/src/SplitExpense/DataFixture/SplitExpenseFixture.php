@@ -14,6 +14,9 @@ use Doctrine\Persistence\ObjectManager;
 
 class SplitExpenseFixture extends Fixture
 {
+    /**
+     * @return class-string[]
+     */
     public function getDependencies(): array
     {
         return [
@@ -30,8 +33,8 @@ class SplitExpenseFixture extends Fixture
         $user = $this->getReference('user', User::class);
 
         foreach (range(1, 9) as $i) {
-            $userA = $this->getReference('user'.$i, User::class);
-            $userB = $this->getReference('user'.($i + 1), User::class);
+            $userA = $this->getReference('user' . $i, User::class);
+            $userB = $this->getReference('user' . ($i + 1), User::class);
             $expense = $this->createExpense($userA, $userB, $category, $currency);
             $manager->persist($expense);
 
@@ -50,8 +53,7 @@ class SplitExpenseFixture extends Fixture
         User $userB,
         SeCategory $category,
         Currency $currency,
-    ): SeExpense
-    {
+    ): SeExpense {
         $expense = new SeExpense(
             paidByUser: $userA,
             createdByUser: $userA,

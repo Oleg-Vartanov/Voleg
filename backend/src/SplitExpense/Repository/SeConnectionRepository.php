@@ -71,6 +71,9 @@ class SeConnectionRepository extends AbstractEntityRepository
             )->setParameter('username', '%' . $username . '%');
         }
 
-        return $qb->getQuery()->getResult();
+        /** @var SeConnection[] $rows */
+        $rows = $qb->getQuery()->getResult();
+
+        return $rows;
     }
 }

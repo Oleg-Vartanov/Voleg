@@ -11,7 +11,8 @@ readonly class UserContactService
 {
     public function __construct(
         private UserContactRepository $repository,
-    ) {}
+    ) {
+    }
 
     public function create(User $user, User $contact): UserContact
     {

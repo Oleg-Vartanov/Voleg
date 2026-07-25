@@ -12,8 +12,7 @@ readonly class SeConnectionService
 {
     public function __construct(
         private SeConnectionRepository $repository,
-    )
-    {
+    ) {
     }
 
     public function requestConnection(SeConnection $connection): void
@@ -47,11 +46,10 @@ readonly class SeConnectionService
     }
 
     public function respond(
-        User                   $user,
-        SeConnection           $connection,
+        User $user,
+        SeConnection $connection,
         SeConnectionStatusEnum $status,
-    ): void
-    {
+    ): void {
         if ($connection->getStatus() !== SeConnectionStatusEnum::PENDING) {
             throw new LogicException('Connection is not pending.');
         }

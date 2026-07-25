@@ -32,7 +32,8 @@ class AuthSignUpActionTest extends ApiTestCase
         $this->mockToken('selector-auth-test', 'secret-auth-test');
         $this->signUpRequest($testUser);
 
-        self::assertResponseStatusCodeSame(Response::HTTP_CREATED);;
+        self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
+        ;
         self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'selector-auth-test');
         self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'secret-auth-test');
     }
@@ -46,7 +47,8 @@ class AuthSignUpActionTest extends ApiTestCase
             'username' => '',
         ]);
 
-        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);;
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
+        ;
     }
 
     private function signUpRequest(array $params): void

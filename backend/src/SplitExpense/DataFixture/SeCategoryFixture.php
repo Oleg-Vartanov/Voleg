@@ -15,7 +15,7 @@ class SeCategoryFixture extends Fixture
         $this->addReference('se-category', $category);
 
         foreach (range(1, 5) as $i) {
-            $category = new SeCategory(tag: 'other'.$i, title: 'Other'.$i);
+            $category = new SeCategory(tag: 'other' . $i, title: 'Other' . $i);
             $manager->persist($category);
         }
         $manager->flush();
