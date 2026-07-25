@@ -63,7 +63,7 @@ class SeExpensePatchAction extends ApiController
         }
 
         try {
-            $expense = $this->service->patch($expense, $dto);
+            $expense = $this->service->patch($user, $expense, $dto);
         } catch (LogicException|DateMalformedStringException $e) {
             return $this->messageResponse($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }

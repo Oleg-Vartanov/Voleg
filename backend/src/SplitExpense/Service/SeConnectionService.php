@@ -12,14 +12,21 @@ readonly class SeConnectionService
 {
     public function __construct(
         private SeConnectionRepository $repository,
-    ) {
+    )
+    {
     }
 
     public function requestConnection(SeConnection $connection): void
     {
-        // todo: send email/notification, then add accept endpoint
-        //  $connection->getRequestedBy()
-        //  $connection->getRequestedTo()
+        // todo.
+//        $this->mailer->send(
+//            template: 'email/emailChange.html.twig',
+//            to: $connection->getRequestedTo()->getEmail(),
+//            subject: 'Split Expense Connection Request',
+//            context: [
+//                'requestedBy' => $connection->getRequestedBy()
+//            ],
+//        );
     }
 
     public function create(User $userA, User $userB): SeConnection
@@ -40,10 +47,11 @@ readonly class SeConnectionService
     }
 
     public function respond(
-        User $user,
-        SeConnection $connection,
+        User                   $user,
+        SeConnection           $connection,
         SeConnectionStatusEnum $status,
-    ): void {
+    ): void
+    {
         if ($connection->getStatus() !== SeConnectionStatusEnum::PENDING) {
             throw new LogicException('Connection is not pending.');
         }
@@ -57,5 +65,12 @@ readonly class SeConnectionService
         }
 
         $connection->setStatus($status);
+    }
+
+    public function isConnected(User $userA, User $userB): bool
+    {
+        $connection = $this->repository->findOneByUsers($userA, $userB);
+
+        return $connection?->getStatus() === SeConnectionStatusEnum::ACCEPTED;
     }
 }

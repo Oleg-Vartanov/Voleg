@@ -22,6 +22,7 @@ readonly class SeExpenseService
 {
     public function __construct(
         private CurrencyRepository $currencyRepository,
+        private SeConnectionService $connectionService,
         private SeExpenseRepository $expenseRepository,
         private SeCategoryRepository $categoryRepository,
         private UserRepository $userRepository,
@@ -67,7 +68,7 @@ readonly class SeExpenseService
             description: $dto->description,
         );
 
-        $this->applySplits($expense, $dto->splits);
+        $this->applySplits($createdBy, $expense, $dto->splits);
 
         return $expense;
     }
@@ -75,8 +76,14 @@ readonly class SeExpenseService
     /**
      * @throws LogicException|DateMalformedStringException|SeExpenseSplitException
      */
-    public function patch(SeExpense $expense, SeExpenseDto $dto): SeExpense
+    public function patch(User $patchedBy, SeExpense $expense, SeExpenseDto $dto): SeExpense
     {
+        foreach ($expense->getSplits() as $split) {
+            if (!$this->connectionService->isConnected($patchedBy, $split->getUser())) {
+                throw new SeExpenseSplitException('Can\'t edit expense with unconnected user.');
+            }
+        }
+
         $props = array_flip(PropertyAccessor::getInitializedProperties($dto));
 
         if (isset($props['title'])) {
@@ -115,7 +122,7 @@ readonly class SeExpenseService
 
         if (isset($props['splits'])) {
             $expense->clearSplits();
-            $this->applySplits($expense, $dto->splits);
+            $this->applySplits($patchedBy, $expense, $dto->splits);
         }
 
         return $expense;
@@ -131,11 +138,19 @@ readonly class SeExpenseService
      *
      * @throws SeExpenseSplitException
      */
-    private function applySplits(SeExpense $expense, array $dtos): void
+    private function applySplits(User $appliedBy, SeExpense $expense, array $dtos): void
     {
         foreach ($dtos as $dto) {
-            $user = $this->userRepository->findById($dto->userId)
-                ?? throw new LogicException('Split user not found.');
+            if ($appliedBy->getId() === $dto->userId) {
+                $user = $appliedBy;
+            } else {
+                $user = $this->userRepository->findById($dto->userId)
+                    ?? throw new SeExpenseSplitException('User not found.');
+
+                if (!$this->connectionService->isConnected($appliedBy, $user)) {
+                    throw new SeExpenseSplitException('Split user require connection.');
+                }
+            }
 
             $expense->addSplit(new SeExpenseSplit($expense, $user, $dto->amount));
         }
