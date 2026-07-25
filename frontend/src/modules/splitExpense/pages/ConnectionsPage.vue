@@ -17,48 +17,50 @@ function partnerName(connection: Parameters<typeof getConnectionPartnerName>[0])
 
 <template>
   <div class="ov-center">
-    <div class="container d-flex flex-column gap-2">
-      <button
-    type="button"
-    class="btn btn-outline-primary w-100"
-    data-bs-toggle="modal"
-    data-bs-target="#addConnectionModal"
-  >
-    <i class="bi bi-person-plus" aria-hidden="true"></i>
-    Add connection
-  </button>
-
-  <div v-if="connections.isListLoading.value" class="text-center py-3 mt-3">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading connections…</span>
-    </div>
-  </div>
-
-  <div v-else class="mt-3">
-    <p v-if="connections.acceptedConnections.value.length === 0" class="text-muted mb-0">
-      No connections yet.
-    </p>
-
-    <ul v-else class="list-group list-group-flush">
-      <li
-        v-for="connection in connections.acceptedConnections.value"
-        :key="connection.id"
-        class="list-group-item d-flex justify-content-between align-items-center gap-2"
-      >
-        <span class="text-truncate">{{ partnerName(connection) }}</span>
+    <div class="container d-flex flex-column align-items-center gap-2">
+      <div class="se-panel">
         <button
           type="button"
-          class="btn btn-outline-danger btn-sm flex-shrink-0"
-          :disabled="connections.isLoading.value"
-          @click="connections.removeConnection(connection)"
+          class="btn btn-outline-primary w-100"
+          data-bs-toggle="modal"
+          data-bs-target="#addConnectionModal"
         >
-          Remove
+          <i class="bi bi-person-plus" aria-hidden="true"></i>
+          Add connection
         </button>
-      </li>
-    </ul>
-  </div>
 
-  <AddConnectionModal @send="connections.sendRequest" />
+        <div v-if="connections.isListLoading.value" class="text-center py-3">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading connections…</span>
+          </div>
+        </div>
+
+        <div v-else>
+          <p v-if="connections.acceptedConnections.value.length === 0" class="text-muted mb-0">
+            No connections yet.
+          </p>
+
+          <ul v-else class="list-group list-group-flush">
+            <li
+              v-for="connection in connections.acceptedConnections.value"
+              :key="connection.id"
+              class="list-group-item d-flex justify-content-between align-items-center gap-2"
+            >
+              <span class="text-truncate">{{ partnerName(connection) }}</span>
+              <button
+                type="button"
+                class="btn btn-outline-danger btn-sm flex-shrink-0"
+                :disabled="connections.isLoading.value"
+                @click="connections.removeConnection(connection)"
+              >
+                Remove
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <AddConnectionModal @send="connections.sendRequest" />
+      </div>
     </div>
   </div>
 </template>

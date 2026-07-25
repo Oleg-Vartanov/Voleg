@@ -29,44 +29,46 @@ onMounted(() => {
 
 <template>
   <div class="ov-center">
-    <div class="container d-flex flex-column gap-2">
-      <button
-        type="button"
-        class="btn btn-outline-primary w-100"
-        @click="isAddExpenseOpen = true"
-      >
-        <i class="bi bi-plus-lg" aria-hidden="true"></i>
-        Add expense
-      </button>
+    <div class="container d-flex flex-column align-items-center gap-2">
+      <div class="se-panel">
+        <button
+          type="button"
+          class="btn btn-outline-primary w-100"
+          @click="isAddExpenseOpen = true"
+        >
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
+          Add expense
+        </button>
 
-      <AddExpenseModal v-model:open="isAddExpenseOpen" @created="expensesState.load()" />
+        <AddExpenseModal v-model:open="isAddExpenseOpen" @created="expensesState.load()" />
 
-      <div v-if="expensesState.isLoading.value" class="text-center py-3">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading expenses…</span>
+        <div v-if="expensesState.isLoading.value" class="text-center py-3">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading expenses…</span>
+          </div>
         </div>
-      </div>
 
-      <div v-else class="expenses-list-scroll">
-        <div class="expenses-list">
-          <p v-if="isEmpty" class="expenses-empty">No expenses yet</p>
+        <div v-else class="expenses-list-scroll">
+          <div class="expenses-list">
+            <p v-if="isEmpty" class="expenses-empty">No expenses yet</p>
 
-          <template v-for="group in expensesByMonth" :key="group.month">
-            <div class="expenses-month-header">{{ group.label }}</div>
+            <template v-for="group in expensesByMonth" :key="group.month">
+              <div class="expenses-month-header">{{ group.label }}</div>
 
-            <article
-              v-for="expense in group.expenses"
-              :key="expense.id"
-              class="expense-item"
-              :class="{ 'is-expanded': isExpanded(expense) }"
-            >
-              <ExpenseRow
-                :expense="expense"
-                @toggle="toggleExpense(expense)"
-              />
-              <ExpenseDetailPanel :expense="expense" :open="isExpanded(expense)" />
-            </article>
-          </template>
+              <article
+                v-for="expense in group.expenses"
+                :key="expense.id"
+                class="expense-item"
+                :class="{ 'is-expanded': isExpanded(expense) }"
+              >
+                <ExpenseRow
+                  :expense="expense"
+                  @toggle="toggleExpense(expense)"
+                />
+                <ExpenseDetailPanel :expense="expense" :open="isExpanded(expense)" />
+              </article>
+            </template>
+          </div>
         </div>
       </div>
     </div>
