@@ -17,6 +17,9 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: SeExpenseRepository::class)]
 class SeExpense
 {
+    /** Matches the range of the {@see Types::INTEGER} `amount` column. */
+    public const int MAX_AMOUNT = 2147483647;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
