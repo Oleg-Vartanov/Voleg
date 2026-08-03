@@ -63,17 +63,26 @@ export function useConnections() {
       });
   }
 
-  async function sendRequest(user: ApiUser) {
+  async function sendRequest(
+    user: ApiUser,
+  ): Promise<{ ok: true } | { ok: false; message: string | null }> {
     isLoading.value = true;
     try {
       const response = await client.requestSplitExpenseConnection(user.id);
       connections.value.unshift(response.data);
       topAlerts.add('Connection request sent.', 'success', 3);
+      return { ok: true };
     } catch (error) {
       const message = axios.isAxiosError(error)
         ? error.response?.data?.message
         : undefined;
+
+      if (axios.isAxiosError(error) && error.response?.status === 400) {
+        return { ok: false, message: message ?? 'Failed to send connection request.' };
+      }
+
       topAlerts.add(message ?? 'Failed to send connection request.', 'danger', 5);
+      return { ok: false, message: null };
     } finally {
       isLoading.value = false;
     }

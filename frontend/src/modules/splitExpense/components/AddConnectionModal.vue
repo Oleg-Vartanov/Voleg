@@ -1,35 +1,47 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
+import AppModal from '@/modules/core/components/AppModal.vue'
 import SelectUsersAction from '@/modules/core/components/SelectUsersAction.vue'
 import type { ApiUser } from '@/modules/core/apiType'
 
-const emit = defineEmits<{
-  send: [user: ApiUser]
+const open = defineModel<boolean>('open', { required: true })
+
+const props = defineProps<{
+  send: (user: ApiUser) => Promise<{ ok: true } | { ok: false; message: string | null }>
 }>()
+
+const error = ref<string | null>(null)
+
+watch(open, (isOpen) => {
+  if (isOpen) {
+    error.value = null
+  }
+})
+
+async function onSend(user: ApiUser) {
+  error.value = null
+  const result = await props.send(user)
+  if (result.ok) {
+    open.value = false
+    return
+  }
+  if (result.message) {
+    error.value = result.message
+  }
+}
 </script>
 
 <template>
-  <div id="addConnectionModal" class="modal fade" tabindex="-1" aria-labelledby="addConnectionModalLabel">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 id="addConnectionModalLabel" class="modal-title fs-5">Add connection</h1>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="modal-body">
-          <SelectUsersAction
-            action-label="Request"
-            @action="emit('send', $event)"
-          />
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
+  <AppModal v-model:open="open" title="Add connection" :error="error">
+    <div class="modal-body">
+      <SelectUsersAction
+        action-label="Request"
+        @action="onSend"
+      />
     </div>
-  </div>
+
+    <template #footer="{ close }">
+      <button type="button" class="btn btn-secondary" @click="close">Close</button>
+    </template>
+  </AppModal>
 </template>

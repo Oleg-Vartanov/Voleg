@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import AddConnectionModal from '@/modules/splitExpense/components/AddConnectionModal.vue'
 import { useConnections } from '@/modules/splitExpense/composables/useConnections'
 import { getConnectionPartnerName } from '@/modules/splitExpense/utils/connections'
@@ -6,6 +7,7 @@ import { useAuth } from '@/modules/user/stores/useAuth'
 
 const auth = useAuth()
 const connections = useConnections()
+const addConnectionOpen = ref(false)
 
 connections.loadConnections()
 
@@ -22,8 +24,7 @@ function partnerName(connection: Parameters<typeof getConnectionPartnerName>[0])
         <button
           type="button"
           class="btn btn-outline-primary w-100"
-          data-bs-toggle="modal"
-          data-bs-target="#addConnectionModal"
+          @click="addConnectionOpen = true"
         >
           <i class="bi bi-person-plus" aria-hidden="true"></i>
           Add connection
@@ -59,7 +60,10 @@ function partnerName(connection: Parameters<typeof getConnectionPartnerName>[0])
           </ul>
         </div>
 
-        <AddConnectionModal @send="connections.sendRequest" />
+        <AddConnectionModal
+          v-model:open="addConnectionOpen"
+          :send="connections.sendRequest"
+        />
       </div>
     </div>
   </div>
