@@ -61,4 +61,17 @@ class SeExpenseRepository extends AbstractEntityRepository
 
         return $rows;
     }
+
+    public function countForUser(User $user): int
+    {
+        $count = $this->createQueryBuilder('e')
+            ->select('COUNT(DISTINCT e.id)')
+            ->leftJoin('e.splits', 's')
+            ->where('e.paidByUser = :user OR s.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return (int) $count;
+    }
 }

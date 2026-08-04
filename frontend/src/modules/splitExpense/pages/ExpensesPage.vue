@@ -2,11 +2,13 @@
 import AddExpenseModal from '@/modules/splitExpense/components/AddExpenseModal.vue'
 import ExpenseDetailPanel from '@/modules/splitExpense/components/ExpenseDetailPanel.vue'
 import ExpenseRow from '@/modules/splitExpense/components/ExpenseRow.vue'
+import ShowMorePagination from '@/modules/core/components/pagination/ShowMorePagination.vue'
 import { useExpenses } from '@/modules/splitExpense/composables/useExpenses'
 import { groupExpensesByMonth } from '@/modules/splitExpense/utils/expenseDates'
 import { computed, onMounted, ref } from 'vue'
 import type { ApiSeExpense } from '@/modules/splitExpense/types'
 
+const EXPENSES_PAGE_SIZE = 25
 const expensesState = useExpenses()
 const isAddExpenseOpen = ref(false)
 
@@ -23,7 +25,7 @@ function isExpanded(expense: ApiSeExpense) {
 }
 
 onMounted(() => {
-  expensesState.load()
+  expensesState.loadInitial(EXPENSES_PAGE_SIZE)
 })
 </script>
 
@@ -40,9 +42,15 @@ onMounted(() => {
           Add expense
         </button>
 
-        <AddExpenseModal v-model:open="isAddExpenseOpen" @created="expensesState.load()" />
+        <AddExpenseModal
+          v-model:open="isAddExpenseOpen"
+          @created="expensesState.loadInitial(EXPENSES_PAGE_SIZE)"
+        />
 
-        <div v-if="expensesState.isLoading.value" class="text-center py-3">
+        <div
+          v-if="expensesState.isLoading.value && expensesState.expenses.value === null"
+          class="text-center py-3"
+        >
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading expenses…</span>
           </div>
@@ -69,6 +77,13 @@ onMounted(() => {
               </article>
             </template>
           </div>
+
+          <ShowMorePagination
+            :has-more="expensesState.hasMore.value"
+            :is-loading="expensesState.isLoading.value"
+            aria-label="Load more expenses"
+            @load-more="expensesState.loadMore"
+          />
         </div>
       </div>
     </div>

@@ -41,8 +41,12 @@ class SeExpenseGetListAction extends ApiController
         #[MapQueryParameter] int $offset = 0,
         #[MapQueryParameter] int $limit = 100,
     ): JsonResponse {
+        $expenses = $this->expenseRepository->listForUser($user, $offset, $limit);
+        $totalCount = $this->expenseRepository->countForUser($user);
+
         return $this->json(
-            $this->expenseRepository->listForUser($user, $offset, $limit),
+            $expenses,
+            headers: ['X-Total-Count' => (string) $totalCount],
             context: ['groups' => Group::public->value],
         );
     }
