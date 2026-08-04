@@ -15,6 +15,7 @@ export function useConnections() {
   const topAlerts = useTopAlerts();
 
   const connections = ref<ApiSeConnection[]>([]);
+  const totalCount = ref(0);
   const isLoading = ref(false);
   const isListLoading = ref(false);
 
@@ -48,19 +49,23 @@ export function useConnections() {
     );
   });
 
-  async function loadConnections() {
+  async function loadConnections(
+    offset = 0,
+    limit = 100,
+    status: 'accepted' | 'pending' | 'rejected' | null = null,
+  ): Promise<void> {
     isListLoading.value = true;
-    client.listSplitExpenseConnections()
-      .then((response) => {
-        connections.value = response.data;
-      })
-      .catch(() => {
-        topAlerts.add('Failed to load connections.', 'danger', 5);
-        connections.value = [];
-      })
-      .finally(() => {
-        isListLoading.value = false;
-      });
+    try {
+      const response = await client.listSplitExpenseConnections(offset, limit, status);
+      connections.value = response.data;
+      totalCount.value = Number(response.headers['x-total-count'] ?? response.data.length);
+    } catch {
+      topAlerts.add('Failed to load connections.', 'danger', 5);
+      connections.value = [];
+      totalCount.value = 0;
+    } finally {
+      isListLoading.value = false;
+    }
   }
 
   async function sendRequest(
@@ -118,14 +123,16 @@ export function useConnections() {
     }
   }
 
-  async function removeConnection(connection: ApiSeConnection) {
+  async function removeConnection(connection: ApiSeConnection): Promise<boolean> {
     isLoading.value = true;
     try {
       await client.deleteSplitExpenseConnection(connection.id);
       connections.value = connections.value.filter((item) => item.id !== connection.id);
       topAlerts.add('Connection removed.', 'success', 3);
+      return true;
     } catch {
       topAlerts.add('Failed to remove connection.', 'danger', 5);
+      return false;
     } finally {
       isLoading.value = false;
     }
@@ -146,6 +153,7 @@ export function useConnections() {
 
   return {
     connections,
+    totalCount,
     acceptedConnections,
     incomingRequests,
     outgoingRequests,

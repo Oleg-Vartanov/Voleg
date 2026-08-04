@@ -6,6 +6,7 @@ use App\Core\Repository\AbstractEntityRepository;
 use App\SplitExpense\Entity\SeConnection;
 use App\SplitExpense\Enum\SeConnectionStatusEnum;
 use App\User\Entity\User;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -50,14 +51,40 @@ class SeConnectionRepository extends AbstractEntityRepository
         ?SeConnectionStatusEnum $status = null,
         ?string $username = null,
     ): array {
+        $qb = $this->createFilteredQueryBuilder($user, $status, $username)
+            ->orderBy('c.createdAt', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit);
+
+        /** @var SeConnection[] $rows */
+        $rows = $qb->getQuery()->getResult();
+
+        return $rows;
+    }
+
+    public function countForUser(
+        User $user,
+        ?SeConnectionStatusEnum $status = null,
+        ?string $username = null,
+    ): int {
+        $count = $this->createFilteredQueryBuilder($user, $status, $username)
+            ->select('COUNT(c.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return (int) $count;
+    }
+
+    private function createFilteredQueryBuilder(
+        User $user,
+        ?SeConnectionStatusEnum $status = null,
+        ?string $username = null,
+    ): QueryBuilder {
         $qb = $this->createQueryBuilder('c')
             ->innerJoin('c.userA', 'userA')
             ->innerJoin('c.userB', 'userB')
             ->where('c.userA = :user OR c.userB = :user')
-            ->setParameter('user', $user)
-            ->orderBy('c.createdAt', 'DESC')
-            ->setFirstResult($offset)
-            ->setMaxResults($limit);
+            ->setParameter('user', $user);
 
         if ($status !== null) {
             $qb->andWhere('c.status = :status');
@@ -71,9 +98,6 @@ class SeConnectionRepository extends AbstractEntityRepository
             )->setParameter('username', '%' . $username . '%');
         }
 
-        /** @var SeConnection[] $rows */
-        $rows = $qb->getQuery()->getResult();
-
-        return $rows;
+        return $qb;
     }
 }

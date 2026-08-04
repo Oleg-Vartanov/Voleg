@@ -54,8 +54,11 @@ class SeConnectionGetListAction extends ApiController
             }
         }
 
+        $totalCount = $this->conRepository->countForUser($user, $status, $username);
+
         return $this->json(
             $usersOnly ? $users : $connections,
+            headers: ['X-Total-Count' => (string) $totalCount],
             context: ['groups' => Group::public->value],
         );
     }
