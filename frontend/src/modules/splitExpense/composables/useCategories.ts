@@ -3,6 +3,7 @@ import client from '@/modules/core/apiClient'
 import type { FormSelectOption } from '@/modules/core/components/form/types'
 import type { ApiSeCategory } from '@/modules/splitExpense/types'
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts'
+import { categories as categoryIcons, type CategoryKey } from '@/modules/splitExpense/categories'
 
 const categories = ref<ApiSeCategory[] | null>(null)
 let loadPromise: Promise<void> | null = null
@@ -13,7 +14,11 @@ export function useCategories() {
   const categoryOptions = computed((): FormSelectOption[] =>
     (categories.value ?? []).map((category) => ({
       value: category.id,
-      label: category.title
+      label: category.title,
+      icon:
+        category.tag in categoryIcons
+          ? categoryIcons[category.tag as CategoryKey]
+          : categoryIcons.other
     }))
   )
 

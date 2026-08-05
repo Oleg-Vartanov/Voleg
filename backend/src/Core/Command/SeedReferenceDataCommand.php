@@ -5,6 +5,7 @@ namespace App\Core\Command;
 use App\Core\Service\Seeder\CountryCsvSeeder;
 use App\FixturePredictions\Service\Seeder\CompetitionSeeder;
 use App\FixturePredictions\Service\Seeder\SeasonSeeder;
+use App\SplitExpense\Service\Seeder\SeCategorySeeder;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -23,6 +24,7 @@ class SeedReferenceDataCommand extends Command
         private readonly CountryCsvSeeder       $countrySeeder,
         private readonly SeasonSeeder           $seasonSeeder,
         private readonly CompetitionSeeder      $competitionSeeder,
+        private readonly SeCategorySeeder        $categorySeeder,
         private readonly EntityManagerInterface $entityManager,
     ) {
         parent::__construct();
@@ -30,21 +32,15 @@ class SeedReferenceDataCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        [$countryCount, $seasonCount, $competitionCount] = $this->entityManager->wrapInTransaction(
-            fn (): array => [
-                $this->countrySeeder->seed(),
-                $this->seasonSeeder->seed(),
-                $this->competitionSeeder->seed(),
-            ],
-        );
+        $this->entityManager->wrapInTransaction(function (): void {
+            $this->countrySeeder->seed();
+            $this->seasonSeeder->seed();
+            $this->competitionSeeder->seed();
+            $this->categorySeeder->seed();
+        });
 
         $io = new SymfonyStyle($input, $output);
-        $io->success(sprintf(
-            'Reference data synchronized: %d countries, %d seasons, %d competitions.',
-            $countryCount,
-            $seasonCount,
-            $competitionCount,
-        ));
+        $io->success('Reference data synchronized.');
 
         return Command::SUCCESS;
     }

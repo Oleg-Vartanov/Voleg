@@ -3,6 +3,7 @@ import type { ApiUser } from '@/modules/core/apiType'
 export interface FormSelectOption {
   value: string | number
   label: string
+  icon?: string
 }
 
 export type UserSearchFn = (query: string) => Promise<ApiUser[]>

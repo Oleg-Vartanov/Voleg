@@ -6,6 +6,7 @@ use App\Core\Command\SeedReferenceDataCommand;
 use App\Core\Repository\CountryRepository;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
+use App\SplitExpense\Repository\SeCategoryRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -22,10 +23,12 @@ class SeedReferenceDataCommandTest extends WebTestCase
 
         $secondRun = new CommandTester($command);
         self::assertSame(0, $secondRun->execute([]));
-        self::assertStringContainsString('0 new seasons', $secondRun->getDisplay());
+        self::assertStringContainsString('Reference data synchronized', $secondRun->getDisplay());
 
         self::assertCount(253, $container->get(CountryRepository::class)->findAll());
         self::assertCount(109, $container->get(SeasonRepository::class)->findAll());
         self::assertCount(1, $container->get(CompetitionRepository::class)->findAll());
+        self::assertNotNull($container->get(SeCategoryRepository::class)->findOneBy(['tag' => 'groceries']));
+        self::assertNotNull($container->get(SeCategoryRepository::class)->findOneBy(['tag' => 'entertainment']));
     }
 }

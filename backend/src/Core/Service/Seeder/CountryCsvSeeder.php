@@ -31,7 +31,7 @@ readonly class CountryCsvSeeder
     /**
      * @throws Exception
      */
-    public function seed(): int
+    public function seed(): void
     {
         $rows = $this->csvReader->read($this->kernel->getProjectDir() . '/data/country.csv');
         $headers = array_shift($rows);
@@ -74,7 +74,5 @@ readonly class CountryCsvSeeder
         }
 
         $this->entityManager->flush();
-
-        return count($rows);
     }
 }

@@ -1,20 +1,20 @@
 export const categories = {
-  other: 'bi-journal-text', // or 'bi-clipboard2'
-  groceries: 'bi-cart3', // or 'bi-basket2'
-  cafe: 'bi-cup-hot',
-  gift: 'bi-gift',
-  shopping: 'bi-handbag',
-  health: 'bi-heart-pulse',
-  rent: 'bi-house-check',
   bills: 'bi-lightbulb',
+  education: 'bi-mortarboard',
+  entertainment: 'bi-controller',
+  gifts: 'bi-gift',
+  groceries: 'bi-cart3', // or 'bi-basket2'
+  health: 'bi-heart-pulse',
+  hobby: 'bi-brush',
   household: 'bi-house-gear',
-  travel: 'bi-luggage',
-  learning: 'bi-mortarboard',
+  other: 'bi-journal-text', // or 'bi-clipboard2'
+  rent: 'bi-house-check',
+  restaurants: 'bi-fork-knife',
+  shopping: 'bi-handbag',
+  sport: 'bi-trophy',
   subscriptions: 'bi-link-45deg',
   transport: 'bi-taxi-front',
-  sport: 'bi-trophy',
-  games: 'bi-controller',
-  hobby: 'bi-brush'
+  travel: 'bi-luggage',
 }
 
 export type CategoryKey = keyof typeof categories;

@@ -16,7 +16,7 @@ readonly class CompetitionSeeder
     ) {
     }
 
-    public function seed(): int
+    public function seed(): void
     {
         $country = $this->countryRepository->findOneByName('England');
         if ($country === null) {
@@ -33,7 +33,5 @@ readonly class CompetitionSeeder
 
             $this->competitionRepository->save($competition, true);
         }
-
-        return 1;
     }
 }

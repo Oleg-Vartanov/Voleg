@@ -17,7 +17,7 @@ readonly class SeasonSeeder
     ) {
     }
 
-    public function seed(): int
+    public function seed(): void
     {
         $existingYears = [];
         foreach ($this->seasonRepository->findAll() as $season) {
@@ -36,7 +36,5 @@ readonly class SeasonSeeder
         }
 
         $this->entityManager->flush();
-
-        return count($range);
     }
 }
