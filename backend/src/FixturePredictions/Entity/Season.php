@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SeasonRepository::class)]
+#[ORM\UniqueConstraint(name: 'UNIQ_FP_SEASON_YEAR', fields: ['year'])]
 #[ORM\Table(name: "fp_season")]
 class Season
 {

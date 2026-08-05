@@ -9,6 +9,11 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<Season>
+ *
+ * @method Season|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Season|null findOneBy(mixed[] $criteria, mixed[] $orderBy = null)
+ * @method Season[] findAll()
+ * @method Season[] findBy(mixed[] $criteria, mixed[] $orderBy = null, $limit = null, $offset = null)
  */
 class SeasonRepository extends ServiceEntityRepository
 {

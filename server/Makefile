@@ -23,16 +23,13 @@ init:
 	$(DOCKER_COMPOSE) build
 	$(DOCKER_COMPOSE) down
 	$(DOCKER_COMPOSE) up -d
-	$(MAKE) init-containers
-	$(DOCKER_COMPOSE) restart php_supervisor
-
-init-containers:
 	$(PHP_CONTAINER) composer install --no-interaction
 	$(PHP_CONTAINER) php bin/console lexik:jwt:generate-keypair --skip-if-exists # Generate JWT keys.
 	$(PHP_CONTAINER) chmod -R 777 var
-	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate --no-interaction
-	$(PHP_CONTAINER) php bin/console app:populate-db
 	$(PHP_CONTAINER) php bin/console asset-map:compile
+	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate --no-interaction
+	$(PHP_CONTAINER) php bin/console app:seed-reference-data --no-interaction
+	$(DOCKER_COMPOSE) restart php_supervisor
 
 deploy:
 	git -C .. pull origin main
@@ -46,6 +43,9 @@ migrations-rollback:
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate prev
 migrations-generate:
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:diff
+
+seed-reference-data:
+	$(PHP_CONTAINER) php bin/console app:seed-reference-data --no-interaction
 
 consumer:
 	$(PHP_CONTAINER) php bin/console messenger:consume default scheduler_fixture_predictions -vv

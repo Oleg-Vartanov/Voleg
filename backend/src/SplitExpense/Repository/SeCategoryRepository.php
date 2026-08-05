@@ -13,7 +13,6 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method SeCategory|null findOneBy(mixed[] $criteria, mixed[] $orderBy = null)
  * @method SeCategory[] findAll()
  * @method SeCategory[] findBy(mixed[] $criteria, mixed[] $orderBy = null, $limit = null, $offset = null)
- * /
  */
 class SeCategoryRepository extends AbstractEntityRepository
 {

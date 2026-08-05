@@ -7,6 +7,7 @@ use App\FixturePredictions\Repository\CompetitionRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CompetitionRepository::class)]
+#[ORM\UniqueConstraint(name: 'UNIQ_FP_COMPETITION_CODE', fields: ['code'])]
 #[ORM\Table(name: "fp_competition")]
 class Competition
 {
