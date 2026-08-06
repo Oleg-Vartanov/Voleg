@@ -8,11 +8,36 @@ use App\Core\Repository\CurrencyRepository;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
 use App\SplitExpense\Repository\SeCategoryRepository;
+use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class SeedReferenceDataCommandTest extends WebTestCase
 {
+    private Connection $connection;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        static::bootKernel();
+        $entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        $this->connection = $entityManager->getConnection();
+        $this->connection->beginTransaction();
+    }
+
+    protected function tearDown(): void
+    {
+        try {
+            if ($this->connection->isTransactionActive()) {
+                $this->connection->rollBack();
+            }
+        } finally {
+            parent::tearDown();
+        }
+    }
+
     public function testItSynchronizesReferenceDataIdempotently(): void
     {
         $container = static::getContainer();

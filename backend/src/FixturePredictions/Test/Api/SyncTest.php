@@ -3,6 +3,7 @@
 namespace App\FixturePredictions\Test\Api;
 
 use App\Core\Test\ApiTestCase;
+use App\FixturePredictions\DataFixture\SeasonFixture;
 use App\FixturePredictions\Service\FixtureProvider;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\TestDox;
@@ -26,7 +27,7 @@ class SyncTest extends ApiTestCase
 
         $this->sendRequest([
             'competitionCode' => 'PL',
-            'seasonYear' => 2000,
+            'seasonYear' => SeasonFixture::CURRENT_SEASON,
             'from' => $anyDate,
             'to' => $anyDate,
         ]);

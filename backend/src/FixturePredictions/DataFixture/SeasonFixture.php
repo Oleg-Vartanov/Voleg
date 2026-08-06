@@ -13,11 +13,16 @@ class SeasonFixture extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        $season = new Season();
-        $season->setYear(self::CURRENT_SEASON);
-        $manager->persist($season);
+        foreach (range(1992, 2100) as $year) {
+            $s = new Season();
+            $s->setYear($year);
+            $manager->persist($s);
+
+            if ($year === self::CURRENT_SEASON) {
+                $this->addReference('season', $s);
+            }
+        }
 
         $manager->flush();
-        $this->addReference('season', $season);
     }
 }
