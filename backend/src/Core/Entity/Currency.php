@@ -19,14 +19,15 @@ class Currency
 
     /**
      * @param string $code ISO 4217 code
+     * @param int $decimalPlaces Minor units
      */
     public function __construct(
+        #[ORM\Column(length: 255)]
+        private string $name,
         #[ORM\Column(length: 3)]
         private readonly string $code,
         #[ORM\Column]
-        private readonly int $decimalPlaces,
-        #[ORM\Column(length: 8)]
-        private readonly string $symbol,
+        private int $decimalPlaces,
     ) {
     }
 
@@ -40,13 +41,23 @@ class Currency
         return $this->code;
     }
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
     public function getDecimalPlaces(): int
     {
         return $this->decimalPlaces;
     }
 
-    public function getSymbol(): string
+    public function setDecimalPlaces(int $decimalPlaces): void
     {
-        return $this->symbol;
+        $this->decimalPlaces = $decimalPlaces;
     }
 }

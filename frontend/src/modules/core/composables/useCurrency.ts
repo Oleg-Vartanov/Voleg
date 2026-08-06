@@ -13,7 +13,7 @@ export function useCurrency() {
   const currencyOptions = computed((): FormSelectOption[] =>
     (currencies.value ?? []).map((currency) => ({
       value: currency.id,
-      label: `${currency.code} (${currency.symbol})`
+      label: `${currency.code} — ${currency.name}`
     }))
   )
 

@@ -7,8 +7,8 @@ export interface ApiUser {
 
 export interface ApiCurrency {
   id: number
+  name: string
   code: string
-  symbol: string
   decimalPlaces: number
 }
 

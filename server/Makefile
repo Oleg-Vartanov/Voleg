@@ -28,7 +28,7 @@ init:
 	$(PHP_CONTAINER) chmod -R 777 var
 	$(PHP_CONTAINER) php bin/console asset-map:compile
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate --no-interaction
-	$(PHP_CONTAINER) php bin/console app:seed-reference-data --no-interaction
+	$(MAKE) seed-reference-data
 	$(DOCKER_COMPOSE) restart php_supervisor
 
 deploy:

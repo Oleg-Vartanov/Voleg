@@ -21,6 +21,7 @@ class CurrencyGetListActionTest extends ApiTestCase
         /** @see \App\Core\DataFixture\CurrencyFixture */
         self::assertCount(50, $data);
         self::assertSame('C1', $data[0]['code']);
+        self::assertSame('Currency 1', $data[0]['name']);
         self::assertSame('C10', $data[1]['code']);
     }
 

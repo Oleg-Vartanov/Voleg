@@ -4,6 +4,7 @@ namespace App\Core\Test;
 
 use App\Core\Command\SeedReferenceDataCommand;
 use App\Core\Repository\CountryRepository;
+use App\Core\Repository\CurrencyRepository;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
 use App\SplitExpense\Repository\SeCategoryRepository;
@@ -26,6 +27,9 @@ class SeedReferenceDataCommandTest extends WebTestCase
         self::assertStringContainsString('Reference data synchronized', $secondRun->getDisplay());
 
         self::assertCount(253, $container->get(CountryRepository::class)->findAll());
+        $usd = $container->get(CurrencyRepository::class)->findOneBy(['code' => 'USD']);
+        self::assertSame('US Dollar', $usd?->getName());
+        self::assertSame(2, $usd?->getDecimalPlaces());
         self::assertCount(109, $container->get(SeasonRepository::class)->findAll());
         self::assertCount(1, $container->get(CompetitionRepository::class)->findAll());
         self::assertNotNull($container->get(SeCategoryRepository::class)->findOneBy(['tag' => 'groceries']));

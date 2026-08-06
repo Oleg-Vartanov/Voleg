@@ -3,6 +3,7 @@
 namespace App\Core\Command;
 
 use App\Core\Service\Seeder\CountryCsvSeeder;
+use App\Core\Service\Seeder\CurrencyCsvSeeder;
 use App\FixturePredictions\Service\Seeder\CompetitionSeeder;
 use App\FixturePredictions\Service\Seeder\SeasonSeeder;
 use App\SplitExpense\Service\Seeder\SeCategorySeeder;
@@ -22,6 +23,7 @@ class SeedReferenceDataCommand extends Command
 {
     public function __construct(
         private readonly CountryCsvSeeder       $countrySeeder,
+        private readonly CurrencyCsvSeeder      $currencySeeder,
         private readonly SeasonSeeder           $seasonSeeder,
         private readonly CompetitionSeeder      $competitionSeeder,
         private readonly SeCategorySeeder        $categorySeeder,
@@ -34,6 +36,7 @@ class SeedReferenceDataCommand extends Command
     {
         $this->entityManager->wrapInTransaction(function (): void {
             $this->countrySeeder->seed();
+            $this->currencySeeder->seed();
             $this->seasonSeeder->seed();
             $this->competitionSeeder->seed();
             $this->categorySeeder->seed();

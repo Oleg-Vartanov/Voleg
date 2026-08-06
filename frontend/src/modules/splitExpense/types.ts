@@ -9,8 +9,8 @@ export interface ApiSeCategory {
 
 export interface ApiSeCurrency {
   id: number
+  name: string
   code: string
-  symbol: string
   decimalPlaces: number
 }
 

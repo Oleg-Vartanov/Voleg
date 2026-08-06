@@ -41,7 +41,7 @@ export function useExpenseDisplay() {
 
   function formatMoney(amountMinor: string | number, expense: ApiSeExpense): string {
     const amount = moneyUtils.fromMinorUnits(Number(amountMinor), expense.currency.decimalPlaces)
-    return `${amount}${expense.currency.symbol}`
+    return `${amount} ${expense.currency.code}`
   }
 
   function formatSignedMoney(
@@ -50,7 +50,7 @@ export function useExpenseDisplay() {
     expense: ApiSeExpense
   ): string {
     const amount = moneyUtils.fromMinorUnits(Number(amountMinor), expense.currency.decimalPlaces)
-    return `${sign}${amount}${expense.currency.symbol}`
+    return `${sign}${amount} ${expense.currency.code}`
   }
 
   function currentUserSplitBalance(expense: ApiSeExpense): string {
