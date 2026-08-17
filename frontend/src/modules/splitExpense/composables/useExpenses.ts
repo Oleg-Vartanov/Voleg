@@ -9,6 +9,7 @@ export function useExpenses() {
   const expenses = ref<ApiSeExpense[] | null>(null)
   const totalCount = ref(0)
   const isLoading = ref(false)
+  const isDeleting = ref(false)
   const pageSize = ref(100)
   const hasMore = computed(
     () => expenses.value !== null && expenses.value.length < totalCount.value,
@@ -50,13 +51,33 @@ export function useExpenses() {
     await load(expenses.value?.length ?? 0, true)
   }
 
+  async function removeExpense(expense: ApiSeExpense): Promise<boolean> {
+    if (isDeleting.value) return false
+
+    isDeleting.value = true
+    try {
+      await client.deleteSplitExpense(expense.id)
+      expenses.value = (expenses.value ?? []).filter((item) => item.id !== expense.id)
+      totalCount.value = Math.max(0, totalCount.value - 1)
+      topAlerts.add('Expense deleted.', 'success', 3)
+      return true
+    } catch {
+      topAlerts.add('Failed to delete expense.', 'danger', 5)
+      return false
+    } finally {
+      isDeleting.value = false
+    }
+  }
+
   return {
     expenses,
     totalCount,
     isLoading,
+    isDeleting,
     hasMore,
     loadInitial,
     loadMore,
+    removeExpense,
   }
 }
 

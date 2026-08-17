@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AddExpenseModal from '@/modules/splitExpense/components/AddExpenseModal.vue'
+import DeleteExpenseModal from '@/modules/splitExpense/components/DeleteExpenseModal.vue'
 import ExpenseDetailPanel from '@/modules/splitExpense/components/ExpenseDetailPanel.vue'
 import ExpenseRow from '@/modules/splitExpense/components/ExpenseRow.vue'
 import ShowMorePagination from '@/modules/core/components/pagination/ShowMorePagination.vue'
@@ -11,6 +12,8 @@ import type { ApiSeExpense } from '@/modules/splitExpense/types'
 const EXPENSES_PAGE_SIZE = 25
 const expensesState = useExpenses()
 const isAddExpenseOpen = ref(false)
+const isDeleteModalOpen = ref(false)
+const expenseToDelete = ref<ApiSeExpense | null>(null)
 
 const isEmpty = computed(() => (expensesState.expenses.value?.length ?? 0) === 0)
 const expandedExpenseId = ref<number | null>(null)
@@ -22,6 +25,23 @@ function toggleExpense(expense: ApiSeExpense) {
 
 function isExpanded(expense: ApiSeExpense) {
   return expandedExpenseId.value === expense.id
+}
+
+function requestDelete(expense: ApiSeExpense) {
+  expenseToDelete.value = expense
+  isDeleteModalOpen.value = true
+}
+
+async function confirmDelete() {
+  const expense = expenseToDelete.value
+  if (!expense) return
+  if (!(await expensesState.removeExpense(expense))) return
+
+  isDeleteModalOpen.value = false
+  expenseToDelete.value = null
+  if (expandedExpenseId.value === expense.id) {
+    expandedExpenseId.value = null
+  }
 }
 
 onMounted(() => {
@@ -45,6 +65,13 @@ onMounted(() => {
         <AddExpenseModal
           v-model:open="isAddExpenseOpen"
           @created="expensesState.loadInitial(EXPENSES_PAGE_SIZE)"
+        />
+
+        <DeleteExpenseModal
+          v-model:open="isDeleteModalOpen"
+          :expense="expenseToDelete"
+          :deleting="expensesState.isDeleting.value"
+          @confirm="confirmDelete"
         />
 
         <div
@@ -73,7 +100,12 @@ onMounted(() => {
                   :expense="expense"
                   @toggle="toggleExpense(expense)"
                 />
-                <ExpenseDetailPanel :expense="expense" :open="isExpanded(expense)" />
+                <ExpenseDetailPanel
+                  :expense="expense"
+                  :open="isExpanded(expense)"
+                  :deleting="expensesState.isDeleting.value"
+                  @delete="requestDelete(expense)"
+                />
               </article>
             </template>
           </div>
