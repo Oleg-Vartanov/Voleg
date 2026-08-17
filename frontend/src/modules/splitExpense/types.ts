@@ -34,6 +34,21 @@ export interface ApiSeExpenseSplit {
   user: ApiUser
 }
 
+export interface ApiSeBalanceAmount {
+  currency: ApiSeCurrency
+  amount: number
+}
+
+export interface ApiSeUserBalance {
+  user: ApiUser
+  amounts: ApiSeBalanceAmount[]
+}
+
+export interface ApiSeBalance {
+  totalAmounts: ApiSeBalanceAmount[]
+  byUserAmounts: ApiSeUserBalance[]
+}
+
 export interface ApiSeConnection {
   id: number
   status: 'accepted' | 'rejected' | 'pending'

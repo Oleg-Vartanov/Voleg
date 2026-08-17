@@ -138,6 +138,12 @@ export default {
     })
   },
 
+  getSplitExpenseBalances() {
+    return axios.get(`${apiBaseUrl}/split-expense/balances`, {
+      headers: getHeader()
+    })
+  },
+
   listSplitExpenseCategories(offset = 0, limit = 100) {
     return axios.get(`${apiBaseUrl}/split-expense/categories`, {
       headers: getHeader(),

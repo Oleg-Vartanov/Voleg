@@ -4,7 +4,9 @@ namespace App\SplitExpense\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
 use App\SplitExpense\Entity\SeExpense;
+use App\SplitExpense\ValueObject\SeBalanceEntry;
 use App\User\Entity\User;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -62,6 +64,48 @@ class SeExpenseRepository extends AbstractEntityRepository
         return $rows;
     }
 
+    /**
+     * @return SeBalanceEntry[]
+     */
+    public function sumSplitsOwedToUser(User $user): array
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->select(
+                'IDENTITY(s.user) AS userId',
+                'IDENTITY(e.currency) AS currencyId',
+                'SUM(s.amount) AS amount',
+            )
+            ->join('e.splits', 's')
+            ->where('e.paidByUser = :user')
+            ->andWhere('s.user != :user')
+            ->groupBy('s.user')
+            ->addGroupBy('e.currency')
+            ->setParameter('user', $user);
+
+        return $this->toBalanceEntries($qb);
+    }
+
+    /**
+     * @return SeBalanceEntry[]
+     */
+    public function sumSplitsOwedByUser(User $user): array
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->select(
+                'IDENTITY(e.paidByUser) AS userId',
+                'IDENTITY(e.currency) AS currencyId',
+                'SUM(s.amount) AS amount',
+            )
+            ->join('e.splits', 's')
+            ->where('s.user = :user')
+            ->andWhere('e.paidByUser != :user')
+            ->groupBy('e.paidByUser')
+            ->addGroupBy('e.currency')
+            ->setParameter('user', $user);
+
+        return $this->toBalanceEntries($qb);
+    }
+
     public function countForUser(User $user): int
     {
         $count = $this->createQueryBuilder('e')
@@ -73,5 +117,25 @@ class SeExpenseRepository extends AbstractEntityRepository
             ->getSingleScalarResult();
 
         return (int) $count;
+    }
+
+    /**
+     * @return SeBalanceEntry[]
+     */
+    private function toBalanceEntries(QueryBuilder $qb): array
+    {
+        /** @var list<array{userId: int|string, currencyId: int|string, amount: int|string}> $result */
+        $result = $qb->getQuery()->getScalarResult();
+
+        $entries = [];
+        foreach ($result as $row) {
+            $entries[] = new SeBalanceEntry(
+                userId: (int) $row['userId'],
+                currencyId: (int) $row['currencyId'],
+                amount: (int) $row['amount'],
+            );
+        }
+
+        return $entries;
     }
 }

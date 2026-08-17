@@ -27,6 +27,7 @@ const menuItems: MenuItem[] = [
     title: 'Split Expense',
     children: [
       { name: 'seExpenses', title: 'Expenses' },
+      { name: 'seBalance', title: 'Balance' },
       { name: 'seConnections', title: 'Connections' },
       { name: 'seRequests', title: 'Requests' },
       { name: 'seCharts', title: 'Charts', disabled: true }
