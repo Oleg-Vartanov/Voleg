@@ -186,7 +186,7 @@ export default {
     })
   },
 
-  listCurrencies(offset = 0, limit = 100) {
+  listCurrencies(offset = 0, limit = 200) {
     return axios.get(`${apiBaseUrl}/currencies`, {
       headers: getHeader(),
       params: { offset, limit }

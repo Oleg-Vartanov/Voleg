@@ -30,7 +30,7 @@ class CurrencyGetListAction extends ApiController
 
     public function __invoke(
         #[MapQueryParameter] int $offset = 0,
-        #[MapQueryParameter] int $limit = 100,
+        #[MapQueryParameter] int $limit = 200,
     ): JsonResponse {
         return $this->json(
             $this->currencyRepository->list($offset, $limit)
