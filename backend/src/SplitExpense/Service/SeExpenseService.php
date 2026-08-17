@@ -31,7 +31,7 @@ readonly class SeExpenseService
 
     public function hasAccess(User $user, SeExpense $expense): bool
     {
-        if ($expense->getPaidByUser()->getId() !== $user->getId()) {
+        if ($expense->getPaidByUser()->getId() === $user->getId()) {
             return true;
         }
 
