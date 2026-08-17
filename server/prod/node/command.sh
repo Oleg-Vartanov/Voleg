@@ -5,4 +5,4 @@ set -e
 
 npm install
 npm run build-only
-npm run dev -- --host
+exec tail -f /dev/null
