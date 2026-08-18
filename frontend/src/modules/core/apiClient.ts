@@ -200,7 +200,7 @@ export default {
   },
 
   updateSplitExpense(id: number, payload: object) {
-    return axios.patch(`${apiBaseUrl}/split-expense/expenses/${id}`, payload, {
+    return axios.put(`${apiBaseUrl}/split-expense/expenses/${id}`, payload, {
       headers: getHeader()
     })
   },

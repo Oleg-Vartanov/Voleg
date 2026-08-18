@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AddExpenseModal from '@/modules/splitExpense/components/AddExpenseModal.vue'
 import DeleteExpenseModal from '@/modules/splitExpense/components/DeleteExpenseModal.vue'
+import EditExpenseModal from '@/modules/splitExpense/components/EditExpenseModal.vue'
 import ExpenseDetailPanel from '@/modules/splitExpense/components/ExpenseDetailPanel.vue'
 import ExpenseRow from '@/modules/splitExpense/components/ExpenseRow.vue'
 import ShowMorePagination from '@/modules/core/components/pagination/ShowMorePagination.vue'
@@ -14,6 +15,8 @@ const expensesState = useExpenses()
 const isAddExpenseOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const expenseToDelete = ref<ApiSeExpense | null>(null)
+const isEditModalOpen = ref(false)
+const expenseToEdit = ref<ApiSeExpense | null>(null)
 
 const isEmpty = computed(() => (expensesState.expenses.value?.length ?? 0) === 0)
 const expandedExpenseId = ref<number | null>(null)
@@ -25,6 +28,16 @@ function toggleExpense(expense: ApiSeExpense) {
 
 function isExpanded(expense: ApiSeExpense) {
   return expandedExpenseId.value === expense.id
+}
+
+function requestEdit(expense: ApiSeExpense) {
+  expenseToEdit.value = expense
+  isEditModalOpen.value = true
+}
+
+function onUpdated(expense: ApiSeExpense) {
+  expensesState.replaceExpense(expense)
+  expenseToEdit.value = null
 }
 
 function requestDelete(expense: ApiSeExpense) {
@@ -67,6 +80,12 @@ onMounted(() => {
           @created="expensesState.loadInitial(EXPENSES_PAGE_SIZE)"
         />
 
+        <EditExpenseModal
+          v-model:open="isEditModalOpen"
+          :expense="expenseToEdit"
+          @updated="onUpdated"
+        />
+
         <DeleteExpenseModal
           v-model:open="isDeleteModalOpen"
           :expense="expenseToDelete"
@@ -104,6 +123,7 @@ onMounted(() => {
                   :expense="expense"
                   :open="isExpanded(expense)"
                   :deleting="expensesState.isDeleting.value"
+                  @edit="requestEdit(expense)"
                   @delete="requestDelete(expense)"
                 />
               </article>

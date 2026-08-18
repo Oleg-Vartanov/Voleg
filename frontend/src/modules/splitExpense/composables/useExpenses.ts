@@ -51,6 +51,12 @@ export function useExpenses() {
     await load(expenses.value?.length ?? 0, true)
   }
 
+  function replaceExpense(expense: ApiSeExpense) {
+    expenses.value = (expenses.value ?? []).map((item) =>
+      item.id === expense.id ? expense : item,
+    )
+  }
+
   async function removeExpense(expense: ApiSeExpense): Promise<boolean> {
     if (isDeleting.value) return false
 
@@ -77,6 +83,7 @@ export function useExpenses() {
     hasMore,
     loadInitial,
     loadMore,
+    replaceExpense,
     removeExpense,
   }
 }

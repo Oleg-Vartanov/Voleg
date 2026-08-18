@@ -11,6 +11,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
+  edit: []
   delete: []
 }>()
 
@@ -42,7 +43,11 @@ const splitUsers = computed(() => ed.mapSplitUsers(props.expense))
             {{ category.title }}
           </p>
 
-          <button type="button" class="btn btn-outline-secondary btn-sm expense-detail-action">
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm expense-detail-action"
+            @click.stop="emit('edit')"
+          >
             Edit
           </button>
         </div>

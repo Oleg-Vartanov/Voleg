@@ -57,14 +57,14 @@ export interface ApiSeConnection {
   userB: ApiUser
 }
 
-export interface ApiSeExpenseCreatePayload {
+export interface ApiSeExpensePayload {
   title: string
   amount: number
   currencyId: number
   expenseDate: string
-  description?: string | null
-  paidByUserId?: number
-  categoryId?: number
+  description: string | null
+  paidByUserId: number
+  categoryId: number
   splits: { userId: number; amount: number }[]
 }
 
