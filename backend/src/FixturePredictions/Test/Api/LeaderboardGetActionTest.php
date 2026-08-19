@@ -3,8 +3,9 @@
 namespace App\FixturePredictions\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\FixturePredictions\DataFixture\SeasonFixture;
+use App\FixturePredictions\Service\Seeder\SeasonSeeder;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
+use App\FixturePredictions\Test\Trait\FootballFixtureTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,11 +13,16 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Fixture Predictions')]
 class LeaderboardGetActionTest extends ApiTestCase
 {
+    use FootballFixtureTestTrait;
+
     #[TestDox('Leaderboard: success')]
     public function testSuccess(): void
     {
-        $this->signIn($this->createUser());
+        $user = $this->createUser(flush: false);
+        $fixture = $this->createFootballFixture();
+        $this->createFootballPrediction($user, $fixture, points: 3);
 
+        $this->signIn($user);
         $this->sendRequest();
         self::assertResponseIsSuccessful();
 
@@ -26,7 +32,7 @@ class LeaderboardGetActionTest extends ApiTestCase
             'start' => '2025-01-01',
             'end' => '2025-01-02',
             'competition' => CompetitionCodeEnum::EPL->value,
-            'season' => SeasonFixture::CURRENT_SEASON,
+            'season' => SeasonSeeder::CURRENT_SEASON_YEAR,
             'limit' => 20,
         ], $data['filters']);
         self::assertNotEmpty($data['users']);
@@ -55,7 +61,7 @@ class LeaderboardGetActionTest extends ApiTestCase
             uri: $this->router->generate('fixtures_leaderboard', [
                 'start' => $start,
                 'end' => '2025-01-02',
-                'season' => SeasonFixture::CURRENT_SEASON,
+                'season' => SeasonSeeder::CURRENT_SEASON_YEAR,
                 'limit' => 20,
             ]),
         );

@@ -3,8 +3,9 @@
 namespace App\SplitExpense\Test\Api;
 
 use App\Core\Test\ApiTestCase;
+use App\SplitExpense\Enum\SeConnectionStatusEnum;
 use App\SplitExpense\Repository\SeConnectionRepository;
-use App\User\Repository\UserRepository;
+use App\SplitExpense\Test\Trait\SplitExpenseTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,23 +13,22 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Split Expense')]
 class SeConnectionDeleteActionTest extends ApiTestCase
 {
-    private UserRepository $userRepo;
+    use SplitExpenseTestTrait;
+
     private SeConnectionRepository $conRepo;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->userRepo = $this->getService(UserRepository::class);
         $this->conRepo = $this->getService(SeConnectionRepository::class);
     }
 
     #[TestDox('Connection DELETE: success')]
     public function testSuccess(): void
     {
-        $userA = $this->userRepo->findByUsername('user1');
-        $userB = $this->userRepo->findByUsername('user2');
-        $connection = $this->conRepo->findOneByUsers($userA, $userB);
-        self::assertNotNull($connection);
+        $userA = $this->createUser(flush: false);
+        $userB = $this->createUser(flush: false);
+        $connection = $this->createConnection($userA, $userB);
 
         $this->signIn($userA);
         $this->sendRequest($connection->getId());
@@ -40,14 +40,13 @@ class SeConnectionDeleteActionTest extends ApiTestCase
     #[TestDox('Connection DELETE: access denied')]
     public function testAccessDenied(): void
     {
-        $connection = $this->conRepo->findOneByUsers(
-            $this->userRepo->findByUsername('user1'),
-            $this->userRepo->findByUsername('user3'),
-        );
-        self::assertNotNull($connection);
+        $userA = $this->createUser(flush: false);
+        $userB = $this->createUser(flush: false);
+        $userC = $this->createUser(flush: false);
+        $connection = $this->createConnection($userA, $userB, SeConnectionStatusEnum::PENDING, false);
+        $this->conRepo->flush();
 
-        $this->signIn($this->userRepo->findByUsername('user2'));
-
+        $this->signIn($userC);
         $this->sendRequest($connection->getId());
         self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Core\Test\Api;
 
+use App\Core\Repository\CurrencyRepository;
 use App\Core\Test\ApiTestCase;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,11 +19,13 @@ class CurrencyGetListActionTest extends ApiTestCase
 
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
         $data = $this->getResponseData();
-        /** @see \App\Core\DataFixture\CurrencyFixture */
-        self::assertCount(50, $data);
-        self::assertSame('C1', $data[0]['code']);
-        self::assertSame('Currency 1', $data[0]['name']);
-        self::assertSame('C10', $data[1]['code']);
+
+        $expectedCount = count($this->getService(CurrencyRepository::class)->findAll());
+        self::assertCount($expectedCount, $data);
+        $usdIndex = array_search('USD', array_column($data, 'code'), true);
+        self::assertNotFalse($usdIndex);
+        self::assertSame('USD', $data[$usdIndex]['code']);
+        self::assertSame('US Dollar', $data[$usdIndex]['name']);
     }
 
     private function sendRequest(): void

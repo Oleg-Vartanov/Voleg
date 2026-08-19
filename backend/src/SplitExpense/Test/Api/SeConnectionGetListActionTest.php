@@ -3,8 +3,8 @@
 namespace App\SplitExpense\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\SplitExpense\Repository\SeConnectionRepository;
-use App\User\Repository\UserRepository;
+use App\SplitExpense\Enum\SeConnectionStatusEnum;
+use App\SplitExpense\Test\Trait\SplitExpenseTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,17 +12,20 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Split Expense')]
 class SeConnectionGetListActionTest extends ApiTestCase
 {
+    use SplitExpenseTestTrait;
+
     #[TestDox('Connection GET list: success')]
     public function testSuccess(): void
     {
-        $user = $this->getService(UserRepository::class)->findByUsername('user1');
-        $connections = $this->getService(SeConnectionRepository::class)->listForUser($user);
+        $user = $this->createUser(flush: false);
+        $this->createConnection($user, $this->createUser(flush: false), flush: false);
+        $this->createConnection($user, $this->createUser());
 
         $this->signIn($user);
         $this->sendRequest();
 
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
-        self::assertCount(count($connections), $this->getResponseData());
+        self::assertCount(2, $this->getResponseData());
     }
 
     #[TestDox('Connection GET list: unauthorized')]
@@ -35,7 +38,11 @@ class SeConnectionGetListActionTest extends ApiTestCase
     #[TestDox('Connection GET list: filter by partner username')]
     public function testFilterByUsername(): void
     {
-        $user = $this->getService(UserRepository::class)->findByUsername('user1');
+        $user = $this->createUser(['username' => 'alice'], flush: false);
+        $this->createConnection(
+            $user,
+            $this->createUser(['username' => 'partner-user']),
+        );
 
         $this->signIn($user);
         $this->sendRequest(['username' => 'user', 'usersOnly' => true, 'status' => 'accepted']);

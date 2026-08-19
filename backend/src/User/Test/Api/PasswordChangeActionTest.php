@@ -4,7 +4,6 @@ namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
 use App\Core\Test\Trait\ContainerTestTrait;
-use App\User\DataFixture\UserFixture;
 use App\User\Entity\User;
 use App\User\Repository\UserRepository;
 use PHPUnit\Framework\Attributes\TestDox;
@@ -20,10 +19,10 @@ class PasswordChangeActionTest extends ApiTestCase
     #[TestDox('User change password: success')]
     public function testSuccess(): void
     {
-        $user = $this->createUser(['password' => UserFixture::DEFAULT_PASSWORD]);
+        $user = $this->createUser(['password' => self::DEFAULT_PASSWORD]);
         $this->signIn($user);
         $this->sendRequest([
-            'currentPassword' => UserFixture::DEFAULT_PASSWORD,
+            'currentPassword' => self::DEFAULT_PASSWORD,
             'newPassword' => '!NewPassword1',
         ]);
         /** @var User $patchedUser */
@@ -39,7 +38,7 @@ class PasswordChangeActionTest extends ApiTestCase
     #[TestDox('User change password: wrong password')]
     public function testWrongPassword(): void
     {
-        $user = $this->createUser(['password' => UserFixture::DEFAULT_PASSWORD]);
+        $user = $this->createUser(['password' => self::DEFAULT_PASSWORD]);
         $this->signIn($user);
         $this->sendRequest([
             'currentPassword' => 'wrong-password',
@@ -51,11 +50,11 @@ class PasswordChangeActionTest extends ApiTestCase
     #[TestDox('User change password: same password')]
     public function testSamePassword(): void
     {
-        $user = $this->createUser(['password' => UserFixture::DEFAULT_PASSWORD]);
+        $user = $this->createUser(['password' => self::DEFAULT_PASSWORD]);
         $this->signIn($user);
         $this->sendRequest([
-            'currentPassword' => UserFixture::DEFAULT_PASSWORD,
-            'newPassword' => UserFixture::DEFAULT_PASSWORD,
+            'currentPassword' => self::DEFAULT_PASSWORD,
+            'newPassword' => self::DEFAULT_PASSWORD,
         ]);
         self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
@@ -63,10 +62,10 @@ class PasswordChangeActionTest extends ApiTestCase
     #[TestDox('User change password: invalid password')]
     public function testInvalidPassword(): void
     {
-        $user = $this->createUser(['password' => UserFixture::DEFAULT_PASSWORD]);
+        $user = $this->createUser(['password' => self::DEFAULT_PASSWORD]);
         $this->signIn($user);
         $this->sendRequest([
-            'currentPassword' => UserFixture::DEFAULT_PASSWORD,
+            'currentPassword' => self::DEFAULT_PASSWORD,
             'newPassword' => 'invalid-password',
         ]);
         self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -82,7 +81,7 @@ class PasswordChangeActionTest extends ApiTestCase
     #[TestDox('User change password: rate limit')]
     public function testRateLimit(): void
     {
-        $user = $this->createUser(['password' => UserFixture::DEFAULT_PASSWORD]);
+        $user = $this->createUser(['password' => self::DEFAULT_PASSWORD]);
         $this->signIn($user);
         foreach (range(1, 4) as $i) {
             $this->sendRequest(['currentPassword' => 'wrong-password', 'newPassword' => '!NewPassword1',]);

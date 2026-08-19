@@ -62,14 +62,18 @@ readonly class UserService
         return $user;
     }
 
-    public function isPasswordValid(User $user, string $plainPassword): bool
+    public function hashPassword(User $user, string $plaintextPassword): string
     {
-        return $this->passwordHasher->isPasswordValid($user, $plainPassword);
+        return $this->passwordHasher->hashPassword($user, $plaintextPassword);
     }
 
     public function setHashedPassword(User $user, string $plaintextPassword): void
     {
-        $hashedPassword = $this->passwordHasher->hashPassword($user, $plaintextPassword);
-        $user->setPassword($hashedPassword);
+        $user->setPassword($this->hashPassword($user, $plaintextPassword));
+    }
+
+    public function isPasswordValid(User $user, string $plainPassword): bool
+    {
+        return $this->passwordHasher->isPasswordValid($user, $plainPassword);
     }
 }

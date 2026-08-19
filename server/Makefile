@@ -28,7 +28,7 @@ init:
 	$(PHP_CONTAINER) chmod -R 777 var
 	$(PHP_CONTAINER) php bin/console asset-map:compile
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate --no-interaction
-	$(MAKE) seed-reference-data
+	$(PHP_CONTAINER) php bin/console app:seed-reference-data --no-interaction
 	$(DOCKER_COMPOSE) restart php_supervisor
 
 deploy:
@@ -43,9 +43,6 @@ migrations-rollback:
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate prev
 migrations-generate:
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:diff
-
-seed-reference-data:
-	$(PHP_CONTAINER) php bin/console app:seed-reference-data --no-interaction
 
 consumer:
 	$(PHP_CONTAINER) php bin/console messenger:consume default scheduler_fixture_predictions -vv
@@ -65,7 +62,7 @@ test:
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:drop --force || true
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:database:create
 	$(PHP_CONTAINER) php bin/console --env=test doctrine:schema:create
-	$(PHP_CONTAINER) php bin/console --env=test doctrine:fixtures:load --no-interaction
+	$(PHP_CONTAINER) php bin/console --env=test app:seed-reference-data --no-interaction
 	docker exec -e XDEBUG_MODE=develop,debug,coverage $(PROJECT_NAME)_php \
 		php bin/phpunit --colors=always --display-deprecations $(if $(filter),--filter $(filter))
 

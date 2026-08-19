@@ -3,17 +3,16 @@
 namespace App\FixturePredictions\Test\Functional;
 
 use App\Core\Test\Trait\ContainerTestTrait;
-use App\FixturePredictions\Entity\Competition;
 use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\FixturePrediction;
-use App\FixturePredictions\Entity\Season;
-use App\FixturePredictions\Entity\Team;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\FixturePredictions\Service\PredictionsService;
+use App\FixturePredictions\Test\Trait\FootballFixtureTestTrait;
 use App\User\Entity\User;
+use App\User\Repository\UserRepository;
+use App\User\Service\UserService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Exception\ORMException;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
@@ -22,19 +21,20 @@ use Symfony\Component\Messenger\Exception\ExceptionInterface;
 class UpdatePointsTest extends KernelTestCase
 {
     use ContainerTestTrait;
+    use FootballFixtureTestTrait;
 
     private EntityManagerInterface $em;
     private PredictionsService $predictionsService;
 
     public function setUp(): void
     {
+        self::bootKernel();
         $this->em = $this->getService(EntityManagerInterface::class);
         $this->predictionsService = $this->getService(PredictionsService::class);
     }
 
     /**
      * @throws ExceptionInterface
-     * @throws ORMException
      */
     #[TestDox('Update points: dispatch success')]
     public function testDispatchUpdatePoints(): void
@@ -51,7 +51,7 @@ class UpdatePointsTest extends KernelTestCase
         $this->predictionsService->dispatchUpdatePoints($fixture);
 
         $predictions = $this->getService(FixturePredictionRepository::class)
-                            ->findByFixture($fixture);
+            ->findByFixture($fixture);
 
         self::assertCount(4, $predictions);
         if (count($predictions) === 4) {
@@ -76,42 +76,48 @@ class UpdatePointsTest extends KernelTestCase
         self::assertTrue(true);
     }
 
-    /**
-     * @throws ORMException
-     */
     private function prepareFixture(int $scoreHome, int $scoreAway): Fixture
     {
-        $f = new Fixture();
-        $f->setHomeScore($scoreHome);
-        $f->setAwayScore($scoreAway);
-        $f->setStartAt(new DateTimeImmutable('-1 day'));
-        $f->setMatchday(1);
-        $f->setCompetition($this->em->getReference(Competition::class, 1));
-        $f->setSeason($this->em->getReference(Season::class, 1));
-        $f->setHomeTeam($this->em->getReference(Team::class, 1));
-        $f->setAwayTeam($this->em->getReference(Team::class, 2));
+        $fixture = $this->createFootballFixture(
+            new DateTimeImmutable('-1 day'),
+            300001,
+        );
+        $fixture->setHomeScore($scoreHome);
+        $fixture->setAwayScore($scoreAway);
+        $this->em->flush();
 
-        $this->em->persist($f);
-
-        return $f;
+        return $fixture;
     }
 
-    /**
-     * @throws ORMException
-     */
     private function preparePrediction(
         Fixture $fixture,
         int $scoreHome,
-        int $scoreAway
+        int $scoreAway,
     ): FixturePrediction {
-        $p = new FixturePrediction();
-        $p->setFixture($fixture);
-        $p->setHomeScore($scoreHome);
-        $p->setAwayScore($scoreAway);
-        $p->setUser($this->em->getReference(User::class, 1));
+        $user = $this->createTestUser();
 
-        $this->em->persist($p);
+        $prediction = new FixturePrediction();
+        $prediction->setFixture($fixture);
+        $prediction->setHomeScore($scoreHome);
+        $prediction->setAwayScore($scoreAway);
+        $prediction->setUser($user);
 
-        return $p;
+        $this->em->persist($prediction);
+
+        return $prediction;
+    }
+
+    private function createTestUser(): User
+    {
+        $index = bin2hex(random_bytes(6));
+        $user = $this->getService(UserService::class)->create(
+            "predictions-{$index}@example.com",
+            'Qwerty1!',
+            "predictions-{$index}",
+        );
+        $user->setVerified(true);
+        $this->getService(UserRepository::class)->save($user, true);
+
+        return $user;
     }
 }

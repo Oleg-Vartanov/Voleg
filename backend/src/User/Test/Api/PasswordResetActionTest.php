@@ -3,7 +3,6 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\User\DataFixture\UserFixture;
 use App\User\Enum\UserTokenTypeEnum;
 use App\User\Repository\UserTokenRepository;
 use App\User\Service\PasswordResetService;
@@ -40,14 +39,14 @@ class PasswordResetActionTest extends ApiTestCase
         $this->sendRequest([
             'selector' => 'selector' . $user->getId(),
             'secret' => 'secret' . $user->getId(),
-            'password' => UserFixture::DEFAULT_PASSWORD . 'new',
+            'password' => self::DEFAULT_PASSWORD . 'new',
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
         self::assertTrue(
             static::getContainer()->get(UserService::class)->isPasswordValid(
                 $user,
-                UserFixture::DEFAULT_PASSWORD . 'new'
+                self::DEFAULT_PASSWORD . 'new'
             )
         );
 
@@ -66,7 +65,7 @@ class PasswordResetActionTest extends ApiTestCase
         $this->sendRequest([
             'selector' => 'selector' . $user->getId(),
             'secret' => 'wrong-secret',
-            'password' => UserFixture::DEFAULT_PASSWORD,
+            'password' => self::DEFAULT_PASSWORD,
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
@@ -86,7 +85,7 @@ class PasswordResetActionTest extends ApiTestCase
         $this->sendRequest([
             'selector' => 'selector' . $user->getId(),
             'secret' => 'secret' . $user->getId(),
-            'password' => UserFixture::DEFAULT_PASSWORD,
+            'password' => self::DEFAULT_PASSWORD,
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
@@ -98,7 +97,7 @@ class PasswordResetActionTest extends ApiTestCase
         $this->sendRequest([
             'selector' => 'non-existent-selector',
             'secret' => 'test',
-            'password' => UserFixture::DEFAULT_PASSWORD,
+            'password' => self::DEFAULT_PASSWORD,
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
@@ -111,7 +110,7 @@ class PasswordResetActionTest extends ApiTestCase
             $this->sendRequest([
                 'selector' => 'passwordResetRateLimitTest',
                 'secret' => 'test',
-                'password' => UserFixture::DEFAULT_PASSWORD,
+                'password' => self::DEFAULT_PASSWORD,
             ]);
             if ($i === 4) {
                 self::assertResponseStatusCodeSame(Response::HTTP_TOO_MANY_REQUESTS);

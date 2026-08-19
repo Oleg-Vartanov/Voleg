@@ -2,16 +2,22 @@
 
 namespace App\FixturePredictions\DataFixture;
 
-use App\FixturePredictions\Entity\Fixture as FpFixture;
 use App\FixturePredictions\Entity\FixturePrediction;
+use App\FixturePredictions\Repository\FixtureRepository;
 use App\User\DataFixture\UserFixture;
 use App\User\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use RuntimeException;
 
 class FixturePredictionFixture extends Fixture implements DependentFixtureInterface
 {
+    public function __construct(
+        private readonly FixtureRepository $fixtureRepository,
+    ) {
+    }
+
     /**
      * @return class-string[]
      */
@@ -25,26 +31,26 @@ class FixturePredictionFixture extends Fixture implements DependentFixtureInterf
 
     public function load(ObjectManager $manager): void
     {
-        $fixtures = [];
-        foreach (range(1, 380) as $index) {
-            $fixtures[] = $this->getReference('fixture_' . $index, FpFixture::class);
+        $fixtures = $this->fixtureRepository->findAll();
+        if ($fixtures === []) {
+            throw new RuntimeException('Fixtures must be loaded before predictions.');
         }
 
         $users = [
-            $this->getReference('admin', User::class),
-            $this->getReference('user', User::class),
+            $this->getReference(UserFixture::REF_ADMIN, User::class),
+            $this->getReference(UserFixture::REF_USER, User::class),
         ];
 
         foreach ($users as $user) {
             foreach ($fixtures as $fixture) {
-                $fp = new FixturePrediction();
-                $fp->setFixture($fixture);
-                $fp->setUser($user);
-                $fp->setPoints([0, 1, 3][array_rand([0, 1, 3])]);
-                $fp->setHomeScore(random_int(0, 4));
-                $fp->setAwayScore(random_int(0, 4));
+                $prediction = new FixturePrediction();
+                $prediction->setFixture($fixture);
+                $prediction->setUser($user);
+                $prediction->setPoints([0, 1, 3][array_rand([0, 1, 3])]);
+                $prediction->setHomeScore(random_int(0, 4));
+                $prediction->setAwayScore(random_int(0, 4));
 
-                $manager->persist($fp);
+                $manager->persist($prediction);
             }
         }
 

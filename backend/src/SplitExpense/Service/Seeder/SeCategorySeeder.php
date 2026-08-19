@@ -7,6 +7,8 @@ use App\SplitExpense\Repository\SeCategoryRepository;
 
 readonly class SeCategorySeeder
 {
+    public const string DEFAULT_TAG = 'other';
+
     private const array TAGS = [
         'bills',
         'education',

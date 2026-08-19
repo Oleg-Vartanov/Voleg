@@ -3,7 +3,6 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\User\DataFixture\UserFixture;
 use App\User\Http\V1\AuthSignInAction;
 use LogicException;
 use PHPUnit\Framework\Attributes\TestDox;
@@ -20,7 +19,7 @@ class AuthSignInActionTest extends ApiTestCase
 
         $this->sendRequest([
             'email' => $user->getEmail(),
-            'password' => UserFixture::DEFAULT_PASSWORD,
+            'password' => self::DEFAULT_PASSWORD,
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
@@ -40,7 +39,7 @@ class AuthSignInActionTest extends ApiTestCase
         $user = $this->createUser(verified: false);
         $this->sendRequest([
             'email' => $user->getEmail(),
-            'password' => UserFixture::DEFAULT_PASSWORD,
+            'password' => self::DEFAULT_PASSWORD,
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);

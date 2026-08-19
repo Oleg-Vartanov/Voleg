@@ -3,7 +3,7 @@
 namespace App\FixturePredictions\Test\Functional;
 
 use App\Core\Test\Trait\ContainerTestTrait;
-use App\FixturePredictions\DataFixture\SeasonFixture;
+use App\FixturePredictions\Service\Seeder\SeasonSeeder;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
 use App\FixturePredictions\Messenger\SyncMessage;
 use App\FixturePredictions\Repository\CompetitionRepository;
@@ -38,7 +38,7 @@ class SyncResultsTest extends KernelTestCase
         $competition = $this->getService(CompetitionRepository::class)
                             ->findOneByCode(CompetitionCodeEnum::EPL->value);
         $season = $this->getService(SeasonRepository::class)
-                       ->findOneByYear(SeasonFixture::CURRENT_SEASON);
+                       ->findOneByYear(SeasonSeeder::CURRENT_SEASON_YEAR);
         $from = new DateTimeImmutable('2025-01-01T00:00:00Z');
         $to = new DateTimeImmutable('2025-01-02T00:00:00Z');
 
@@ -60,7 +60,7 @@ class SyncResultsTest extends KernelTestCase
              ->expects(self::once())
              ->method('sync');
 
-        $this->messageBus->dispatch(new SyncMessage(year: SeasonFixture::CURRENT_SEASON));
+        $this->messageBus->dispatch(new SyncMessage(year: SeasonSeeder::CURRENT_SEASON_YEAR));
     }
 
     /**

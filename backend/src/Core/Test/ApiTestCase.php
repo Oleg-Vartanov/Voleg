@@ -3,20 +3,21 @@
 namespace App\Core\Test;
 
 use App\Core\Test\Trait\ContainerTestTrait;
-use App\User\DataFixture\UserFixture;
 use App\User\Entity\User;
 use App\User\Enum\RoleEnum;
 use App\User\Repository\UserRepository;
 use App\User\Service\UserService;
 use RuntimeException;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 
 abstract class ApiTestCase extends WebTestCase
 {
     use ContainerTestTrait;
+
+    public const string DEFAULT_PASSWORD = 'Qwerty1!';
 
     protected KernelBrowser $client;
     protected RouterInterface $router;
@@ -36,7 +37,7 @@ abstract class ApiTestCase extends WebTestCase
         $index = bin2hex(random_bytes(6));
         $defaults = [
             'email' => 'user' . $index . '@example.com',
-            'password' => UserFixture::DEFAULT_PASSWORD,
+            'password' => self::DEFAULT_PASSWORD,
             'username' => 'john-doe-' . $index,
             'roles' => [],
         ];
@@ -62,15 +63,15 @@ abstract class ApiTestCase extends WebTestCase
         return $user;
     }
 
-    protected function signIn(User $user): User
+    protected function signIn(User $user, string $password = self::DEFAULT_PASSWORD): User
     {
         $this->client->jsonRequest(
             method: Request::METHOD_POST,
             uri: $this->router->generate('sign_in'),
             parameters: [
                 'email' => $user->getEmail(),
-                'password' => UserFixture::DEFAULT_PASSWORD,
-            ]
+                'password' => $password,
+            ],
         );
 
         if ($this->getResponseStatusCode() !== 200) {

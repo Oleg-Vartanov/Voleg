@@ -3,6 +3,8 @@
 namespace App\SplitExpense\Test\Api;
 
 use App\Core\Test\ApiTestCase;
+use App\SplitExpense\Repository\SeCategoryRepository;
+use App\SplitExpense\Service\Seeder\SeCategorySeeder;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,13 +20,16 @@ class SeCategoryGetListActionTest extends ApiTestCase
 
         $data = $this->getResponseData();
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
-        self::assertCount(6, $data);
 
-        /** @see \App\SplitExpense\DataFixture\SeCategoryFixture */
-        self::assertSame('other', $data[0]['tag']);
-        self::assertSame('Other', $data[0]['title']);
-        self::assertSame('other4', $data[4]['tag']);
-        self::assertSame('Other4', $data[4]['title']);
+        $expectedCount = count($this->getService(SeCategoryRepository::class)->findAll());
+        self::assertCount($expectedCount, $data);
+        self::assertSame(16, $expectedCount);
+
+        $otherIndex = array_search(SeCategorySeeder::DEFAULT_TAG, array_column($data, 'tag'), true);
+        self::assertNotFalse($otherIndex);
+        self::assertSame(SeCategorySeeder::DEFAULT_TAG, $data[$otherIndex]['tag']);
+        self::assertSame('Other', $data[$otherIndex]['title']);
+        self::assertSame('Bills', $data[0]['title']);
     }
 
     #[TestDox('Categories GET list: unauthorized')]

@@ -6,7 +6,7 @@ use App\Core\Test\ApiTestCase;
 use App\SplitExpense\Entity\SeConnection;
 use App\SplitExpense\Enum\SeConnectionStatusEnum;
 use App\SplitExpense\Repository\SeConnectionRepository;
-use App\User\Repository\UserRepository;
+use App\SplitExpense\Test\Trait\SplitExpenseTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,23 +14,22 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Split Expense')]
 class SeConnectionResponseActionTest extends ApiTestCase
 {
-    private UserRepository $userRepo;
+    use SplitExpenseTestTrait;
+
     private SeConnectionRepository $conRepo;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->userRepo = $this->getService(UserRepository::class);
         $this->conRepo = $this->getService(SeConnectionRepository::class);
     }
 
     #[TestDox('Connection response: accept success')]
     public function testAcceptSuccess(): void
     {
-        $userA = $this->userRepo->findByUsername('user1');
-        $userB = $this->userRepo->findByUsername('user3');
-        $connection = $this->conRepo->findOneByUsers($userA, $userB);
-        self::assertNotNull($connection);
+        $userA = $this->createUser(flush: false);
+        $userB = $this->createUser(flush: false);
+        $connection = $this->createConnection($userA, $userB, SeConnectionStatusEnum::PENDING);
         self::assertSame(SeConnectionStatusEnum::PENDING, $connection->getStatus());
 
         $this->signIn($userB);

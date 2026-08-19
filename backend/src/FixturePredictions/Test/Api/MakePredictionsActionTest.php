@@ -4,7 +4,7 @@ namespace App\FixturePredictions\Test\Api;
 
 use App\Core\Test\ApiTestCase;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
-use App\FixturePredictions\Repository\FixtureRepository;
+use App\FixturePredictions\Test\Trait\FootballFixtureTestTrait;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,23 +13,22 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Fixture Predictions')]
 class MakePredictionsActionTest extends ApiTestCase
 {
+    use FootballFixtureTestTrait;
+
     #[TestDox('Make predictions: success')]
     public function testSuccess(): void
     {
-        $fixtureRepository = $this->getService(FixtureRepository::class);
         $fptRepository = $this->getService(FixturePredictionRepository::class);
-
         $user = $this->signIn($this->createUser());
 
-        $fixtures = $fixtureRepository->findBy(['id' => [1, 2]]);
-        foreach ($fixtures as $fixture) {
-            $fixture->setStartAt(new DateTimeImmutable('+1 day'));
-        }
-        $fixtureRepository->flush();
+        $fixtures = [
+            $this->createFootballFixture(new DateTimeImmutable('+1 day'), 200001),
+            $this->createFootballFixture(new DateTimeImmutable('+2 days'), 200002),
+        ];
 
         $this->sendRequest([
-            ['fixtureId' => 1, 'homeScore' => 10, 'awayScore' => 11],
-            ['fixtureId' => 2, 'homeScore' => 12, 'awayScore' => 13],
+            ['fixtureId' => $fixtures[0]->getId(), 'homeScore' => 10, 'awayScore' => 11],
+            ['fixtureId' => $fixtures[1]->getId(), 'homeScore' => 12, 'awayScore' => 13],
         ]);
         self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
 
@@ -44,8 +43,10 @@ class MakePredictionsActionTest extends ApiTestCase
     #[TestDox('Make predictions: fixture has already started error')]
     public function testFixtureHasAlreadyStartedError(): void
     {
+        $fixture = $this->createFootballFixture(new DateTimeImmutable('-1 day'), 200003);
+
         $this->signIn($this->createUser());
-        $this->sendRequest([['fixtureId' => 3, 'homeScore' => 1, 'awayScore' => 1]]);
+        $this->sendRequest([['fixtureId' => $fixture->getId(), 'homeScore' => 1, 'awayScore' => 1]]);
         self::assertResponseStatusCodeSame(Response::HTTP_CONFLICT);
     }
 
@@ -53,8 +54,7 @@ class MakePredictionsActionTest extends ApiTestCase
     public function testNotFound(): void
     {
         $this->signIn($this->createUser());
-        $nonExistentId = 1000;
-        $this->sendRequest([['fixtureId' => $nonExistentId, 'homeScore' => 1, 'awayScore' => 1]]);
+        $this->sendRequest([['fixtureId' => 1000, 'homeScore' => 1, 'awayScore' => 1]]);
         self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
 

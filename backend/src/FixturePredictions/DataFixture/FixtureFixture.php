@@ -2,18 +2,30 @@
 
 namespace App\FixturePredictions\DataFixture;
 
-use App\FixturePredictions\Entity\Competition;
 use App\FixturePredictions\Entity\Fixture as FpFixture;
-use App\FixturePredictions\Entity\Season;
 use App\FixturePredictions\Entity\Team;
+use App\FixturePredictions\Enum\CompetitionCodeEnum;
 use App\FixturePredictions\Enum\FixtureStatusEnum;
+use App\FixturePredictions\Repository\CompetitionRepository;
+use App\FixturePredictions\Repository\SeasonRepository;
+use App\FixturePredictions\Repository\TeamRepository;
+use App\FixturePredictions\Service\Seeder\SeasonSeeder;
 use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Random\RandomException;
+use RuntimeException;
 
 class FixtureFixture extends Fixture implements DependentFixtureInterface
 {
+    public function __construct(
+        private readonly CompetitionRepository $competitionRepository,
+        private readonly SeasonRepository $seasonRepository,
+        private readonly TeamRepository $teamRepository,
+    ) {
+    }
+
     /**
      * @return class-string[]
      */
@@ -21,42 +33,51 @@ class FixtureFixture extends Fixture implements DependentFixtureInterface
     {
         return [
             TeamFixture::class,
-            SeasonFixture::class,
-            CompetitionFixture::class,
         ];
     }
 
+    /**
+     * @throws RandomException
+     */
     public function load(ObjectManager $manager): void
     {
-        $teams = [];
-        foreach (range(1, 20) as $index) {
-            $teams[] = $this->getReference('team_' . $index, Team::class);
+        $competition = $this->competitionRepository->findOneByCode(CompetitionCodeEnum::EPL->value);
+        if ($competition === null) {
+            throw new RuntimeException('Premier League competition must be seeded before loading fixtures.');
         }
-        $competition = $this->getReference('competition_PL', Competition::class);
-        $season = $this->getReference('season', Season::class);
 
-        $index = 1;
+        $season = $this->seasonRepository->findOneByYear(SeasonSeeder::CURRENT_SEASON_YEAR);
+        if ($season === null) {
+            throw new RuntimeException(
+                sprintf('Season %d must be seeded before loading fixtures.', SeasonSeeder::CURRENT_SEASON_YEAR),
+            );
+        }
+
+        /** @var list<Team> $teams */
+        $teams = $this->teamRepository->findBy([], ['id' => 'ASC']);
+        if (count($teams) < TeamFixture::TEAM_COUNT) {
+            throw new RuntimeException('Teams must be seeded before loading fixtures.');
+        }
+
         foreach ($teams as $teamHome) {
             foreach ($teams as $teamAway) {
                 if ($teamHome->getId() === $teamAway->getId()) {
                     continue;
                 }
 
-                $f = new FpFixture();
-                $f->setSeason($season);
-                $f->setCompetition($competition);
-                $f->setHomeTeam($teamHome);
-                $f->setAwayTeam($teamAway);
-                $f->setHomeScore(random_int(0, 4));
-                $f->setAwayScore(random_int(0, 4));
-                $f->setStatus(FixtureStatusEnum::Unknown);
-                $f->setMatchday(1);
-                $f->setProviderFixtureId(1);
-                $f->setStartAt(new DateTimeImmutable('2025-01-01'));
+                $fixture = new FpFixture();
+                $fixture->setSeason($season);
+                $fixture->setCompetition($competition);
+                $fixture->setHomeTeam($teamHome);
+                $fixture->setAwayTeam($teamAway);
+                $fixture->setHomeScore(random_int(0, 4));
+                $fixture->setAwayScore(random_int(0, 4));
+                $fixture->setStatus(FixtureStatusEnum::Unknown);
+                $fixture->setMatchday(1);
+                $fixture->setProviderFixtureId(1);
+                $fixture->setStartAt(new DateTimeImmutable('2025-01-01'));
 
-                $manager->persist($f);
-
-                $this->addReference('fixture_' . $index++, $f);
+                $manager->persist($fixture);
             }
         }
 

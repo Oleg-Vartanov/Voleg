@@ -8,14 +8,14 @@ use Doctrine\Persistence\ObjectManager;
 
 class TeamFixture extends Fixture
 {
+    public const int TEAM_COUNT = 20;
+
     public function load(ObjectManager $manager): void
     {
-        foreach (range(1, 20) as $index) {
+        foreach (range(1, self::TEAM_COUNT) as $index) {
             $team = new Team();
             $team->setName('Team ' . $index);
             $manager->persist($team);
-
-            $this->addReference('team_' . $index, $team);
         }
 
         $manager->flush();

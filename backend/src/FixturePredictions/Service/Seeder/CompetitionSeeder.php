@@ -6,6 +6,7 @@ use App\Core\Repository\CountryRepository;
 use App\FixturePredictions\Entity\Competition;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
 use App\FixturePredictions\Repository\CompetitionRepository;
+use App\FixturePredictions\Repository\SeasonRepository;
 use RuntimeException;
 
 readonly class CompetitionSeeder
@@ -13,6 +14,7 @@ readonly class CompetitionSeeder
     public function __construct(
         private CountryRepository $countryRepository,
         private CompetitionRepository $competitionRepository,
+        private SeasonRepository $seasonRepository,
     ) {
     }
 
@@ -31,6 +33,18 @@ readonly class CompetitionSeeder
             $competition->setCode($code);
             $competition->setCountry($country);
 
+            $this->competitionRepository->save($competition, true);
+        }
+
+        if ($competition->getCurrentSeason() === null) {
+            $season = $this->seasonRepository->findOneByYear(SeasonSeeder::CURRENT_SEASON_YEAR);
+            if ($season === null) {
+                throw new RuntimeException(
+                    sprintf('Season %d must be seeded before setting the current competition season.', SeasonSeeder::CURRENT_SEASON_YEAR),
+                );
+            }
+
+            $competition->setCurrentSeason($season);
             $this->competitionRepository->save($competition, true);
         }
     }

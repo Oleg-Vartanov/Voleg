@@ -3,8 +3,9 @@
 namespace App\FixturePredictions\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\FixturePredictions\DataFixture\SeasonFixture;
+use App\FixturePredictions\Service\Seeder\SeasonSeeder;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
+use App\FixturePredictions\Test\Trait\FootballFixtureTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,9 +13,12 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Fixture Predictions')]
 class PredictionsGetActionTest extends ApiTestCase
 {
+    use FootballFixtureTestTrait;
+
     #[TestDox('Predictions GET: success')]
     public function testSuccess(): void
     {
+        $this->createFootballFixtures(20);
         $user = $this->signIn($this->createUser());
 
         $this->sendRequest(userIds: [$user->getId()]);
@@ -25,7 +29,7 @@ class PredictionsGetActionTest extends ApiTestCase
         self::assertSame('2025-01-01', $filters['start']);
         self::assertSame('2025-01-02', $filters['end']);
         self::assertSame(CompetitionCodeEnum::EPL->value, $filters['competition']);
-        self::assertSame(SeasonFixture::CURRENT_SEASON, $filters['season']);
+        self::assertSame(SeasonSeeder::CURRENT_SEASON_YEAR, $filters['season']);
         self::assertSame(20, $filters['limit']);
         self::assertSame($user->getId(), array_first($filters['users'])['id']);
         self::assertSame(20, count($data['fixtures']));
@@ -54,7 +58,7 @@ class PredictionsGetActionTest extends ApiTestCase
             uri: $this->router->generate('fixtures_predictions', [
                 'start' => '2025-01-01',
                 'end' => '2025-01-02',
-                'season' => SeasonFixture::CURRENT_SEASON,
+                'season' => SeasonSeeder::CURRENT_SEASON_YEAR,
                 'limit' => 20,
                 'userIds' => $userIds,
             ]),

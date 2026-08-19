@@ -11,8 +11,8 @@ use App\SplitExpense\Entity\SeExpenseSplit;
 use App\SplitExpense\Repository\SeCategoryRepository;
 use App\SplitExpense\Repository\SeExpenseRepository;
 use App\SplitExpense\Repository\SeExpenseSplitRepository;
+use App\SplitExpense\Test\Trait\SplitExpenseTestTrait;
 use App\User\Entity\User;
-use App\User\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\TestDox;
@@ -22,9 +22,10 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Split Expense')]
 class SeExpensePutActionTest extends ApiTestCase
 {
+    use SplitExpenseTestTrait;
+
     private SeExpenseRepository $expenseRepo;
     private SeExpenseSplitRepository $splitRepo;
-    private UserRepository $userRepo;
     private EntityManagerInterface $em;
     private SeCategory $category;
     private Currency $currency;
@@ -35,7 +36,6 @@ class SeExpensePutActionTest extends ApiTestCase
 
         $this->expenseRepo = $this->getService(SeExpenseRepository::class);
         $this->splitRepo = $this->getService(SeExpenseSplitRepository::class);
-        $this->userRepo = $this->getService(UserRepository::class);
         $this->em = $this->getService(EntityManagerInterface::class);
         $this->category = $this->getService(SeCategoryRepository::class)->find(SeCategory::DEFAULT_ID);
         $this->currency = $this->getService(CurrencyRepository::class)->list(0, 1)[0];
@@ -44,9 +44,9 @@ class SeExpensePutActionTest extends ApiTestCase
     #[TestDox('Expense PUT: replaces the whole expense')]
     public function testSuccess(): void
     {
-        $userA = $this->userRepo->findByUsername('user1');
-        $userB = $this->userRepo->findByUsername('user6');
-        $userC = $this->userRepo->findByUsername('user7');
+        [$userA, $userB] = $this->connectedUsers();
+        $userC = $this->createUser();
+        $this->createConnection($userA, $userC);
         $expense = $this->createExpense($userA, $userB);
 
         $this->signIn($userA);
@@ -81,8 +81,7 @@ class SeExpensePutActionTest extends ApiTestCase
     #[TestDox('Expense PUT: omitted description is cleared')]
     public function testOmittedFieldIsReplaced(): void
     {
-        $userA = $this->userRepo->findByUsername('user1');
-        $userB = $this->userRepo->findByUsername('user6');
+        [$userA, $userB] = $this->connectedUsers();
         $expense = $this->createExpense($userA, $userB);
 
         $payload = $this->payload($userA, $userB);
@@ -100,8 +99,7 @@ class SeExpensePutActionTest extends ApiTestCase
     #[TestDox('Expense PUT: incomplete payload is rejected')]
     public function testIncompletePayloadIsRejected(): void
     {
-        $userA = $this->userRepo->findByUsername('user1');
-        $userB = $this->userRepo->findByUsername('user6');
+        [$userA, $userB] = $this->connectedUsers();
         $expense = $this->createExpense($userA, $userB);
 
         $this->signIn($userA);
@@ -116,14 +114,12 @@ class SeExpensePutActionTest extends ApiTestCase
     #[TestDox('Expense PUT: invalid splits keep the stored ones')]
     public function testInvalidSplitsRollBack(): void
     {
-        $userA = $this->userRepo->findByUsername('user1');
-        $userB = $this->userRepo->findByUsername('user6');
+        [$userA, $userB] = $this->connectedUsers();
         $expense = $this->createExpense($userA, $userB);
 
         $this->signIn($userA);
         $this->sendRequest($expense->getId(), $this->payload($userA, $userB, [
             'title' => 'Updated title',
-            // Sums to less than the expense amount, so applySplits() rejects it.
             'splits' => [
                 ['userId' => $userA->getId(), 'amount' => 1000],
                 ['userId' => $userB->getId(), 'amount' => 1000],
@@ -146,9 +142,8 @@ class SeExpensePutActionTest extends ApiTestCase
     #[TestDox('Expense PUT: split with an unconnected user is rejected')]
     public function testUnconnectedSplitUserIsRejected(): void
     {
-        $userA = $this->userRepo->findByUsername('user1');
-        $userB = $this->userRepo->findByUsername('user6');
-        $stranger = $this->userRepo->findByUsername('user11');
+        [$userA, $userB] = $this->connectedUsers();
+        $stranger = $this->createUser();
         $expense = $this->createExpense($userA, $userB);
 
         $this->signIn($userA);
@@ -166,9 +161,8 @@ class SeExpensePutActionTest extends ApiTestCase
     #[TestDox('Expense PUT: access denied')]
     public function testAccessDenied(): void
     {
-        $userA = $this->userRepo->findByUsername('user1');
-        $userB = $this->userRepo->findByUsername('user6');
-        $outsider = $this->userRepo->findByUsername('user7');
+        [$userA, $userB] = $this->connectedUsers();
+        $outsider = $this->createUser();
         $expense = $this->createExpense($userA, $userB);
 
         $this->signIn($outsider);
@@ -180,8 +174,7 @@ class SeExpensePutActionTest extends ApiTestCase
     #[TestDox('Expense PUT: expense not found')]
     public function testNotFound(): void
     {
-        $userA = $this->userRepo->findByUsername('user1');
-        $userB = $this->userRepo->findByUsername('user6');
+        [$userA, $userB] = $this->connectedUsers();
 
         $this->signIn($userA);
         $this->sendRequest(999999, $this->payload($userA, $userB));
@@ -195,6 +188,18 @@ class SeExpensePutActionTest extends ApiTestCase
         $this->sendRequest(0, []);
 
         self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * @return array{0: User, 1: User}
+     */
+    private function connectedUsers(): array
+    {
+        $userA = $this->createUser(flush: false);
+        $userB = $this->createUser(flush: false);
+        $this->createConnection($userA, $userB);
+
+        return [$userA, $userB];
     }
 
     private function createExpense(User $userA, User $userB): SeExpense
