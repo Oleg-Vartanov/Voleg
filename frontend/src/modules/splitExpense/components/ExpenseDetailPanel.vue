@@ -7,6 +7,12 @@ import { computed } from 'vue'
 const props = defineProps<{
   expense: ApiSeExpense
   open: boolean
+  deleting?: boolean
+}>()
+
+const emit = defineEmits<{
+  edit: []
+  delete: []
 }>()
 
 const ed = useExpenseDisplay()
@@ -36,6 +42,14 @@ const splitUsers = computed(() => ed.mapSplitUsers(props.expense))
             <i class="bi" :class="category.icon" aria-hidden="true"></i>
             {{ category.title }}
           </p>
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm expense-detail-action"
+            @click.stop="emit('edit')"
+          >
+            Edit
+          </button>
         </div>
 
         <div class="expense-detail-side">
@@ -58,6 +72,15 @@ const splitUsers = computed(() => ed.mapSplitUsers(props.expense))
               </span>
             </li>
           </ul>
+
+          <button
+            type="button"
+            class="btn btn-outline-danger btn-sm expense-detail-action"
+            :disabled="deleting"
+            @click.stop="emit('delete')"
+          >
+            Delete
+          </button>
         </div>
       </div>
     </div>
@@ -91,7 +114,7 @@ const splitUsers = computed(() => ed.mapSplitUsers(props.expense))
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.75rem 0;
-  align-items: start;
+  align-items: stretch;
   min-width: 0;
   overflow: hidden;
   overflow-wrap: anywhere;
@@ -130,6 +153,17 @@ const splitUsers = computed(() => ed.mapSplitUsers(props.expense))
   transition:
     opacity 0.25s ease 0.05s,
     padding 0.3s ease;
+}
+
+.btn.expense-detail-action {
+  margin-top: auto;
+  box-sizing: border-box;
+  width: 4.75rem;
+  min-height: 0;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .expense-detail-title {

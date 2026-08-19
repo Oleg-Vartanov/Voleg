@@ -54,10 +54,7 @@ class SeExpensePostAction extends ApiController
     public function __invoke(
         #[CurrentUser] User $user,
         int $id,
-        #[MapRequestPayload(validationGroups: [
-            Group::default->value,
-            Group::create->value,
-        ])] SeExpenseDto $dto,
+        #[MapRequestPayload] SeExpenseDto $dto,
     ): JsonResponse {
         try {
             $expense = $this->service->create($user, $dto);

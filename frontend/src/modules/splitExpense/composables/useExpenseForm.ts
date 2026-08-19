@@ -7,7 +7,7 @@ import moneyUtils from '@/modules/core/utils/moneyUtils'
 import dateUtils from '@/modules/core/utils/dateUtils'
 import type { ApiUser } from '@/modules/core/apiType'
 import type { FormSelectOption } from '@/modules/core/components/form/types'
-import type { ApiSeExpenseCreatePayload } from '@/modules/splitExpense/types'
+import type { ApiSeExpense, ApiSeExpensePayload } from '@/modules/splitExpense/types'
 import { buildEqualSplits } from '@/modules/splitExpense/utils/splitAmounts'
 import { useAuth } from '@/modules/user/stores/useAuth'
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts.ts'
@@ -35,10 +35,10 @@ export function defaultFields(): ExpenseFormFields {
   }
 }
 
-export function useAddExpenseForm() {
+export function useExpenseForm() {
   const auth = useAuth()
   const topAlerts = useTopAlerts()
-  const validation = useApiValidation<ApiSeExpenseCreatePayload>()
+  const validation = useApiValidation<ApiSeExpensePayload>()
 
   const currency = useCurrency()
   const categories = useCategories()
@@ -46,6 +46,7 @@ export function useAddExpenseForm() {
   const fields = reactive<ExpenseFormFields>(defaultFields())
   const isLoaded = ref(false)
   const isLoading = ref(false)
+  const editingId = ref<number | null>(null)
 
   const splitUsersSelected = ref<ApiUser[]>([])
   const splitUsersLocked = computed(() => [auth.user])
@@ -81,20 +82,42 @@ export function useAddExpenseForm() {
 
   const amountDecimalPlaces = computed(() => currency.decimalPlacesById(fields.currencyId))
 
+  async function loadReferenceData(): Promise<boolean> {
+    return Promise.all([
+      categories.load(),
+      currency.load(),
+    ])
+    .then(() => true)
+    .catch(() => {
+      topAlerts.add('Failed to load expense form data.', 'danger', 5)
+      return false
+    })
+  }
+
   async function load() {
     if (isLoading.value || isLoaded.value) return
     isLoading.value = true
 
-    await Promise.all([
-      categories.load(),
-      currency.load(),
-    ])
-    .then(() => {
+    await loadReferenceData()
+    .then((loaded) => {
+      if (!loaded) return
       reset()
       isLoaded.value = true
     })
-    .catch(() => {
-      topAlerts.add('Failed to load expense form data.', 'danger', 5)
+    .finally(() => {
+      isLoading.value = false
+    })
+  }
+
+  async function loadForEdit(expense: ApiSeExpense) {
+    if (isLoading.value) return
+    isLoading.value = true
+
+    await loadReferenceData()
+    .then((loaded) => {
+      if (!loaded) return
+      fill(expense)
+      isLoaded.value = true
     })
     .finally(() => {
       isLoading.value = false
@@ -108,13 +131,29 @@ export function useAddExpenseForm() {
     fields.categoryId = categories.defaultCategoryId()
     fields.paidByUser = auth.user
     splitUsersSelected.value = []
+    editingId.value = null
   }
 
-  async function submit(): Promise<boolean> {
-    if (isLoading.value) return false
+  function fill(expense: ApiSeExpense) {
+    validation.reset()
+    editingId.value = expense.id
+    fields.title = expense.title
+    fields.amount = moneyUtils.fromMinorUnits(Number(expense.amount), expense.currency.decimalPlaces)
+    fields.expenseDate = expense.expenseDate.slice(0, 10)
+    fields.currencyId = expense.currency.id
+    fields.categoryId = expense.category?.id ?? categories.defaultCategoryId()
+    fields.description = expense.description ?? ''
+    splitUsersSelected.value = expense.splits
+      .map((split) => split.user)
+      .filter((user) => user.id !== auth.user.id)
+    fields.paidByUser = expense.paidByUser
+  }
+
+  async function submit(): Promise<ApiSeExpense | null> {
+    if (isLoading.value) return null
 
     const amountMinor = moneyUtils.toMinorUnits(fields.amount, currency.decimalPlacesById(fields.currencyId))
-    const payload: ApiSeExpenseCreatePayload = {
+    const payload: ApiSeExpensePayload = {
       title: fields.title.trim(),
       amount: amountMinor,
       currencyId: fields.currencyId,
@@ -124,22 +163,32 @@ export function useAddExpenseForm() {
       description: fields.description.trim() || null,
       splits: buildEqualSplits(amountMinor, splitUsers.value.map((user) => user.id))
     }
+    const id = editingId.value
     isLoading.value = true
     validation.reset()
 
-    return client.createSplitExpense(payload)
-    .then(() => {
-      topAlerts.add('Expense created.', 'success', 3)
-      reset()
-      return true
+    const request = id === null
+      ? client.createSplitExpense(payload)
+      : client.updateSplitExpense(id, payload)
+
+    return request
+    .then((response) => {
+      if (id === null) {
+        topAlerts.add('Expense created.', 'success', 3)
+        reset()
+      } else {
+        topAlerts.add('Expense updated.', 'success', 3)
+      }
+      return response.data as ApiSeExpense
     })
     .catch((axiosError) => {
       if (axiosError.response?.status === 422) {
         validation.applyErrors(axiosError.response.data.violations)
-        return false
+        return null
       }
-      topAlerts.add(axiosError.response?.data?.message ?? 'Failed to create expense.', 'danger', 5)
-      return false
+      const fallback = id === null ? 'Failed to create expense.' : 'Failed to update expense.'
+      topAlerts.add(axiosError.response?.data?.message ?? fallback, 'danger', 5)
+      return null
     })
     .finally(() => {
       isLoading.value = false
@@ -152,6 +201,7 @@ export function useAddExpenseForm() {
     validation,
     isLoading,
     load,
+    loadForEdit,
     reset,
     splitUsers,
     splitUsersSelected,
@@ -163,3 +213,5 @@ export function useAddExpenseForm() {
     categoryOptions: categories.categoryOptions,
   }
 }
+
+export type ExpenseFormState = ReturnType<typeof useExpenseForm>

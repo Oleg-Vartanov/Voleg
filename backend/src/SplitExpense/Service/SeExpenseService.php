@@ -2,8 +2,8 @@
 
 namespace App\SplitExpense\Service;
 
+use App\Core\Exception\NotFoundException;
 use App\Core\Repository\CurrencyRepository;
-use App\Core\Util\PropertyAccessor;
 use App\SplitExpense\Entity\SeCategory;
 use App\SplitExpense\Entity\SeExpense;
 use App\SplitExpense\Entity\SeExpenseSplit;
@@ -31,7 +31,7 @@ readonly class SeExpenseService
 
     public function hasAccess(User $user, SeExpense $expense): bool
     {
-        if ($expense->getPaidByUser()->getId() !== $user->getId()) {
+        if ($expense->getPaidByUser()->getId() === $user->getId()) {
             return true;
         }
 
@@ -42,6 +42,24 @@ readonly class SeExpenseService
         }
 
         return false;
+    }
+
+    public function canUpdate(User $user, SeExpense $expense): bool
+    {
+        if (!$this->hasAccess($user, $expense)) {
+            return false;
+        }
+
+        foreach ($expense->getSplits() as $split) {
+            if (
+                $split->getUser()->getId() !== $user->getId()
+                && !$this->connectionService->isConnected($user, $split->getUser())
+            ) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -73,56 +91,32 @@ readonly class SeExpenseService
     }
 
     /**
-     * @throws LogicException|DateMalformedStringException|SeExpenseSplitException
+     * @throws DateMalformedStringException
+     * @throws NotFoundException
+     * @throws SeExpenseSplitException
      */
-    public function patch(User $patchedBy, SeExpense $expense, SeExpenseDto $dto): SeExpense
+    public function update(User $updatedBy, SeExpense $expense, SeExpenseDto $dto): SeExpense
     {
-        foreach ($expense->getSplits() as $split) {
-            if (!$this->connectionService->isConnected($patchedBy, $split->getUser())) {
-                throw new SeExpenseSplitException('Can\'t edit expense with unconnected user.');
-            }
+        if (!$this->canUpdate($updatedBy, $expense)) {
+            throw throw new SeExpenseSplitException('Can\'t edit expense with unconnected user.');
         }
 
-        $props = array_flip(PropertyAccessor::getInitializedProperties($dto));
+        $paidBy = $this->userRepository->find($dto->paidByUserId)
+            ?? throw new NotFoundException('Payer not found.', tag: 'paidByUserId');
+        $category = $this->categoryRepository->find($dto->categoryId)
+            ?? throw new NotFoundException('Category not found.', tag: 'categoryId');
+        $currency = $this->currencyRepository->find($dto->currencyId)
+            ?? throw new NotFoundException('Currency not found.', tag: 'currencyId');
 
-        if (isset($props['title'])) {
-            $expense->setTitle($dto->title);
-        }
+        $expense->setPaidByUser($paidBy);
+        $expense->setCategory($category);
+        $expense->setCurrency($currency);
+        $expense->setAmount($dto->amount);
+        $expense->setTitle($dto->title);
+        $expense->setExpenseDate(new DateTimeImmutable($dto->expenseDate));
+        $expense->setDescription($dto->description);
 
-        if (isset($props['description'])) {
-            $expense->setDescription($dto->description);
-        }
-
-        if (isset($props['amount'])) {
-            $expense->setAmount($dto->amount);
-        }
-
-        if (isset($props['expenseDate'])) {
-            $expense->setExpenseDate(new DateTimeImmutable($dto->expenseDate));
-        }
-
-        if (isset($props['currencyId'])) {
-            $currency = $this->currencyRepository->find($dto->currencyId)
-                ?? throw new LogicException('Currency not found.');
-            $expense->setCurrency($currency);
-        }
-
-        if (isset($props['categoryId'])) {
-            $category = $this->categoryRepository->find($dto->categoryId)
-                ?? throw new LogicException('Category not found.');
-            $expense->setCategory($category);
-        }
-
-        if (isset($props['paidByUserId'])) {
-            $paidBy = $this->userRepository->find($dto->paidByUserId)
-                ?? throw new LogicException('Payer user not found.');
-            $expense->setPaidByUser($paidBy);
-        }
-
-        if (isset($props['splits'])) {
-            $expense->clearSplits();
-            $this->applySplits($patchedBy, $expense, $dto->splits);
-        }
+        $this->applySplits($updatedBy, $expense, $dto->splits);
 
         return $expense;
     }
@@ -139,19 +133,41 @@ readonly class SeExpenseService
      */
     private function applySplits(User $appliedBy, SeExpense $expense, array $dtos): void
     {
+        $currentSplits = [];
+        $appliedSplitsUsersIds = [];
+
+        foreach ($expense->getSplits() as $split) {
+            $currentSplits[$split->getUser()->getId()] = $split;
+        }
+
         foreach ($dtos as $dto) {
+            $appliedSplitsUsersIds[] = $dto->userId;
+
             if ($appliedBy->getId() === $dto->userId) {
                 $user = $appliedBy;
             } else {
                 $user = $this->userRepository->findById($dto->userId)
                     ?? throw new SeExpenseSplitException('User not found.');
 
-                if (!$this->connectionService->isConnected($appliedBy, $user)) {
+                if (
+                    $user->getId() !== $appliedBy->getId()
+                    && !$this->connectionService->isConnected($appliedBy, $user)
+                ) {
                     throw new SeExpenseSplitException('Split user require connection.');
                 }
             }
 
-            $expense->addSplit(new SeExpenseSplit($expense, $user, $dto->amount));
+            if (isset($currentSplits[$user->getId()])) {
+                $currentSplits[$user->getId()]->setAmount($dto->amount);
+            } else {
+                $expense->addSplit(new SeExpenseSplit($expense, $user, $dto->amount));
+            }
+        }
+
+        foreach ($currentSplits as $split) {
+            if (!in_array($split->getUser()->getId(), $appliedSplitsUsersIds)) {
+                $expense->removeSplit($split);
+            }
         }
 
         $this->assertSplit($expense);

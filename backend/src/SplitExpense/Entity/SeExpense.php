@@ -164,8 +164,10 @@ class SeExpense
         }
     }
 
-    public function clearSplits(): void
+    public function removeSplit(SeExpenseSplit $split): void
     {
-        $this->splits->clear();
+        if ($this->splits->contains($split)) {
+            $this->splits->removeElement($split);
+        }
     }
 }

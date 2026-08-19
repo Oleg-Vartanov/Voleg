@@ -35,7 +35,6 @@ class SeExpenseDeleteAction extends ApiController
     {
         $expense = $this->expenseRepository->find($id) ?? $this->notFound();
 
-        // todo: only owner can delete? or maybe soft delete?
         if (!$this->service->hasAccess($user, $expense)) {
             $this->accessDenied();
         }
