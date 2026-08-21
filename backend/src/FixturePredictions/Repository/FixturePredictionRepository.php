@@ -45,7 +45,7 @@ class FixturePredictionRepository extends AbstractEntityRepository
                 'NEW ' . LeaderboardRow::class . '(
                     u,
                     SUM(fp.points),
-                    SUM(CASE WHEN f.startAt >= :start AND f.startAt <= :end THEN fp.points ELSE 0 END)
+                    COALESCE(SUM(CASE WHEN f.startAt >= :start AND f.startAt <= :end THEN COALESCE(fp.points, 0) ELSE 0 END), 0)
                 )'
             )
             ->from(FixturePrediction::class, 'fp')
