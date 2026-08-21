@@ -1,111 +1,82 @@
 <script setup lang="ts">
+import { computed, inject } from 'vue'
 import arrayUtils from '@/modules/core/utils/arrayUtils'
-import { inject } from 'vue'
+import AppModal from '@/modules/core/components/AppModal.vue'
+import FormInput from '@/modules/core/components/form/FormInput.vue'
+import FormSelect from '@/modules/core/components/form/FormSelect.vue'
+import type { FormSelectOption } from '@/modules/core/components/form/types'
 import { type FixtureFilters } from '@/modules/fixturePredictions/composables/useFilters'
 import { type Tables } from '@/modules/fixturePredictions/composables/useTables'
 import { CompetitionCode, CompetitionNames } from '@/modules/fixturePredictions/enum'
 
-const tables: Tables = inject('tables')
-const filters: FixtureFilters = inject('filters')
+const open = defineModel<boolean>('open', { required: true })
+
+const tables = inject<Tables>('tables')!
+const filters = inject<FixtureFilters>('filters')!
+
+const start = computed({
+  get: () => filters.start.value ?? '',
+  set: (value: string) => {
+    filters.start.value = value || null
+  },
+})
+
+const end = computed({
+  get: () => filters.end.value ?? '',
+  set: (value: string) => {
+    filters.end.value = value || null
+  },
+})
+
+const competitionOptions: FormSelectOption[] = Object.values(CompetitionCode).map((code) => ({
+  value: code,
+  label: CompetitionNames[code],
+}))
+
+const seasonOptions = computed<FormSelectOption[]>(() =>
+  arrayUtils.range(2023, 2100).map((year) => ({
+    value: year,
+    label: String(year),
+  }))
+)
+
+function applyFilters(close: () => void) {
+  tables.updateLoadedTables()
+  close()
+}
 </script>
 
 <template>
-  <div
-    id="offcanvasFilters"
-    class="offcanvas offcanvas-start"
-    tabindex="-1"
-    aria-labelledby="offcanvas-filters-label"
-  >
-    <div class="offcanvas-header">
-      <h5 id="offcanvas-filters-label" class="offcanvas-title">Filters</h5>
+  <AppModal v-model:open="open" title="Filters">
+    <div class="modal-body">
+      <FormInput id="filter-start" v-model="start" type="date" label="Start" :required="false" />
+      <FormInput id="filter-end" v-model="end" type="date" label="End" :required="false" />
+      <FormSelect
+        id="filter-competition"
+        v-model="filters.competition.value"
+        label="Competition"
+        :options="competitionOptions"
+      />
+      <FormSelect
+        id="filter-season"
+        v-model="filters.season.value"
+        label="Season"
+        :options="seasonOptions"
+        :required="false"
+      />
+    </div>
+
+    <template #footer="{ close }">
+      <button type="button" class="btn btn-secondary" @click="close">Close</button>
       <button
+        class="btn btn-primary"
         type="button"
-        class="btn-close"
-        data-bs-dismiss="offcanvas"
-        aria-label="Close"
-      ></button>
-    </div>
-    <div class="offcanvas-body">
-      <div class="d-flex justify-content-center">
-        <div class="row">
-          <div class="col-auto mb-2 p-1">
-            <div class="input-group">
-              <span class="input-group-text filter-date-text">Start</span>
-              <input
-                id="start"
-                v-model="filters.start.value"
-                class="form-control filter-date-input"
-                type="date"
-              />
-            </div>
-          </div>
-
-          <div class="col-auto mb-2 p-1">
-            <div class="input-group">
-              <span class="input-group-text filter-date-text">End</span>
-              <input
-                id="end"
-                v-model="filters.end.value"
-                class="form-control filter-date-input"
-                type="date"
-              />
-            </div>
-          </div>
-
-          <div class="col-auto mb-2 p-1">
-            <div class="input-group">
-              <span class="input-group-text filter-date-text">Competition</span>
-              <select
-                v-model="filters.competition.value"
-                class="form-select"
-                aria-label="Default select example"
-              >
-                <option :value="CompetitionCode.PL">
-                  {{ CompetitionNames[CompetitionCode.PL] }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="col-auto mb-2 p-1">
-            <div class="input-group">
-              <span class="input-group-text filter-date-text">Season</span>
-              <select v-model="filters.season.value" class="form-select">
-                <option v-for="year in arrayUtils.range(2023, 2100)" :key="year" :value="year">
-                  {{ year }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="col-auto mb-2 p-1">
-            <button
-              class="btn btn-outline-primary"
-              type="button"
-              :disabled="tables.isLoading.value.fixtures || tables.isLoading.value.leaderboard"
-              data-bs-dismiss="offcanvas"
-              @click="tables.updateLoadedTables"
-            >
-              <i class="bi bi-funnel"></i>
-              Filter
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+        :disabled="tables.isLoading.value.fixtures || tables.isLoading.value.leaderboard"
+        @click="applyFilters(close)"
+      >
+        <i class="bi bi-funnel"></i>
+        Filter
+      </button>
+    </template>
+  </AppModal>
 </template>
-
-<style scoped>
-.filter-date-input {
-  width: 125px;
-  padding-left: 6px;
-}
-
-.filter-date-text {
-  padding: 0 5px 0 5px;
-  min-width: 45px;
-  display: flex;
-  justify-content: center;
-}
-</style>

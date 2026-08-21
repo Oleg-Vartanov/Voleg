@@ -5,7 +5,7 @@ import LeaderboardTable from '@/modules/fixturePredictions/components/Leaderboar
 import FixturesTable from '@/modules/fixturePredictions/components/FixturesTable.vue'
 import FixtureFilters from '@/modules/fixturePredictions/components/FixtureFilters.vue'
 import VersusModal from '@/modules/fixturePredictions/components/VersusModal.vue'
-import { computed, provide } from 'vue'
+import { computed, provide, ref } from 'vue'
 import { useTables } from '@/modules/fixturePredictions/composables/useTables'
 import TopButtons from '@/modules/fixturePredictions/components/TopButtons.vue'
 import TabNavigationButton from '@/modules/fixturePredictions/components/TabNavigationButton.vue'
@@ -25,6 +25,9 @@ provide('predictions', predictions)
 
 tables.loadFixtures()
 
+const isFiltersOpen = ref(false)
+const isVersusOpen = ref(false)
+
 const disablePredictions = computed(() => {
   return tables.isLoadingTables.value || tables.fixtures.value?.length === 0
 })
@@ -33,11 +36,15 @@ const disablePredictions = computed(() => {
 <template>
   <div class="ov-center">
     <div class="container">
-      <FixtureFilters />
-      <VersusModal />
+      <FixtureFilters v-model:open="isFiltersOpen" />
+      <VersusModal v-model:open="isVersusOpen" />
       <PredictionsModal />
 
-      <TopButtons :vs="vs" :disable-predictions="disablePredictions" />
+      <TopButtons
+        :disable-predictions="disablePredictions"
+        @open-filters="isFiltersOpen = true"
+        @open-versus="isVersusOpen = true"
+      />
 
       <nav>
         <div id="nav-tab" class="nav nav-tabs justify-content-center" role="tablist">

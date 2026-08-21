@@ -2,22 +2,22 @@
 defineProps<{
   disablePredictions: boolean
 }>()
+
+const emit = defineEmits<{
+  openFilters: []
+  openVersus: []
+}>()
 </script>
 
 <template>
   <div class="d-flex justify-content-center mb-3">
     <div class="btn-group me-2" role="group" aria-label="Top buttons">
-      <button
-        class="btn btn-outline-primary"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#offcanvasFilters"
-        aria-controls="offcanvasFilters"
-      >
+      <button class="btn btn-outline-primary" type="button" @click="emit('openFilters')">
         <i class="bi bi-funnel"></i>
         Filters
       </button>
 
-      <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#go">
+      <button class="btn btn-outline-primary" type="button" @click="emit('openVersus')">
         <i class="bi bi-people-fill"></i>
         VS
       </button>
