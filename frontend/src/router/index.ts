@@ -63,14 +63,6 @@ const index = createRouter({
           redirect: { name: 'seConnections' }
         },
         {
-          path: 'split-expense/charts',
-          name: 'seCharts',
-          meta: { title: 'Split Expense' },
-          beforeEnter: [guards.isAuthenticated],
-          component: () => import('@/modules/splitExpense/pages/ChartsPage.vue'),
-          redirect: { name: 'seExpenses' }
-        },
-        {
           path: 'about',
           name: 'about',
           meta: { title: 'About' },

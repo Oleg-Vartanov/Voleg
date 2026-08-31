@@ -30,7 +30,6 @@ const menuItems: MenuItem[] = [
       { name: 'seBalance', title: 'Balance' },
       { name: 'seConnections', title: 'Connections' },
       { name: 'seRequests', title: 'Requests' },
-      { name: 'seCharts', title: 'Charts', disabled: true }
     ]
   },
   { name: 'footballPredictions', title: 'Football Predictions' },
