@@ -6,6 +6,7 @@ use App\Core\Documentation\Attribute\Response\ArrayResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
 use App\SplitExpense\Entity\SeConnection;
+use App\SplitExpense\Enum\SeConnectionDirectionEnum;
 use App\SplitExpense\Enum\SeConnectionStatusEnum;
 use App\SplitExpense\Repository\SeConnectionRepository;
 use App\User\Entity\User;
@@ -42,8 +43,9 @@ class SeConnectionGetListAction extends ApiController
         #[MapQueryParameter] ?SeConnectionStatusEnum $status = null,
         #[MapQueryParameter] bool $usersOnly = false,
         #[MapQueryParameter] ?string $username = null,
+        #[MapQueryParameter] ?SeConnectionDirectionEnum $direction = null,
     ): JsonResponse {
-        $connections = $this->conRepository->listForUser($user, $offset, $limit, $status, $username);
+        $connections = $this->conRepository->listForUser($user, $offset, $limit, $status, $username, $direction);
 
         if ($usersOnly) {
             $users = [];
@@ -54,7 +56,7 @@ class SeConnectionGetListAction extends ApiController
             }
         }
 
-        $totalCount = $this->conRepository->countForUser($user, $status, $username);
+        $totalCount = $this->conRepository->countForUser($user, $status, $username, $direction);
 
         return $this->json(
             $usersOnly ? $users : $connections,

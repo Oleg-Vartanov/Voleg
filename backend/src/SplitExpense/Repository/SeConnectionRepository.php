@@ -4,6 +4,7 @@ namespace App\SplitExpense\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
 use App\SplitExpense\Entity\SeConnection;
+use App\SplitExpense\Enum\SeConnectionDirectionEnum;
 use App\SplitExpense\Enum\SeConnectionStatusEnum;
 use App\User\Entity\User;
 use Doctrine\ORM\QueryBuilder;
@@ -50,8 +51,9 @@ class SeConnectionRepository extends AbstractEntityRepository
         int $limit = 100,
         ?SeConnectionStatusEnum $status = null,
         ?string $username = null,
+        ?SeConnectionDirectionEnum $direction = null,
     ): array {
-        $qb = $this->createFilteredQueryBuilder($user, $status, $username)
+        $qb = $this->createFilteredQueryBuilder($user, $status, $username, $direction)
             ->orderBy('c.createdAt', 'DESC')
             ->setFirstResult($offset)
             ->setMaxResults($limit);
@@ -66,8 +68,9 @@ class SeConnectionRepository extends AbstractEntityRepository
         User $user,
         ?SeConnectionStatusEnum $status = null,
         ?string $username = null,
+        ?SeConnectionDirectionEnum $direction = null,
     ): int {
-        $count = $this->createFilteredQueryBuilder($user, $status, $username)
+        $count = $this->createFilteredQueryBuilder($user, $status, $username, $direction)
             ->select('COUNT(c.id)')
             ->getQuery()
             ->getSingleScalarResult();
@@ -79,6 +82,7 @@ class SeConnectionRepository extends AbstractEntityRepository
         User $user,
         ?SeConnectionStatusEnum $status = null,
         ?string $username = null,
+        ?SeConnectionDirectionEnum $direction = null,
     ): QueryBuilder {
         $qb = $this->createQueryBuilder('c')
             ->innerJoin('c.userA', 'userA')
@@ -86,7 +90,16 @@ class SeConnectionRepository extends AbstractEntityRepository
             ->where('c.userA = :user OR c.userB = :user')
             ->setParameter('user', $user);
 
-        if ($status !== null) {
+        if ($direction !== null) {
+            $qb->andWhere('c.status = :pendingStatus');
+            $qb->setParameter('pendingStatus', SeConnectionStatusEnum::PENDING);
+
+            if ($direction === SeConnectionDirectionEnum::INCOMING) {
+                $qb->andWhere('c.requestedBy != :user');
+            } else {
+                $qb->andWhere('c.requestedBy = :user');
+            }
+        } elseif ($status !== null) {
             $qb->andWhere('c.status = :status');
             $qb->setParameter('status', $status);
         }

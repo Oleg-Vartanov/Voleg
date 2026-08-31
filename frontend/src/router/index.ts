@@ -53,10 +53,7 @@ const index = createRouter({
         },
         {
           path: 'split-expense/requests',
-          name: 'seRequests',
-          meta: { title: 'Split Expense' },
-          beforeEnter: [guards.isAuthenticated],
-          component: () => import('@/modules/splitExpense/pages/RequestsPage.vue')
+          redirect: { name: 'seConnections' }
         },
         {
           path: 'split-expense/users',

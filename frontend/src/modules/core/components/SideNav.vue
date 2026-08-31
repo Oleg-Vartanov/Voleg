@@ -29,7 +29,6 @@ const menuItems: MenuItem[] = [
       { name: 'seExpenses', title: 'Expenses' },
       { name: 'seBalance', title: 'Balance' },
       { name: 'seConnections', title: 'Connections' },
-      { name: 'seRequests', title: 'Requests' },
     ]
   },
   { name: 'footballPredictions', title: 'Football Predictions' },

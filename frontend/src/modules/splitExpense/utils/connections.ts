@@ -12,11 +12,3 @@ export function getConnectionPartnerName(
   const partner = getConnectionPartner(connection, currentUserId)
   return `@${partner.username}`
 }
-
-export function isIncomingRequest(connection: ApiSeConnection, currentUserId: number): boolean {
-  return connection.status === 'pending' && connection.requestedBy.id !== currentUserId
-}
-
-export function isOutgoingRequest(connection: ApiSeConnection, currentUserId: number): boolean {
-  return connection.status === 'pending' && connection.requestedBy.id === currentUserId
-}

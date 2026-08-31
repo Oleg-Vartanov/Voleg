@@ -3,15 +3,9 @@ import axios from 'axios';
 import client from '@/modules/core/apiClient';
 import type { ApiUser } from '@/modules/core/apiType';
 import type { ApiSeConnection } from '@/modules/splitExpense/types';
-import {
-  isIncomingRequest,
-  isOutgoingRequest,
-} from '@/modules/splitExpense/utils/connections';
-import { useAuth } from '@/modules/user/stores/useAuth';
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts.ts';
 
 export function useConnections() {
-  const auth = useAuth();
   const topAlerts = useTopAlerts();
 
   const connections = ref<ApiSeConnection[]>([]);
@@ -22,32 +16,6 @@ export function useConnections() {
   const acceptedConnections = computed(() =>
     connections.value.filter((connection) => connection.status === 'accepted'),
   );
-
-  const incomingRequests = computed(() => {
-    if (auth.user.id === null) return [];
-
-    return connections.value.filter((connection) =>
-      isIncomingRequest(connection, auth.user.id!),
-    );
-  });
-
-  const outgoingRequests = computed(() => {
-    if (auth.user.id === null) return [];
-
-    return connections.value.filter((connection) =>
-      isOutgoingRequest(connection, auth.user.id!),
-    );
-  });
-
-  const rejectedConnections = computed(() => {
-    if (auth.user.id === null) return [];
-
-    return connections.value.filter(
-      (connection) =>
-        connection.status === 'rejected' &&
-        (connection.userA.id === auth.user.id || connection.userB.id === auth.user.id),
-    );
-  });
 
   async function loadConnections(
     offset = 0,
@@ -93,36 +61,6 @@ export function useConnections() {
     }
   }
 
-  async function acceptRequest(connection: ApiSeConnection) {
-    isLoading.value = true;
-    try {
-      const response = await client.respondSplitExpenseConnection(connection.id, 'accepted');
-      connections.value = connections.value.map((item) =>
-        item.id === connection.id ? response.data : item,
-      );
-      topAlerts.add('Connection accepted.', 'success', 3);
-    } catch {
-      topAlerts.add('Failed to accept connection.', 'danger', 5);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  async function rejectRequest(connection: ApiSeConnection) {
-    isLoading.value = true;
-    try {
-      const response = await client.respondSplitExpenseConnection(connection.id, 'rejected');
-      connections.value = connections.value.map((item) =>
-        item.id === connection.id ? response.data : item,
-      );
-      topAlerts.add('Connection request rejected.', 'success', 3);
-    } catch {
-      topAlerts.add('Failed to reject connection.', 'danger', 5);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
   async function removeConnection(connection: ApiSeConnection): Promise<boolean> {
     isLoading.value = true;
     try {
@@ -138,33 +76,14 @@ export function useConnections() {
     }
   }
 
-  async function cancelRequest(connection: ApiSeConnection) {
-    isLoading.value = true;
-    try {
-      await client.deleteSplitExpenseConnection(connection.id);
-      connections.value = connections.value.filter((item) => item.id !== connection.id);
-      topAlerts.add('Connection request cancelled.', 'success', 3);
-    } catch {
-      topAlerts.add('Failed to cancel connection request.', 'danger', 5);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
   return {
     connections,
     totalCount,
     acceptedConnections,
-    incomingRequests,
-    outgoingRequests,
-    rejectedConnections,
     isLoading,
     isListLoading,
     loadConnections,
     sendRequest,
-    acceptRequest,
-    rejectRequest,
     removeConnection,
-    cancelRequest,
   };
 }
