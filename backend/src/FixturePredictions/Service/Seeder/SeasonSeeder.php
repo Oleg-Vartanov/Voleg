@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 
 readonly class SeasonSeeder
 {
+    // Used for db init and tests.
     public const int CURRENT_SEASON_YEAR = 2024;
 
     public const int FIRST_YEAR = 1992;

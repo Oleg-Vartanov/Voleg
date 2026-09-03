@@ -20,6 +20,11 @@ class CurrencyRepository extends AbstractEntityRepository
         parent::__construct($registry, Currency::class);
     }
 
+    public function findOneByCode(string $code): ?Currency
+    {
+        return $this->findOneBy(['code' => $code]);
+    }
+
     /**
      * @return Currency[]
      */

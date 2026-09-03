@@ -21,6 +21,11 @@ class SeCategoryRepository extends AbstractEntityRepository
         parent::__construct($registry, SeCategory::class);
     }
 
+    public function findOneByTag(string $tag): ?SeCategory
+    {
+        return $this->findOneBy(['tag' => $tag]);
+    }
+
     /**
      * @return SeCategory[]
      */

@@ -55,7 +55,10 @@ fixtures:
 ifeq ($(SERVER_ENV),prod)
 	$(error fixtures is disabled in prod)
 endif
-	$(PHP_CONTAINER) php bin/console doctrine:fixtures:load --no-interaction
+	$(PHP_CONTAINER) php bin/console doctrine:schema:drop --force --full-database
+	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate --no-interaction
+	$(PHP_CONTAINER) php bin/console app:seed-reference-data --no-interaction
+	$(PHP_CONTAINER) php bin/console doctrine:fixtures:load --no-interaction --append
 
 test:
 	$(PHP_CONTAINER) php bin/console --env=test cache:clear

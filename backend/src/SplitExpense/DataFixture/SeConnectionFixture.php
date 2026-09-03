@@ -6,12 +6,18 @@ use App\SplitExpense\Entity\SeConnection;
 use App\SplitExpense\Enum\SeConnectionStatusEnum;
 use App\User\DataFixture\UserFixture;
 use App\User\Entity\User;
+use App\User\Repository\UserRepository;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
 class SeConnectionFixture extends Fixture implements DependentFixtureInterface
 {
+    public function __construct(
+        private readonly UserRepository $userRepository,
+    ) {
+    }
+
     /**
      * @return class-string[]
      */
@@ -24,24 +30,36 @@ class SeConnectionFixture extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
-        $userA = $this->getReference(UserFixture::refUser(1), User::class);
+        $user1 = $this->userRepository->findByUsername('user1');
+        $users = $this->findUsers(100);
 
-        foreach (range(2, 5) as $i) {
-            $userB = $this->getReference(UserFixture::refUser($i), User::class);
-            $manager->persist(new SeConnection($userA, $userB));
-        }
+        foreach ($users as $i => $user) {
+            $seConnection = match (true) {
+                $i < 15 => new SeConnection($user1, $user, SeConnectionStatusEnum::ACCEPTED),
+                $i < 30 => new SeConnection($user, $user1, SeConnectionStatusEnum::ACCEPTED),
+                $i < 45 => new SeConnection($user1, $user),
+                $i < 60 => new SeConnection($user, $user1),
+                $i < 70 => new SeConnection($user, $user1, SeConnectionStatusEnum::REJECTED),
+                default => new SeConnection($user1, $user, SeConnectionStatusEnum::REJECTED),
+            };
 
-        foreach (range(6, 10) as $i) {
-            $userB = $this->getReference(UserFixture::refUser($i), User::class);
-            $manager->persist(
-                new SeConnection(
-                    $userA,
-                    $userB,
-                    SeConnectionStatusEnum::ACCEPTED,
-                ),
-            );
+            $manager->persist($seConnection);
         }
 
         $manager->flush();
+    }
+
+    /**
+     * @return User[]
+     */
+    private function findUsers(int $limit): array
+    {
+        return $this->userRepository->createQueryBuilder('u')
+            ->where('u.username NOT IN (:usernames)')
+            ->setParameter('usernames', ['admin', 'user1'])
+            ->orderBy('u.id', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
     }
 }

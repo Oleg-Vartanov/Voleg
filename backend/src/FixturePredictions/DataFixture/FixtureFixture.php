@@ -10,6 +10,7 @@ use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
 use App\FixturePredictions\Repository\TeamRepository;
 use App\FixturePredictions\Service\Seeder\SeasonSeeder;
+use DateMalformedStringException;
 use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -19,6 +20,8 @@ use RuntimeException;
 
 class FixtureFixture extends Fixture implements DependentFixtureInterface
 {
+    private const array KICKOFF_HOURS = [12, 14, 15, 17];
+
     public function __construct(
         private readonly CompetitionRepository $competitionRepository,
         private readonly SeasonRepository $seasonRepository,
@@ -37,7 +40,7 @@ class FixtureFixture extends Fixture implements DependentFixtureInterface
     }
 
     /**
-     * @throws RandomException
+     * @throws RandomException|DateMalformedStringException
      */
     public function load(ObjectManager $manager): void
     {
@@ -46,41 +49,117 @@ class FixtureFixture extends Fixture implements DependentFixtureInterface
             throw new RuntimeException('Premier League competition must be seeded before loading fixtures.');
         }
 
-        $season = $this->seasonRepository->findOneByYear(SeasonSeeder::CURRENT_SEASON_YEAR);
+        $seasonYear = SeasonSeeder::CURRENT_SEASON_YEAR;
+        $season = $this->seasonRepository->findOneByYear($seasonYear);
         if ($season === null) {
-            throw new RuntimeException(
-                sprintf('Season %d must be seeded before loading fixtures.', SeasonSeeder::CURRENT_SEASON_YEAR),
-            );
+            throw new RuntimeException('Season '.$seasonYear.' must be seeded before loading fixtures.');
         }
 
         /** @var list<Team> $teams */
-        $teams = $this->teamRepository->findBy([], ['id' => 'ASC']);
-        if (count($teams) < TeamFixture::TEAM_COUNT) {
-            throw new RuntimeException('Teams must be seeded before loading fixtures.');
+        $teams = $this->teamRepository->findBy([], ['id' => 'ASC'], limit: 20);
+        if (count($teams) !== 20) {
+            throw new RuntimeException('At least 20 teams must exist before loading fixtures.');
         }
 
-        foreach ($teams as $teamHome) {
-            foreach ($teams as $teamAway) {
-                if ($teamHome->getId() === $teamAway->getId()) {
-                    continue;
-                }
+        $matchdays = $this->buildDoubleRoundRobin($teams);
+        $weekends = $this->weekendDates($seasonYear, count($matchdays));
+        $now = new DateTimeImmutable();
+        $providerId = 1000;
+
+        foreach ($matchdays as $matchdayIndex => $pairs) {
+            $saturday = $weekends[$matchdayIndex];
+            $sunday = $saturday->modify('+1 day');
+            $gamesPerDay = (int) ceil(count($pairs) / 2);
+
+            foreach ($pairs as $gameIndex => [$home, $away]) {
+                $isSunday = $gameIndex >= $gamesPerDay;
+                $day = $isSunday ? $sunday : $saturday;
+                $slot = $isSunday ? $gameIndex - $gamesPerDay : $gameIndex;
+                $hour = self::KICKOFF_HOURS[$slot % count(self::KICKOFF_HOURS)];
+                $startAt = $day->setTime($hour, 0);
 
                 $fixture = new FpFixture();
                 $fixture->setSeason($season);
                 $fixture->setCompetition($competition);
-                $fixture->setHomeTeam($teamHome);
-                $fixture->setAwayTeam($teamAway);
-                $fixture->setHomeScore(random_int(0, 4));
-                $fixture->setAwayScore(random_int(0, 4));
-                $fixture->setStatus(FixtureStatusEnum::Unknown);
-                $fixture->setMatchday(1);
-                $fixture->setProviderFixtureId(1);
-                $fixture->setStartAt(new DateTimeImmutable('2025-01-01'));
+                $fixture->setHomeTeam($home);
+                $fixture->setAwayTeam($away);
+                $fixture->setMatchday($matchdayIndex + 1);
+                $fixture->setProviderFixtureId($providerId++);
+                $fixture->setStartAt($startAt);
+
+                if ($startAt < $now) {
+                    $fixture->setHomeScore(random_int(0, 4));
+                    $fixture->setAwayScore(random_int(0, 4));
+                    $fixture->setStatus(FixtureStatusEnum::Finished);
+                } else {
+                    $fixture->setStatus(FixtureStatusEnum::Scheduled);
+                }
 
                 $manager->persist($fixture);
             }
         }
 
         $manager->flush();
+    }
+
+    /**
+     * @param list<Team> $teams
+     *
+     * @return list<list<array{0: Team, 1: Team}>>
+     */
+    private function buildDoubleRoundRobin(array $teams): array
+    {
+        $rotation = array_values($teams);
+        $teamCount = count($rotation);
+        $half = intdiv($teamCount, 2);
+        $firstHalf = [];
+
+        for ($round = 0; $round < $teamCount - 1; $round++) {
+            $pairs = [];
+            for ($i = 0; $i < $half; $i++) {
+                $home = $rotation[$i];
+                $away = $rotation[$teamCount - 1 - $i];
+                if ($round % 2 === 1 && $i === 0) {
+                    [$home, $away] = [$away, $home];
+                }
+                $pairs[] = [$home, $away];
+            }
+            $firstHalf[] = $pairs;
+
+            $fixed = array_shift($rotation);
+            $last = array_pop($rotation);
+            array_unshift($rotation, $last);
+            array_unshift($rotation, $fixed);
+        }
+
+        $secondHalf = [];
+        foreach ($firstHalf as $pairs) {
+            $secondHalf[] = array_map(
+                static fn (array $pair): array => [$pair[1], $pair[0]],
+                $pairs,
+            );
+        }
+
+        return [...$firstHalf, ...$secondHalf];
+    }
+
+    /**
+     * @return list<DateTimeImmutable>
+     * @throws DateMalformedStringException
+     */
+    private function weekendDates(int $seasonYear, int $matchdayCount): array
+    {
+        $date = new DateTimeImmutable(sprintf('%d-08-10', $seasonYear));
+        while ((int) $date->format('N') !== 6) {
+            $date = $date->modify('+1 day');
+        }
+
+        $dates = [];
+        for ($i = 0; $i < $matchdayCount; $i++) {
+            $dates[] = $date;
+            $date = $date->modify('+7 days');
+        }
+
+        return $dates;
     }
 }

@@ -8,13 +8,34 @@ use Doctrine\Persistence\ObjectManager;
 
 class TeamFixture extends Fixture
 {
-    public const int TEAM_COUNT = 20;
+    private const array TEAM_NAMES = [
+        'Arsenal',
+        'Aston Villa',
+        'Bournemouth',
+        'Brentford',
+        'Brighton Hove',
+        'Chelsea',
+        'Crystal Palace',
+        'Everton',
+        'Fulham',
+        'Ipswich Town',
+        'Leicester City',
+        'Liverpool',
+        'Man City',
+        'Man United',
+        'Newcastle',
+        'Nottingham',
+        'Southampton',
+        'Tottenham',
+        'West Ham',
+        'Wolverhampton',
+    ];
 
     public function load(ObjectManager $manager): void
     {
-        foreach (range(1, self::TEAM_COUNT) as $index) {
+        foreach (self::TEAM_NAMES as $name) {
             $team = new Team();
-            $team->setName('Team ' . $index);
+            $team->setName($name);
             $manager->persist($team);
         }
 

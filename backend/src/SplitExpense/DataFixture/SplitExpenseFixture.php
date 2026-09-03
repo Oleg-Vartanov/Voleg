@@ -2,15 +2,15 @@
 
 namespace App\SplitExpense\DataFixture;
 
-use App\Core\Entity\Currency;
 use App\Core\Repository\CurrencyRepository;
-use App\SplitExpense\Entity\SeCategory;
 use App\SplitExpense\Entity\SeExpense;
 use App\SplitExpense\Entity\SeExpenseSplit;
 use App\SplitExpense\Repository\SeCategoryRepository;
 use App\SplitExpense\Service\Seeder\SeCategorySeeder;
 use App\User\DataFixture\UserFixture;
 use App\User\Entity\User;
+use App\User\Repository\UserRepository;
+use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
@@ -18,10 +18,8 @@ use RuntimeException;
 
 class SplitExpenseFixture extends Fixture implements DependentFixtureInterface
 {
-    /** Currency code from reference data used for demo expenses. */
-    public const string CURRENCY_CODE = 'USD';
-
     public function __construct(
+        private readonly UserRepository $userRepository,
         private readonly SeCategoryRepository $categoryRepository,
         private readonly CurrencyRepository $currencyRepository,
     ) {
@@ -34,72 +32,59 @@ class SplitExpenseFixture extends Fixture implements DependentFixtureInterface
     {
         return [
             UserFixture::class,
+            SeConnectionFixture::class,
         ];
     }
 
     public function load(ObjectManager $manager): void
     {
-        $category = $this->categoryRepository->findOneBy(['tag' => SeCategorySeeder::DEFAULT_TAG]);
-        if ($category === null) {
-            throw new RuntimeException(
-                sprintf('Category "%s" must be seeded before loading split expenses.', SeCategorySeeder::DEFAULT_TAG),
+        $category = $this->categoryRepository->findOneByTag(SeCategorySeeder::DEFAULT_TAG)
+            ?? throw new RuntimeException('Categories must me seeded for fixtures');
+
+        $currency = $this->currencyRepository->findOneByCode('USD')
+            ?? throw new RuntimeException('Currencies must be seeded for fixtures');
+
+        $firstDate = new DateTimeImmutable('2026-01-01');
+
+        $user1 = $this->userRepository->findByUsername('user1');
+        $users = $this->findUsers(100);
+
+        foreach ($users as $i => $user) {
+            [$payer, $splitUser] = rand(0, 1)
+                ? [$user1, $user]
+                : [$user, $user1];
+
+            $expense = new SeExpense(
+                paidByUser: $payer,
+                createdByUser: $payer,
+                category: $category,
+                amount: 6000,
+                title: 'Test expense '.$i,
+                currency: $currency,
+                expenseDate: $firstDate->modify("+{$i} weeks"),
+                description: 'Test description '.$i,
             );
-        }
 
-        $currency = $this->currencyRepository->findOneBy(['code' => self::CURRENCY_CODE]);
-        if ($currency === null) {
-            throw new RuntimeException(
-                sprintf('Currency "%s" must be seeded before loading split expenses.', self::CURRENCY_CODE),
-            );
-        }
+            $expense->addSplit(new SeExpenseSplit(expense: $expense, user: $payer, amount: 3000));
+            $expense->addSplit(new SeExpenseSplit(expense: $expense, user: $splitUser, amount: 3000));
 
-        $user = $this->getReference(UserFixture::REF_USER, User::class);
-
-        foreach (range(1, 9) as $i) {
-            $userA = $this->getReference(UserFixture::refUser($i), User::class);
-            $userB = $this->getReference(UserFixture::refUser($i + 1), User::class);
-            $manager->persist($this->createExpense($userA, $userB, $category, $currency));
-
-            $userA = random_int(0, 1) ? $user : $userA;
-            $userB = $userA->getId() === $user->getId() ? $userB : $user;
-            $manager->persist($this->createExpense($userA, $userB, $category, $currency));
+            $manager->persist($expense);
         }
 
         $manager->flush();
     }
 
-    private function createExpense(
-        User $userA,
-        User $userB,
-        SeCategory $category,
-        Currency $currency,
-    ): SeExpense {
-        $expense = new SeExpense(
-            paidByUser: $userA,
-            createdByUser: $userA,
-            category: $category,
-            amount: 10000,
-            title: 'Test expense',
-            currency: $currency,
-            expenseDate: new \DateTimeImmutable(),
-            description: 'Test expense description',
-        );
-
-        $expense->addSplit(
-            new SeExpenseSplit(
-                expense: $expense,
-                user: $userA,
-                amount: 5000,
-            ),
-        );
-        $expense->addSplit(
-            new SeExpenseSplit(
-                expense: $expense,
-                user: $userB,
-                amount: 5000,
-            ),
-        );
-
-        return $expense;
+    /**
+     * @return User[]
+     */
+    private function findUsers(int $limit): array
+    {
+        return $this->userRepository->createQueryBuilder('u')
+            ->where('u.username NOT IN (:usernames)')
+            ->setParameter('usernames', ['admin', 'user1'])
+            ->orderBy('u.id', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
     }
 }
