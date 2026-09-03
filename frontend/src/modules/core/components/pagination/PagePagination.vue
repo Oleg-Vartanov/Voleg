@@ -51,7 +51,7 @@ function onPageSizeChange(value: string | number) {
 </script>
 
 <template>
-  <nav v-if="totalPages > 1" class="d-flex justify-content-center mt-3" :aria-label="ariaLabel">
+  <nav class="d-flex justify-content-center mt-3" :aria-label="ariaLabel">
     <div class="app-pagination">
       <button
         type="button"

@@ -1,45 +1,71 @@
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import client from '@/modules/core/apiClient';
+import { usePagePagination } from '@/modules/core/components/pagination/usePagePagination';
 import type { ApiSeConnection } from '@/modules/splitExpense/types';
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts.ts';
 
 export type ConnectionRequestTab = 'incoming' | 'outgoing' | 'rejected';
 
-const emptyTabCache = (): Record<ConnectionRequestTab, ApiSeConnection[]> => ({
-  incoming: [],
-  outgoing: [],
-  rejected: [],
-});
+const requestsPageSize = 5;
+
+function createTabState() {
+  return {
+    items: ref<ApiSeConnection[]>([]),
+    pagination: usePagePagination(requestsPageSize),
+    loaded: false,
+  };
+}
 
 export function useConnectionRequests() {
   const topAlerts = useTopAlerts();
   const activeTab = ref<ConnectionRequestTab>('incoming');
-  const items = ref<ApiSeConnection[]>([]);
   const isListLoading = ref(false);
   const isLoading = ref(false);
-  const tabCache = ref(emptyTabCache());
-  const loadedTabs = new Set<ConnectionRequestTab>();
+
+  const tabs: Record<ConnectionRequestTab, ReturnType<typeof createTabState>> = {
+    incoming: createTabState(),
+    outgoing: createTabState(),
+    rejected: createTabState(),
+  };
+
+  const activeState = computed(() => tabs[activeTab.value]);
+  const items = computed(() => activeState.value.items.value);
+  const pageIndex = computed(() => activeState.value.pagination.pageIndex.value);
+  const pageSize = computed(() => activeState.value.pagination.pageSize.value);
+  const totalPages = computed(() => activeState.value.pagination.totalPages.value);
 
   async function loadTab(tab: ConnectionRequestTab, force = false): Promise<void> {
-    if (!force && loadedTabs.has(tab)) {
-      items.value = tabCache.value[tab];
-      return;
-    }
+    const state = tabs[tab];
+    if (!force && state.loaded) return;
+
+    const { offset, limit, setTotalItems, setPageIndex } = state.pagination;
 
     isListLoading.value = true;
     try {
       const response =
         tab === 'rejected'
-          ? await client.listSplitExpenseConnections(0, 100, 'rejected')
-          : await client.listSplitExpenseConnections(0, 100, null, false, null, tab);
+          ? await client.listSplitExpenseConnections(offset.value, limit.value, 'rejected')
+          : await client.listSplitExpenseConnections(
+              offset.value,
+              limit.value,
+              null,
+              false,
+              null,
+              tab,
+            );
 
-      tabCache.value[tab] = response.data;
-      items.value = tabCache.value[tab];
-      loadedTabs.add(tab);
+      state.items.value = response.data;
+      setTotalItems(Number(response.headers['x-total-count'] ?? response.data.length));
+      state.loaded = true;
+
+      if (state.pagination.pageIndex.value > state.pagination.totalPages.value) {
+        setPageIndex(state.pagination.totalPages.value);
+        await loadTab(tab, true);
+      }
     } catch {
       topAlerts.add('Failed to load requests.', 'danger', 5);
-      tabCache.value[tab] = [];
-      items.value = [];
+      state.items.value = [];
+      setTotalItems(0);
     } finally {
       isListLoading.value = false;
     }
@@ -50,23 +76,39 @@ export function useConnectionRequests() {
     await loadTab(tab);
   }
 
-  function removeFromTab(tab: ConnectionRequestTab, connectionId: number): void {
-    tabCache.value[tab] = tabCache.value[tab].filter((item) => item.id !== connectionId);
-    if (activeTab.value === tab) {
-      items.value = tabCache.value[tab];
+  async function setPage(page: number): Promise<void> {
+    const state = activeState.value;
+    if (state.loaded && state.pagination.pageIndex.value === page) return;
+
+    state.pagination.setPageIndex(page);
+    await loadTab(activeTab.value, true);
+  }
+
+  async function setPageSize(size: number): Promise<void> {
+    for (const tab of Object.keys(tabs) as ConnectionRequestTab[]) {
+      tabs[tab].pagination.setPageSize(size);
+      tabs[tab].loaded = false;
     }
+    await loadTab(activeTab.value, true);
+  }
+
+  async function refreshTabs(...changed: ConnectionRequestTab[]): Promise<void> {
+    changed.forEach((tab) => {
+      tabs[tab].loaded = false;
+    });
+    await loadTab(activeTab.value, true);
   }
 
   function invalidateTab(tab: ConnectionRequestTab): void {
-    loadedTabs.delete(tab);
+    tabs[tab].loaded = false;
   }
 
   async function acceptRequest(connection: ApiSeConnection): Promise<void> {
     isLoading.value = true;
     try {
       await client.respondSplitExpenseConnection(connection.id, 'accepted');
-      removeFromTab('incoming', connection.id);
       topAlerts.add('Connection accepted.', 'success', 3);
+      await refreshTabs('incoming');
     } catch {
       topAlerts.add('Failed to accept connection.', 'danger', 5);
     } finally {
@@ -78,9 +120,8 @@ export function useConnectionRequests() {
     isLoading.value = true;
     try {
       await client.respondSplitExpenseConnection(connection.id, 'rejected');
-      removeFromTab('incoming', connection.id);
-      invalidateTab('rejected');
       topAlerts.add('Connection request rejected.', 'success', 3);
+      await refreshTabs('incoming', 'rejected');
     } catch {
       topAlerts.add('Failed to reject connection.', 'danger', 5);
     } finally {
@@ -92,8 +133,8 @@ export function useConnectionRequests() {
     isLoading.value = true;
     try {
       await client.deleteSplitExpenseConnection(connection.id);
-      removeFromTab('outgoing', connection.id);
       topAlerts.add('Connection request cancelled.', 'success', 3);
+      await refreshTabs('outgoing');
     } catch {
       topAlerts.add('Failed to cancel connection request.', 'danger', 5);
     } finally {
@@ -105,8 +146,8 @@ export function useConnectionRequests() {
     isLoading.value = true;
     try {
       await client.deleteSplitExpenseConnection(connection.id);
-      removeFromTab('rejected', connection.id);
       topAlerts.add('Connection removed.', 'success', 3);
+      await refreshTabs('rejected');
     } catch {
       topAlerts.add('Failed to remove connection.', 'danger', 5);
     } finally {
@@ -119,8 +160,14 @@ export function useConnectionRequests() {
     items,
     isListLoading,
     isLoading,
+    pageIndex,
+    pageSize,
+    totalPages,
     loadTab,
     selectTab,
+    setPage,
+    setPageSize,
+    invalidateTab,
     acceptRequest,
     rejectRequest,
     cancelRequest,

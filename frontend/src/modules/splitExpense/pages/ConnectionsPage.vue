@@ -7,13 +7,14 @@ import { useConnectionRequests } from '@/modules/splitExpense/composables/useCon
 import { useConnections } from '@/modules/splitExpense/composables/useConnections'
 import { getConnectionPartnerName } from '@/modules/splitExpense/utils/connections'
 import type { ApiSeConnection } from '@/modules/splitExpense/types'
+import type { ApiUser } from '@/modules/core/apiType'
 import { useAuth } from '@/modules/user/stores/useAuth'
 
 const auth = useAuth()
 const requests = useConnectionRequests()
 const connections = useConnections()
 const { pageIndex, pageSize, totalPages, offset, limit, setPageIndex, setPageSize, setTotalItems } =
-  usePagePagination(10)
+  usePagePagination(5)
 const items = ref<ApiSeConnection[]>([])
 const addConnectionOpen = ref(false)
 
@@ -28,6 +29,18 @@ requests.loadTab('incoming')
 function partnerName(connection: ApiSeConnection) {
   if (auth.user.id === null) return ''
   return getConnectionPartnerName(connection, auth.user.id)
+}
+
+async function sendConnectionRequest(user: ApiUser) {
+  const result = await connections.sendRequest(user)
+  if (result.ok) {
+    if (requests.activeTab.value === 'outgoing') {
+      await requests.loadTab('outgoing', true)
+    } else {
+      requests.invalidateTab('outgoing')
+    }
+  }
+  return result
 }
 
 async function loadPage(nextPage = pageIndex.value) {
@@ -152,6 +165,16 @@ loadPage(1)
               </li>
             </template>
           </ul>
+
+          <PagePagination
+            :page-index="requests.pageIndex.value"
+            :page-size="requests.pageSize.value"
+            :page-size-options="[5, 10, 25, 50]"
+            :total-pages="requests.totalPages.value"
+            aria-label="Requests pagination"
+            @update:page-index="requests.setPage"
+            @update:page-size="requests.setPageSize"
+          />
         </template>
       </div>
 
@@ -193,7 +216,7 @@ loadPage(1)
           <PagePagination
             :page-index="pageIndex"
             :page-size="pageSize"
-            :page-size-options="[10, 25, 50]"
+            :page-size-options="[5, 10, 25, 50]"
             :total-pages="totalPages"
             aria-label="Connections pagination"
             @update:page-index="loadPage"
@@ -204,7 +227,7 @@ loadPage(1)
 
       <AddConnectionModal
         v-model:open="addConnectionOpen"
-        :send="connections.sendRequest"
+        :send="sendConnectionRequest"
       />
     </div>
   </div>
