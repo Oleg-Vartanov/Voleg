@@ -18,25 +18,25 @@ const start = computed({
   get: () => filters.start.value ?? '',
   set: (value: string) => {
     filters.start.value = value || null
-  },
+  }
 })
 
 const end = computed({
   get: () => filters.end.value ?? '',
   set: (value: string) => {
     filters.end.value = value || null
-  },
+  }
 })
 
 const competitionOptions: FormSelectOption[] = Object.values(CompetitionCode).map((code) => ({
   value: code,
-  label: CompetitionNames[code],
+  label: CompetitionNames[code]
 }))
 
 const seasonOptions = computed<FormSelectOption[]>(() =>
   arrayUtils.range(2023, 2100).map((year) => ({
     value: year,
-    label: String(year),
+    label: String(year)
   }))
 )
 

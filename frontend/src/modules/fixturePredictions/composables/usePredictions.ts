@@ -74,7 +74,10 @@ export function usePredictions(tables: Tables): Predictions {
 
     const form = event.target as HTMLFormElement
     const elements = form.elements
-    const predictions: Record<string, any> = {}
+    const predictions: Record<
+      string,
+      { fixtureId: number; homeScore: number | null; awayScore: number | null }
+    > = {}
 
     for (const element of elements) {
       if (!(element instanceof HTMLInputElement)) continue

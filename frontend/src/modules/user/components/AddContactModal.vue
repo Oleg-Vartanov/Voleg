@@ -21,10 +21,7 @@ const emit = defineEmits<{
           ></button>
         </div>
         <div class="modal-body">
-          <SelectUsersAction
-            action-label="Add"
-            @action="emit('add', $event)"
-          />
+          <SelectUsersAction action-label="Add" @action="emit('add', $event)" />
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

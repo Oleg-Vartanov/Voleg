@@ -39,9 +39,7 @@ readonly class CompetitionSeeder
         if ($competition->getCurrentSeason() === null) {
             $season = $this->seasonRepository->findOneByYear(SeasonSeeder::CURRENT_SEASON_YEAR);
             if ($season === null) {
-                throw new RuntimeException(
-                    sprintf('Season %d must be seeded before setting the current competition season.', SeasonSeeder::CURRENT_SEASON_YEAR),
-                );
+                throw new RuntimeException('Season must be seeded before setting to the competition.');
             }
 
             $competition->setCurrentSeason($season);

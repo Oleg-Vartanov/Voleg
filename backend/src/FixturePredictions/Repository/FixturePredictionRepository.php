@@ -46,7 +46,14 @@ class FixturePredictionRepository extends AbstractEntityRepository
                 'NEW ' . LeaderboardRow::class . '(
                     u,
                     SUM(fp.points),
-                    COALESCE(SUM(CASE WHEN f.startAt >= :start AND f.startAt <= :end THEN COALESCE(fp.points, 0) ELSE 0 END), 0)
+                    COALESCE(
+                        SUM(CASE
+                            WHEN f.startAt >= :start AND f.startAt <= :end
+                            THEN COALESCE(fp.points, 0)
+                            ELSE 0
+                        END),
+                        0
+                    )
                 )'
             )
             ->setParameter('start', $start ?? new DateTimeImmutable('0001-01-01'))

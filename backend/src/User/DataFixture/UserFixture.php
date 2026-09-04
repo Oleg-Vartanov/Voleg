@@ -26,7 +26,7 @@ class UserFixture extends Fixture
         ];
 
         foreach (range(1, 1000) as $id) {
-            $users[] = ['user'.$id.'@test.com', 'user'.$id, []];
+            $users[] = ['user' . $id . '@test.com', 'user' . $id, []];
         }
 
         foreach ($users as [$email, $username, $roles]) {

@@ -14,8 +14,8 @@ const props = withDefaults(
   }>(),
   {
     ariaLabel: 'Pagination',
-    pageSizeOptions: () => [],
-  },
+    pageSizeOptions: () => []
+  }
 )
 
 const hasPrev = computed(() => pageIndex.value > 1)
@@ -209,8 +209,7 @@ function onPageSizeChange(value: string | number) {
   border-bottom-right-radius: 0;
 }
 
-.app-pagination-page-size
-  :deep(.form-select-menu--up .form-select-menu-trigger) {
+.app-pagination-page-size :deep(.form-select-menu--up .form-select-menu-trigger) {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }

@@ -52,7 +52,7 @@ class FixtureFixture extends Fixture implements DependentFixtureInterface
         $seasonYear = SeasonSeeder::CURRENT_SEASON_YEAR;
         $season = $this->seasonRepository->findOneByYear($seasonYear);
         if ($season === null) {
-            throw new RuntimeException('Season '.$seasonYear.' must be seeded before loading fixtures.');
+            throw new RuntimeException('Season ' . $seasonYear . ' must be seeded before loading fixtures.');
         }
 
         /** @var list<Team> $teams */
@@ -110,7 +110,7 @@ class FixtureFixture extends Fixture implements DependentFixtureInterface
      */
     private function buildDoubleRoundRobin(array $teams): array
     {
-        $rotation = array_values($teams);
+        $rotation = $teams;
         $teamCount = count($rotation);
         $half = intdiv($teamCount, 2);
         $firstHalf = [];
@@ -129,6 +129,9 @@ class FixtureFixture extends Fixture implements DependentFixtureInterface
 
             $fixed = array_shift($rotation);
             $last = array_pop($rotation);
+            if ($fixed === null || $last === null) {
+                throw new RuntimeException('Unexpected empty team rotation.');
+            }
             array_unshift($rotation, $last);
             array_unshift($rotation, $fixed);
         }

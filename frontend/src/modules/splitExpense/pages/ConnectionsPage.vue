@@ -21,7 +21,7 @@ const addConnectionOpen = ref(false)
 const requestTabs = [
   { id: 'incoming' as const, label: 'Incoming' },
   { id: 'outgoing' as const, label: 'Outgoing' },
-  { id: 'rejected' as const, label: 'Rejected' },
+  { id: 'rejected' as const, label: 'Rejected' }
 ]
 
 requests.loadTab('incoming')
@@ -112,8 +112,12 @@ loadPage(1)
               v-if="requests.items.value.length === 0"
               class="list-group-item text-muted text-center"
             >
-              <template v-if="requests.activeTab.value === 'incoming'">No incoming requests.</template>
-              <template v-else-if="requests.activeTab.value === 'outgoing'">No outgoing requests.</template>
+              <template v-if="requests.activeTab.value === 'incoming'"
+                >No incoming requests.</template
+              >
+              <template v-else-if="requests.activeTab.value === 'outgoing'"
+                >No outgoing requests.</template
+              >
               <template v-else>No rejected requests.</template>
             </li>
             <template v-else>
@@ -124,7 +128,10 @@ loadPage(1)
               >
                 <span class="text-truncate">{{ partnerName(connection) }}</span>
 
-                <div v-if="requests.activeTab.value === 'incoming'" class="d-flex gap-2 flex-shrink-0">
+                <div
+                  v-if="requests.activeTab.value === 'incoming'"
+                  class="d-flex gap-2 flex-shrink-0"
+                >
                   <button
                     type="button"
                     class="btn btn-outline-primary btn-sm"
@@ -188,10 +195,7 @@ loadPage(1)
 
         <div v-else>
           <ul class="list-group list-group-flush">
-            <li
-              v-if="items.length === 0"
-              class="list-group-item text-muted text-center"
-            >
+            <li v-if="items.length === 0" class="list-group-item text-muted text-center">
               No connections yet.
             </li>
             <template v-else>
@@ -225,10 +229,7 @@ loadPage(1)
         </div>
       </div>
 
-      <AddConnectionModal
-        v-model:open="addConnectionOpen"
-        :send="sendConnectionRequest"
-      />
+      <AddConnectionModal v-model:open="addConnectionOpen" :send="sendConnectionRequest" />
     </div>
   </div>
 </template>

@@ -19,7 +19,7 @@ const defaultUser: User = {
   isSignedIn: false,
   id: null,
   username: null,
-  roles: [],
+  roles: []
 }
 
 export const useAuth = defineStore('auth', () => {

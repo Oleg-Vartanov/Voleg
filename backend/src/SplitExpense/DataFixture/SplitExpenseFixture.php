@@ -46,7 +46,8 @@ class SplitExpenseFixture extends Fixture implements DependentFixtureInterface
 
         $firstDate = new DateTimeImmutable('2026-01-01');
 
-        $user1 = $this->userRepository->findByUsername('user1');
+        $user1 = $this->userRepository->findByUsername('user1')
+            ?? throw new RuntimeException('User "user1" must be seeded before loading expenses.');
         $users = $this->findUsers(100);
 
         foreach ($users as $i => $user) {
@@ -59,10 +60,10 @@ class SplitExpenseFixture extends Fixture implements DependentFixtureInterface
                 createdByUser: $payer,
                 category: $category,
                 amount: 6000,
-                title: 'Test expense '.$i,
+                title: 'Test expense ' . $i,
                 currency: $currency,
                 expenseDate: $firstDate->modify("+{$i} weeks"),
-                description: 'Test description '.$i,
+                description: 'Test description ' . $i,
             );
 
             $expense->addSplit(new SeExpenseSplit(expense: $expense, user: $payer, amount: 3000));
@@ -79,12 +80,15 @@ class SplitExpenseFixture extends Fixture implements DependentFixtureInterface
      */
     private function findUsers(int $limit): array
     {
-        return $this->userRepository->createQueryBuilder('u')
+        /** @var User[] $users */
+        $users = $this->userRepository->createQueryBuilder('u')
             ->where('u.username NOT IN (:usernames)')
             ->setParameter('usernames', ['admin', 'user1'])
             ->orderBy('u.id', 'ASC')
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
+
+        return $users;
     }
 }

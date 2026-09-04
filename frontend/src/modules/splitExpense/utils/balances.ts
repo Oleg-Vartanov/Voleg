@@ -6,10 +6,7 @@ import type { ApiSeBalanceAmount } from '@/modules/splitExpense/types'
  * current user cancels out what the current user owes another.
  */
 export function formatBalance(balance: ApiSeBalanceAmount): string {
-  const amount = moneyUtils.fromMinorUnits(
-    Math.abs(balance.amount),
-    balance.currency.decimalPlaces
-  )
+  const amount = moneyUtils.fromMinorUnits(Math.abs(balance.amount), balance.currency.decimalPlaces)
   if (balance.amount === 0) {
     return `${amount} ${balance.currency.code}`
   }

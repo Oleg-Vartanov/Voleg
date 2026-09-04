@@ -17,7 +17,7 @@ const versusUsers = computed({
   set: (value: ApiUser[] | ApiUser | null) => {
     vs.setUsers(Array.isArray(value) ? value : [])
     tables.updateLoadedTables()
-  },
+  }
 })
 </script>
 

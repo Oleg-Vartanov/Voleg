@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import BaseFormField from '@/modules/core/components/form/BaseFormField.vue'
-import {
-  validationClass,
-  type FormSelectOption
-} from '@/modules/core/components/form/types'
+import { validationClass, type FormSelectOption } from '@/modules/core/components/form/types'
 
 interface Props {
   id: string

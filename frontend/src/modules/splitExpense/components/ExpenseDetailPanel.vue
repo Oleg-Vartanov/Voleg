@@ -54,18 +54,19 @@ const splitUsers = computed(() => ed.mapSplitUsers(props.expense))
 
         <div class="expense-detail-side">
           <p class="expense-split-balance">
-            Your split balance <strong :class="ed.amountColor(expense)">{{ ed.currentUserSplitBalance(expense) }}</strong>
+            Your split balance
+            <strong :class="ed.amountColor(expense)">{{
+              ed.currentUserSplitBalance(expense)
+            }}</strong>
           </p>
 
           <ul class="expense-split-users list-unstyled mb-0">
-            <li
-              v-for="splitUser in splitUsers"
-              :key="splitUser.user.id"
-              class="expense-split-user"
-            >
+            <li v-for="splitUser in splitUsers" :key="splitUser.user.id" class="expense-split-user">
               <span class="expense-split-user-text">
                 <strong>{{ splitUser.user.username }}</strong>
-                <template v-if="splitUser.paidAmount"> paid <strong>{{ splitUser.paidAmount }}</strong></template>
+                <template v-if="splitUser.paidAmount">
+                  paid <strong>{{ splitUser.paidAmount }}</strong></template
+                >
                 <span v-if="splitUser.paidAmount"> share </span>
                 <span v-else> owes </span>
                 <strong>{{ splitUser.splitAmount }}</strong>

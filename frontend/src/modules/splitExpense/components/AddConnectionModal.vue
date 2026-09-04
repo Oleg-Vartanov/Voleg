@@ -34,10 +34,7 @@ async function onSend(user: ApiUser) {
 <template>
   <AppModal v-model:open="open" title="Add connection" :error="error">
     <div class="modal-body">
-      <SelectUsersAction
-        action-label="Request"
-        @action="onSend"
-      />
+      <SelectUsersAction action-label="Request" @action="onSend" />
     </div>
 
     <template #footer="{ close }">

@@ -20,8 +20,7 @@ const emit = defineEmits<{
       <p class="mb-0">
         Delete
         <strong v-if="expense">{{ expense.title }}</strong>
-        <template v-else>this expense</template>?
-        This cannot be undone.
+        <template v-else>this expense</template>? This cannot be undone.
       </p>
     </div>
 

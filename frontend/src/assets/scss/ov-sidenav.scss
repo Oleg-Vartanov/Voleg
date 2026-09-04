@@ -7,9 +7,7 @@ $ov-sidenav-mobile-shadow: 0.25rem 0 0.5rem rgba(0, 0, 0, 0.15);
 $ov-chrome-toggle-icon-size: 1rem;
 
 .app-layout {
-  --app-navbar-height: calc(
-    #{$ov-sidenav-link-padding-y * 2} + #{$ov-chrome-toggle-icon-size}
-  );
+  --app-navbar-height: calc(#{$ov-sidenav-link-padding-y * 2} + #{$ov-chrome-toggle-icon-size});
 }
 
 .side-nav {

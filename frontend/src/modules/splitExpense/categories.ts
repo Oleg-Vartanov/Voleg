@@ -14,7 +14,7 @@ export const categories = {
   sport: 'bi-trophy',
   subscriptions: 'bi-link-45deg',
   transport: 'bi-taxi-front',
-  travel: 'bi-luggage',
+  travel: 'bi-luggage'
 }
 
-export type CategoryKey = keyof typeof categories;
+export type CategoryKey = keyof typeof categories

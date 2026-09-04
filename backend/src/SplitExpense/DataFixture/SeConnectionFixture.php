@@ -10,6 +10,7 @@ use App\User\Repository\UserRepository;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use RuntimeException;
 
 class SeConnectionFixture extends Fixture implements DependentFixtureInterface
 {
@@ -30,7 +31,8 @@ class SeConnectionFixture extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
-        $user1 = $this->userRepository->findByUsername('user1');
+        $user1 = $this->userRepository->findByUsername('user1')
+            ?? throw new RuntimeException('User "user1" must be seeded before loading connections.');
         $users = $this->findUsers(100);
 
         foreach ($users as $i => $user) {
@@ -54,12 +56,15 @@ class SeConnectionFixture extends Fixture implements DependentFixtureInterface
      */
     private function findUsers(int $limit): array
     {
-        return $this->userRepository->createQueryBuilder('u')
+        /** @var User[] $users */
+        $users = $this->userRepository->createQueryBuilder('u')
             ->where('u.username NOT IN (:usernames)')
             ->setParameter('usernames', ['admin', 'user1'])
             ->orderBy('u.id', 'ASC')
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
+
+        return $users;
     }
 }

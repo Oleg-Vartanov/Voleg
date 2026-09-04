@@ -12,7 +12,7 @@ export function useExpenses() {
   const isDeleting = ref(false)
   const pageSize = ref(100)
   const hasMore = computed(
-    () => expenses.value !== null && expenses.value.length < totalCount.value,
+    () => expenses.value !== null && expenses.value.length < totalCount.value
   )
 
   async function load(offset: number, append: boolean) {
@@ -22,9 +22,7 @@ export function useExpenses() {
     try {
       const response = await client.listSplitExpenses(offset, pageSize.value)
       const loadedExpenses: ApiSeExpense[] = response.data
-      expenses.value = append
-        ? [...(expenses.value ?? []), ...loadedExpenses]
-        : loadedExpenses
+      expenses.value = append ? [...(expenses.value ?? []), ...loadedExpenses] : loadedExpenses
 
       const responseTotal = Number(response.headers['x-total-count'])
       totalCount.value = Number.isFinite(responseTotal)
@@ -52,9 +50,7 @@ export function useExpenses() {
   }
 
   function replaceExpense(expense: ApiSeExpense) {
-    expenses.value = (expenses.value ?? []).map((item) =>
-      item.id === expense.id ? expense : item,
-    )
+    expenses.value = (expenses.value ?? []).map((item) => (item.id === expense.id ? expense : item))
   }
 
   async function removeExpense(expense: ApiSeExpense): Promise<boolean> {
@@ -84,7 +80,7 @@ export function useExpenses() {
     loadInitial,
     loadMore,
     replaceExpense,
-    removeExpense,
+    removeExpense
   }
 }
 

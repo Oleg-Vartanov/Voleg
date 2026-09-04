@@ -25,6 +25,9 @@ const props = withDefaults(defineProps<Props>(), {
   errorText: '',
   helpText: '',
   required: true,
+  min: undefined,
+  step: undefined,
+  inputmode: undefined,
   placeholder: ''
 })
 

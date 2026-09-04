@@ -7,8 +7,8 @@ withDefaults(
   }>(),
   {
     isLoading: false,
-    ariaLabel: 'Load more items',
-  },
+    ariaLabel: 'Load more items'
+  }
 )
 
 defineEmits<{

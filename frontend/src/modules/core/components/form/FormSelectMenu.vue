@@ -10,8 +10,8 @@ const props = withDefaults(
     ariaLabel?: string
   }>(),
   {
-    ariaLabel: 'Select',
-  },
+    ariaLabel: 'Select'
+  }
 )
 
 const id = useId()
@@ -66,7 +66,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
     class="form-select-menu"
     :class="{
       'form-select-menu--open': isOpen,
-      'form-select-menu--up': isOpen && openUp,
+      'form-select-menu--up': isOpen && openUp
     }"
   >
     <button

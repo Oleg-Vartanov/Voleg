@@ -1,6 +1,6 @@
 import moneyUtils from '@/modules/core/utils/moneyUtils'
 import { categories, type CategoryKey } from '@/modules/splitExpense/categories'
-import type { ApiSeExpense, SeCategory, SeExpenseSplitUser } from '@/modules/splitExpense/types';
+import type { ApiSeExpense, SeCategory, SeExpenseSplitUser } from '@/modules/splitExpense/types'
 import { useAuth } from '@/modules/user/stores/useAuth'
 
 export function useExpenseDisplay() {

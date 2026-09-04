@@ -26,7 +26,7 @@ watch(
   }
 )
 
-watch(isSidebarCollapsed, collapsed => {
+watch(isSidebarCollapsed, (collapsed) => {
   window.localStorage.setItem(sidebarCollapsedKey, collapsed ? '1' : '0')
 })
 

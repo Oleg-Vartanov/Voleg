@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<Props>(), {
   placeholder: 'Search by username…',
   multiple: false,
   lockedUsers: () => [],
-  showTags: true,
+  showTags: true
 })
 
 const modelValue = defineModel<ApiUser | ApiUser[] | null>({ required: true })
@@ -60,9 +60,7 @@ const removableTags = computed(() => {
 })
 
 const hasTags = computed(
-  () =>
-    props.showTags &&
-    (props.lockedUsers.length > 0 || removableTags.value.length > 0)
+  () => props.showTags && (props.lockedUsers.length > 0 || removableTags.value.length > 0)
 )
 
 const isDropdownVisible = computed(() => isOpen.value && searchResults.value.length > 0)
@@ -91,7 +89,7 @@ function updateDropdownPosition() {
   dropdownStyle.value = {
     top: `${rect.bottom - 1}px`,
     left: `${rect.left}px`,
-    width: `${rect.width}px`,
+    width: `${rect.width}px`
   }
 }
 
@@ -218,7 +216,7 @@ onUnmounted(() => {
       :class="{
         'form-user-select-input--open': isDropdownVisible,
         'form-user-select-input--invalid': isInvalid,
-        'form-user-select-input--filled': hasTags || searchQuery !== '',
+        'form-user-select-input--filled': hasTags || searchQuery !== ''
       }"
     >
       <div class="form-floating">
@@ -418,11 +416,13 @@ onUnmounted(() => {
   border-bottom-right-radius: 0;
 }
 
-.form-user-select-input--open:not(.form-user-select-input--invalid) .form-user-select-input-control {
+.form-user-select-input--open:not(.form-user-select-input--invalid)
+  .form-user-select-input-control {
   border-color: var(--bs-primary);
 }
 
-.form-user-select-input--open:not(.form-user-select-input--invalid) .form-user-select-input-control:focus-within {
+.form-user-select-input--open:not(.form-user-select-input--invalid)
+  .form-user-select-input-control:focus-within {
   border-color: var(--bs-primary);
   box-shadow: none;
 }

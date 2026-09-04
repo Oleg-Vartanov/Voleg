@@ -75,7 +75,7 @@ export default {
   listUsers(username: null | string = null, offset = 0, limit = 100) {
     return axios.get(`${apiBaseUrl}/users`, {
       headers: getHeader(),
-      params: { username, offset, limit },
+      params: { username, offset, limit }
     })
   },
 
@@ -165,11 +165,11 @@ export default {
     status: 'accepted' | 'pending' | 'rejected' | null = null,
     usersOnly: boolean = false,
     username: string | null = null,
-    direction: 'incoming' | 'outgoing' | null = null,
+    direction: 'incoming' | 'outgoing' | null = null
   ) {
     return axios.get(`${apiBaseUrl}/split-expense/connections`, {
       headers: getHeader(),
-      params: { offset, limit, status, usersOnly, username, direction },
+      params: { offset, limit, status, usersOnly, username, direction }
     })
   },
 

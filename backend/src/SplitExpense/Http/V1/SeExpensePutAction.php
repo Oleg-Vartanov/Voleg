@@ -69,6 +69,10 @@ class SeExpensePutAction extends ApiController
                 new Violation('splits', $e->getMessage())
             );
         } catch (NotFoundException $e) {
+            if ($e->tag === null) {
+                throw $e;
+            }
+
             return $this->validationErrorResponse(
                 new Violation($e->tag, $e->getMessage())
             );

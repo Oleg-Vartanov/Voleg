@@ -51,13 +51,16 @@ export function useExpenseForm() {
   const splitUsersSelected = ref<ApiUser[]>([])
   const splitUsersLocked = computed(() => [auth.user])
   const splitUsers = computed(() =>
-    arrayUtils.uniqueBy<ApiUser>([...splitUsersLocked.value, ...splitUsersSelected.value], (user) => user.id)
+    arrayUtils.uniqueBy<ApiUser>(
+      [...splitUsersLocked.value, ...splitUsersSelected.value],
+      (user) => user.id
+    )
   )
 
   const paidBySelectOptions = computed<FormSelectOption[]>(() =>
     splitUsers.value.map((user) => ({
       value: user.id,
-      label: user.id === auth.user.id ? `@${user.username} (You)` : `@${user.username}`,
+      label: user.id === auth.user.id ? `@${user.username} (You)` : `@${user.username}`
     }))
   )
 
@@ -66,7 +69,7 @@ export function useExpenseForm() {
     set: (id: string | number | null) => {
       const user = splitUsers.value.find((entry) => entry.id === Number(id))
       fields.paidByUser = user ?? auth.user
-    },
+    }
   })
 
   watch(
@@ -83,15 +86,12 @@ export function useExpenseForm() {
   const amountDecimalPlaces = computed(() => currency.decimalPlacesById(fields.currencyId))
 
   async function loadReferenceData(): Promise<boolean> {
-    return Promise.all([
-      categories.load(),
-      currency.load(),
-    ])
-    .then(() => true)
-    .catch(() => {
-      topAlerts.add('Failed to load expense form data.', 'danger', 5)
-      return false
-    })
+    return Promise.all([categories.load(), currency.load()])
+      .then(() => true)
+      .catch(() => {
+        topAlerts.add('Failed to load expense form data.', 'danger', 5)
+        return false
+      })
   }
 
   async function load() {
@@ -99,14 +99,14 @@ export function useExpenseForm() {
     isLoading.value = true
 
     await loadReferenceData()
-    .then((loaded) => {
-      if (!loaded) return
-      reset()
-      isLoaded.value = true
-    })
-    .finally(() => {
-      isLoading.value = false
-    })
+      .then((loaded) => {
+        if (!loaded) return
+        reset()
+        isLoaded.value = true
+      })
+      .finally(() => {
+        isLoading.value = false
+      })
   }
 
   async function loadForEdit(expense: ApiSeExpense) {
@@ -114,14 +114,14 @@ export function useExpenseForm() {
     isLoading.value = true
 
     await loadReferenceData()
-    .then((loaded) => {
-      if (!loaded) return
-      fill(expense)
-      isLoaded.value = true
-    })
-    .finally(() => {
-      isLoading.value = false
-    })
+      .then((loaded) => {
+        if (!loaded) return
+        fill(expense)
+        isLoaded.value = true
+      })
+      .finally(() => {
+        isLoading.value = false
+      })
   }
 
   function reset() {
@@ -138,7 +138,10 @@ export function useExpenseForm() {
     validation.reset()
     editingId.value = expense.id
     fields.title = expense.title
-    fields.amount = moneyUtils.fromMinorUnits(Number(expense.amount), expense.currency.decimalPlaces)
+    fields.amount = moneyUtils.fromMinorUnits(
+      Number(expense.amount),
+      expense.currency.decimalPlaces
+    )
     fields.expenseDate = expense.expenseDate.slice(0, 10)
     fields.currencyId = expense.currency.id
     fields.categoryId = expense.category?.id ?? categories.defaultCategoryId()
@@ -152,7 +155,10 @@ export function useExpenseForm() {
   async function submit(): Promise<ApiSeExpense | null> {
     if (isLoading.value) return null
 
-    const amountMinor = moneyUtils.toMinorUnits(fields.amount, currency.decimalPlacesById(fields.currencyId))
+    const amountMinor = moneyUtils.toMinorUnits(
+      fields.amount,
+      currency.decimalPlacesById(fields.currencyId)
+    )
     const payload: ApiSeExpensePayload = {
       title: fields.title.trim(),
       amount: amountMinor,
@@ -161,38 +167,40 @@ export function useExpenseForm() {
       categoryId: fields.categoryId,
       paidByUserId: fields.paidByUser.id,
       description: fields.description.trim() || null,
-      splits: buildEqualSplits(amountMinor, splitUsers.value.map((user) => user.id))
+      splits: buildEqualSplits(
+        amountMinor,
+        splitUsers.value.map((user) => user.id)
+      )
     }
     const id = editingId.value
     isLoading.value = true
     validation.reset()
 
-    const request = id === null
-      ? client.createSplitExpense(payload)
-      : client.updateSplitExpense(id, payload)
+    const request =
+      id === null ? client.createSplitExpense(payload) : client.updateSplitExpense(id, payload)
 
     return request
-    .then((response) => {
-      if (id === null) {
-        topAlerts.add('Expense created.', 'success', 3)
-        reset()
-      } else {
-        topAlerts.add('Expense updated.', 'success', 3)
-      }
-      return response.data as ApiSeExpense
-    })
-    .catch((axiosError) => {
-      if (axiosError.response?.status === 422) {
-        validation.applyErrors(axiosError.response.data.violations)
+      .then((response) => {
+        if (id === null) {
+          topAlerts.add('Expense created.', 'success', 3)
+          reset()
+        } else {
+          topAlerts.add('Expense updated.', 'success', 3)
+        }
+        return response.data as ApiSeExpense
+      })
+      .catch((axiosError) => {
+        if (axiosError.response?.status === 422) {
+          validation.applyErrors(axiosError.response.data.violations)
+          return null
+        }
+        const fallback = id === null ? 'Failed to create expense.' : 'Failed to update expense.'
+        topAlerts.add(axiosError.response?.data?.message ?? fallback, 'danger', 5)
         return null
-      }
-      const fallback = id === null ? 'Failed to create expense.' : 'Failed to update expense.'
-      topAlerts.add(axiosError.response?.data?.message ?? fallback, 'danger', 5)
-      return null
-    })
-    .finally(() => {
-      isLoading.value = false
-    })
+      })
+      .finally(() => {
+        isLoading.value = false
+      })
   }
 
   return {
@@ -210,7 +218,7 @@ export function useExpenseForm() {
     paidBySelectOptions,
     submit,
     currencyOptions: currency.currencyOptions,
-    categoryOptions: categories.categoryOptions,
+    categoryOptions: categories.categoryOptions
   }
 }
 

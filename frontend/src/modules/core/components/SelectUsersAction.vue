@@ -5,7 +5,7 @@ import { searchUsers } from '@/modules/core/api/searchUsers'
 import type { UserSearchFn } from '@/modules/core/components/form/types'
 import type { ApiUser } from '@/modules/core/apiType'
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     id?: string
     label?: string
@@ -17,7 +17,8 @@ const props = withDefaults(
     id: 'user-search',
     label: 'Search users',
     actionLabel: 'Select',
-    embedded: false,
+    search: searchUsers,
+    embedded: false
   }
 )
 
@@ -38,7 +39,7 @@ function onAction(user: ApiUser) {
       :id="id"
       v-model="selectedUser"
       :label="label"
-      :search="props.search ?? searchUsers"
+      :search="search"
       :show-tags="false"
     />
 

@@ -28,7 +28,7 @@ const menuItems: MenuItem[] = [
     children: [
       { name: 'seExpenses', title: 'Expenses' },
       { name: 'seBalance', title: 'Balance' },
-      { name: 'seConnections', title: 'Connections' },
+      { name: 'seConnections', title: 'Connections' }
     ]
   },
   { name: 'footballPredictions', title: 'Football Predictions' },
@@ -47,14 +47,14 @@ function onSignOut() {
 
 function isActive(menuItem: MenuItem) {
   if (menuItem.children?.length) {
-    return menuItem.children.some(child => route.name === child.name)
+    return menuItem.children.some((child) => route.name === child.name)
   }
 
-  return route.matched.some(record => record.name === menuItem.name)
+  return route.matched.some((record) => record.name === menuItem.name)
 }
 
 function isChildActive(child: MenuChild) {
-  return route.name === child.name;
+  return route.name === child.name
 }
 
 const expandedMenus = ref<Record<string, boolean>>({})
@@ -109,11 +109,7 @@ watch(
                 />
               </button>
               <ul v-show="isMenuExpanded(menuItem.name)" class="side-nav__sublist">
-                <li
-                  v-for="child in menuItem.children"
-                  :key="child.name"
-                  class="side-nav__item"
-                >
+                <li v-for="child in menuItem.children" :key="child.name" class="side-nav__item">
                   <router-link
                     v-if="!child.disabled"
                     class="side-nav__link side-nav__link--sub"
@@ -123,10 +119,7 @@ watch(
                   >
                     {{ child.title }}
                   </router-link>
-                  <span
-                    v-else
-                    class="side-nav__link side-nav__link--sub side-nav__link--disabled"
-                  >
+                  <span v-else class="side-nav__link side-nav__link--sub side-nav__link--disabled">
                     {{ child.title }}
                   </span>
                 </li>

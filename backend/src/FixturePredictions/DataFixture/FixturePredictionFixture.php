@@ -38,13 +38,15 @@ class FixturePredictionFixture extends Fixture implements DependentFixtureInterf
 
         foreach ($users as $user) {
             foreach ($fixtures as $fixture) {
-                if ($fixture->getHomeScore() === null) {
+                $actualHomeScore = $fixture->getHomeScore();
+                $actualAwayScore = $fixture->getAwayScore();
+                if ($actualHomeScore === null || $actualAwayScore === null) {
                     continue;
                 }
 
                 // Randomize prediction results.
                 [$homeScore, $awayScore] = rand(0, 1)
-                    ? [$fixture->getHomeScore(), $fixture->getAwayScore()]
+                    ? [$actualHomeScore, $actualAwayScore]
                     : [1, 1];
 
                 $fixturePrediction = new FixturePrediction();

@@ -22,7 +22,7 @@ const {
   paidByUserId,
   paidBySelectOptions,
   currencyOptions,
-  categoryOptions,
+  categoryOptions
 } = props.form
 
 function fieldId(name: string): string {

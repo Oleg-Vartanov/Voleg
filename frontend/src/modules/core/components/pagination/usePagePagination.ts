@@ -33,6 +33,6 @@ export function usePagePagination(initialPageSize = 10) {
     hasNextPage,
     setPageIndex,
     setPageSize,
-    setTotalItems,
+    setTotalItems
   }
 }

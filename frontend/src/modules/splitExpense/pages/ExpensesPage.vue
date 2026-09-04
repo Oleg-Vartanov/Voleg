@@ -115,10 +115,7 @@ onMounted(() => {
                 class="expense-item"
                 :class="{ 'is-expanded': isExpanded(expense) }"
               >
-                <ExpenseRow
-                  :expense="expense"
-                  @toggle="toggleExpense(expense)"
-                />
+                <ExpenseRow :expense="expense" @toggle="toggleExpense(expense)" />
                 <ExpenseDetailPanel
                   :expense="expense"
                   :open="isExpanded(expense)"

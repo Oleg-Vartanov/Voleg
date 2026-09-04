@@ -86,7 +86,10 @@ class FixtureRepository extends AbstractEntityRepository
                     ->getQuery();
 
         // Paginator applies limit to fixtures, not joined rows.
-        return iterator_to_array(new Paginator($query));
+        /** @var Fixture[] $fixtures */
+        $fixtures = iterator_to_array(new Paginator($query));
+
+        return $fixtures;
     }
 
     public function countFiltered(

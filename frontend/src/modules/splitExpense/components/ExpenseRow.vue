@@ -15,12 +15,7 @@ const date = computed(() => formatShortDate(props.expense.expenseDate))
 </script>
 
 <template>
-  <div
-    class="expense-row"
-    role="button"
-    tabindex="0"
-    @click="emit('toggle')"
-  >
+  <div class="expense-row" role="button" tabindex="0" @click="emit('toggle')">
     <div class="expense-date-cell">
       <span class="expense-date">
         <span class="expense-date-day">{{ date.day }}</span>
