@@ -71,12 +71,9 @@ class LeaderboardGetAction extends ApiController
             $dto->defaultToCurrentSeason
         );
 
-        $filters = new LeaderboardFiltersResponse(
-            start: $dto->start,
-            end: $dto->end,
-            competitionEntity: $competition,
-            seasonEntity: $season,
-            limit: $dto->limit,
+        $total = $this->fpRepository->countLeaderboard(
+            competition: $competition,
+            season: $season,
         );
         $leaderboard = $this->fpRepository->leaderboard(
             competition: $competition,
@@ -84,11 +81,26 @@ class LeaderboardGetAction extends ApiController
             start: $dto->start,
             end: $dto->end,
             limit: $dto->limit,
+            offset: $dto->offset,
         );
 
-        return $this->json([
-            'filters' => $filters,
-            'users' => $leaderboard,
-        ], context: ['groups' => [Group::public->value]]);
+        $filters = new LeaderboardFiltersResponse(
+            start: $dto->start,
+            end: $dto->end,
+            competitionEntity: $competition,
+            seasonEntity: $season,
+            limit: $dto->limit,
+            offset: $dto->offset,
+            total: $total,
+        );
+
+        return $this->json(
+            [
+                'filters' => $filters,
+                'users' => $leaderboard,
+            ],
+            headers: ['X-Total-Count' => (string) $total],
+            context: ['groups' => [Group::public->value]],
+        );
     }
 }

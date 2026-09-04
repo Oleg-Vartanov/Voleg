@@ -9,6 +9,7 @@ use App\FixturePredictions\Entity\FixturePrediction;
 use App\FixturePredictions\Entity\Season;
 use App\FixturePredictions\Http\V1\Leaderboard\LeaderboardRow;
 use DateTimeImmutable;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -38,9 +39,9 @@ class FixturePredictionRepository extends AbstractEntityRepository
         ?DateTimeImmutable $start = null,
         ?DateTimeImmutable $end = null,
         ?int $limit = null,
+        int $offset = 0,
     ): array {
-        $qb = $this->getEntityManager()
-            ->createQueryBuilder()
+        $qb = $this->createLeaderboardQueryBuilder($competition, $season)
             ->select(
                 'NEW ' . LeaderboardRow::class . '(
                     u,
@@ -48,6 +49,41 @@ class FixturePredictionRepository extends AbstractEntityRepository
                     COALESCE(SUM(CASE WHEN f.startAt >= :start AND f.startAt <= :end THEN COALESCE(fp.points, 0) ELSE 0 END), 0)
                 )'
             )
+            ->setParameter('start', $start ?? new DateTimeImmutable('0001-01-01'))
+            ->setParameter('end', $end ?? new DateTimeImmutable('9999-12-31'))
+            ->groupBy('u.id')
+            ->orderBy('SUM(fp.points)', 'DESC')
+        ;
+
+        if ($limit !== null) {
+            $qb->setFirstResult($offset)
+               ->setMaxResults($limit);
+        }
+
+        /** @var LeaderboardRow[] $rows */
+        $rows = $qb->getQuery()->getResult();
+
+        return $rows;
+    }
+
+    public function countLeaderboard(
+        ?Competition $competition = null,
+        ?Season $season = null,
+    ): int {
+        $count = $this->createLeaderboardQueryBuilder($competition, $season)
+            ->select('COUNT(DISTINCT u.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return (int) $count;
+    }
+
+    private function createLeaderboardQueryBuilder(
+        ?Competition $competition = null,
+        ?Season $season = null,
+    ): QueryBuilder {
+        $qb = $this->getEntityManager()
+            ->createQueryBuilder()
             ->from(FixturePrediction::class, 'fp')
             ->join('fp.user', 'u')
             ->join('fp.fixture', 'f');
@@ -62,19 +98,6 @@ class FixturePredictionRepository extends AbstractEntityRepository
                ->setParameter('season', $season);
         }
 
-        $qb->setParameter('start', $start ?? new DateTimeImmutable('0001-01-01'));
-        $qb->setParameter('end', $end ?? new DateTimeImmutable('9999-12-31'));
-
-        $qb->groupBy('u.id')
-           ->orderBy('SUM(fp.points)', 'DESC');
-
-        if ($limit !== null) {
-            $qb->setMaxResults($limit);
-        }
-
-        /** @var LeaderboardRow[] $rows */
-        $rows = $qb->getQuery()->getResult();
-
-        return $rows;
+        return $qb;
     }
 }

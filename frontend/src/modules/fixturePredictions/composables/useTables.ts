@@ -23,12 +23,13 @@ export interface Tables {
   setFixturesPage: (page: number) => Promise<void>
   setFixturesPageSize: (size: number) => Promise<void>
   leaderboard: Ref<LeaderboardUser[] | null>
-  pagedLeaderboard: Ref<LeaderboardUser[]>
   leaderboardPagination: ReturnType<typeof usePagePagination>
+  setLeaderboardPage: (page: number) => Promise<void>
+  setLeaderboardPageSize: (size: number) => Promise<void>
   initTable: (tab: TablesEnum) => void
   updateLoadedTables: () => void
   loadFixtures: (resetPage?: boolean) => Promise<void>
-  loadLeaderboard: () => Promise<void>
+  loadLeaderboard: (resetPage?: boolean) => Promise<void>
 }
 
 export function useTables(filters: FixtureFilters, vs: Versus): Tables {
@@ -47,15 +48,6 @@ export function useTables(filters: FixtureFilters, vs: Versus): Tables {
 
   const fixturesPagination = usePagePagination(25)
   const leaderboardPagination = usePagePagination(20)
-
-  // The leaderboard endpoint returns every row at once, so its pages are sliced locally.
-  const pagedLeaderboard = computed<LeaderboardUser[]>(() => {
-    if (!leaderboard.value) return []
-    return leaderboard.value.slice(
-      leaderboardPagination.offset.value,
-      leaderboardPagination.offset.value + leaderboardPagination.limit.value,
-    )
-  })
 
   function initTable(tab: TablesEnum) {
     if (tab === TablesEnum.MATCHES && fixtures.value === null) {
@@ -116,20 +108,33 @@ export function useTables(filters: FixtureFilters, vs: Versus): Tables {
     }
   }
 
-  async function loadLeaderboard() {
+  async function loadLeaderboard(resetPage = true) {
+    if (resetPage) {
+      leaderboardPagination.setPageIndex(1)
+    }
     isLoading.value.leaderboard = true
+
     try {
       const response = await Client.leaderboard(
         filters.start.value,
         filters.end.value,
         filters.competition.value,
-        filters.season.value
+        filters.season.value,
+        leaderboardPagination.offset.value,
+        leaderboardPagination.limit.value
       )
       leaderboard.value = response.data.users
-      leaderboardPagination.setPageIndex(1)
-      leaderboardPagination.setTotalItems(response.data.users.length)
+      leaderboardPagination.setTotalItems(
+        Number(response.headers['x-total-count'] ?? response.data.filters.total)
+      )
       filters.onLoadTable(response.data.filters)
       updateRouteQuery()
+
+      if (leaderboardPagination.pageIndex.value > leaderboardPagination.totalPages.value) {
+        leaderboardPagination.setPageIndex(leaderboardPagination.totalPages.value)
+        isLoading.value.leaderboard = false
+        await loadLeaderboard(false)
+      }
     } catch (err) {
       if (err?.response?.status === 422) {
         topAlerts.add('Invalid request. Check the filters and retry.', 'warning')
@@ -153,6 +158,18 @@ export function useTables(filters: FixtureFilters, vs: Versus): Tables {
   async function setFixturesPageSize(size: number): Promise<void> {
     fixturesPagination.setPageSize(size)
     await loadFixtures(false)
+  }
+
+  async function setLeaderboardPage(page: number): Promise<void> {
+    if (leaderboard.value !== null && leaderboardPagination.pageIndex.value === page) return
+
+    leaderboardPagination.setPageIndex(page)
+    await loadLeaderboard(false)
+  }
+
+  async function setLeaderboardPageSize(size: number): Promise<void> {
+    leaderboardPagination.setPageSize(size)
+    await loadLeaderboard(false)
   }
 
   function reset(): void {
@@ -181,8 +198,9 @@ export function useTables(filters: FixtureFilters, vs: Versus): Tables {
     setFixturesPage,
     setFixturesPageSize,
     leaderboard,
-    pagedLeaderboard,
     leaderboardPagination,
+    setLeaderboardPage,
+    setLeaderboardPageSize,
     initTable,
     updateLoadedTables,
     loadFixtures,

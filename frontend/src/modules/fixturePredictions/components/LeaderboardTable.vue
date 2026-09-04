@@ -23,7 +23,7 @@ const tables: Tables = inject('tables')
       </tr>
 
       <!-- Leaderboard -->
-      <tr v-for="(user, index) in tables.pagedLeaderboard.value" :key="user.user.id">
+      <tr v-for="(user, index) in tables.leaderboard.value" :key="user.user.id">
         <th scope="row">{{ tables.leaderboardPagination.offset.value + index + 1 }}</th>
         <td>{{ user.user.username }}</td>
         <td>{{ user.periodPoints ?? '-' }}</td>
@@ -39,8 +39,8 @@ const tables: Tables = inject('tables')
     :page-size-options="[10, 20, 50]"
     :total-pages="tables.leaderboardPagination.totalPages.value"
     aria-label="Leaderboard pagination"
-    @update:page-index="tables.leaderboardPagination.setPageIndex"
-    @update:page-size="tables.leaderboardPagination.setPageSize"
+    @update:page-index="tables.setLeaderboardPage"
+    @update:page-size="tables.setLeaderboardPageSize"
   />
 </template>
 

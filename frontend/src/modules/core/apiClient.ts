@@ -54,7 +54,9 @@ export default {
     start: null | string = null,
     end: null | string = null,
     competition: null | string = null,
-    season: null | number
+    season: null | number,
+    offset: number = 0,
+    limit: number = 20
   ) {
     return axios.get(`${apiBaseUrl}/fixtures/leaderboard`, {
       headers: getHeader(),
@@ -63,6 +65,8 @@ export default {
         end: end,
         competitionCode: competition,
         season: season,
+        offset: offset,
+        limit: limit,
         defaultToCurrentSeason: true
       }
     })

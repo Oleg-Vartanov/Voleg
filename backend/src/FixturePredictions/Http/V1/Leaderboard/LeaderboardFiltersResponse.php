@@ -31,17 +31,28 @@ class LeaderboardFiltersResponse
 
     public int $limit;
 
+    public int $offset;
+
+    /**
+     * Total number of users on the leaderboard, ignoring limit and offset.
+     */
+    public int $total;
+
     public function __construct(
         ?DateTimeImmutable $start,
         ?DateTimeImmutable $end,
         ?Competition $competitionEntity,
         ?Season $seasonEntity,
         int $limit,
+        int $offset,
+        int $total,
     ) {
         $this->start = $start?->format('Y-m-d');
         $this->end = $end?->format('Y-m-d');
         $this->competition = $competitionEntity?->getCode();
         $this->season = $seasonEntity?->getYear();
         $this->limit = $limit;
+        $this->offset = $offset;
+        $this->total = $total;
     }
 }

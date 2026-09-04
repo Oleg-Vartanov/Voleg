@@ -63,7 +63,8 @@ class FixtureFixture extends Fixture implements DependentFixtureInterface
 
         $matchdays = $this->buildDoubleRoundRobin($teams);
         $weekends = $this->weekendDates($seasonYear, count($matchdays));
-        $now = new DateTimeImmutable();
+        // Cut off scores at year-end so results don't depend on when fixtures are loaded.
+        $scoresUntil = new DateTimeImmutable(sprintf('%d-12-31 23:59:59', $seasonYear));
         $providerId = 1000;
 
         foreach ($matchdays as $matchdayIndex => $pairs) {
@@ -87,7 +88,7 @@ class FixtureFixture extends Fixture implements DependentFixtureInterface
                 $fixture->setProviderFixtureId($providerId++);
                 $fixture->setStartAt($startAt);
 
-                if ($startAt < $now) {
+                if ($startAt <= $scoresUntil) {
                     $fixture->setHomeScore(random_int(0, 4));
                     $fixture->setAwayScore(random_int(0, 4));
                     $fixture->setStatus(FixtureStatusEnum::Finished);

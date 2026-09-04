@@ -53,7 +53,7 @@ class UserRepository extends AbstractEntityRepository implements PasswordUpgrade
     /**
      * @return User[]
      */
-    public function list(?string $username, int $offset = 0, int $limit = 100): array
+    public function list(?string $username = null, int $offset = 0, int $limit = 100): array
     {
         $qb = $this->createQueryBuilder('u');
 
