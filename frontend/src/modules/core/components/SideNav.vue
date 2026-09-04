@@ -20,29 +20,30 @@ type MenuChild = { name: string; title: string; disabled?: boolean }
 
 type MenuItem = { name: string; title: string; roles?: string[]; children?: MenuChild[] }
 
-const menuItems: MenuItem[] = [
-  { name: 'about', title: 'About' },
-  {
-    name: 'splitExpense',
-    title: 'Split Expense',
-    children: [
-      { name: 'seExpenses', title: 'Expenses' },
-      { name: 'seBalance', title: 'Balance' },
-      { name: 'seConnections', title: 'Connections' }
-    ]
-  },
-  { name: 'footballPredictions', title: 'Football Predictions' },
-  { name: 'pricing', title: 'Pricing' },
-  { name: 'admin', title: 'Admin', roles: ['ROLE_ADMIN'] }
+const menuGroups: MenuItem[][] = [
+  [
+    { name: 'about', title: 'About' },
+    { name: 'pricing', title: 'Pricing' },
+    { name: 'admin', title: 'Admin', roles: ['ROLE_ADMIN'] }
+  ],
+  [
+    {
+      name: 'splitExpense',
+      title: 'Split Expense',
+      children: [
+        { name: 'seExpenses', title: 'Expenses' },
+        { name: 'seBalance', title: 'Balance' },
+        { name: 'seConnections', title: 'Connections' }
+      ]
+    },
+    { name: 'footballPredictions', title: 'Football Predictions' }
+  ],
 ]
+
+const menuItems = menuGroups.flat()
 
 function onNavigate() {
   emit('navigate')
-}
-
-function onSignOut() {
-  auth.signOut()
-  onNavigate()
 }
 
 function isActive(menuItem: MenuItem) {
@@ -87,56 +88,60 @@ watch(
     aria-label="Sidebar navigation"
   >
     <nav class="side-nav__content">
-      <ul class="side-nav__list">
-        <li v-for="menuItem in menuItems" :key="menuItem.name" class="side-nav__item">
-          <template v-if="!menuItem.roles || auth.hasRole(menuItem.roles)">
-            <div v-if="menuItem.children?.length" class="side-nav__dropdown">
-              <button
-                type="button"
-                class="side-nav__link side-nav__link--toggle"
-                :class="{
-                  'side-nav__link--active': isActive(menuItem),
-                  'side-nav__link--expanded': isMenuExpanded(menuItem.name)
-                }"
-                :aria-expanded="isMenuExpanded(menuItem.name)"
-                @click="toggleMenu(menuItem.name)"
+      <template v-for="(group, groupIndex) in menuGroups" :key="groupIndex">
+        <hr v-if="groupIndex > 0" class="side-nav__divider" />
+
+        <ul class="side-nav__list">
+          <li v-for="menuItem in group" :key="menuItem.name" class="side-nav__item">
+            <template v-if="!menuItem.roles || auth.hasRole(menuItem.roles)">
+              <div v-if="menuItem.children?.length" class="side-nav__dropdown">
+                <button
+                  type="button"
+                  class="side-nav__link side-nav__link--toggle"
+                  :class="{
+                    'side-nav__link--active': isActive(menuItem),
+                    'side-nav__link--expanded': isMenuExpanded(menuItem.name)
+                  }"
+                  :aria-expanded="isMenuExpanded(menuItem.name)"
+                  @click="toggleMenu(menuItem.name)"
+                >
+                  <span class="side-nav__link-label">{{ menuItem.title }}</span>
+                  <i
+                    class="bi side-nav__chevron"
+                    :class="isMenuExpanded(menuItem.name) ? 'bi-chevron-down' : 'bi-chevron-left'"
+                    aria-hidden="true"
+                  />
+                </button>
+                <ul v-show="isMenuExpanded(menuItem.name)" class="side-nav__sublist">
+                  <li v-for="child in menuItem.children" :key="child.name" class="side-nav__item">
+                    <router-link
+                      v-if="!child.disabled"
+                      class="side-nav__link side-nav__link--sub"
+                      :class="{ 'side-nav__link--active': isChildActive(child) }"
+                      :to="{ name: child.name }"
+                      @click="onNavigate"
+                    >
+                      {{ child.title }}
+                    </router-link>
+                    <span v-else class="side-nav__link side-nav__link--sub side-nav__link--disabled">
+                      {{ child.title }}
+                    </span>
+                  </li>
+                </ul>
+              </div>
+              <router-link
+                v-else
+                class="side-nav__link"
+                :class="{ 'side-nav__link--active': isActive(menuItem) }"
+                :to="{ name: menuItem.name }"
+                @click="onNavigate"
               >
-                <span class="side-nav__link-label">{{ menuItem.title }}</span>
-                <i
-                  class="bi side-nav__chevron"
-                  :class="isMenuExpanded(menuItem.name) ? 'bi-chevron-down' : 'bi-chevron-left'"
-                  aria-hidden="true"
-                />
-              </button>
-              <ul v-show="isMenuExpanded(menuItem.name)" class="side-nav__sublist">
-                <li v-for="child in menuItem.children" :key="child.name" class="side-nav__item">
-                  <router-link
-                    v-if="!child.disabled"
-                    class="side-nav__link side-nav__link--sub"
-                    :class="{ 'side-nav__link--active': isChildActive(child) }"
-                    :to="{ name: child.name }"
-                    @click="onNavigate"
-                  >
-                    {{ child.title }}
-                  </router-link>
-                  <span v-else class="side-nav__link side-nav__link--sub side-nav__link--disabled">
-                    {{ child.title }}
-                  </span>
-                </li>
-              </ul>
-            </div>
-            <router-link
-              v-else
-              class="side-nav__link"
-              :class="{ 'side-nav__link--active': isActive(menuItem) }"
-              :to="{ name: menuItem.name }"
-              @click="onNavigate"
-            >
-              {{ menuItem.title }}
-            </router-link>
-          </template>
-        </li>
-      </ul>
+                {{ menuItem.title }}
+              </router-link>
+            </template>
+          </li>
+        </ul>
+      </template>
 
       <hr class="side-nav__divider" />
 
@@ -153,11 +158,6 @@ watch(
         </li>
 
         <template v-else>
-          <li class="side-nav__item">
-            <span class="side-nav__link side-nav__link--user">
-              {{ auth.user.username ?? 'User' }}
-            </span>
-          </li>
           <li class="side-nav__item">
             <router-link
               class="side-nav__link"
@@ -177,9 +177,6 @@ watch(
             >
               Contacts
             </router-link>
-          </li>
-          <li class="side-nav__item">
-            <button type="button" class="side-nav__link" @click="onSignOut">Sign Out</button>
           </li>
         </template>
       </ul>

@@ -11,6 +11,6 @@
 <style scoped>
 .form-central {
   max-width: 480px;
-  padding: 1rem;
+  padding: 0 1rem;
 }
 </style>

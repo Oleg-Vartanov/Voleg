@@ -151,18 +151,29 @@ onMounted(() => {
       <FormButton label="Save Changes" :loading="isLoading" type="submit" />
       <FormButton
         label="Cancel"
-        variant="outline-secondary"
+        variant="outline-primary"
         :disabled="isLoading"
         @click="closeEditMode"
       />
     </template>
     <template v-else>
-      <FormButton label="Edit Profile" :loading="isLoading" @click="openEditMode" />
+      <FormButton
+        label="Edit Profile"
+        variant="outline-primary"
+        :loading="isLoading"
+        @click="openEditMode"
+      />
       <FormButton
         label="Change Password"
         variant="outline-primary"
         :disabled="isLoading"
         @click="router.push({ name: 'passwordChange' })"
+      />
+      <FormButton
+        label="Sign Out"
+        variant="outline-primary"
+        :disabled="isLoading"
+        @click="auth.signOut()"
       />
     </template>
   </form>
