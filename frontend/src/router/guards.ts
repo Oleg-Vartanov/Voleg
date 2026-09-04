@@ -3,7 +3,7 @@ import { useAuth } from '@/modules/user/stores/useAuth'
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts'
 
 export const useGuard = () => {
-  function isAuthenticated(to: RouteLocationNormalized): void {
+  function isAuthenticated(to: RouteLocationNormalized) {
     const auth = useAuth()
     const topAlerts = useTopAlerts()
 
@@ -21,6 +21,16 @@ export const useGuard = () => {
     }
   }
 
+  function isGuest() {
+    const auth = useAuth()
+
+    if (auth.isTokenValid()) {
+      return { name: 'home' }
+    }
+
+    return true
+  }
+
   function hasRole(roles: string[]) {
     return function () {
       const auth = useAuth()
@@ -36,5 +46,5 @@ export const useGuard = () => {
     }
   }
 
-  return { isAuthenticated, hasRole }
+  return { isAuthenticated, isGuest, hasRole }
 }

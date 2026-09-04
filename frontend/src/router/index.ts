@@ -108,6 +108,7 @@ const index = createRouter({
         {
           path: 'auth',
           name: 'authForms',
+          beforeEnter: [guards.isGuest],
           component: () => import('@/modules/user/components/AuthForms.vue'),
           children: [
             {
