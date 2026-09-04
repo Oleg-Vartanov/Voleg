@@ -73,13 +73,11 @@ class PredictionsGetAction extends ApiController
             $dto->defaultToCurrentSeason
         );
 
-        $filters = new PredictionsFiltersResponse(
+        $total = $this->fixtureRepository->countFiltered(
+            competition: $competition,
+            season: $season,
             start: $dto->start,
             end: $dto->end,
-            competitionEntity: $competition,
-            seasonEntity: $season,
-            limit: $dto->limit,
-            users: $users,
         );
         $fixtures = $this->fixtureRepository->filter(
             users: $users,
@@ -88,6 +86,18 @@ class PredictionsGetAction extends ApiController
             start: $dto->start,
             end: $dto->end,
             limit: $dto->limit,
+            offset: $dto->offset,
+        );
+
+        $filters = new PredictionsFiltersResponse(
+            start: $dto->start,
+            end: $dto->end,
+            competitionEntity: $competition,
+            seasonEntity: $season,
+            limit: $dto->limit,
+            offset: $dto->offset,
+            total: $total,
+            users: $users,
         );
 
         return $this->json(
@@ -95,6 +105,7 @@ class PredictionsGetAction extends ApiController
                 'filters' => $filters,
                 'fixtures' => $fixtures,
             ],
+            headers: ['X-Total-Count' => (string) $total],
             context: ['groups' => [Group::public->value]],
         );
     }

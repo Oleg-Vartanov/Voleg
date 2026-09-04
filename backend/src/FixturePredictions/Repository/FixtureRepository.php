@@ -9,6 +9,8 @@ use App\FixturePredictions\Entity\Season;
 use App\User\Entity\User;
 use DateTimeImmutable;
 use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -47,7 +49,11 @@ class FixtureRepository extends AbstractEntityRepository
     }
 
     /**
+     * Returns one page of fixtures, each with the predictions of the given users.
+     *
      * @param User[] $users
+     *
+     * @return Fixture[]
      */
     public function filter(
         array $users,
@@ -57,14 +63,55 @@ class FixtureRepository extends AbstractEntityRepository
         ?DateTimeImmutable $start = null,
         ?DateTimeImmutable $end = null,
         ?int $limit = null,
-    ): mixed {
-        $qb = $this->createQueryBuilder('f')
+        int $offset = 0,
+    ): array {
+        $qb = $this->createFilteredQueryBuilder($competition, $season, $round, $start, $end)
             ->addSelect('fp', 'ht', 'at')
             ->leftJoin('f.fixturePredictions', 'fp', Join::WITH, 'fp.user IN (:users) ')
             ->setParameter('users', $users)
             ->leftJoin('f.homeTeam', 'ht')
             ->leftJoin('f.awayTeam', 'at')
+            ->orderBy('f.startAt', 'ASC')
         ;
+
+        if ($limit === null) {
+            /** @var Fixture[] $fixtures */
+            $fixtures = $qb->getQuery()->getResult();
+
+            return $fixtures;
+        }
+
+        $query = $qb->setFirstResult($offset)
+                    ->setMaxResults($limit)
+                    ->getQuery();
+
+        // Paginator applies limit to fixtures, not joined rows.
+        return iterator_to_array(new Paginator($query));
+    }
+
+    public function countFiltered(
+        ?Competition $competition = null,
+        ?Season $season = null,
+        ?int $round = null,
+        ?DateTimeImmutable $start = null,
+        ?DateTimeImmutable $end = null,
+    ): int {
+        $count = $this->createFilteredQueryBuilder($competition, $season, $round, $start, $end)
+            ->select('COUNT(f.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return (int) $count;
+    }
+
+    private function createFilteredQueryBuilder(
+        ?Competition $competition = null,
+        ?Season $season = null,
+        ?int $round = null,
+        ?DateTimeImmutable $start = null,
+        ?DateTimeImmutable $end = null,
+    ): QueryBuilder {
+        $qb = $this->createQueryBuilder('f');
 
         if ($competition !== null) {
             $qb->andWhere('f.competition = :competition')
@@ -87,12 +134,6 @@ class FixtureRepository extends AbstractEntityRepository
                ->setParameter('end', $end);
         }
 
-        if ($limit !== null) {
-            $qb->setMaxResults($limit);
-        }
-
-        return $qb->orderBy('f.startAt', 'ASC')
-                  ->getQuery()
-                  ->getResult();
+        return $qb;
     }
 }

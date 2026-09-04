@@ -31,7 +31,9 @@ export default {
     end: null | string = null,
     competition: null | string = null,
     userIds: null | number[] = null,
-    season: null | number
+    season: null | number,
+    offset: number = 0,
+    limit: number = 20
   ) {
     return axios.get(`${apiBaseUrl}/fixtures/predictions`, {
       headers: getHeader(),
@@ -41,6 +43,8 @@ export default {
         competitionCode: competition,
         userIds: userIds,
         season: season,
+        offset: offset,
+        limit: limit,
         defaultToCurrentSeason: true
       }
     })

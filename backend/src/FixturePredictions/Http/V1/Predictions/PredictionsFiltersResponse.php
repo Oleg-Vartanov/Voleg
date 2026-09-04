@@ -32,6 +32,13 @@ class PredictionsFiltersResponse
 
     public int $limit;
 
+    public int $offset;
+
+    /**
+     * Total number of fixtures matching the filters, ignoring limit and offset.
+     */
+    public int $total;
+
     /**
      * @var array<User>
      */
@@ -46,6 +53,8 @@ class PredictionsFiltersResponse
         ?Competition $competitionEntity,
         ?Season $seasonEntity,
         int $limit,
+        int $offset,
+        int $total,
         array $users,
     ) {
         $this->start = $start?->format('Y-m-d');
@@ -53,6 +62,8 @@ class PredictionsFiltersResponse
         $this->competition = $competitionEntity?->getCode();
         $this->season = $seasonEntity?->getYear();
         $this->limit = $limit;
+        $this->offset = $offset;
+        $this->total = $total;
         $this->users = $users;
     }
 }

@@ -21,6 +21,8 @@ class PredictionsRequest
         public ?DateTimeImmutable $end = null,
         #[Assert\Positive]
         public int $limit = 50,
+        #[Assert\PositiveOrZero]
+        public int $offset = 0,
         #[Assert\Positive]
         public ?int $season = null,
         public bool $defaultToCurrentSeason = false,

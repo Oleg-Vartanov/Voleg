@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PagePagination from '@/modules/core/components/pagination/PagePagination.vue'
 import { type Tables } from '@/modules/fixturePredictions/composables/useTables'
 import { inject } from 'vue'
 
@@ -22,14 +23,25 @@ const tables: Tables = inject('tables')
       </tr>
 
       <!-- Leaderboard -->
-      <tr v-for="(user, index) in tables.leaderboard.value" :key="user.user.id">
-        <th scope="row">{{ index + 1 }}</th>
+      <tr v-for="(user, index) in tables.pagedLeaderboard.value" :key="user.user.id">
+        <th scope="row">{{ tables.leaderboardPagination.offset.value + index + 1 }}</th>
         <td>{{ user.user.username }}</td>
         <td>{{ user.periodPoints ?? '-' }}</td>
         <td>{{ user.totalPoints ?? '-' }}</td>
       </tr>
     </tbody>
   </table>
+
+  <PagePagination
+    v-if="!tables.isLoading.value.leaderboard"
+    :page-index="tables.leaderboardPagination.pageIndex.value"
+    :page-size="tables.leaderboardPagination.pageSize.value"
+    :page-size-options="[10, 20, 50]"
+    :total-pages="tables.leaderboardPagination.totalPages.value"
+    aria-label="Leaderboard pagination"
+    @update:page-index="tables.leaderboardPagination.setPageIndex"
+    @update:page-size="tables.leaderboardPagination.setPageSize"
+  />
 </template>
 
 <style scoped>

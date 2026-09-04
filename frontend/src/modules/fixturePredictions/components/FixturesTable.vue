@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import TeamLogo from '@/modules/fixturePredictions/components/TeamLogo.vue'
+import PagePagination from '@/modules/core/components/pagination/PagePagination.vue'
 import { useAuth } from '@/modules/user/stores/useAuth'
 import { type Versus } from '@/modules/fixturePredictions/composables/useVersus.ts'
 import { type Tables } from '@/modules/fixturePredictions/composables/useTables'
@@ -86,6 +87,17 @@ const auth = useAuth()
       </tr>
     </tbody>
   </table>
+
+  <PagePagination
+    v-if="!tables.isLoading.value.fixtures"
+    :page-index="tables.fixturesPagination.pageIndex.value"
+    :page-size="tables.fixturesPagination.pageSize.value"
+    :page-size-options="[25, 50, 100]"
+    :total-pages="tables.fixturesPagination.totalPages.value"
+    aria-label="Fixtures pagination"
+    @update:page-index="tables.setFixturesPage"
+    @update:page-size="tables.setFixturesPageSize"
+  />
 </template>
 
 <style scoped>

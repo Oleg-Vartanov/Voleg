@@ -17,4 +17,7 @@ export interface ApiFixtureFilters {
   end: string
   competition: string
   season: number
+  limit: number
+  offset: number
+  total: number
 }
