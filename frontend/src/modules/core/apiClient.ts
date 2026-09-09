@@ -218,5 +218,30 @@ export default {
     return axios.delete(`${apiBaseUrl}/split-expense/expenses/${id}`, {
       headers: getHeader()
     })
+  },
+
+  listSplitExpenseAdjustments(offset = 0, limit = 100) {
+    return axios.get(`${apiBaseUrl}/split-expense/adjustments`, {
+      headers: getHeader(),
+      params: { offset, limit }
+    })
+  },
+
+  createSplitExpenseAdjustment(payload: object) {
+    return axios.post(`${apiBaseUrl}/split-expense/adjustments`, payload, {
+      headers: getHeader()
+    })
+  },
+
+  updateSplitExpenseAdjustment(id: number, payload: object) {
+    return axios.put(`${apiBaseUrl}/split-expense/adjustments/${id}`, payload, {
+      headers: getHeader()
+    })
+  },
+
+  deleteSplitExpenseAdjustment(id: number) {
+    return axios.delete(`${apiBaseUrl}/split-expense/adjustments/${id}`, {
+      headers: getHeader()
+    })
   }
 }

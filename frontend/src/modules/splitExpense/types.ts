@@ -68,6 +68,24 @@ export interface ApiSeExpensePayload {
   splits: { userId: number; amount: number }[]
 }
 
+export interface ApiSeAdjustment {
+  id: number
+  amount: string
+  adjustmentDate: string
+  description: string | null
+  otherUser: ApiUser
+  createdByUser: ApiUser
+  currency: ApiSeCurrency
+}
+
+export interface ApiSeAdjustmentPayload {
+  otherUserId: number
+  amount: number
+  currencyId: number
+  adjustmentDate: string
+  description: string | null
+}
+
 export interface SeCategory {
   icon: CategoryKey
   title: string

@@ -5,9 +5,11 @@ namespace App\SplitExpense\Test\Api;
 use App\Core\Entity\Currency;
 use App\Core\Repository\CurrencyRepository;
 use App\Core\Test\ApiTestCase;
+use App\SplitExpense\Entity\SeAdjustment;
 use App\SplitExpense\Entity\SeCategory;
 use App\SplitExpense\Entity\SeExpense;
 use App\SplitExpense\Entity\SeExpenseSplit;
+use App\SplitExpense\Repository\SeAdjustmentRepository;
 use App\SplitExpense\Repository\SeCategoryRepository;
 use App\SplitExpense\Repository\SeExpenseRepository;
 use App\User\Entity\User;
@@ -20,6 +22,7 @@ use Symfony\Component\HttpFoundation\Response;
 class SeBalanceGetActionTest extends ApiTestCase
 {
     private SeExpenseRepository $expenseRepo;
+    private SeAdjustmentRepository $adjustmentRepo;
     private SeCategory $category;
     private Currency $currency;
     private Currency $otherCurrency;
@@ -29,6 +32,7 @@ class SeBalanceGetActionTest extends ApiTestCase
         parent::setUp();
 
         $this->expenseRepo = $this->getService(SeExpenseRepository::class);
+        $this->adjustmentRepo = $this->getService(SeAdjustmentRepository::class);
         $this->category = $this->getService(SeCategoryRepository::class)->find(SeCategory::DEFAULT_ID);
 
         $currencies = $this->getService(CurrencyRepository::class)->list(0, 2);
@@ -148,6 +152,25 @@ class SeBalanceGetActionTest extends ApiTestCase
         self::assertSame(-4000, $data['byUserAmounts'][0]['amounts'][0]['amount']);
     }
 
+    #[TestDox('Balance GET: an adjustment nets against an expense')]
+    public function testAdjustmentNetsAgainstExpense(): void
+    {
+        $userA = $this->createUser(flush: false);
+        $userB = $this->createUser();
+
+        $this->createExpense($userA, [[$userA, 5000], [$userB, 5000]]);
+        $this->createAdjustment($userB, $userA, 5000);
+
+        $this->signIn($userA);
+        $this->sendRequest();
+
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
+        $data = $this->getResponseData();
+
+        self::assertSame([], $data['byUserAmounts']);
+        self::assertSame([], $data['totalAmounts']);
+    }
+
     #[TestDox('Balance GET: unauthorized')]
     public function testUnauthorized(): void
     {
@@ -180,6 +203,19 @@ class SeBalanceGetActionTest extends ApiTestCase
         }
 
         $this->expenseRepo->save($expense, true);
+    }
+
+    private function createAdjustment(User $fromUser, User $toUser, int $amount): void
+    {
+        $adjustment = new SeAdjustment(
+            createdByUser: $fromUser,
+            otherUser: $toUser,
+            amount: $amount,
+            currency: $this->currency,
+            adjustmentDate: new DateTimeImmutable(),
+        );
+
+        $this->adjustmentRepo->save($adjustment, true);
     }
 
     private function sendRequest(): void

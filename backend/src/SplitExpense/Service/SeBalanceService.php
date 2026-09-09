@@ -7,19 +7,17 @@ use App\Core\Repository\CurrencyRepository;
 use App\SplitExpense\Http\V1\Balance\SeBalanceAmount;
 use App\SplitExpense\Http\V1\Balance\SeBalanceResponse;
 use App\SplitExpense\Http\V1\Balance\SeUserBalance;
+use App\SplitExpense\Repository\SeAdjustmentRepository;
 use App\SplitExpense\Repository\SeExpenseRepository;
 use App\SplitExpense\ValueObject\SeBalanceEntry;
 use App\User\Entity\User;
 use App\User\Repository\UserRepository;
 
-/**
- * Balances are derived from the splits on every read, never stored. The splits are the
- * ledger, so an edited or deleted expense can never leave a stale balance behind.
- */
 readonly class SeBalanceService
 {
     public function __construct(
         private SeExpenseRepository $expenseRepository,
+        private SeAdjustmentRepository $adjustmentRepository,
         private UserRepository $userRepository,
         private CurrencyRepository $currencyRepository,
     ) {
@@ -102,6 +100,16 @@ readonly class SeBalanceService
         }
 
         foreach ($this->expenseRepository->sumSplitsOwedByUser($user) as $entry) {
+            $amounts[$entry->userId][$entry->currencyId] =
+                ($amounts[$entry->userId][$entry->currencyId] ?? 0) - $entry->amount;
+        }
+
+        foreach ($this->adjustmentRepository->sumCreatedByUser($user) as $entry) {
+            $amounts[$entry->userId][$entry->currencyId] =
+                ($amounts[$entry->userId][$entry->currencyId] ?? 0) + $entry->amount;
+        }
+
+        foreach ($this->adjustmentRepository->sumOtherUser($user) as $entry) {
             $amounts[$entry->userId][$entry->currencyId] =
                 ($amounts[$entry->userId][$entry->currencyId] ?? 0) - $entry->amount;
         }

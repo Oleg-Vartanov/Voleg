@@ -15,6 +15,7 @@ interface Props {
   disabled?: boolean
   required?: boolean
   placeholder?: string
+  signed?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -22,7 +23,8 @@ const props = withDefaults(defineProps<Props>(), {
   errorText: '',
   helpText: '',
   required: true,
-  placeholder: ''
+  placeholder: '',
+  signed: false
 })
 
 const emit = defineEmits<{
@@ -30,7 +32,7 @@ const emit = defineEmits<{
 }>()
 
 function sanitize(raw: string): string {
-  return moneyUtils.sanitizeDecimalPlaces(raw, props.decimalPlaces)
+  return moneyUtils.sanitizeDecimalPlaces(raw, props.decimalPlaces, props.signed)
 }
 
 const fieldValidationClass = computed(() => validationClass(props.isValid))

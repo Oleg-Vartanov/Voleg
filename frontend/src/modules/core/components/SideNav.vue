@@ -32,12 +32,13 @@ const menuGroups: MenuItem[][] = [
       title: 'Split Expense',
       children: [
         { name: 'seExpenses', title: 'Expenses' },
+        { name: 'seAdjustments', title: 'Adjustments' },
         { name: 'seBalance', title: 'Balance' },
         { name: 'seConnections', title: 'Connections' }
       ]
     },
     { name: 'footballPredictions', title: 'Football Predictions' }
-  ],
+  ]
 ]
 
 const menuItems = menuGroups.flat()
@@ -123,7 +124,10 @@ watch(
                     >
                       {{ child.title }}
                     </router-link>
-                    <span v-else class="side-nav__link side-nav__link--sub side-nav__link--disabled">
+                    <span
+                      v-else
+                      class="side-nav__link side-nav__link--sub side-nav__link--disabled"
+                    >
                       {{ child.title }}
                     </span>
                   </li>
