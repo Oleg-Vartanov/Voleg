@@ -7,19 +7,19 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
     <h4>Welcome to my site!</h4>
 
     <p>
-      Currently there is only a Football Predictions game. Maybe there will be more to come, who
-      knows. So stay tuned ;)
+      Right now there are two apps:<br />
+      <router-link :to="{ name: 'splitExpense' }">Split Expense</router-link> — track shared costs
+      with friends and see who owes whom.<br />
+      <router-link :to="{ name: 'footballPredictions' }">Football Predictions</router-link> — guess
+      match scores and collect points.<br />
+      Maybe there will be more to come, who knows. So stay tuned ;)
     </p>
     <p>If you'd like to contact me for some reason, you're welcome.</p>
-    <br />
-
     <h5>Contacts:</h5>
     <p>
       <i class="bi bi-envelope-at me-1" />
       <a href="mailto:oleg.vartanov1997@gmail.com">oleg.vartanov1997@gmail.com</a>
     </p>
-    <br />
-
     <h5>Resources:</h5>
     <p>
       <i class="bi bi-file-text me-1" />API Documentation <a :href="apiBaseUrl + '/doc'">GUI</a> ,
