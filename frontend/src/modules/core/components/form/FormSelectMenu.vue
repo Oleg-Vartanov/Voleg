@@ -129,7 +129,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   border-radius: 0;
   background-color: var(--bs-body-bg);
   color: var(--bs-body-color);
-  font-size: 0.875rem;
+  font-size: var(--ov-font-size-md);
   line-height: 1.5;
   cursor: pointer;
 }
@@ -189,7 +189,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   padding: 0.25rem 0.35rem;
   cursor: pointer;
   color: var(--bs-body-color);
-  font-size: 0.875rem;
+  font-size: var(--ov-font-size-md);
   line-height: 1.5;
   text-align: center;
 }

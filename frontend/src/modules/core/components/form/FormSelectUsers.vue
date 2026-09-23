@@ -387,7 +387,7 @@ onUnmounted(() => {
 }
 
 .form-user-select-input-tag-remove .bi {
-  font-size: 0.875rem;
+  font-size: var(--ov-font-size-md);
   line-height: 1;
 }
 

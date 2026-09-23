@@ -138,7 +138,7 @@ function onPageSizeChange(value: string | number) {
   border-radius: 0;
   background: transparent;
   color: var(--ov-text);
-  font-size: 0.8125rem;
+  font-size: var(--ov-font-size-sm);
   line-height: 1.25;
 }
 
@@ -199,7 +199,7 @@ function onPageSizeChange(value: string | number) {
   border-radius: var(--bs-border-radius-sm);
   background: transparent;
   color: var(--ov-text);
-  font-size: 0.8125rem;
+  font-size: var(--ov-font-size-sm);
   line-height: 1.25;
 }
 

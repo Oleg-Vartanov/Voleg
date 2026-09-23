@@ -165,7 +165,7 @@ onMounted(() => {
   padding: 0.2rem 0.5rem;
   background-color: var(--bs-secondary-bg);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: var(--ov-font-size-label);
   line-height: 1.2;
   border-bottom: var(--bs-border-width) solid var(--bs-border-color);
 }

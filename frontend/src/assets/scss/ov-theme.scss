@@ -22,6 +22,14 @@ $ov-dark-border: $ov-color-gray-700;
   --ov-color-white: #{$ov-color-white};
   --ov-color-black: #{$ov-color-black};
 
+  // Type scale (rem; inherits html root size)
+  --ov-font-size-xs: 0.75rem; // meta (e.g. month abbr)
+  --ov-font-size-sm: 0.8125rem; // compact chrome (pagination, hints)
+  --ov-font-size-md: 0.875rem; // secondary UI (menus, tags)
+  --ov-font-size-label: 0.9375rem; // section / field labels
+  --ov-font-size-lg: 1.25rem; // emphasis (date day, callouts)
+  --ov-font-size-xl: 1.5rem; // highlights (amounts)
+
   // Semantic — swap per theme
   --ov-text: #{$ov-light-text};
   --ov-text-muted: #{$ov-light-text-muted};

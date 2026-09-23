@@ -1,3 +1,13 @@
+// Larger base type than the browser default (~16px): ~18px on phones,
+// ~19px on wide desktops. Percentages keep user font-size preferences.
+html {
+  font-size: 112.5%;
+
+  @media (min-width: 1200px) {
+    font-size: 118.75%;
+  }
+}
+
 .ov-center {
   padding: 15px 0;
   text-align: center;

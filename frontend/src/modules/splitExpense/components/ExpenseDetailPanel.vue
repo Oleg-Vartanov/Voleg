@@ -162,20 +162,20 @@ const splitUsers = computed(() => ed.mapSplitUsers(props.expense))
   width: 4.75rem;
   min-height: 0;
   padding: 0.05rem 0.35rem;
-  font-size: 0.85rem;
+  font-size: var(--ov-font-size-label);
   line-height: 1.2;
   text-align: center;
 }
 
 .expense-detail-title {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--ov-font-size-label);
   line-height: 1.35;
 }
 
 .expense-detail-description {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--ov-font-size-label);
   line-height: 1.35;
   color: var(--bs-secondary-color);
 }
@@ -185,7 +185,7 @@ const splitUsers = computed(() => ed.mapSplitUsers(props.expense))
 .expense-split-balance,
 .expense-split-user {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--ov-font-size-label);
   line-height: 1.35;
 }
 

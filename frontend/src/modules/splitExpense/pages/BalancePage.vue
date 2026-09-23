@@ -97,7 +97,7 @@ onMounted(() => {
 
 .balance-total__title {
   margin: 0 0 0.35rem;
-  font-size: 0.85rem;
+  font-size: var(--ov-font-size-label);
   font-weight: 600;
   text-transform: uppercase;
   color: var(--bs-secondary-color);
@@ -120,14 +120,14 @@ onMounted(() => {
 }
 
 .balance-total__amount {
-  font-size: 1.5rem;
+  font-size: var(--ov-font-size-xl);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
 .balance-total__label,
 .balance-user__label {
-  font-size: 0.75rem;
+  font-size: var(--ov-font-size-sm);
   color: var(--bs-secondary-color);
 }
 
@@ -139,7 +139,7 @@ onMounted(() => {
 }
 
 .balance-message--lg {
-  font-size: 1.25rem;
+  font-size: var(--ov-font-size-lg);
 }
 
 .balance-user {

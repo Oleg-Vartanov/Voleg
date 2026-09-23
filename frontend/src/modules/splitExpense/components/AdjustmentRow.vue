@@ -107,7 +107,7 @@ const date = computed(() => formatShortDate(props.adjustment.adjustmentDate))
 
 .adjustment-date-day {
   font-weight: 500;
-  font-size: 1.25rem;
+  font-size: var(--ov-font-size-lg);
   font-variant-numeric: tabular-nums;
   line-height: 1;
   color: var(--bs-secondary-color);
@@ -115,7 +115,7 @@ const date = computed(() => formatShortDate(props.adjustment.adjustmentDate))
 
 .adjustment-date-month {
   font-weight: 500;
-  font-size: 0.64rem;
+  font-size: var(--ov-font-size-xs);
   text-transform: uppercase;
   color: var(--bs-secondary-color);
 }

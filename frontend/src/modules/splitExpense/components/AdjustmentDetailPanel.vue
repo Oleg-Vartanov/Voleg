@@ -149,20 +149,20 @@ const display = useAdjustmentDisplay()
   width: 4.75rem;
   min-height: 0;
   padding: 0.05rem 0.35rem;
-  font-size: 0.85rem;
+  font-size: var(--ov-font-size-label);
   line-height: 1.2;
   text-align: center;
 }
 
 .adjustment-detail-title {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--ov-font-size-label);
   line-height: 1.35;
 }
 
 .adjustment-detail-description {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--ov-font-size-label);
   line-height: 1.35;
   color: var(--bs-secondary-color);
 }
@@ -171,7 +171,7 @@ const display = useAdjustmentDisplay()
 .adjustment-split-balance,
 .adjustment-party {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--ov-font-size-label);
   line-height: 1.35;
 }
 
