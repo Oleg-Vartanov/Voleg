@@ -70,166 +70,168 @@ loadPage(1)
 
 <template>
   <div class="ov-center">
-    <div class="container d-flex flex-column align-items-center gap-3">
-      <div class="se-panel">
-        <button
-          type="button"
-          class="btn btn-outline-primary w-100"
-          @click="addConnectionOpen = true"
-        >
-          <i class="bi bi-person-plus" aria-hidden="true"></i>
-          Add connection
-        </button>
-      </div>
+    <div class="container se-page d-flex flex-column align-items-center">
+      <div class="se-page-inset d-flex flex-column gap-3">
+        <div class="se-panel">
+          <button
+            type="button"
+            class="btn btn-outline-primary w-100"
+            @click="addConnectionOpen = true"
+          >
+            <i class="bi bi-person-plus" aria-hidden="true"></i>
+            Add connection
+          </button>
+        </div>
 
-      <div class="se-panel se-panel-block">
-        <h2 class="se-panel__title">Requests</h2>
+        <div class="se-panel se-panel-block">
+          <h2 class="se-panel__title">Requests</h2>
 
-        <ul class="nav nav-tabs justify-content-center" role="tablist">
-          <li v-for="tab in requestTabs" :key="tab.id" class="nav-item" role="presentation">
-            <button
-              type="button"
-              class="nav-link"
-              :class="{ active: requests.activeTab.value === tab.id }"
-              role="tab"
-              :aria-selected="requests.activeTab.value === tab.id"
-              @click="requests.selectTab(tab.id)"
-            >
-              {{ tab.label }}
-            </button>
-          </li>
-        </ul>
+          <ul class="nav nav-tabs justify-content-center" role="tablist">
+            <li v-for="tab in requestTabs" :key="tab.id" class="nav-item" role="presentation">
+              <button
+                type="button"
+                class="nav-link"
+                :class="{ active: requests.activeTab.value === tab.id }"
+                role="tab"
+                :aria-selected="requests.activeTab.value === tab.id"
+                @click="requests.selectTab(tab.id)"
+              >
+                {{ tab.label }}
+              </button>
+            </li>
+          </ul>
 
-        <div v-if="requests.isListLoading.value" class="text-center py-3">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading requests…</span>
+          <div v-if="requests.isListLoading.value" class="text-center py-3">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading requests…</span>
+            </div>
+          </div>
+
+          <template v-else>
+            <ul class="list-group list-group-flush">
+              <li
+                v-if="requests.items.value.length === 0"
+                class="list-group-item text-muted text-center"
+              >
+                <template v-if="requests.activeTab.value === 'incoming'"
+                  >No incoming requests.</template
+                >
+                <template v-else-if="requests.activeTab.value === 'outgoing'"
+                  >No outgoing requests.</template
+                >
+                <template v-else>No rejected requests.</template>
+              </li>
+              <template v-else>
+                <li
+                  v-for="connection in requests.items.value"
+                  :key="connection.id"
+                  class="list-group-item d-flex justify-content-between align-items-center gap-2"
+                >
+                  <span class="text-truncate">{{ partnerName(connection) }}</span>
+
+                  <div
+                    v-if="requests.activeTab.value === 'incoming'"
+                    class="d-flex gap-2 flex-shrink-0"
+                  >
+                    <button
+                      type="button"
+                      class="btn btn-outline-primary btn-sm"
+                      :disabled="requests.isLoading.value"
+                      @click="requests.acceptRequest(connection)"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger btn-sm"
+                      :disabled="requests.isLoading.value"
+                      @click="requests.rejectRequest(connection)"
+                    >
+                      Reject
+                    </button>
+                  </div>
+
+                  <button
+                    v-else-if="requests.activeTab.value === 'outgoing'"
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm flex-shrink-0 se-action-btn"
+                    :disabled="requests.isLoading.value"
+                    @click="requests.cancelRequest(connection)"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    v-else-if="connection.requestedBy.id !== auth.user.id"
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm flex-shrink-0 se-action-btn"
+                    :disabled="requests.isLoading.value"
+                    @click="requests.removeConnection(connection)"
+                  >
+                    Remove
+                  </button>
+                </li>
+              </template>
+            </ul>
+
+            <PagePagination
+              :page-index="requests.pageIndex.value"
+              :page-size="requests.pageSize.value"
+              :page-size-options="[5, 10, 25, 50]"
+              :total-pages="requests.totalPages.value"
+              aria-label="Requests pagination"
+              @update:page-index="requests.setPage"
+              @update:page-size="requests.setPageSize"
+            />
+          </template>
+        </div>
+
+        <div class="se-panel se-panel-block">
+          <h2 class="se-panel__title">Connections</h2>
+          <div v-if="connections.isListLoading.value" class="text-center py-3">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading connections…</span>
+            </div>
+          </div>
+
+          <div v-else>
+            <ul class="list-group list-group-flush">
+              <li v-if="items.length === 0" class="list-group-item text-muted text-center">
+                No connections yet.
+              </li>
+              <template v-else>
+                <li
+                  v-for="connection in items"
+                  :key="connection.id"
+                  class="list-group-item d-flex justify-content-between align-items-center gap-2"
+                >
+                  <span class="text-truncate">{{ partnerName(connection) }}</span>
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger btn-sm flex-shrink-0 se-action-btn"
+                    :disabled="connections.isLoading.value"
+                    @click="removeConnection(connection)"
+                  >
+                    Remove
+                  </button>
+                </li>
+              </template>
+            </ul>
+
+            <PagePagination
+              :page-index="pageIndex"
+              :page-size="pageSize"
+              :page-size-options="[5, 10, 25, 50]"
+              :total-pages="totalPages"
+              aria-label="Connections pagination"
+              @update:page-index="loadPage"
+              @update:page-size="onPageSizeChange"
+            />
           </div>
         </div>
 
-        <template v-else>
-          <ul class="list-group list-group-flush">
-            <li
-              v-if="requests.items.value.length === 0"
-              class="list-group-item text-muted text-center"
-            >
-              <template v-if="requests.activeTab.value === 'incoming'"
-                >No incoming requests.</template
-              >
-              <template v-else-if="requests.activeTab.value === 'outgoing'"
-                >No outgoing requests.</template
-              >
-              <template v-else>No rejected requests.</template>
-            </li>
-            <template v-else>
-              <li
-                v-for="connection in requests.items.value"
-                :key="connection.id"
-                class="list-group-item d-flex justify-content-between align-items-center gap-2"
-              >
-                <span class="text-truncate">{{ partnerName(connection) }}</span>
-
-                <div
-                  v-if="requests.activeTab.value === 'incoming'"
-                  class="d-flex gap-2 flex-shrink-0"
-                >
-                  <button
-                    type="button"
-                    class="btn btn-outline-primary btn-sm"
-                    :disabled="requests.isLoading.value"
-                    @click="requests.acceptRequest(connection)"
-                  >
-                    Accept
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-outline-danger btn-sm"
-                    :disabled="requests.isLoading.value"
-                    @click="requests.rejectRequest(connection)"
-                  >
-                    Reject
-                  </button>
-                </div>
-
-                <button
-                  v-else-if="requests.activeTab.value === 'outgoing'"
-                  type="button"
-                  class="btn btn-outline-secondary btn-sm flex-shrink-0 se-action-btn"
-                  :disabled="requests.isLoading.value"
-                  @click="requests.cancelRequest(connection)"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  v-else-if="connection.requestedBy.id !== auth.user.id"
-                  type="button"
-                  class="btn btn-outline-secondary btn-sm flex-shrink-0 se-action-btn"
-                  :disabled="requests.isLoading.value"
-                  @click="requests.removeConnection(connection)"
-                >
-                  Remove
-                </button>
-              </li>
-            </template>
-          </ul>
-
-          <PagePagination
-            :page-index="requests.pageIndex.value"
-            :page-size="requests.pageSize.value"
-            :page-size-options="[5, 10, 25, 50]"
-            :total-pages="requests.totalPages.value"
-            aria-label="Requests pagination"
-            @update:page-index="requests.setPage"
-            @update:page-size="requests.setPageSize"
-          />
-        </template>
+        <AddConnectionModal v-model:open="addConnectionOpen" :send="sendConnectionRequest" />
       </div>
-
-      <div class="se-panel se-panel-block">
-        <h2 class="se-panel__title">Connections</h2>
-        <div v-if="connections.isListLoading.value" class="text-center py-3">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading connections…</span>
-          </div>
-        </div>
-
-        <div v-else>
-          <ul class="list-group list-group-flush">
-            <li v-if="items.length === 0" class="list-group-item text-muted text-center">
-              No connections yet.
-            </li>
-            <template v-else>
-              <li
-                v-for="connection in items"
-                :key="connection.id"
-                class="list-group-item d-flex justify-content-between align-items-center gap-2"
-              >
-                <span class="text-truncate">{{ partnerName(connection) }}</span>
-                <button
-                  type="button"
-                  class="btn btn-outline-danger btn-sm flex-shrink-0 se-action-btn"
-                  :disabled="connections.isLoading.value"
-                  @click="removeConnection(connection)"
-                >
-                  Remove
-                </button>
-              </li>
-            </template>
-          </ul>
-
-          <PagePagination
-            :page-index="pageIndex"
-            :page-size="pageSize"
-            :page-size-options="[5, 10, 25, 50]"
-            :total-pages="totalPages"
-            aria-label="Connections pagination"
-            @update:page-index="loadPage"
-            @update:page-size="onPageSizeChange"
-          />
-        </div>
-      </div>
-
-      <AddConnectionModal v-model:open="addConnectionOpen" :send="sendConnectionRequest" />
     </div>
   </div>
 </template>

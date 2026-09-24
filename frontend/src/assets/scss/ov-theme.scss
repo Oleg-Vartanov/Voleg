@@ -30,6 +30,9 @@ $ov-dark-border: $ov-color-gray-700;
   --ov-font-size-lg: 1.25rem; // emphasis (date day, callouts)
   --ov-font-size-xl: 1.5rem; // highlights (amounts)
 
+  // Page side inset (about, profile, expense actions, connections, …)
+  --ov-page-inset: 15px;
+
   // Semantic — swap per theme
   --ov-text: #{$ov-light-text};
   --ov-text-muted: #{$ov-light-text-muted};

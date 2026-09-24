@@ -64,7 +64,7 @@ onMounted(() => {
 
 <template>
   <div class="ov-center">
-    <div class="container d-flex flex-column align-items-center gap-2">
+    <div class="container se-page d-flex flex-column align-items-center gap-2">
       <div class="se-panel">
         <button
           type="button"

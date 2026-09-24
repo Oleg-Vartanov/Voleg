@@ -31,29 +31,29 @@ const auth = useAuth()
         </div>
         <div class="modal-body">
           <form id="makePredictionsForm" @submit.prevent="predictions.makePredictions">
-            <table v-if="!tables.isLoading.value.fixtures" class="table">
+            <table v-if="!tables.isLoading.value.fixtures" class="table predictions-table">
               <thead>
                 <tr>
                   <th scope="col">Match</th>
-                  <th scope="col" style="width: 20%; min-width: 80px">Home</th>
-                  <th scope="col" style="width: 20%; min-width: 80px">Away</th>
+                  <th scope="col" class="predictions-col-score">Home</th>
+                  <th scope="col" class="predictions-col-score">Away</th>
                 </tr>
               </thead>
               <tbody>
                 <template v-for="fixture in tables.fixtures.value" :key="fixture.id">
                   <tr v-if="new Date(fixture.startAt) > new Date()">
-                    <td class="text-start">
-                      <span>
+                    <td class="text-start predictions-match">
+                      <span class="predictions-team">
                         <TeamLogo :team-name="fixture.homeTeam.name" />
                         {{ fixture.homeTeam.name }}
                       </span>
                       <br />
-                      <span>
+                      <span class="predictions-team">
                         <TeamLogo :team-name="fixture.awayTeam.name" />
                         {{ fixture.awayTeam.name }}
                       </span>
                     </td>
-                    <td>
+                    <td class="predictions-score-cell">
                       <input
                         class="form-control"
                         type="number"
@@ -70,7 +70,7 @@ const auth = useAuth()
                         "
                       />
                     </td>
-                    <td>
+                    <td class="predictions-score-cell">
                       <input
                         class="form-control"
                         type="number"
@@ -122,3 +122,46 @@ const auth = useAuth()
     </div>
   </div>
 </template>
+
+<style scoped>
+.predictions-table {
+  font-size: var(--ov-font-size-sm);
+}
+
+.predictions-table thead th {
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+  text-align: center;
+  vertical-align: bottom;
+  border-bottom-color: var(--bs-primary);
+}
+
+.predictions-col-score {
+  width: 20%;
+  min-width: 80px;
+}
+
+.predictions-score-cell {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.predictions-score-cell .form-control {
+  display: inline-block;
+  width: 3.25rem;
+  margin-inline: auto;
+  text-align: center;
+  padding-inline: 0.35rem;
+}
+
+.predictions-match {
+  font-size: var(--ov-font-size-sm);
+}
+
+.predictions-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+</style>

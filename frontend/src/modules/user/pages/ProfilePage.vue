@@ -11,6 +11,6 @@
 <style scoped>
 .form-central {
   max-width: 480px;
-  padding: 0 1rem;
+  padding-inline: var(--ov-page-inset);
 }
 </style>

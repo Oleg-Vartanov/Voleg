@@ -9,6 +9,11 @@ html {
 }
 
 .ov-center {
-  padding: 15px 0;
+  padding: var(--ov-page-inset) 0;
   text-align: center;
+}
+
+.ov-page-inset {
+  box-sizing: border-box;
+  padding-inline: var(--ov-page-inset);
 }

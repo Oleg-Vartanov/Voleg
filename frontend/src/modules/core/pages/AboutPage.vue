@@ -3,7 +3,7 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
 </script>
 
 <template>
-  <div class="ov-center">
+  <div class="ov-center ov-page-inset">
     <h4>Welcome to my site!</h4>
 
     <p>

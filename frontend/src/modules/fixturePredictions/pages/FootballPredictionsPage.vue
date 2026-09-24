@@ -35,7 +35,7 @@ const disablePredictions = computed(() => {
 
 <template>
   <div class="ov-center">
-    <div class="container">
+    <div class="container fixtures-page">
       <FixtureFilters v-model:open="isFiltersOpen" />
       <VersusModal v-model:open="isVersusOpen" />
       <PredictionsModal />
@@ -73,3 +73,9 @@ const disablePredictions = computed(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.fixtures-page.container {
+  padding-inline: 0;
+}
+</style>

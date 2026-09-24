@@ -5,88 +5,127 @@ import { useAuth } from '@/modules/user/stores/useAuth'
 import { type Versus } from '@/modules/fixturePredictions/composables/useVersus.ts'
 import { type Tables } from '@/modules/fixturePredictions/composables/useTables'
 import { type Predictions } from '@/modules/fixturePredictions/composables/usePredictions'
-import { inject } from 'vue'
+import { computed, inject } from 'vue'
 
 const tables: Tables = inject('tables')
 const vs: Versus = inject('vs')
 const predictions: Predictions = inject('predictions')
 const auth = useAuth()
+
+const showPoints = computed(() => vs.users.value.length === 0)
+
+/** Username header wrap width; also drives num-column `ch` size. */
+const usernameCharsPerLine = 6
+
+/** Split a username into rows (no ellipsis). */
+function usernameLines(name: string): string[] {
+  const lines: string[] = []
+  for (let i = 0; i < name.length; i += usernameCharsPerLine) {
+    lines.push(name.slice(i, i + usernameCharsPerLine))
+  }
+  return lines.length > 0 ? lines : [name]
+}
+
+/** Shared tracks: Start | Match | Score | Prediction | [Points | vs…] */
+const tableStyle = computed(() => {
+  const vsCount = vs.users.value.length
+  const num = `calc(${usernameCharsPerLine}ch + 0.75rem)`
+  const columns =
+    vsCount === 0
+      ? `auto auto ${num} ${num} ${num}`
+      : `auto auto ${num} ${num} repeat(${vsCount}, ${num})`
+
+  return { gridTemplateColumns: columns }
+})
 </script>
 
 <template>
-  <table v-if="!tables.isLoading.value.leaderboard" class="table table-sm">
-    <thead>
-      <tr>
-        <th scope="col">Match</th>
-        <th scope="col">Score</th>
-        <th scope="col">
-          {{ vs.users.value.length === 0 ? 'Prediction' : auth.user.username }}
-        </th>
-        <th v-if="vs.users.value.length === 0" scope="col">Points</th>
-        <th v-for="vsUser in vs.users.value" :key="vsUser.id" scope="col">
-          {{ vsUser.username }}
-        </th>
-        <th scope="col">Start</th>
-      </tr>
-    </thead>
+  <div
+    v-if="!tables.isLoading.value.leaderboard"
+    class="fixtures"
+    role="table"
+    aria-label="Fixtures"
+    :style="tableStyle"
+  >
+    <div class="fixtures-row fixtures-row--head" role="row">
+      <div class="fixtures-start" role="columnheader">Start</div>
+      <div class="fixtures-match" role="columnheader">Match</div>
+      <div class="fixtures-num" role="columnheader">
+        <span class="fixtures-num-label">Score</span>
+      </div>
+      <div class="fixtures-num" role="columnheader">
+        <span v-if="showPoints" class="fixtures-num-label">Pred</span>
+        <span v-else class="fixtures-username" :title="auth.user.username">
+          <span v-for="(line, i) in usernameLines(auth.user.username)" :key="i">{{ line }}</span>
+        </span>
+      </div>
+      <div v-if="showPoints" class="fixtures-num" role="columnheader">
+        <span class="fixtures-num-label">Points</span>
+      </div>
+      <div
+        v-for="vsUser in vs.users.value"
+        :key="vsUser.id"
+        class="fixtures-num"
+        role="columnheader"
+        :title="vsUser.username"
+      >
+        <span class="fixtures-username">
+          <span v-for="(line, i) in usernameLines(vsUser.username)" :key="i">{{ line }}</span>
+        </span>
+      </div>
+    </div>
 
-    <tbody>
-      <!-- No fixtures -->
-      <tr v-if="tables.fixtures.value?.length === 0">
-        <td colspan="6" class="text-center py-3 text-muted">No fixtures found</td>
-      </tr>
+    <div v-if="tables.fixtures.value?.length === 0" class="fixtures-empty" role="row">
+      <div class="fixtures-empty-cell" role="cell">No fixtures found</div>
+    </div>
 
-      <!-- Fixtures -->
-      <tr v-for="fixture in tables.fixtures.value" :key="fixture.id">
-        <!-- Teams -->
-        <td class="text-start">
-          <span>
-            <TeamLogo :team-name="fixture.homeTeam.name" />
-            {{ fixture.homeTeam.name }}
-          </span>
-          <br />
-          <span>
-            <TeamLogo :team-name="fixture.awayTeam.name" />
-            {{ fixture.awayTeam.name }}
-          </span>
-        </td>
+    <div v-for="fixture in tables.fixtures.value" :key="fixture.id" class="fixtures-row" role="row">
+      <div class="fixtures-start" role="cell">
+        <span>{{ predictions.fixtureDate(fixture).time }}</span>
+        <span>{{ predictions.fixtureDate(fixture).date }}</span>
+      </div>
 
-        <!-- Score -->
-        <td>
-          {{ fixture.homeScore ?? '-' }}<br />
-          {{ fixture.awayScore ?? '-' }}
-        </td>
+      <div class="fixtures-match" role="cell">
+        <div class="fixtures-team">
+          <TeamLogo :team-name="fixture.homeTeam.name" />
+          <span>{{ fixture.homeTeam.name }}</span>
+        </div>
+        <div class="fixtures-team">
+          <TeamLogo :team-name="fixture.awayTeam.name" />
+          <span>{{ fixture.awayTeam.name }}</span>
+        </div>
+      </div>
 
-        <!-- Current user prediction -->
-        <td
-          :class="predictions.scoreColorClass(predictions.getPrediction(fixture.id, auth.user.id))"
-        >
-          {{ predictions.getPrediction(fixture.id, auth.user.id)?.homeScore ?? '-' }}<br />
-          {{ predictions.getPrediction(fixture.id, auth.user.id)?.awayScore ?? '-' }}
-        </td>
+      <div class="fixtures-num" role="cell">
+        <span>{{ fixture.homeScore ?? '-' }}</span>
+        <span>{{ fixture.awayScore ?? '-' }}</span>
+      </div>
 
-        <!-- Points -->
-        <td v-if="vs.users.value.length === 0">
-          {{ predictions.getPrediction(fixture.id, auth.user.id)?.points ?? '-' }}
-        </td>
+      <div
+        class="fixtures-num"
+        role="cell"
+        :class="predictions.scoreColorClass(predictions.getPrediction(fixture.id, auth.user.id))"
+      >
+        <span>{{ predictions.getPrediction(fixture.id, auth.user.id)?.homeScore ?? '-' }}</span>
+        <span>{{ predictions.getPrediction(fixture.id, auth.user.id)?.awayScore ?? '-' }}</span>
+      </div>
 
-        <!-- Versus users predictions -->
-        <td
-          v-for="vsUser in vs.users.value"
-          :key="vsUser.id"
-          :class="predictions.scoreColorClass(predictions.getPrediction(fixture.id, vsUser.id))"
-        >
-          {{ predictions.getPrediction(fixture.id, vsUser.id)?.homeScore ?? '-' }}<br />
-          {{ predictions.getPrediction(fixture.id, vsUser.id)?.awayScore ?? '-' }}
-        </td>
+      <div v-if="showPoints" class="fixtures-num" role="cell">
+        {{ predictions.getPrediction(fixture.id, auth.user.id)?.points ?? '-' }}
+      </div>
 
-        <!-- Fixture Start Date -->
-        <td v-for="{ id, date, time } of [predictions.fixtureDate(fixture)]" :key="id">
-          {{ time }}<br />{{ date }}
-        </td>
-      </tr>
-    </tbody>
-  </table>
+      <div
+        v-for="vsUser in vs.users.value"
+        :key="vsUser.id"
+        class="fixtures-num"
+        role="cell"
+        :class="predictions.scoreColorClass(predictions.getPrediction(fixture.id, vsUser.id))"
+      >
+        <span>{{ predictions.getPrediction(fixture.id, vsUser.id)?.homeScore ?? '-' }}</span>
+        <span>{{ predictions.getPrediction(fixture.id, vsUser.id)?.awayScore ?? '-' }}</span>
+      </div>
+    </div>
+  </div>
 
   <PagePagination
     v-if="!tables.isLoading.value.fixtures"
@@ -101,11 +140,83 @@ const auth = useAuth()
 </template>
 
 <style scoped>
-.table-sm {
-  margin-bottom: 0;
+.fixtures {
+  display: grid;
+  width: max-content;
+  max-width: 100%;
+  margin-inline: auto;
+  font-size: var(--ov-font-size-sm);
 }
 
-.text-muted {
+/* Flatten rows into the parent grid so column tracks are shared */
+.fixtures-row,
+.fixtures-empty {
+  display: contents;
+}
+
+.fixtures-row > *,
+.fixtures-empty-cell {
+  padding: 0.35rem 0.4rem;
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.fixtures-num,
+.fixtures-start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.fixtures-row--head > * {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  text-align: center;
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+  border-bottom-color: var(--bs-primary);
+}
+
+.fixtures-empty-cell {
+  grid-column: 1 / -1;
+  padding: 1rem 0;
+  text-align: center;
+  color: var(--bs-secondary-color);
   opacity: 0.9;
+}
+
+.fixtures-match {
+  text-align: start;
+  white-space: nowrap;
+}
+
+.fixtures-team {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.fixtures-num-label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fixtures-username {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+  white-space: normal;
+  overflow: visible;
+  font-variant-numeric: normal;
 }
 </style>

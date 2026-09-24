@@ -7,6 +7,33 @@
   text-align: start;
 }
 
+.se-page.container {
+  padding-inline: 0;
+}
+
+// Shared page inset (connections wraps all content; expense pages inset only top buttons)
+.se-page-inset {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 26rem;
+  padding-inline: var(--ov-page-inset);
+}
+
+.se-page-inset .se-panel {
+  max-width: none;
+}
+
+// Keep expense/adjustment lists edge-to-edge; inset only top action buttons
+.se-panel > .btn {
+  margin-inline: var(--ov-page-inset);
+  width: calc(100% - 2 * var(--ov-page-inset)) !important;
+}
+
+.se-page-inset .se-panel > .btn {
+  margin-inline: 0;
+  width: 100% !important;
+}
+
 .se-panel__title {
   margin: 0 0 0.25rem;
   font-size: var(--ov-font-size-label);
