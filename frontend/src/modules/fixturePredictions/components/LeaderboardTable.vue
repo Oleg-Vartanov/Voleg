@@ -37,7 +37,7 @@ const tables: Tables = inject('tables')
       role="row"
     >
       <div class="leaderboard-rank" role="cell">
-        {{ tables.leaderboardPagination.offset.value + index + 1 }}
+        {{ tables.leaderboardPagination.offset.value + index + 1 }}.
       </div>
       <div class="leaderboard-name" role="cell">{{ user.user.username }}</div>
       <div class="leaderboard-points" role="cell">{{ user.periodPoints ?? '-' }}</div>
