@@ -18,11 +18,23 @@ const props = withDefaults(
   }
 )
 
+// Keeps huge totals (e.g. "of 300M") from pushing the paginator past narrow screens.
+const COMPACT_TOTAL_FROM = 10000
+const compactFormat = new Intl.NumberFormat('en', { notation: 'compact' })
+const fullFormat = new Intl.NumberFormat('en')
+
 const hasPrev = computed(() => pageIndex.value > 1)
 const hasNext = computed(() => pageIndex.value < props.totalPages)
 const showPageSizeSelect = computed(
   () => pageSize.value !== undefined && props.pageSizeOptions.length > 0
 )
+const totalPagesFull = computed(() => fullFormat.format(props.totalPages))
+const totalPagesLabel = computed(() =>
+  props.totalPages >= COMPACT_TOTAL_FROM
+    ? compactFormat.format(props.totalPages)
+    : String(props.totalPages)
+)
+const pageInputDigits = computed(() => String(props.totalPages).length)
 const pageSizeSelectOptions = computed<FormSelectOption[]>(() =>
   props.pageSizeOptions.map((option) => ({ value: option, label: String(option) }))
 )
@@ -78,11 +90,15 @@ function onPageSizeChange(value: string | number) {
         min="1"
         :max="totalPages"
         class="app-pagination-control app-pagination-input"
+        :style="{ '--app-pagination-input-digits': pageInputDigits }"
         aria-label="Current page"
         @keyup.enter="commitPageInput"
         @blur="commitPageInput"
       />
-      <span class="app-pagination-control app-pagination-text">of {{ totalPages }}</span>
+      <span class="app-pagination-control app-pagination-text" :title="totalPagesFull">
+        <span aria-hidden="true">of {{ totalPagesLabel }}</span>
+        <span class="visually-hidden">of {{ totalPagesFull }}</span>
+      </span>
 
       <button
         type="button"
@@ -103,7 +119,7 @@ function onPageSizeChange(value: string | number) {
         <i class="bi bi-chevron-double-right" aria-hidden="true"></i>
       </button>
 
-      <template v-if="showPageSizeSelect && pageSize !== undefined">
+      <div v-if="showPageSizeSelect && pageSize !== undefined" class="app-pagination-size">
         <div class="app-pagination-page-size">
           <FormSelectMenu
             :model-value="pageSize"
@@ -113,7 +129,7 @@ function onPageSizeChange(value: string | number) {
           />
         </div>
         <span class="app-pagination-control app-pagination-text">per page</span>
-      </template>
+      </div>
     </div>
   </nav>
 </template>
@@ -121,10 +137,21 @@ function onPageSizeChange(value: string | number) {
 <style scoped>
 .app-pagination {
   --app-pagination-field-width: 3rem;
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 0.25rem 0.125rem;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--ov-text);
+}
+
+/* The page size select and its label wrap to the next line together. */
+.app-pagination-size {
+  display: flex;
   align-items: stretch;
   gap: 0.125rem;
-  color: var(--ov-text);
 }
 
 .app-pagination-control {
@@ -144,6 +171,10 @@ function onPageSizeChange(value: string | number) {
 
 .app-pagination-btn {
   cursor: pointer;
+}
+
+.app-pagination-text {
+  white-space: nowrap;
 }
 
 .app-pagination-btn:hover:not(:disabled),
@@ -173,6 +204,15 @@ function onPageSizeChange(value: string | number) {
 }
 
 .app-pagination-input {
+  /* Grows with the digit count of the last page so any page number fits. */
+  --app-pagination-input-width: max(
+    var(--app-pagination-field-width),
+    calc(var(--app-pagination-input-digits, 1) * 1ch + 1rem)
+  );
+  flex-basis: var(--app-pagination-input-width);
+  width: var(--app-pagination-input-width);
+  min-width: var(--app-pagination-input-width);
+  max-width: var(--app-pagination-input-width);
   border: var(--bs-border-width) solid var(--bs-primary);
   border-radius: var(--bs-border-radius-sm);
   text-align: center;
