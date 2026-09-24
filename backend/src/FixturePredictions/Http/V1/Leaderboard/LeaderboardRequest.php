@@ -2,6 +2,7 @@
 
 namespace App\FixturePredictions\Http\V1\Leaderboard;
 
+use App\Core\Util\ArrayUtil;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
 use DateTimeImmutable;
 use OpenApi\Attributes as OA;
@@ -10,6 +11,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[OA\Schema(title: 'Leaderboard Request')]
 class LeaderboardRequest
 {
+    /**
+     * @param mixed[] $userIds
+     */
     public function __construct(
         #[OA\Property(example: '2024-12-31')]
         public ?DateTimeImmutable $start = null,
@@ -24,7 +28,11 @@ class LeaderboardRequest
         public bool $defaultToCurrentSeason = false,
         #[Assert\NotBlank, Assert\Choice(callback: [CompetitionCodeEnum::class, 'values'])]
         public string $competitionCode = CompetitionCodeEnum::EPL->value,
+        #[OA\Property(type: 'array', items: new OA\Items(type: 'integer'))]
+        #[Assert\All([new Assert\Type('int'), new Assert\Positive()])]
+        public array $userIds = [],
     ) {
+        $this->userIds = ArrayUtil::castItemsToIntIfPossible($userIds);
         $this->start ??= new DateTimeImmutable()->modify('-5 days');
         $this->end ??= new DateTimeImmutable()->modify('+5 days');
         $this->start = $this->start->setTime(0, 0, 0);

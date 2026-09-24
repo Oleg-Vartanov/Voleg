@@ -83,6 +83,32 @@ class LeaderboardGetActionTest extends ApiTestCase
         self::assertSame($ids, array_unique($ids));
     }
 
+    #[TestDox('Leaderboard: versus limits users to the current user and the selected ones')]
+    public function testVersus(): void
+    {
+        $fixture = $this->createFootballFixture(
+            providerFixtureId: 700000 + random_int(0, 99999),
+        );
+        $users = [];
+        foreach (range(1, 3) as $rank) {
+            $user = $this->createUser();
+            $this->createFootballPrediction($user, $fixture, points: 10 - $rank);
+            $users[] = $user;
+        }
+        $this->signIn($users[0]);
+
+        $this->sendRequest(userIds: [$users[2]->getId()]);
+        self::assertResponseIsSuccessful();
+
+        $data = $this->getResponseData();
+        self::assertSame(2, $data['filters']['total']);
+        self::assertSame('2', $this->client->getResponse()->headers->get('X-Total-Count'));
+        self::assertSame(
+            [$users[0]->getId(), $users[2]->getId()],
+            array_column(array_column($data['users'], 'user'), 'id'),
+        );
+    }
+
     #[TestDox('Leaderboard: negative offset is rejected')]
     public function testNegativeOffsetIsRejected(): void
     {
@@ -106,10 +132,14 @@ class LeaderboardGetActionTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
     }
 
+    /**
+     * @param int[] $userIds
+     */
     private function sendRequest(
         string $start = '2025-01-01',
         int $limit = 20,
         int $offset = 0,
+        array $userIds = [],
     ): void {
         $this->client->request(
             method: Request::METHOD_GET,
@@ -119,6 +149,7 @@ class LeaderboardGetActionTest extends ApiTestCase
                 'season' => SeasonSeeder::CURRENT_SEASON_YEAR,
                 'limit' => $limit,
                 'offset' => $offset,
+                'userIds' => $userIds,
             ]),
         );
     }

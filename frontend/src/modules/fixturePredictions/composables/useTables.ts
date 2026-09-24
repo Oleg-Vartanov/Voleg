@@ -119,6 +119,7 @@ export function useTables(filters: FixtureFilters, vs: Versus): Tables {
         filters.start.value,
         filters.end.value,
         filters.competition.value,
+        vs.getUserIds(),
         filters.season.value,
         leaderboardPagination.offset.value,
         leaderboardPagination.limit.value

@@ -54,6 +54,7 @@ export default {
     start: null | string = null,
     end: null | string = null,
     competition: null | string = null,
+    userIds: null | number[] = null,
     season: null | number,
     offset: number = 0,
     limit: number = 20
@@ -64,6 +65,7 @@ export default {
         start: start,
         end: end,
         competitionCode: competition,
+        userIds: userIds,
         season: season,
         offset: offset,
         limit: limit,

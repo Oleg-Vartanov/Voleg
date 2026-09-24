@@ -9,6 +9,7 @@ use App\Core\Http\ApiController;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
+use App\User\Entity\User;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,6 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[OA\Get(
     security: [['Bearer' => []]],
@@ -61,9 +63,15 @@ class LeaderboardGetAction extends ApiController
     }
 
     public function __invoke(
+        #[CurrentUser] User $user,
         #[MapQueryString(validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY)]
         LeaderboardRequest $dto = new LeaderboardRequest(),
     ): JsonResponse {
+        /** @var int[] $userIds */
+        $userIds = $dto->userIds;
+        // Versus mode: compare the current user with the selected users only.
+        $userIds = empty($userIds) ? null : array_values(array_unique([(int) $user->getId(), ...$userIds]));
+
         $competition = $this->competitionRepository->findOneByCode($dto->competitionCode);
         $season = $this->seasonRepository->findByYearOrCompetition(
             $dto->season,
@@ -74,10 +82,12 @@ class LeaderboardGetAction extends ApiController
         $total = $this->fpRepository->countLeaderboard(
             competition: $competition,
             season: $season,
+            userIds: $userIds,
         );
         $leaderboard = $this->fpRepository->leaderboard(
             competition: $competition,
             season: $season,
+            userIds: $userIds,
             start: $dto->start,
             end: $dto->end,
             limit: $dto->limit,

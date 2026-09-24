@@ -31,17 +31,20 @@ class FixturePredictionRepository extends AbstractEntityRepository
     }
 
     /**
+     * @param int[]|null $userIds Limits the leaderboard to these users; null means all users.
+     *
      * @return LeaderboardRow[]
      */
     public function leaderboard(
         ?Competition $competition = null,
         ?Season $season = null,
+        ?array $userIds = null,
         ?DateTimeImmutable $start = null,
         ?DateTimeImmutable $end = null,
         ?int $limit = null,
         int $offset = 0,
     ): array {
-        $qb = $this->createLeaderboardQueryBuilder($competition, $season)
+        $qb = $this->createLeaderboardQueryBuilder($competition, $season, $userIds)
             ->select(
                 'NEW ' . LeaderboardRow::class . '(
                     u,
@@ -73,11 +76,15 @@ class FixturePredictionRepository extends AbstractEntityRepository
         return $rows;
     }
 
+    /**
+     * @param int[]|null $userIds
+     */
     public function countLeaderboard(
         ?Competition $competition = null,
         ?Season $season = null,
+        ?array $userIds = null,
     ): int {
-        $count = $this->createLeaderboardQueryBuilder($competition, $season)
+        $count = $this->createLeaderboardQueryBuilder($competition, $season, $userIds)
             ->select('COUNT(DISTINCT u.id)')
             ->getQuery()
             ->getSingleScalarResult();
@@ -85,9 +92,13 @@ class FixturePredictionRepository extends AbstractEntityRepository
         return (int) $count;
     }
 
+    /**
+     * @param int[]|null $userIds
+     */
     private function createLeaderboardQueryBuilder(
         ?Competition $competition = null,
         ?Season $season = null,
+        ?array $userIds = null,
     ): QueryBuilder {
         $qb = $this->getEntityManager()
             ->createQueryBuilder()
@@ -103,6 +114,11 @@ class FixturePredictionRepository extends AbstractEntityRepository
         if ($season !== null) {
             $qb->andWhere('f.season = :season')
                ->setParameter('season', $season);
+        }
+
+        if ($userIds !== null) {
+            $qb->andWhere('u.id IN (:userIds)')
+               ->setParameter('userIds', $userIds);
         }
 
         return $qb;
