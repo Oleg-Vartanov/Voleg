@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import InkFilters from '@/modules/core/components/InkFilters.vue'
+import { useInkPaper } from '@/modules/core/composables/useInkPaper'
+
+useInkPaper()
 </script>
 
 <template>
-  <InkFilters />
   <router-view />
 </template>

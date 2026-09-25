@@ -4,7 +4,8 @@
 // Ink design — the whole UI drawn in ink on textured paper.
 // Switched on by DesignToggle.vue (body[data-ov-design='ink']) and combines with both color themes.
 // Selectors start with `body[...]` so they outrank component scoped styles loaded later.
-// Wobbly outlines use the SVG filters from InkFilters.vue.
+// It must stay cheap to paint on phones: no SVG filters and no blurred shadows, as browsers re-run
+// those on every repaint. The paper texture is rendered once into a bitmap by useInkPaper.ts.
 
 $ink: "body[data-ov-design='ink']";
 $ink-dark: "body[data-ov-design='ink'][data-bs-theme='dark']";
@@ -99,14 +100,17 @@ $ink-paper-fibre-mix: 0.25; // 0 = grain only, 1 = clouds only
 $ink-paper-depth: 1.6; // embossing, how strong the shading is
 $ink-paper-opacity-light: 0.14; // overall visibility on white paper
 $ink-paper-opacity-dark: 0.2; // overall visibility on black paper
+$ink-paper-tile: 360; // px, the texture repeats at this size
 
 // The relief is embossed by a light from the top left and comes out as black shadows and white
 // highlights over transparency (flat areas stay clear), so one tile works on any paper color.
 // The filter region matches the tile exactly, otherwise stitchTiles leaves seams.
+// Kept free of raw `%` and with a viewBox: useInkPaper.ts decodes it and re-renders it at device resolution.
 @function ink-paper-texture($opacity) {
+  $t: $ink-paper-tile;
   @return ink-svg(
-    "<svg xmlns='http://www.w3.org/2000/svg' width='360' height='360'>" +
-      "<filter id='f' x='0' y='0' width='100%' height='100%' color-interpolation-filters='sRGB'>" +
+    "<svg xmlns='http://www.w3.org/2000/svg' width='#{$t}' height='#{$t}' viewBox='0 0 #{$t} #{$t}'>" +
+      "<filter id='f' filterUnits='userSpaceOnUse' x='0' y='0' width='#{$t}' height='#{$t}' color-interpolation-filters='sRGB'>" +
       "<feTurbulence type='fractalNoise' baseFrequency='#{math.div(1, $ink-paper-grain-size)}' numOctaves='#{$ink-paper-grain-detail}' seed='5' stitchTiles='stitch' result='grain'/>" +
       "<feTurbulence type='fractalNoise' baseFrequency='#{math.div(1, $ink-paper-fibre-size)}' numOctaves='#{$ink-paper-fibre-detail}' seed='7' stitchTiles='stitch' result='fibre'/>" +
       "<feComposite in='grain' in2='fibre' operator='arithmetic' k2='#{1 - $ink-paper-fibre-mix}' k3='#{$ink-paper-fibre-mix}' result='relief'/>" +
@@ -114,7 +118,7 @@ $ink-paper-opacity-dark: 0.2; // overall visibility on black paper
       "<feColorMatrix in='lit' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.6 0 0 0 1.13' result='shadow'/>" +
       "<feColorMatrix in='lit' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.6 0 0 0 -1.13' result='highlight'/>" +
       "<feMerge><feMergeNode in='shadow'/><feMergeNode in='highlight'/></feMerge></filter>" +
-      "<rect width='100%' height='100%' filter='url(#f)' opacity='#{$opacity}'/></svg>"
+      "<rect width='#{$t}' height='#{$t}' filter='url(#f)' opacity='#{$opacity}'/></svg>"
   );
 }
 
@@ -132,6 +136,7 @@ $ink-paper-opacity-dark: 0.2; // overall visibility on black paper
 ) {
   --ov-paper: #{$paper};
   --ov-paper-texture: #{ink-paper-texture($texture-opacity)};
+  --ov-paper-image: var(--ov-paper-bitmap, var(--ov-paper-texture));
   --ov-ink: #{$ink-color};
   --ov-ink-rgb: #{to-rgb($ink-color)};
   --ov-ink-muted: #{$muted};
@@ -222,9 +227,7 @@ $ink-paper-opacity-dark: 0.2; // overall visibility on black paper
   --bs-body-font-family: #{$ink-font-body};
   --bs-border-width: #{$ink-stroke};
 
-  background: var(--ov-paper-texture) var(--ov-paper);
-  // A hairline blur of the glyph's own color reads as ink soaking into the paper.
-  text-shadow: 0 0 0.6px;
+  background: var(--ov-paper-image) 0 0 / #{$ink-paper-tile}px var(--ov-paper);
   scrollbar-color: rgba(var(--ov-ink-rgb), 0.45) transparent;
 }
 
@@ -252,8 +255,8 @@ $ink-paper-opacity-dark: 0.2; // overall visibility on black paper
   background-size: 100% $ink-line-height;
 }
 
-// Outline drawn by filtered pseudo-elements, so the element's own text stays crisp:
-// ::before is the stroke (and fill, for buttons), ::after a lighter second pass slightly off it.
+// Outline drawn by pseudo-elements, so the element's own text is untouched: ::before is the stroke
+// (and fill, for buttons), ::after a lighter second pass, turned slightly as if gone over twice by hand.
 // $behind puts them under the element's content, which needs an isolated stacking context;
 // without it the outline paints over the (transparent) edge of in-flow content instead.
 @mixin ink-drawn-box(
@@ -281,21 +284,18 @@ $ink-paper-opacity-dark: 0.2; // overall visibility on black paper
     pointer-events: none;
   }
 
-  &::before {
-    filter: url(#ov-ink-rough);
-  }
-
   &::after {
     border-width: 1px;
     border-radius: $retrace-radius;
     opacity: 0.45;
-    filter: url(#ov-ink-rough-retrace);
+    transform: rotate(-0.4deg);
   }
 }
 
 @mixin ink-paper-surface {
   background-color: var(--ov-paper);
-  background-image: var(--ov-paper-texture);
+  background-image: var(--ov-paper-image);
+  background-size: #{$ink-paper-tile}px;
 }
 
 // ---------- Typography ----------
@@ -374,10 +374,6 @@ $ink-paper-opacity-dark: 0.2; // overall visibility on black paper
     background: var(--ov-ink-line) center / 100% $ink-line-height no-repeat;
   }
 
-  .bi {
-    filter: url(#ov-ink-bleed);
-  }
-
   .text-bg-primary,
   .text-bg-secondary {
     color: var(--ov-paper) !important;
@@ -393,10 +389,6 @@ $ink-paper-opacity-dark: 0.2; // overall visibility on black paper
 #{$ink} {
   .app-navbar {
     background-color: transparent;
-  }
-
-  .app-navbar__brand {
-    filter: url(#ov-ink-bleed);
   }
 
   // On desktop the page content draws the side-nav's edge (see .app-main below).
@@ -458,14 +450,14 @@ $ink-paper-opacity-dark: 0.2; // overall visibility on black paper
     // Slides over the page, so it needs its own sheet of paper.
     .side-nav {
       background-color: var(--ov-paper);
-      background-image: var(--ov-ink-vline), var(--ov-paper-texture);
+      background-image: var(--ov-ink-vline), var(--ov-paper-image);
       background-repeat: repeat-y, repeat;
       background-position:
         right -3px top,
         left top;
       background-size:
         $ink-line-height 400px,
-        auto;
+        #{$ink-paper-tile}px;
       box-shadow: 0.35rem 0 1rem rgba(0, 0, 0, 0.2);
     }
   }
@@ -570,14 +562,6 @@ $ink-btn-selectors: ();
   .btn-group {
     gap: 0.2rem;
   }
-
-  .btn-close {
-    filter: url(#ov-ink-bleed);
-  }
-}
-
-#{$ink-dark} .btn-close {
-  filter: invert(1) grayscale(100%) brightness(200%) url(#ov-ink-bleed);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -764,7 +748,8 @@ $ink-btn-selectors: ();
     --bs-modal-border-radius: #{$ink-radius};
 
     @include ink-drawn-box(var(--ov-ink), $ink-radius, 3px);
-    background-image: var(--ov-paper-texture);
+    background-image: var(--ov-paper-image);
+    background-size: #{$ink-paper-tile}px;
     box-shadow:
       0.15rem 0.25rem 0 rgba(var(--ov-ink-rgb), 0.12),
       0 1.25rem 2.5rem rgba(0, 0, 0, 0.3);
@@ -815,7 +800,6 @@ $ink-btn-selectors: ();
       z-index: -1;
       border-radius: $ink-radius-sm;
       background-color: var(--ov-card-header-ink);
-      filter: url(#ov-ink-rough);
     }
   }
 
@@ -851,7 +835,6 @@ $ink-btn-selectors: ();
 
   .spinner-border {
     border-radius: $ink-radius-round;
-    filter: url(#ov-ink-rough);
   }
 
   .nav-tabs {
