@@ -13,26 +13,26 @@ const emit = defineEmits<{
 
 <template>
   <header class="app-navbar navbar">
-    <div class="app-navbar__row">
-      <div
+    <button
+      type="button"
+      class="app-navbar__row app-navbar__toggle"
+      :aria-label="collapsed ? 'Show sidebar' : 'Hide sidebar'"
+      @click="emit('toggle')"
+    >
+      <span
         class="app-navbar__sidebar-col"
         :class="{ 'app-navbar__sidebar-col--narrow': sidebarCollapsed }"
       >
-        <button
-          type="button"
-          class="app-navbar__toggle side-nav__link"
-          :aria-label="collapsed ? 'Show sidebar' : 'Hide sidebar'"
-          @click="emit('toggle')"
-        >
+        <span class="app-navbar__chevron side-nav__link">
           <i
             class="bi"
             :class="collapsed ? 'bi-chevron-right' : 'bi-chevron-left'"
             aria-hidden="true"
           ></i>
-        </button>
-      </div>
+        </span>
+      </span>
       <LogoVoleg class="app-navbar__brand" />
-    </div>
+    </button>
   </header>
 </template>
 

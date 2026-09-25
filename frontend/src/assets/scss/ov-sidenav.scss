@@ -213,6 +213,23 @@ $ov-chrome-toggle-icon-size: 1rem;
   min-height: 0;
 }
 
+.app-navbar__toggle.app-navbar__row {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+
+  &:hover {
+    background-color: var(--ov-surface-hover);
+  }
+}
+
 .app-navbar__sidebar-col {
   display: flex;
   flex-direction: column;
@@ -241,7 +258,7 @@ $ov-chrome-toggle-icon-size: 1rem;
   user-select: none;
 }
 
-.app-navbar__toggle.side-nav__link {
+.app-navbar__chevron.side-nav__link {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -249,9 +266,14 @@ $ov-chrome-toggle-icon-size: 1rem;
   width: calc(100% - #{$ov-sidenav-padding-x * 2});
   margin: 0 $ov-sidenav-padding-x;
   border-radius: $ov-sidenav-radius;
+  pointer-events: none;
+
+  &:hover {
+    background-color: transparent;
+  }
 }
 
-.app-navbar__sidebar-col--narrow .app-navbar__toggle.side-nav__link {
+.app-navbar__sidebar-col--narrow .app-navbar__chevron.side-nav__link {
   width: auto;
 }
 
@@ -261,7 +283,7 @@ $ov-chrome-toggle-icon-size: 1rem;
     width: auto;
   }
 
-  .app-navbar__toggle.side-nav__link {
+  .app-navbar__chevron.side-nav__link {
     width: auto;
   }
 }
