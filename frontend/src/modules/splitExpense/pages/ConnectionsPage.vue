@@ -86,7 +86,7 @@ loadPage(1)
         <div class="se-panel se-panel-block">
           <h2 class="se-panel__title">Requests</h2>
 
-          <ul class="nav nav-tabs justify-content-center" role="tablist">
+          <ul class="nav nav-tabs justify-content-center request-tabs" role="tablist">
             <li v-for="tab in requestTabs" :key="tab.id" class="nav-item" role="presentation">
               <button
                 type="button"
@@ -235,3 +235,11 @@ loadPage(1)
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Slightly smaller tabs, so all three fit on one line on phones (360px and up). */
+.request-tabs {
+  --bs-nav-link-font-size: var(--ov-font-size-md);
+  --bs-nav-link-padding-x: 0.75rem;
+}
+</style>
