@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ColorThemeToggle from './ColorThemeToggle.vue'
+import DesignToggle from './DesignToggle.vue'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuth } from '@/modules/user/stores/useAuth'
@@ -190,6 +191,9 @@ watch(
       <ul class="side-nav__list">
         <li class="side-nav__item">
           <ColorThemeToggle class="side-nav__theme" />
+        </li>
+        <li class="side-nav__item">
+          <DesignToggle class="side-nav__theme" />
         </li>
       </ul>
     </nav>

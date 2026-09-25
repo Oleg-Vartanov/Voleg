@@ -12,3 +12,20 @@ $ov-color-gray-600: #6c757d;
 $ov-color-gray-700: #495057;
 $ov-color-gray-800: #2b3035;
 $ov-color-gray-900: #212529;
+
+// Ink design (ov-ink.scss) — black-and-white ink on textured paper.
+// Light: black ink on white paper.
+$ov-ink-paper-light: $ov-color-white;
+$ov-ink-light: #141414;
+$ov-ink-muted-light: #666666;
+$ov-ink-red-light: #b3261e;
+$ov-ink-green-light: #2f6b3b;
+$ov-ink-ochre-light: #a85c16;
+
+// Dark: white ink on black paper.
+$ov-ink-paper-dark: #141414;
+$ov-ink-dark: #f2f2f2;
+$ov-ink-muted-dark: #a3a3a3;
+$ov-ink-red-dark: #ff8a7d;
+$ov-ink-green-dark: #8fd19e;
+$ov-ink-ochre-dark: #f0b35a;

@@ -1,0 +1,947 @@
+@use 'sass:math';
+@import 'ov-colors';
+
+// Ink design — the whole UI drawn in ink on textured paper.
+// Switched on by DesignToggle.vue (body[data-ov-design='ink']) and combines with both color themes.
+// Selectors start with `body[...]` so they outrank component scoped styles loaded later.
+// Wobbly outlines use the SVG filters from InkFilters.vue.
+
+$ink: "body[data-ov-design='ink']";
+$ink-dark: "body[data-ov-design='ink'][data-bs-theme='dark']";
+
+$ink-font-body: 'Kalam', 'Segoe Print', 'Bradley Hand', cursive;
+$ink-font-heading: 'Caveat', 'Kalam', 'Segoe Print', cursive;
+
+// Oversized uneven radii: browsers scale them down per box, which bends every edge of a large box.
+// Small boxes would end up nearly square with those, so they get uneven corners of their own.
+$ink-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+$ink-radius-alt: 15px 255px 15px 225px / 225px 15px 255px 15px;
+$ink-radius-sm: 10px 4px 12px 5px / 5px 12px 4px 10px;
+$ink-radius-sm-alt: 4px 11px 5px 13px / 12px 4px 10px 5px;
+$ink-radius-round: 48% 52% 45% 55% / 55% 45% 52% 48%;
+
+$ink-stroke: 1.5px;
+$ink-line-height: 8px;
+
+// ---------- SVG images ----------
+
+// Double quotes around the data URI: the SVG markup itself uses single quotes.
+@function ink-svg($svg) {
+  // prettier-ignore
+  @return escape-svg(url("data:image/svg+xml,#{$svg}"));
+}
+
+@function ink-path($d, $color, $width, $opacity: 1) {
+  @return "<path d='#{$d}' fill='none' stroke='#{$color}' stroke-opacity='#{$opacity}' stroke-width='#{$width}' stroke-linecap='round' vector-effect='non-scaling-stroke'/>";
+}
+
+// Stretchable stroke(s); non-scaling-stroke keeps the pen width when the image is stretched.
+@function ink-strokes($viewbox, $paths...) {
+  $svg: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='#{$viewbox}' preserveAspectRatio='none'>";
+  @each $path in $paths {
+    $svg: $svg + $path;
+  }
+  @return ink-svg($svg + '</svg>');
+}
+
+// Strokes run edge to edge and both ends sit at the same offset, so segments drawn per cell
+// (or tiles of a long line) join into one continuous line.
+$ink-hline-d: 'M0 4C50 3.2 110 3 170 3.7S290 4.9 350 4.3 396 3.8 400 4';
+$ink-hline-retrace-d: 'M6 5.6C80 5 150 5.3 230 5.9S360 5.2 394 5.5';
+$ink-vline-d: 'M4 0C3.2 50 3 110 3.7 170S4.9 290 4.3 350 3.8 396 4 400';
+$ink-underline-d: 'M2 6.5C20 4.8 55 4 98 5.2';
+$ink-underline-retrace-d: 'M10 9C35 7.6 62 7.3 90 7.9';
+$ink-check-d: 'M5 10.5c1.2 1 2.4 2.3 3.6 3.6C10.5 10.8 12.8 8 15.5 5.2';
+
+@function ink-hline($color, $width, $opacity: 1) {
+  @return ink-strokes('0 0 400 8', ink-path($ink-hline-d, $color, $width, $opacity));
+}
+
+@function ink-hline-double($color) {
+  @return ink-strokes(
+    '0 0 400 8',
+    ink-path($ink-hline-d, $color, 1.4),
+    ink-path($ink-hline-retrace-d, $color, 0.9, 0.7)
+  );
+}
+
+@function ink-vline($color, $width) {
+  @return ink-strokes('0 0 8 400', ink-path($ink-vline-d, $color, $width));
+}
+
+@function ink-underline($color) {
+  @return ink-strokes(
+    '0 0 100 12',
+    ink-path($ink-underline-d, $color, 2),
+    ink-path($ink-underline-retrace-d, $color, 1.3, 0.8)
+  );
+}
+
+@function ink-check($color) {
+  @return ink-svg(
+    "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='#{$ink-check-d}' fill='none' stroke='#{$color}' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/></svg>"
+  );
+}
+
+@function ink-knob($color) {
+  @return ink-svg(
+    "<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$color}'/></svg>"
+  );
+}
+
+// Paper texture: cotton card stock, a fine grain over soft fibre clouds.
+// Sizes are in px (the noise frequency is 1 / size); the tile nudges them slightly so it repeats seamlessly.
+$ink-paper-grain-size: 5; // fine tooth
+$ink-paper-grain-detail: 4; // noise octaves: more is grittier
+$ink-paper-fibre-size: 28; // soft clouds
+$ink-paper-fibre-detail: 3;
+$ink-paper-fibre-mix: 0.25; // 0 = grain only, 1 = clouds only
+$ink-paper-depth: 1.6; // embossing, how strong the shading is
+$ink-paper-opacity-light: 0.14; // overall visibility on white paper
+$ink-paper-opacity-dark: 0.2; // overall visibility on black paper
+
+// The relief is embossed by a light from the top left and comes out as black shadows and white
+// highlights over transparency (flat areas stay clear), so one tile works on any paper color.
+// The filter region matches the tile exactly, otherwise stitchTiles leaves seams.
+@function ink-paper-texture($opacity) {
+  @return ink-svg(
+    "<svg xmlns='http://www.w3.org/2000/svg' width='360' height='360'>" +
+      "<filter id='f' x='0' y='0' width='100%' height='100%' color-interpolation-filters='sRGB'>" +
+      "<feTurbulence type='fractalNoise' baseFrequency='#{math.div(1, $ink-paper-grain-size)}' numOctaves='#{$ink-paper-grain-detail}' seed='5' stitchTiles='stitch' result='grain'/>" +
+      "<feTurbulence type='fractalNoise' baseFrequency='#{math.div(1, $ink-paper-fibre-size)}' numOctaves='#{$ink-paper-fibre-detail}' seed='7' stitchTiles='stitch' result='fibre'/>" +
+      "<feComposite in='grain' in2='fibre' operator='arithmetic' k2='#{1 - $ink-paper-fibre-mix}' k3='#{$ink-paper-fibre-mix}' result='relief'/>" +
+      "<feDiffuseLighting in='relief' surfaceScale='#{$ink-paper-depth}' lighting-color='#fff' result='lit'><feDistantLight azimuth='235' elevation='45'/></feDiffuseLighting>" +
+      "<feColorMatrix in='lit' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.6 0 0 0 1.13' result='shadow'/>" +
+      "<feColorMatrix in='lit' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.6 0 0 0 -1.13' result='highlight'/>" +
+      "<feMerge><feMergeNode in='shadow'/><feMergeNode in='highlight'/></feMerge></filter>" +
+      "<rect width='100%' height='100%' filter='url(#f)' opacity='#{$opacity}'/></svg>"
+  );
+}
+
+// ---------- Theme tokens ----------
+
+@mixin ink-theme(
+  $paper,
+  $ink-color,
+  $muted,
+  $red,
+  $green,
+  $ochre,
+  $highlight-alpha,
+  $texture-opacity
+) {
+  --ov-paper: #{$paper};
+  --ov-paper-texture: #{ink-paper-texture($texture-opacity)};
+  --ov-ink: #{$ink-color};
+  --ov-ink-rgb: #{to-rgb($ink-color)};
+  --ov-ink-muted: #{$muted};
+  --ov-ink-red: #{$red};
+  --ov-ink-green: #{$green};
+  --ov-ink-ochre: #{$ochre};
+  --ov-ink-wash: #{rgba($ink-color, 0.07)};
+  --ov-ink-highlight: #{rgba($ink-color, $highlight-alpha)};
+  --ov-ink-line: #{ink-hline($ink-color, 1.3)};
+  --ov-ink-line-faint: #{ink-hline($ink-color, 1, 0.4)};
+  --ov-ink-line-double: #{ink-hline-double($ink-color)};
+  --ov-ink-vline: #{ink-vline($ink-color, 1.3)};
+  --ov-ink-vline-bold: #{ink-vline($ink-color, 2.6)};
+  --ov-ink-underline: #{ink-underline($ink-color)};
+  --ov-ink-check: #{ink-check($paper)};
+  --ov-ink-knob: #{ink-knob(rgba($ink-color, 0.55))};
+  --ov-ink-knob-checked: #{ink-knob($paper)};
+
+  // Site tokens (ov-theme.scss)
+  --ov-color-primary: #{$ink-color};
+  --ov-text: #{$ink-color};
+  --ov-text-muted: #{$muted};
+  --ov-surface: transparent;
+  --ov-surface-hover: var(--ov-ink-wash);
+  --ov-chrome-bg: transparent;
+  --ov-border: #{rgba($ink-color, 0.3)};
+  --ov-logo-fill-primary: #{$ink-color};
+  --ov-logo-fill-secondary: #{$paper};
+
+  // Bootstrap tokens
+  --bs-body-bg: #{$paper};
+  --bs-body-bg-rgb: #{to-rgb($paper)};
+  --bs-body-color: #{$ink-color};
+  --bs-body-color-rgb: #{to-rgb($ink-color)};
+  --bs-emphasis-color: #{$ink-color};
+  --bs-emphasis-color-rgb: #{to-rgb($ink-color)};
+  --bs-secondary-color: #{$muted};
+  --bs-secondary-color-rgb: #{to-rgb($muted)};
+  --bs-tertiary-color: #{rgba($muted, 0.75)};
+  --bs-secondary-bg: #{rgba($ink-color, 0.06)};
+  --bs-tertiary-bg: #{rgba($ink-color, 0.04)};
+  --bs-border-color: #{rgba($ink-color, 0.35)};
+  --bs-border-color-translucent: #{rgba($ink-color, 0.2)};
+  --bs-link-color: #{$ink-color};
+  --bs-link-color-rgb: #{to-rgb($ink-color)};
+  --bs-link-hover-color: #{$muted};
+  --bs-link-hover-color-rgb: #{to-rgb($muted)};
+  --bs-highlight-bg: var(--ov-ink-highlight);
+  --bs-highlight-color: #{$ink-color};
+  --bs-focus-ring-color: #{rgba($ink-color, 0.25)};
+  --bs-form-valid-color: #{$green};
+  --bs-form-valid-border-color: #{$green};
+  --bs-form-invalid-color: #{$red};
+  --bs-form-invalid-border-color: #{$red};
+  --bs-orange: #{$ochre};
+  --bs-box-shadow: 0 0.5rem 1rem #{rgba($ov-color-black, 0.15)};
+
+  $variants: (
+    primary: $ink-color,
+    secondary: $muted,
+    success: $green,
+    danger: $red,
+    warning: $ochre,
+    info: $ink-color
+  );
+
+  @each $name, $color in $variants {
+    --bs-#{$name}: #{$color};
+    --bs-#{$name}-rgb: #{to-rgb($color)};
+    --bs-#{$name}-text-emphasis: #{$color};
+    --bs-#{$name}-bg-subtle: #{rgba($color, 0.08)};
+    --bs-#{$name}-border-subtle: #{$color};
+  }
+}
+
+#{$ink} {
+  @include ink-theme(
+    $ov-ink-paper-light,
+    $ov-ink-light,
+    $ov-ink-muted-light,
+    $ov-ink-red-light,
+    $ov-ink-green-light,
+    $ov-ink-ochre-light,
+    0.15,
+    $ink-paper-opacity-light
+  );
+
+  --bs-body-font-family: #{$ink-font-body};
+  --bs-border-width: #{$ink-stroke};
+
+  background: var(--ov-paper-texture) var(--ov-paper);
+  // A hairline blur of the glyph's own color reads as ink soaking into the paper.
+  text-shadow: 0 0 0.6px;
+  scrollbar-color: rgba(var(--ov-ink-rgb), 0.45) transparent;
+}
+
+#{$ink-dark} {
+  @include ink-theme(
+    $ov-ink-paper-dark,
+    $ov-ink-dark,
+    $ov-ink-muted-dark,
+    $ov-ink-red-dark,
+    $ov-ink-green-dark,
+    $ov-ink-ochre-dark,
+    0.25,
+    $ink-paper-opacity-dark
+  );
+}
+
+// ---------- Mixins ----------
+
+// Straight border swapped for a drawn stroke along one side.
+@mixin ink-rule($image: var(--ov-ink-line-faint), $side: bottom) {
+  border-#{$side}-color: transparent;
+  background-image: $image;
+  background-repeat: no-repeat;
+  background-position: left $side;
+  background-size: 100% $ink-line-height;
+}
+
+// Outline drawn by filtered pseudo-elements, so the element's own text stays crisp:
+// ::before is the stroke (and fill, for buttons), ::after a lighter second pass slightly off it.
+// $behind puts them under the element's content, which needs an isolated stacking context;
+// without it the outline paints over the (transparent) edge of in-flow content instead.
+@mixin ink-drawn-box(
+  $color: var(--ov-ink),
+  $radius: $ink-radius,
+  $inset: 1px,
+  $retrace-radius: $ink-radius-alt,
+  $behind: true
+) {
+  position: relative;
+  border-color: transparent;
+
+  @if $behind {
+    isolation: isolate;
+  }
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset: $inset;
+    z-index: if($behind, -1, auto);
+    border: $ink-stroke solid $color;
+    border-radius: $radius;
+    pointer-events: none;
+  }
+
+  &::before {
+    filter: url(#ov-ink-rough);
+  }
+
+  &::after {
+    border-width: 1px;
+    border-radius: $retrace-radius;
+    opacity: 0.45;
+    filter: url(#ov-ink-rough-retrace);
+  }
+}
+
+@mixin ink-paper-surface {
+  background-color: var(--ov-paper);
+  background-image: var(--ov-paper-texture);
+}
+
+// ---------- Typography ----------
+
+// Headings stay at element specificity, so component classes styling a heading still win.
+:where(#{$ink}) {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .h1,
+  .h2,
+  .h3,
+  .h4,
+  .h5,
+  .h6 {
+    font-family: $ink-font-heading;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  // Caveat runs small, so headings get a size bump over Bootstrap's scale.
+  h1,
+  .h1 {
+    font-size: 2.9rem;
+  }
+
+  h2,
+  .h2 {
+    font-size: 2.5rem;
+  }
+
+  h3,
+  .h3 {
+    font-size: 2.2rem;
+  }
+
+  h4,
+  .h4 {
+    font-size: 1.95rem;
+  }
+
+  h5,
+  .h5 {
+    font-size: 1.65rem;
+  }
+
+  h6,
+  .h6 {
+    font-size: 1.35rem;
+  }
+}
+
+#{$ink} {
+  .modal-title {
+    // Overrides Bootstrap's `.fs-5` utility (!important).
+    font-size: 1.75rem !important;
+  }
+
+  a {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  ::selection {
+    background-color: var(--ov-ink-highlight);
+    color: inherit;
+  }
+
+  hr {
+    height: $ink-line-height;
+    border: 0;
+    opacity: 1;
+    background: var(--ov-ink-line) center / 100% $ink-line-height no-repeat;
+  }
+
+  .bi {
+    filter: url(#ov-ink-bleed);
+  }
+
+  .text-bg-primary,
+  .text-bg-secondary {
+    color: var(--ov-paper) !important;
+  }
+
+  .badge {
+    border-radius: $ink-radius-sm;
+  }
+}
+
+// ---------- Layout chrome ----------
+
+#{$ink} {
+  .app-navbar {
+    background-color: transparent;
+  }
+
+  .app-navbar__brand {
+    filter: url(#ov-ink-bleed);
+  }
+
+  // On desktop the page content draws the side-nav's edge (see .app-main below).
+  .side-nav {
+    background-color: transparent;
+    border-right-color: transparent;
+  }
+
+  .side-nav__divider {
+    margin: 0.35rem 0;
+  }
+
+  .side-nav__link--active,
+  .side-nav__link--active:hover {
+    border-left-color: transparent;
+    background-image: var(--ov-ink-vline-bold);
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 6px 85%;
+  }
+
+  .sidebar-backdrop {
+    background-color: rgba(var(--ov-ink-rgb), 0.3);
+  }
+
+  // The top line and the side-nav's edge are both drawn here, their 1.3px strokes centered 1px inside
+  // the top-left corner. Each starts at the other's outer edge (0.35px in), so the corner closes.
+  // The edge is its own box (a repeating background would also paint above the corner), tiled at a
+  // fixed length as the page's height varies.
+  @media (min-width: 768px) {
+    .app-main {
+      position: relative;
+      border-top-color: transparent;
+      background-image: var(--ov-ink-line);
+      background-repeat: no-repeat;
+      background-position: left 0.35px top -3px;
+      background-size: 100% $ink-line-height;
+    }
+
+    .side-nav:not(.side-nav--collapsed) + .app-main::before {
+      content: '';
+      position: absolute;
+      top: 0.35px;
+      bottom: 0;
+      left: -3px;
+      width: $ink-line-height;
+      background: var(--ov-ink-vline) left top / #{$ink-line-height} 400px repeat-y;
+      pointer-events: none;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    // Pulled onto the bar's bottom edge, so no strip of the bar shows between the line and the page.
+    .app-navbar {
+      @include ink-rule(var(--ov-ink-line), bottom);
+      background-position: left bottom -3px;
+    }
+
+    // Slides over the page, so it needs its own sheet of paper.
+    .side-nav {
+      background-color: var(--ov-paper);
+      background-image: var(--ov-ink-vline), var(--ov-paper-texture);
+      background-repeat: repeat-y, repeat;
+      background-position:
+        right -3px top,
+        left top;
+      background-size:
+        $ink-line-height 400px,
+        auto;
+      box-shadow: 0.35rem 0 1rem rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+// ---------- Buttons ----------
+
+$ink-btn-variants: (
+  primary: var(--ov-ink),
+  secondary: var(--ov-ink-muted),
+  success: var(--ov-ink-green),
+  danger: var(--ov-ink-red),
+  warning: var(--ov-ink-ochre),
+  info: var(--ov-ink),
+  dark: var(--ov-ink),
+  light: var(--ov-paper)
+);
+
+$ink-btn-selectors: ();
+
+@each $name, $color in $ink-btn-variants {
+  $ink-btn-selectors: append($ink-btn-selectors, unquote('.btn-#{$name}'), comma);
+  $ink-btn-selectors: append($ink-btn-selectors, unquote('.btn-outline-#{$name}'), comma);
+}
+
+#{$ink} {
+  #{$ink-btn-selectors} {
+    // Outline look by default: transparent inside, hatched on hover, inked when pressed.
+    --ov-btn-fill: transparent;
+    --ov-btn-hover-fill: repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--ov-btn-ink) 35%, transparent) 0 1px,
+      transparent 1px 5px
+    );
+    --ov-btn-active-fill: var(--ov-btn-ink);
+    --bs-btn-color: var(--ov-btn-ink);
+    --bs-btn-hover-color: var(--ov-btn-ink);
+    --bs-btn-active-color: var(--ov-paper);
+    --bs-btn-disabled-color: var(--ov-btn-ink);
+
+    @include ink-drawn-box(var(--ov-btn-ink), $ink-radius-sm, 1px, $ink-radius-sm-alt);
+
+    // Bootstrap paints fill and border per state with high specificity; the pseudo-element draws them instead.
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+
+    &::before {
+      background: var(--ov-btn-fill);
+      transition: transform 0.15s ease-in-out;
+    }
+
+    &:hover::before {
+      background: var(--ov-btn-hover-fill);
+      transform: rotate(-0.6deg);
+    }
+
+    &:active::before,
+    &.active::before,
+    &.show::before {
+      background: var(--ov-btn-active-fill);
+    }
+
+    &:focus-visible {
+      outline: $ink-stroke dashed var(--ov-btn-ink);
+      outline-offset: 2px;
+    }
+  }
+
+  .btn-check:checked + :is(#{$ink-btn-selectors})::before {
+    background: var(--ov-btn-active-fill);
+  }
+
+  @each $name, $color in $ink-btn-variants {
+    .btn-#{$name},
+    .btn-outline-#{$name} {
+      --ov-btn-ink: #{$color};
+    }
+
+    // Solid variants: a filled blot of ink.
+    .btn-#{$name} {
+      --ov-btn-fill: var(--ov-btn-ink);
+      --ov-btn-hover-fill: var(--ov-btn-ink);
+      --bs-btn-color: var(--ov-paper);
+      --bs-btn-hover-color: var(--ov-paper);
+      --bs-btn-disabled-color: var(--ov-paper);
+    }
+  }
+
+  .btn-light {
+    --bs-btn-color: var(--ov-ink);
+    --bs-btn-hover-color: var(--ov-ink);
+    --bs-btn-active-color: var(--ov-ink);
+    --bs-btn-disabled-color: var(--ov-ink);
+  }
+
+  .btn-link {
+    --bs-btn-color: var(--bs-link-color);
+    --bs-btn-hover-color: var(--bs-link-hover-color);
+  }
+
+  .btn-group {
+    gap: 0.2rem;
+  }
+
+  .btn-close {
+    filter: url(#ov-ink-bleed);
+  }
+}
+
+#{$ink-dark} .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%) url(#ov-ink-bleed);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #{$ink} :is(#{$ink-btn-selectors}):hover::before {
+    transform: none;
+  }
+}
+
+// ---------- Forms ----------
+
+#{$ink} {
+  // :where() keeps specificity low so Bootstrap's validation states still win.
+  :where(.form-control, .form-select) {
+    background-color: transparent;
+    border-color: rgba(var(--ov-ink-rgb), 0.85);
+    border-radius: $ink-radius-sm-alt;
+  }
+
+  :where(.form-control, .form-select):focus {
+    background-color: transparent;
+    border-color: var(--ov-ink);
+    box-shadow: 0 0 0 0.2rem var(--ov-ink-highlight);
+  }
+
+  // Floating fields: the wrapper draws the outline, the field itself stays borderless.
+  .form-floating {
+    @include ink-drawn-box(
+      rgba(var(--ov-ink-rgb), 0.85),
+      $ink-radius-sm-alt,
+      0px,
+      $ink-radius-sm,
+      $behind: false
+    );
+
+    > :is(.form-control, .form-select) {
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    &:focus-within::before {
+      border-width: 2.25px;
+      border-color: var(--ov-ink);
+    }
+
+    &:has(.is-invalid)::before,
+    &:has(.is-invalid)::after {
+      border-color: var(--bs-form-invalid-border-color);
+    }
+
+    // Read-only fields: a dashed outline instead of a grey fill.
+    &:has(> :disabled)::before {
+      border-style: dashed;
+    }
+
+    &:has(> :disabled)::after {
+      display: none;
+    }
+
+    > :disabled {
+      background-color: transparent;
+    }
+  }
+
+  // Input groups: one outline around the group, a drawn divider after each addon.
+  .input-group {
+    @include ink-drawn-box(
+      rgba(var(--ov-ink-rgb), 0.85),
+      $ink-radius-sm-alt,
+      0px,
+      $ink-radius-sm,
+      $behind: false
+    );
+
+    > :is(.form-control, .form-select, .input-group-text, .form-floating) {
+      border-color: transparent;
+      background-color: transparent;
+      box-shadow: none;
+    }
+
+    > .input-group-text {
+      background-image: var(--ov-ink-vline);
+      background-repeat: no-repeat;
+      background-position: right center;
+      background-size: $ink-line-height 80%;
+    }
+
+    &:focus-within::before {
+      border-width: 2.25px;
+      border-color: var(--ov-ink);
+    }
+  }
+
+  .form-floating > label {
+    color: var(--ov-ink-muted);
+  }
+
+  .form-floating > :is(.form-control, .form-control-plaintext, .form-select) ~ label::after {
+    background-color: transparent;
+  }
+
+  .form-text,
+  .invalid-feedback,
+  .valid-feedback {
+    font-size: var(--ov-font-size-md);
+  }
+
+  .form-check-input {
+    background-color: transparent;
+    border-color: var(--ov-ink);
+
+    &[type='checkbox'] {
+      border-radius: 3px 6px 2px 7px / 6px 2px 7px 3px;
+    }
+
+    &:checked {
+      background-color: var(--ov-ink);
+      border-color: var(--ov-ink);
+    }
+
+    &:checked[type='checkbox'] {
+      --bs-form-check-bg-image: var(--ov-ink-check);
+    }
+
+    &:focus {
+      border-color: var(--ov-ink);
+      box-shadow: 0 0 0 0.2rem var(--ov-ink-highlight);
+    }
+  }
+
+  .form-switch .form-check-input {
+    --bs-form-switch-bg: var(--ov-ink-knob);
+    border-radius: 2em;
+
+    &:checked {
+      --bs-form-switch-bg: var(--ov-ink-knob-checked);
+    }
+  }
+
+  // Custom selects and pickers (FormSelectMenu, FormSelect, FormSelectUsers, pagination).
+  .form-select-menu-trigger,
+  .app-pagination-input,
+  .app-pagination-page-size .form-select-menu-trigger {
+    border-color: var(--ov-ink);
+    border-radius: $ink-radius-sm-alt;
+    background-color: transparent;
+  }
+
+  .app-pagination-control {
+    border-radius: $ink-radius-sm;
+  }
+
+  .form-select-menu-trigger:focus {
+    background-color: transparent;
+    box-shadow: 0 0 0 0.2rem var(--ov-ink-highlight);
+  }
+
+  .form-user-select-input-control:focus-within {
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  .form-select-menu-dropdown,
+  .form-select-icons-options,
+  .form-user-select-input-dropdown {
+    @include ink-paper-surface;
+    border-color: var(--ov-ink);
+    box-shadow: 0.2rem 0.35rem 0.75rem rgba(0, 0, 0, 0.15);
+  }
+}
+
+// ---------- Surfaces ----------
+
+#{$ink} {
+  .modal-backdrop {
+    --bs-backdrop-bg: #{$ov-ink-light};
+    --bs-backdrop-opacity: 0.35;
+  }
+
+  .modal-content {
+    --bs-modal-bg: var(--ov-paper);
+    --bs-modal-border-color: transparent;
+    --bs-modal-header-border-color: transparent;
+    --bs-modal-footer-border-color: transparent;
+    --bs-modal-border-radius: #{$ink-radius};
+
+    @include ink-drawn-box(var(--ov-ink), $ink-radius, 3px);
+    background-image: var(--ov-paper-texture);
+    box-shadow:
+      0.15rem 0.25rem 0 rgba(var(--ov-ink-rgb), 0.12),
+      0 1.25rem 2.5rem rgba(0, 0, 0, 0.3);
+  }
+
+  .modal-header {
+    @include ink-rule(var(--ov-ink-line), bottom);
+    background-size: calc(100% - 1.5rem) $ink-line-height;
+    background-position: center bottom;
+  }
+
+  .modal-footer {
+    @include ink-rule(var(--ov-ink-line), top);
+    background-size: calc(100% - 1.5rem) $ink-line-height;
+    background-position: center top;
+  }
+
+  .card {
+    --bs-card-bg: transparent;
+    --bs-card-cap-bg: transparent;
+    --bs-card-border-radius: #{$ink-radius};
+    --bs-card-inner-border-radius: #{$ink-radius};
+
+    @include ink-drawn-box;
+    // Overrides `.border-*` and `.shadow-*` utilities (!important); the pseudo-elements draw the outline.
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  // Inset, so the line ends inside the card's drawn outline.
+  .card-header {
+    @include ink-rule(var(--ov-ink-line), bottom);
+    background-position: center bottom;
+    background-size: calc(100% - 1rem) $ink-line-height;
+  }
+
+  // Filled headers: a rough blot of ink instead of the flat `.text-bg-*` fill (!important utilities).
+  .card-header:is(.text-bg-primary, .text-bg-secondary) {
+    position: relative;
+    isolation: isolate;
+    border-color: transparent !important;
+    background: none !important;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 3px 3px 0;
+      z-index: -1;
+      border-radius: $ink-radius-sm;
+      background-color: var(--ov-card-header-ink);
+      filter: url(#ov-ink-rough);
+    }
+  }
+
+  .card-header.text-bg-primary {
+    --ov-card-header-ink: var(--ov-ink);
+  }
+
+  .card-header.text-bg-secondary {
+    --ov-card-header-ink: var(--ov-ink-muted);
+  }
+
+  .alert {
+    --bs-alert-border-radius: #{$ink-radius-sm};
+
+    @include ink-drawn-box(var(--bs-alert-border-color), $ink-radius-sm, 1px, $ink-radius-sm-alt);
+  }
+
+  .list-group {
+    --bs-list-group-bg: transparent;
+    --bs-list-group-color: var(--ov-ink);
+    --bs-list-group-border-color: transparent;
+    --bs-list-group-action-hover-bg: var(--ov-ink-wash);
+    --bs-list-group-action-active-bg: var(--ov-ink-wash);
+  }
+
+  .list-group-item + .list-group-item {
+    @include ink-rule(var(--ov-ink-line-faint), top);
+  }
+
+  .se-panel-block {
+    @include ink-drawn-box;
+  }
+
+  .spinner-border {
+    border-radius: $ink-radius-round;
+    filter: url(#ov-ink-rough);
+  }
+
+  .nav-tabs {
+    --bs-nav-tabs-border-color: transparent;
+    --bs-nav-tabs-link-hover-border-color: transparent;
+    --bs-nav-tabs-link-active-bg: transparent;
+    --bs-nav-tabs-link-active-border-color: transparent;
+    --bs-nav-tabs-link-active-color: var(--ov-ink);
+    --bs-nav-link-color: var(--ov-ink-muted);
+    --bs-nav-link-hover-color: var(--ov-ink);
+  }
+
+  .nav-tabs .nav-link.active {
+    background-color: transparent;
+    border-color: transparent;
+    font-weight: 700;
+    background-image: var(--ov-ink-underline);
+    background-repeat: no-repeat;
+    background-position: center bottom 0.15rem;
+    background-size: 85% 12px;
+  }
+}
+
+#{$ink-dark} .modal-backdrop {
+  --bs-backdrop-bg: #000;
+  --bs-backdrop-opacity: 0.6;
+}
+
+// ---------- Tables and lists ----------
+
+#{$ink} {
+  .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--ov-ink);
+    --bs-table-border-color: transparent;
+    --bs-table-hover-bg: var(--ov-ink-wash);
+    --bs-table-striped-bg: var(--ov-ink-wash);
+  }
+
+  .table > :not(caption) > * > * {
+    @include ink-rule;
+  }
+
+  .table > thead > tr > * {
+    @include ink-rule(var(--ov-ink-line-double));
+  }
+
+  // Football predictions (FixturesTable, LeaderboardTable)
+  .fixtures-row > *,
+  .fixtures-empty-cell,
+  .leaderboard-row > *,
+  .leaderboard-empty-cell {
+    @include ink-rule;
+  }
+
+  .fixtures-row--head > *,
+  .leaderboard-row--head > * {
+    @include ink-rule(var(--ov-ink-line-double));
+  }
+
+  // Split expense (ExpensesPage, AdjustmentsPage, BalancePage, detail panels)
+  .expenses-month-header,
+  .adjustments-month-header {
+    @include ink-rule(var(--ov-ink-line-double));
+    background-color: transparent;
+    font-family: $ink-font-heading;
+    font-size: 1.45rem;
+  }
+
+  .expense-item:not(.is-expanded) .expense-row,
+  .expense-item.is-expanded,
+  .adjustment-item:not(.is-expanded) .adjustment-row,
+  .adjustment-item.is-expanded {
+    @include ink-rule;
+  }
+
+  .expense-detail-content,
+  .adjustment-detail-content {
+    border-inline-end-color: transparent;
+    background-image: var(--ov-ink-vline);
+    background-repeat: no-repeat;
+    background-position: right top;
+    background-size: $ink-line-height 100%;
+
+    @media (max-width: 767.98px) {
+      @include ink-rule;
+    }
+  }
+
+  .balance-total {
+    @include ink-rule(var(--ov-ink-line-double));
+  }
+}
