@@ -13,10 +13,7 @@ $ink-dark: "body[data-ov-design='ink'][data-bs-theme='dark']";
 $ink-font-body: 'Kalam', 'Segoe Print', 'Bradley Hand', cursive;
 $ink-font-heading: 'Caveat', 'Kalam', 'Segoe Print', cursive;
 
-// Oversized uneven radii: browsers scale them down per box, which bends every edge of a large box.
-// Small boxes would end up nearly square with those, so they get uneven corners of their own.
-$ink-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
-$ink-radius-alt: 15px 255px 15px 225px / 225px 15px 255px 15px;
+// Uneven corners for plain CSS shapes (fields, fills, badges).
 $ink-radius-sm: 10px 4px 12px 5px / 5px 12px 4px 10px;
 $ink-radius-sm-alt: 4px 11px 5px 13px / 12px 4px 10px 5px;
 $ink-radius-round: 48% 52% 45% 55% / 55% 45% 52% 48%;
@@ -89,6 +86,174 @@ $ink-check-d: 'M5 10.5c1.2 1 2.4 2.3 3.6 3.6C10.5 10.8 12.8 8 15.5 5.2';
     "<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$color}'/></svg>"
   );
 }
+
+// Hand-drawn box outline (see ink-drawn-box): pen strokes baked into small SVG shapes and used as a
+// mask, so their color comes from CSS. Corners keep their size and the sides stretch; the top and
+// bottom repeat a drawn stroke, so the wobble stays the same size on long boxes. Each has a main pass
+// and a lighter retrace. No filters: painting it costs about as much as a border.
+
+// The pen, in px.
+$ink-pen-width: 1.5; // stroke width
+$ink-pen-pressure: 0.35; // how much the width swells and thins along a stroke, 0 to 1
+$ink-pen-grain: 0.3; // how ragged the stroke edges are, as if catching on the paper
+$ink-pen-wobble: 1.2; // how far a stroke wanders off a straight line
+$ink-pen-stroke: 180; // length of the drawn stroke the top and bottom repeat
+$ink-pen-step: 2; // spacing of the points along a stroke's outline
+
+$ink-box-band: 8px; // strokes run along the middle of this band
+$ink-box-corner: 12px;
+
+// Deterministic pseudo-random number in [0, 1).
+@function ink-random($seed) {
+  $v: math.sin($seed * 12.9898) * 43758.5453;
+  @return $v - math.floor($v);
+}
+
+@function ink-round($v) {
+  @return math.div(math.round($v * 10), 10);
+}
+
+// Smooth wave within ±1 over $t from 0 to 1, zero at both ends: each sine runs a whole number of
+// $cycles, so a stroke ends where it started and repeats join up.
+@function ink-wave($t, $seed, $cycles) {
+  $sum: 0;
+  $weights: 0;
+  $i: 1;
+  @each $k in $cycles {
+    $phase: ink-random($seed + $i) * 2 * math.$pi;
+    $weight: math.div(1, $i);
+    $sum: $sum + $weight * (math.sin(2 * math.$pi * $k * $t + $phase) - math.sin($phase));
+    $weights: $weights + $weight;
+    $i: $i + 1;
+  }
+  @return math.div($sum, 2 * $weights);
+}
+
+// Outline of a pen stroke $length long along the middle of the band, as path data.
+@function ink-pen-edge($length, $seed, $cycles, $wobble, $width, $vertical: false) {
+  $steps: math.max(1, math.round(math.div($length, $ink-pen-step)));
+  $side-a: '';
+  $side-b: '';
+  @for $i from 0 through $steps {
+    $t: math.div($i, $steps);
+    $center: 4 + $wobble * ink-wave($t, $seed, $cycles);
+    $half: 0.5 * $width * (1 + $ink-pen-pressure * ink-wave($t, $seed + 10, (2, 5)));
+    $grain: if($i == $steps, 0, $i); // the same at both ends, so repeats join up
+    $a: ink-round($center - $half + $ink-pen-grain * (2 * ink-random($seed + 20 + $grain) - 1));
+    $b: ink-round($center + $half + $ink-pen-grain * (2 * ink-random($seed + 40.5 + $grain) - 1));
+    $along: ink-round($t * $length);
+    $point-a: if($vertical, '#{$a} #{$along}', '#{$along} #{$a}');
+    $point-b: if($vertical, '#{$b} #{$along}', '#{$along} #{$b}');
+    $side-a: $side-a + if($i == 0, 'M', 'L') + $point-a;
+    $side-b: 'L' + $point-b + $side-b;
+  }
+  @return $side-a + $side-b + 'Z';
+}
+
+// Outline of a pen stroke around the top-left corner of the corner square: a quarter circle from the
+// left side's band to the top's.
+@function ink-pen-corner($seed, $width, $radius, $center) {
+  $steps: 10;
+  $outer: '';
+  $inner: '';
+  @for $i from 0 through $steps {
+    $t: math.div($i, $steps);
+    $angle: math.$pi * (1 + 0.5 * $t);
+    $r: $radius + 0.3 * $ink-pen-wobble * ink-wave($t, $seed, (1));
+    $half: 0.5 * $width * (1 + $ink-pen-pressure * ink-wave($t, $seed + 10, (1, 2)));
+    $o: $r + $half + $ink-pen-grain * (2 * ink-random($seed + 20 + $i) - 1);
+    $n: $r - $half + $ink-pen-grain * (2 * ink-random($seed + 40.5 + $i) - 1);
+    $cos: math.cos($angle);
+    $sin: math.sin($angle);
+    $outer: $outer +
+      if($i == 0, 'M', 'L') +
+      '#{ink-round($center + $o * $cos)} #{ink-round($center + $o * $sin)}';
+    $inner: 'L' + '#{ink-round($center + $n * $cos)} #{ink-round($center + $n * $sin)}' + $inner;
+  }
+  @return $outer + $inner + 'Z';
+}
+
+$ink-pen-retrace: "fill-opacity='.45'";
+
+@function ink-pen-shape($viewbox, $paths...) {
+  $svg: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='#{$viewbox}' preserveAspectRatio='none'>";
+  @each $d, $attrs in $paths {
+    $svg: $svg + "<path d='#{$d}' #{$attrs}/>";
+  }
+  @return ink-svg($svg + '</svg>');
+}
+
+@function ink-box-corner-shape($angle) {
+  $main: ink-pen-corner(1, $ink-pen-width, 8, 12);
+  $retrace: ink-pen-corner(2, 0.6 * $ink-pen-width, 7.2, 12.4);
+  @return ink-svg(
+    "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><g transform='rotate(#{$angle} 6 6)'>" +
+      "<path d='#{$main}'/><path d='#{$retrace}' #{$ink-pen-retrace}/></g></svg>"
+  );
+}
+
+$ink-box-retrace-stroke: math.round($ink-pen-stroke * 1.3);
+
+// A repeated stroke: wobbles several times, so repeats aren't obvious.
+@function ink-box-edge-shape($length, $seed, $width, $attrs: '') {
+  $d: ink-pen-edge($length, $seed, (3, 5, 8), $ink-pen-wobble, $width);
+  @return ink-pen-shape('0 0 #{$length} 8', ($d, $attrs));
+}
+
+// A stretched side: a gentle curve, as most sides are short.
+@function ink-box-side-shape($seed) {
+  $main: ink-pen-edge(200, $seed, (1, 2), 0.7 * $ink-pen-wobble, $ink-pen-width, true);
+  $retrace: ink-pen-edge(200, $seed + 5, (1, 2), $ink-pen-wobble, 0.6 * $ink-pen-width, true);
+  @return ink-pen-shape('0 0 8 200', ($main, ''), ($retrace, $ink-pen-retrace));
+}
+
+// Mask layers: corners, top and bottom (main pass and retrace, each repeated), sides.
+@function ink-box-mask() {
+  $retrace-width: 0.6 * $ink-pen-width;
+  @return ink-box-corner-shape(0), ink-box-corner-shape(90), ink-box-corner-shape(180),
+    ink-box-corner-shape(270), ink-box-edge-shape($ink-pen-stroke, 3, $ink-pen-width),
+    ink-box-edge-shape($ink-box-retrace-stroke, 4, $retrace-width, $ink-pen-retrace),
+    ink-box-edge-shape($ink-pen-stroke, 5, $ink-pen-width),
+    ink-box-edge-shape($ink-box-retrace-stroke, 6, $retrace-width, $ink-pen-retrace),
+    ink-box-side-shape(7), ink-box-side-shape(8);
+}
+
+$ink-box-mask-positions:
+  left top,
+  right top,
+  right bottom,
+  left bottom,
+  left top,
+  left top,
+  left bottom,
+  left bottom,
+  left $ink-box-corner,
+  right $ink-box-corner;
+$ink-box-mask-boxes:
+  border-box, border-box, border-box, border-box, padding-box, padding-box, padding-box,
+  padding-box, border-box, border-box;
+$ink-box-mask-sizes:
+  $ink-box-corner $ink-box-corner,
+  $ink-box-corner $ink-box-corner,
+  $ink-box-corner $ink-box-corner,
+  $ink-box-corner $ink-box-corner,
+  #{$ink-pen-stroke}px $ink-box-band,
+  #{$ink-box-retrace-stroke}px $ink-box-band,
+  #{$ink-pen-stroke}px $ink-box-band,
+  #{$ink-box-retrace-stroke}px $ink-box-band,
+  $ink-box-band calc(100% - #{2 * $ink-box-corner}),
+  $ink-box-band calc(100% - #{2 * $ink-box-corner});
+$ink-box-mask-repeats:
+  no-repeat,
+  no-repeat,
+  no-repeat,
+  no-repeat,
+  round no-repeat,
+  round no-repeat,
+  round no-repeat,
+  round no-repeat,
+  no-repeat,
+  no-repeat;
 
 // Paper texture: cotton card stock, a fine grain over soft fibre clouds.
 // Sizes are in px (the noise frequency is 1 / size); the tile nudges them slightly so it repeats seamlessly.
@@ -224,6 +389,7 @@ $ink-paper-tile: 360; // px, the texture repeats at this size
     $ink-paper-opacity-light
   );
 
+  --ov-ink-box-mask: #{ink-box-mask()};
   --bs-body-font-family: #{$ink-font-body};
   --bs-border-width: #{$ink-stroke};
 
@@ -255,17 +421,14 @@ $ink-paper-tile: 360; // px, the texture repeats at this size
   background-size: 100% $ink-line-height;
 }
 
-// Outline drawn by pseudo-elements, so the element's own text is untouched: ::before is the stroke
-// (and fill, for buttons), ::after a lighter second pass, turned slightly as if gone over twice by hand.
-// $behind puts them under the element's content, which needs an isolated stacking context;
+// Hand-drawn outline (the ink-box-mask strokes) on ::after, so the element's own text is untouched;
+// ::before stays free for a fill. The color can be changed later through --ov-box-color.
+// $inset is how far inside the element's edge the stroke runs.
+// $behind puts it under the element's content, which needs an isolated stacking context;
 // without it the outline paints over the (transparent) edge of in-flow content instead.
-@mixin ink-drawn-box(
-  $color: var(--ov-ink),
-  $radius: $ink-radius,
-  $inset: 1px,
-  $retrace-radius: $ink-radius-alt,
-  $behind: true
-) {
+@mixin ink-drawn-box($color: var(--ov-ink), $inset: 1px, $behind: true) {
+  --ov-box-color: #{$color};
+
   position: relative;
   border-color: transparent;
 
@@ -273,22 +436,27 @@ $ink-paper-tile: 360; // px, the texture repeats at this size
     isolation: isolate;
   }
 
-  &::before,
   &::after {
     content: '';
     position: absolute;
-    inset: $inset;
+    inset: $inset - math.div($ink-box-band, 2);
     z-index: if($behind, -1, auto);
-    border: $ink-stroke solid $color;
-    border-radius: $radius;
+    // Narrows the padding box, which the repeated top and bottom are clipped to: they stop at the corners.
+    border-inline: $ink-box-corner solid transparent;
+    background-color: var(--ov-box-color);
     pointer-events: none;
-  }
-
-  &::after {
-    border-width: 1px;
-    border-radius: $retrace-radius;
-    opacity: 0.45;
-    transform: rotate(-0.4deg);
+    -webkit-mask-image: var(--ov-ink-box-mask);
+    -webkit-mask-position: $ink-box-mask-positions;
+    -webkit-mask-size: $ink-box-mask-sizes;
+    -webkit-mask-repeat: $ink-box-mask-repeats;
+    -webkit-mask-origin: $ink-box-mask-boxes;
+    -webkit-mask-clip: $ink-box-mask-boxes;
+    mask-image: var(--ov-ink-box-mask);
+    mask-position: $ink-box-mask-positions;
+    mask-size: $ink-box-mask-sizes;
+    mask-repeat: $ink-box-mask-repeats;
+    mask-origin: $ink-box-mask-boxes;
+    mask-clip: $ink-box-mask-boxes;
   }
 }
 
@@ -498,20 +666,35 @@ $ink-btn-selectors: ();
     --bs-btn-active-color: var(--ov-paper);
     --bs-btn-disabled-color: var(--ov-btn-ink);
 
-    @include ink-drawn-box(var(--ov-btn-ink), $ink-radius-sm, 1px, $ink-radius-sm-alt);
+    @include ink-drawn-box(var(--ov-btn-ink), 1.5px);
 
-    // Bootstrap paints fill and border per state with high specificity; the pseudo-element draws them instead.
+    // Bootstrap paints fill and border per state with high specificity; the pseudo-elements draw them instead.
     background: transparent !important;
     border-color: transparent !important;
     box-shadow: none !important;
 
+    // The fill; its edge hides under the stroke.
     &::before {
+      content: '';
+      position: absolute;
+      inset: 1.5px;
+      z-index: -1;
+      border-radius: 7px;
       background: var(--ov-btn-fill);
+      pointer-events: none;
+    }
+
+    &::before,
+    &::after {
       transition: transform 0.15s ease-in-out;
     }
 
     &:hover::before {
       background: var(--ov-btn-hover-fill);
+    }
+
+    &:hover::before,
+    &:hover::after {
       transform: rotate(-0.6deg);
     }
 
@@ -565,7 +748,8 @@ $ink-btn-selectors: ();
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #{$ink} :is(#{$ink-btn-selectors}):hover::before {
+  #{$ink} :is(#{$ink-btn-selectors}):hover::before,
+  #{$ink} :is(#{$ink-btn-selectors}):hover::after {
     transform: none;
   }
 }
@@ -586,38 +770,40 @@ $ink-btn-selectors: ();
     box-shadow: 0 0 0 0.2rem var(--ov-ink-highlight);
   }
 
-  // Floating fields: the wrapper draws the outline, the field itself stays borderless.
-  .form-floating {
-    @include ink-drawn-box(
-      rgba(var(--ov-ink-rgb), 0.85),
-      $ink-radius-sm-alt,
-      0px,
-      $ink-radius-sm,
-      $behind: false
-    );
+  // Floating fields and input groups: the wrapper draws the outline, the fields stay borderless.
+  // Not isolated, so dropdowns inside can still overlap the fields below.
+  .form-floating,
+  .input-group {
+    @include ink-drawn-box($behind: false);
 
+    // Focus glow, drawn around the outline.
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      border-radius: 8px;
+      pointer-events: none;
+      transition: box-shadow 0.15s ease-in-out;
+    }
+
+    &:focus-within::before {
+      box-shadow: 0 0 0 0.2rem var(--ov-ink-highlight);
+    }
+  }
+
+  .form-floating {
     > :is(.form-control, .form-select) {
       border-color: transparent;
       box-shadow: none;
     }
 
-    &:focus-within::before {
-      border-width: 2.25px;
-      border-color: var(--ov-ink);
+    &:has(.is-invalid) {
+      --ov-box-color: var(--bs-form-invalid-border-color);
     }
 
-    &:has(.is-invalid)::before,
-    &:has(.is-invalid)::after {
-      border-color: var(--bs-form-invalid-border-color);
-    }
-
-    // Read-only fields: a dashed outline instead of a grey fill.
-    &:has(> :disabled)::before {
-      border-style: dashed;
-    }
-
+    // Read-only fields: a faded outline instead of a grey fill.
     &:has(> :disabled)::after {
-      display: none;
+      opacity: 0.45;
     }
 
     > :disabled {
@@ -625,16 +811,8 @@ $ink-btn-selectors: ();
     }
   }
 
-  // Input groups: one outline around the group, a drawn divider after each addon.
+  // Input groups: a drawn divider after each addon.
   .input-group {
-    @include ink-drawn-box(
-      rgba(var(--ov-ink-rgb), 0.85),
-      $ink-radius-sm-alt,
-      0px,
-      $ink-radius-sm,
-      $behind: false
-    );
-
     > :is(.form-control, .form-select, .input-group-text, .form-floating) {
       border-color: transparent;
       background-color: transparent;
@@ -646,11 +824,6 @@ $ink-btn-selectors: ();
       background-repeat: no-repeat;
       background-position: right center;
       background-size: $ink-line-height 80%;
-    }
-
-    &:focus-within::before {
-      border-width: 2.25px;
-      border-color: var(--ov-ink);
     }
   }
 
@@ -745,9 +918,9 @@ $ink-btn-selectors: ();
     --bs-modal-border-color: transparent;
     --bs-modal-header-border-color: transparent;
     --bs-modal-footer-border-color: transparent;
-    --bs-modal-border-radius: #{$ink-radius};
+    --bs-modal-border-radius: #{$ink-radius-sm};
 
-    @include ink-drawn-box(var(--ov-ink), $ink-radius, 3px);
+    @include ink-drawn-box($inset: 4px);
     background-image: var(--ov-paper-image);
     background-size: #{$ink-paper-tile}px;
     box-shadow:
@@ -770,8 +943,8 @@ $ink-btn-selectors: ();
   .card {
     --bs-card-bg: transparent;
     --bs-card-cap-bg: transparent;
-    --bs-card-border-radius: #{$ink-radius};
-    --bs-card-inner-border-radius: #{$ink-radius};
+    --bs-card-border-radius: #{$ink-radius-sm};
+    --bs-card-inner-border-radius: #{$ink-radius-sm};
 
     @include ink-drawn-box;
     // Overrides `.border-*` and `.shadow-*` utilities (!important); the pseudo-elements draw the outline.
@@ -814,7 +987,7 @@ $ink-btn-selectors: ();
   .alert {
     --bs-alert-border-radius: #{$ink-radius-sm};
 
-    @include ink-drawn-box(var(--bs-alert-border-color), $ink-radius-sm, 1px, $ink-radius-sm-alt);
+    @include ink-drawn-box(var(--bs-alert-border-color));
   }
 
   .list-group {
