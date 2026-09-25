@@ -33,7 +33,8 @@ export default {
     userIds: null | number[] = null,
     season: null | number,
     offset: number = 0,
-    limit: number = 20
+    limit: number = 20,
+    upcomingOnly: boolean = false
   ) {
     return axios.get(`${apiBaseUrl}/fixtures/predictions`, {
       headers: getHeader(),
@@ -45,7 +46,8 @@ export default {
         season: season,
         offset: offset,
         limit: limit,
-        defaultToCurrentSeason: true
+        defaultToCurrentSeason: true,
+        upcomingOnly: upcomingOnly
       }
     })
   },

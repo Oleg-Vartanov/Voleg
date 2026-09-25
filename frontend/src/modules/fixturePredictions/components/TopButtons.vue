@@ -6,6 +6,7 @@ defineProps<{
 const emit = defineEmits<{
   openFilters: []
   openVersus: []
+  openPredictions: []
 }>()
 </script>
 
@@ -24,9 +25,9 @@ const emit = defineEmits<{
 
       <button
         class="btn btn-outline-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#predictionsModal"
+        type="button"
         :disabled="disablePredictions"
+        @click="emit('openPredictions')"
       >
         <i class="bi bi-magic"></i>
         Predict

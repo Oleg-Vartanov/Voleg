@@ -27,6 +27,7 @@ tables.loadFixtures()
 
 const isFiltersOpen = ref(false)
 const isVersusOpen = ref(false)
+const isPredictionsOpen = ref(false)
 
 const disablePredictions = computed(() => {
   return tables.isLoadingTables.value || tables.fixtures.value?.length === 0
@@ -38,12 +39,13 @@ const disablePredictions = computed(() => {
     <div class="container fixtures-page">
       <FixtureFilters v-model:open="isFiltersOpen" />
       <VersusModal v-model:open="isVersusOpen" />
-      <PredictionsModal />
+      <PredictionsModal v-model:open="isPredictionsOpen" />
 
       <TopButtons
         :disable-predictions="disablePredictions"
         @open-filters="isFiltersOpen = true"
         @open-versus="isVersusOpen = true"
+        @open-predictions="isPredictionsOpen = true"
       />
 
       <nav>

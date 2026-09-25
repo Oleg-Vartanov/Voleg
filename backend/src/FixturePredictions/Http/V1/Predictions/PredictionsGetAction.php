@@ -78,6 +78,7 @@ class PredictionsGetAction extends ApiController
             season: $season,
             start: $dto->start,
             end: $dto->end,
+            upcomingOnly: $dto->upcomingOnly,
         );
         $fixtures = $this->fixtureRepository->filter(
             users: $users,
@@ -87,6 +88,7 @@ class PredictionsGetAction extends ApiController
             end: $dto->end,
             limit: $dto->limit,
             offset: $dto->offset,
+            upcomingOnly: $dto->upcomingOnly,
         );
 
         $filters = new PredictionsFiltersResponse(

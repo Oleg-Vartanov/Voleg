@@ -26,6 +26,8 @@ class PredictionsRequest
         #[Assert\Positive]
         public ?int $season = null,
         public bool $defaultToCurrentSeason = false,
+        #[OA\Property(description: 'Only fixtures that have not started yet, i.e. can still be predicted.')]
+        public bool $upcomingOnly = false,
         #[Assert\NotBlank, Assert\Choice(callback: [CompetitionCodeEnum::class, 'values'])]
         public string $competitionCode = CompetitionCodeEnum::EPL->value,
         #[OA\Property(type: 'array', items: new OA\Items(type: 'integer'))]

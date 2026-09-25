@@ -1,23 +1,14 @@
 import type { Fixture, Prediction } from '@/modules/fixturePredictions/type'
 import { type Tables } from '@/modules/fixturePredictions/composables/useTables'
-import Client from '@/modules/core/apiClient'
-import { computed, ref } from 'vue'
-import { useTopAlerts } from '@/modules/core/stores/useTopAlerts'
+import { computed } from 'vue'
 
 export interface Predictions {
-  isLoading: Ref<boolean>
   getPrediction: (fixtureId: number | string, userId: number | string) => Nullable<Prediction>
-  getHomeScore: (prediction: Nullable<Prediction>, defaultValue?: string) => number | string | null
-  getAwayScore: (prediction: Nullable<Prediction>, defaultValue?: string) => number | string | null
-  makePredictions: (event: SubmitEvent) => Promise<void>
   scoreColorClass: (prediction: Nullable<Prediction>) => string
   fixtureDate: (fixture: Fixture) => { id: number; date: string; time: string }
 }
 
 export function usePredictions(tables: Tables): Predictions {
-  const topAlerts = useTopAlerts()
-
-  const isLoading = ref(false)
   const predictionMap = computed(() => {
     const map = new Map()
 
@@ -35,14 +26,6 @@ export function usePredictions(tables: Tables): Predictions {
 
   function getPrediction(fixtureId, userId) {
     return predictionMap.value.get(`${fixtureId}-${userId}`) || null
-  }
-
-  function getHomeScore(prediction, defaultValue: string = '-') {
-    return prediction?.homeScore == null ? defaultValue : prediction.homeScore
-  }
-
-  function getAwayScore(prediction, defaultValue: string = '-') {
-    return prediction?.awayScore == null ? defaultValue : prediction.awayScore
   }
 
   function scoreColorClass(prediction) {
@@ -69,72 +52,8 @@ export function usePredictions(tables: Tables): Predictions {
     return { id: fixture.id, date: `${day}/${month}`, time: `${hour}:${minute}` }
   }
 
-  async function makePredictions(event: SubmitEvent) {
-    isLoading.value = true
-
-    const form = event.target as HTMLFormElement
-    const elements = form.elements
-    const predictions: Record<
-      string,
-      { fixtureId: number; homeScore: number | null; awayScore: number | null }
-    > = {}
-
-    for (const element of elements) {
-      if (!(element instanceof HTMLInputElement)) continue
-
-      const fixtureId = element.dataset.id || null
-      const side = element.dataset.side || null
-      if (fixtureId === null || side === null) continue
-      const parsedValue = parseInt(element.value, 10)
-      const score = isNaN(parsedValue) ? null : parsedValue
-
-      if (!predictions[fixtureId]) {
-        predictions[fixtureId] = {
-          fixtureId: parseInt(fixtureId, 10),
-          homeScore: null,
-          awayScore: null
-        }
-      }
-
-      if (side === 'home') predictions[fixtureId].homeScore = score
-      if (side === 'away') predictions[fixtureId].awayScore = score
-    }
-
-    // Exclude not filled fixtures.
-    Object.entries(predictions).forEach(([index, prediction]) => {
-      if (prediction.homeScore === null || prediction.awayScore === null) {
-        delete predictions[index]
-      }
-    })
-
-    try {
-      await Client.makePredictions(Object.values(predictions))
-      tables.updateLoadedTables()
-      topAlerts.add('Updated.', 'success')
-    } catch (err) {
-      switch (err?.response?.status) {
-        case 409:
-          topAlerts.add('Some fixtures have already started. Try to reload the page.', 'danger')
-          break
-        default:
-          topAlerts.add('Error. Try again later or contact support.', 'danger')
-      }
-    } finally {
-      isLoading.value = false
-      closePredictionsModal()
-    }
-  }
-
-  function closePredictionsModal() {
-    document.getElementById('closePredictionsModal')?.click()
-  }
-
   return {
-    isLoading,
     getPrediction,
-    getHomeScore,
-    getAwayScore,
-    makePredictions,
     scoreColorClass,
     fixtureDate
   }

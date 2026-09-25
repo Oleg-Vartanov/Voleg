@@ -3,15 +3,21 @@ import { onUnmounted, useId, watch } from 'vue'
 
 const open = defineModel<boolean>('open', { required: true })
 
-defineProps<{
+const props = defineProps<{
   title: string
   error?: string | null
+  /** Keep the modal open on outside clicks, e.g. so a stray click can't discard a filled form. */
+  staticBackdrop?: boolean
 }>()
 
 const titleId = useId()
 
 function close() {
   open.value = false
+}
+
+function onBackdropClick() {
+  if (!props.staticBackdrop) close()
 }
 
 function onKeydown(event: KeyboardEvent) {
@@ -45,14 +51,14 @@ onUnmounted(() => {
 <template>
   <Teleport to="body">
     <template v-if="open">
-      <div class="modal-backdrop fade show" @click="close"></div>
+      <div class="modal-backdrop fade show" @click="onBackdropClick"></div>
       <div
         class="modal fade show d-block"
         tabindex="-1"
         role="dialog"
         aria-modal="true"
         :aria-labelledby="titleId"
-        @mousedown.self="close"
+        @mousedown.self="onBackdropClick"
       >
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
           <div class="modal-content">

@@ -7,6 +7,7 @@ export interface Fixture {
   homeScore: number | null
   awayScore: number | null
   startAt: string
+  fixturePredictions?: Prediction[]
 }
 
 export interface FixtureTeam {

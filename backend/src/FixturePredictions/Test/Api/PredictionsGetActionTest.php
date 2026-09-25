@@ -124,6 +124,33 @@ class PredictionsGetActionTest extends ApiTestCase
         self::assertCount(3, $data['fixtures']);
     }
 
+    #[TestDox('Predictions GET: upcoming only skips fixtures that have started')]
+    public function testUpcomingOnly(): void
+    {
+        $baseId = 950000 + random_int(0, 40000);
+        $started = $this->createFootballFixture(new DateTimeImmutable('-1 hour'), $baseId);
+        $upcoming = $this->createFootballFixture(new DateTimeImmutable('+1 hour'), $baseId + 1);
+        $this->signIn($this->createUser());
+
+        $this->sendRequest(
+            start: new DateTimeImmutable('-1 day')->format('Y-m-d'),
+            end: new DateTimeImmutable('+1 day')->format('Y-m-d'),
+            limit: 100,
+            upcomingOnly: true,
+        );
+        self::assertResponseIsSuccessful();
+
+        $data = $this->getResponseData();
+        $ids = array_column($data['fixtures'], 'id');
+        self::assertContains($upcoming->getId(), $ids);
+        self::assertNotContains($started->getId(), $ids);
+        foreach ($data['fixtures'] as $fixture) {
+            self::assertGreaterThan(new DateTimeImmutable(), new DateTimeImmutable($fixture['startAt']));
+        }
+        // The total must skip started fixtures too, or the modal would page past the last fixture.
+        self::assertSame(count($data['fixtures']), $data['filters']['total']);
+    }
+
     #[TestDox('Predictions GET: negative offset is rejected')]
     public function testNegativeOffsetIsRejected(): void
     {
@@ -153,6 +180,7 @@ class PredictionsGetActionTest extends ApiTestCase
         string $end = '2025-01-02',
         int $limit = 20,
         int $offset = 0,
+        bool $upcomingOnly = false,
     ): void {
         $this->client->request(
             method: Request::METHOD_GET,
@@ -163,6 +191,7 @@ class PredictionsGetActionTest extends ApiTestCase
                 'limit' => $limit,
                 'offset' => $offset,
                 'userIds' => $userIds,
+                'upcomingOnly' => $upcomingOnly ? 'true' : 'false',
             ]),
         );
     }

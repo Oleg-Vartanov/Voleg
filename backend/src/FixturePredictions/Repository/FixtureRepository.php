@@ -64,8 +64,9 @@ class FixtureRepository extends AbstractEntityRepository
         ?DateTimeImmutable $end = null,
         ?int $limit = null,
         int $offset = 0,
+        bool $upcomingOnly = false,
     ): array {
-        $qb = $this->createFilteredQueryBuilder($competition, $season, $round, $start, $end)
+        $qb = $this->createFilteredQueryBuilder($competition, $season, $round, $start, $end, $upcomingOnly)
             ->addSelect('fp', 'ht', 'at')
             ->leftJoin('f.fixturePredictions', 'fp', Join::WITH, 'fp.user IN (:users) ')
             ->setParameter('users', $users)
@@ -98,8 +99,9 @@ class FixtureRepository extends AbstractEntityRepository
         ?int $round = null,
         ?DateTimeImmutable $start = null,
         ?DateTimeImmutable $end = null,
+        bool $upcomingOnly = false,
     ): int {
-        $count = $this->createFilteredQueryBuilder($competition, $season, $round, $start, $end)
+        $count = $this->createFilteredQueryBuilder($competition, $season, $round, $start, $end, $upcomingOnly)
             ->select('COUNT(f.id)')
             ->getQuery()
             ->getSingleScalarResult();
@@ -113,6 +115,7 @@ class FixtureRepository extends AbstractEntityRepository
         ?int $round = null,
         ?DateTimeImmutable $start = null,
         ?DateTimeImmutable $end = null,
+        bool $upcomingOnly = false,
     ): QueryBuilder {
         $qb = $this->createQueryBuilder('f');
 
@@ -135,6 +138,10 @@ class FixtureRepository extends AbstractEntityRepository
         if ($end !== null) {
             $qb->andWhere('f.startAt <= :end')
                ->setParameter('end', $end);
+        }
+        if ($upcomingOnly) {
+            $qb->andWhere('f.startAt > :now')
+               ->setParameter('now', new DateTimeImmutable());
         }
 
         return $qb;
