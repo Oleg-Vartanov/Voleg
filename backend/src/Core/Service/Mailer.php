@@ -3,24 +3,34 @@
 namespace App\Core\Service;
 
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 
 readonly class Mailer
 {
-    private string $noReply;
+    private Address $noReply;
 
     /** @var mixed[] */
     private array $context;
 
     public function __construct(
         private MailerInterface $mailer,
-        private ParameterBagInterface $parameterBag,
+        #[Autowire(env: 'APP_MAIL_DOMAIN')]
+        private string $domain,
+        #[Autowire(env: 'APP_MAIL_NAME')]
+        private string $senderName,
+        #[Autowire(env: 'APP_SUPPORT_EMAIL')]
+        private string $supportEmail,
     ) {
-        $this->noReply = 'no-reply@' . $this->parameterBag->get('app.mail.domain');
+        $this->noReply = new Address(
+            address: 'no-reply@' . $this->domain,
+            name: $this->senderName,
+        );
+
         $this->context = [
-            'supportEmail' => $this->parameterBag->get('app.support.email'),
+            'supportEmail' => $this->supportEmail,
         ];
     }
 
