@@ -97,3 +97,11 @@ export interface SeExpenseSplitUser {
   paidAmount: string | null
   splitAmount: string
 }
+
+export type ApiSeFeedItem =
+  | { type: 'expense'; expense: ApiSeExpense; adjustment: null }
+  | { type: 'adjustment'; expense: null; adjustment: ApiSeAdjustment }
+
+export type SeFeedType = ApiSeFeedItem['type']
+
+export type SeFeedFilters = Record<SeFeedType, boolean>

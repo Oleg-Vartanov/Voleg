@@ -1068,19 +1068,17 @@ $ink-btn-selectors: ();
     @include ink-rule(var(--ov-ink-line-double));
   }
 
-  // Split expense (ExpensesPage, AdjustmentsPage, BalancePage, detail panels)
-  .expenses-month-header,
-  .adjustments-month-header {
+  // Split expense (FeedPage, BalancePage, detail panels)
+  .feed-month-header {
     @include ink-rule(var(--ov-ink-line-double));
     background-color: transparent;
     font-family: $ink-font-heading;
     font-size: 1.45rem;
   }
 
-  .expense-item:not(.is-expanded) .expense-row,
-  .expense-item.is-expanded,
-  .adjustment-item:not(.is-expanded) .adjustment-row,
-  .adjustment-item.is-expanded {
+  .feed-item:not(.is-expanded) .expense-row,
+  .feed-item:not(.is-expanded) .adjustment-row,
+  .feed-item.is-expanded {
     @include ink-rule;
   }
 

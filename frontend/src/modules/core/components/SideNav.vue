@@ -32,8 +32,7 @@ const menuGroups: MenuItem[][] = [
       name: 'splitExpense',
       title: 'Split Expense',
       children: [
-        { name: 'seExpenses', title: 'Expenses' },
-        { name: 'seAdjustments', title: 'Adjustments' },
+        { name: 'seFeed', title: 'Feed' },
         { name: 'seBalance', title: 'Balance' },
         { name: 'seConnections', title: 'Connections' }
       ]

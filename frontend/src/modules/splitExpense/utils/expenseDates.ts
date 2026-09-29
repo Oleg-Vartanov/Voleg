@@ -1,6 +1,4 @@
-import type { ApiSeExpense } from '@/modules/splitExpense/types'
-
-export type ExpenseMonthGroup = { month: string; label: string; expenses: ApiSeExpense[] }
+export type MonthGroup<T> = { month: string; label: string; items: T[] }
 
 export function parseExpenseDate(value: string): Date | null {
   const date = new Date(value)
@@ -43,17 +41,17 @@ export function formatFullDate(value: string): string {
   })
 }
 
-export function groupExpensesByMonth(expenses: ApiSeExpense[]): ExpenseMonthGroup[] {
-  const groups = new Map<string, ExpenseMonthGroup>()
+export function groupByMonth<T>(items: T[], dateOf: (item: T) => string): MonthGroup<T>[] {
+  const groups = new Map<string, MonthGroup<T>>()
 
-  for (const expense of expenses) {
-    const key = monthKey(expense.expenseDate)
+  for (const item of items) {
+    const key = monthKey(dateOf(item))
     let group = groups.get(key)
     if (!group) {
-      group = { month: key, label: formatMonthLabel(key), expenses: [] }
+      group = { month: key, label: formatMonthLabel(key), items: [] }
       groups.set(key, group)
     }
-    group.expenses.push(expense)
+    group.items.push(item)
   }
 
   return [...groups.values()]

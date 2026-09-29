@@ -247,5 +247,12 @@ export default {
     return axios.delete(`${apiBaseUrl}/split-expense/adjustments/${id}`, {
       headers: getHeader()
     })
+  },
+
+  listSplitExpenseFeed(offset = 0, limit = 100, types: string[] = []) {
+    return axios.get(`${apiBaseUrl}/split-expense/feed`, {
+      headers: getHeader(),
+      params: { offset, limit, types }
+    })
   }
 }

@@ -28,21 +28,14 @@ const index = createRouter({
           path: 'split-expense',
           name: 'splitExpense',
           meta: { title: 'Split Expense' },
-          redirect: { name: 'seExpenses' }
+          redirect: { name: 'seFeed' }
         },
         {
-          path: 'split-expense/expenses',
-          name: 'seExpenses',
+          path: 'split-expense/feed',
+          name: 'seFeed',
           meta: { title: 'Split Expense' },
           beforeEnter: [guards.isAuthenticated],
-          component: () => import('@/modules/splitExpense/pages/ExpensesPage.vue')
-        },
-        {
-          path: 'split-expense/adjustments',
-          name: 'seAdjustments',
-          meta: { title: 'Split Expense' },
-          beforeEnter: [guards.isAuthenticated],
-          component: () => import('@/modules/splitExpense/pages/AdjustmentsPage.vue')
+          component: () => import('@/modules/splitExpense/pages/FeedPage.vue')
         },
         {
           path: 'split-expense/balance',
@@ -57,6 +50,14 @@ const index = createRouter({
           meta: { title: 'Split Expense' },
           beforeEnter: [guards.isAuthenticated],
           component: () => import('@/modules/splitExpense/pages/ConnectionsPage.vue')
+        },
+        {
+          path: 'split-expense/expenses',
+          redirect: { name: 'seFeed' }
+        },
+        {
+          path: 'split-expense/adjustments',
+          redirect: { name: 'seFeed' }
         },
         {
           path: 'split-expense/requests',
