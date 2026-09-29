@@ -4,6 +4,7 @@ namespace App\SplitExpense\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
 use App\SplitExpense\Entity\SeExpense;
+use App\SplitExpense\Entity\SeExpenseSplit;
 use App\SplitExpense\ValueObject\SeBalanceEntry;
 use App\User\Entity\User;
 use Doctrine\ORM\QueryBuilder;
@@ -47,16 +48,46 @@ class SeExpenseRepository extends AbstractEntityRepository
         int $offset = 0,
         int $limit = 100
     ): array {
-        $qb = $this->createQueryBuilder('e')
-            ->distinct()
-            ->leftJoin('e.splits', 's')
-            ->leftJoin('e.currency', 'c')
-            ->where('e.paidByUser = :user OR s.user = :user')
-            ->setParameter('user', $user)
+        // Page ids first: with splits fetch-joined, LIMIT would count split rows instead of expenses.
+        /** @var list<int|string> $ids */
+        $ids = $this->createForUserQueryBuilder($user)
+            ->select('e.id')
             ->orderBy('e.expenseDate', 'DESC')
             ->addOrderBy('e.id', 'DESC')
             ->setFirstResult($offset)
-            ->setMaxResults($limit);
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getSingleColumnResult();
+
+        return $this->findByIdsWithRelations(array_map(intval(...), $ids));
+    }
+
+    /**
+     * Loads everything the API serializes, so reading the expenses triggers no lazy queries.
+     *
+     * @param int[] $ids
+     *
+     * @return SeExpense[]
+     */
+    public function findByIdsWithRelations(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $qb = $this->createQueryBuilder('e')
+            ->addSelect('s', 'su', 'pu', 'cu', 'cat', 'c')
+            ->leftJoin('e.splits', 's')
+            ->leftJoin('s.user', 'su')
+            ->join('e.paidByUser', 'pu')
+            ->join('e.createdByUser', 'cu')
+            ->join('e.category', 'cat')
+            ->join('e.currency', 'c')
+            ->where('e.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->orderBy('e.expenseDate', 'DESC')
+            ->addOrderBy('e.id', 'DESC')
+            ->addOrderBy('s.id', 'ASC');
 
         /** @var SeExpense[] $rows */
         $rows = $qb->getQuery()->getResult();
@@ -108,15 +139,29 @@ class SeExpenseRepository extends AbstractEntityRepository
 
     public function countForUser(User $user): int
     {
-        $count = $this->createQueryBuilder('e')
-            ->select('COUNT(DISTINCT e.id)')
-            ->leftJoin('e.splits', 's')
-            ->where('e.paidByUser = :user OR s.user = :user')
-            ->setParameter('user', $user)
+        $count = $this->createForUserQueryBuilder($user)
+            ->select('COUNT(e.id)')
             ->getQuery()
             ->getSingleScalarResult();
 
         return (int) $count;
+    }
+
+    /**
+     * Expenses the user paid or has a split in. EXISTS keeps one row per expense and leaves
+     * the splits association free to be fetch-joined in full.
+     */
+    private function createForUserQueryBuilder(User $user): QueryBuilder
+    {
+        $userSplit = $this->getEntityManager()->createQueryBuilder()
+            ->select('us.id')
+            ->from(SeExpenseSplit::class, 'us')
+            ->where('us.expense = e')
+            ->andWhere('us.user = :user');
+
+        return $this->createQueryBuilder('e')
+            ->where('e.paidByUser = :user OR EXISTS (' . $userSplit->getDQL() . ')')
+            ->setParameter('user', $user);
     }
 
     /**

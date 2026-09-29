@@ -32,13 +32,34 @@ class SeAdjustmentRepository extends AbstractEntityRepository
         int $offset = 0,
         int $limit = 100,
     ): array {
-        $qb = $this->createQueryBuilder('a')
+        $qb = $this->createWithRelationsQueryBuilder()
             ->where('a.createdByUser = :user OR a.otherUser = :user')
             ->setParameter('user', $user)
             ->orderBy('a.adjustmentDate', 'DESC')
             ->addOrderBy('a.id', 'DESC')
             ->setFirstResult($offset)
             ->setMaxResults($limit);
+
+        /** @var SeAdjustment[] $rows */
+        $rows = $qb->getQuery()->getResult();
+
+        return $rows;
+    }
+
+    /**
+     * @param int[] $ids
+     *
+     * @return SeAdjustment[]
+     */
+    public function findByIdsWithRelations(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $qb = $this->createWithRelationsQueryBuilder()
+            ->where('a.id IN (:ids)')
+            ->setParameter('ids', $ids);
 
         /** @var SeAdjustment[] $rows */
         $rows = $qb->getQuery()->getResult();
@@ -94,6 +115,15 @@ class SeAdjustmentRepository extends AbstractEntityRepository
             ->setParameter('user', $user);
 
         return $this->toBalanceEntries($qb);
+    }
+
+    private function createWithRelationsQueryBuilder(): QueryBuilder
+    {
+        return $this->createQueryBuilder('a')
+            ->addSelect('cu', 'ou', 'c')
+            ->join('a.createdByUser', 'cu')
+            ->join('a.otherUser', 'ou')
+            ->join('a.currency', 'c');
     }
 
     /**

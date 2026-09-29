@@ -27,7 +27,8 @@ class UserGetListActionTest extends ApiTestCase
     {
         $user = $this->createUser();
 
-        $this->sendRequest(substr($user->getUsername(), 0, 4));
+        // Distinctive enough to stay on the first page however many users other tests created.
+        $this->sendRequest(substr($user->getUsername(), 0, -2));
 
         self::assertResponseIsSuccessful();
         $usernames = array_column($this->getResponseData(), 'username');
