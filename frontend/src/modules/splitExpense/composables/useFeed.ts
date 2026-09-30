@@ -16,6 +16,8 @@ export function useFeed() {
   const items = ref<ApiSeFeedItem[] | null>(null)
   const totalCount = ref(0)
   const isLoading = ref(false)
+  /** True while a "load more" request is in flight (not a full refresh). */
+  const isLoadingMore = ref(false)
   const isDeleting = ref(false)
   const pageSize = ref(100)
   const filters = reactive<SeFeedFilters>({ expense: true, adjustment: true })
@@ -32,10 +34,12 @@ export function useFeed() {
       items.value = []
       totalCount.value = 0
       isLoading.value = false
+      isLoadingMore.value = false
       return
     }
 
     isLoading.value = true
+    isLoadingMore.value = append
 
     try {
       const response = await client.listSplitExpenseFeed(offset, pageSize.value, types)
@@ -57,6 +61,7 @@ export function useFeed() {
     } finally {
       if (requestId === lastRequestId) {
         isLoading.value = false
+        isLoadingMore.value = false
       }
     }
   }
@@ -134,6 +139,7 @@ export function useFeed() {
     totalCount,
     filters,
     isLoading,
+    isLoadingMore,
     isDeleting,
     hasMore,
     loadInitial,

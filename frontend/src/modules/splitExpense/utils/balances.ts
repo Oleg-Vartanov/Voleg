@@ -21,15 +21,3 @@ export function balanceColor(balance: ApiSeBalanceAmount): string {
 
   return balance.amount < 0 ? 'text-orange' : 'text-success'
 }
-
-export function balanceLabel(balance: ApiSeBalanceAmount): string {
-  if (balance.amount === 0) return 'settled'
-
-  return balance.amount < 0 ? 'you owe' : 'owes you'
-}
-
-export function totalLabel(balance: ApiSeBalanceAmount): string {
-  if (balance.amount === 0) return 'settled'
-
-  return balance.amount < 0 ? 'you owe' : 'you are owed'
-}

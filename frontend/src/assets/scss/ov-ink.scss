@@ -1095,7 +1095,11 @@ $ink-btn-selectors: ();
     }
   }
 
-  .balance-total {
+  .balance-total:not(.balance-total--compact) {
+    @include ink-rule(var(--ov-ink-line-double));
+  }
+
+  .feed-balance {
     @include ink-rule(var(--ov-ink-line-double));
   }
 }

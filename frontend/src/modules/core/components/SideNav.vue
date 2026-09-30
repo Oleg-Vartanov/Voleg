@@ -2,7 +2,7 @@
 import ColorThemeToggle from './ColorThemeToggle.vue'
 import DesignToggle from './DesignToggle.vue'
 import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '@/modules/user/stores/useAuth'
 
 defineProps<{
@@ -15,11 +15,19 @@ const emit = defineEmits<{
 }>()
 
 const route = useRoute()
+const router = useRouter()
 const auth = useAuth()
 
 type MenuChild = { name: string; title: string; disabled?: boolean }
 
-type MenuItem = { name: string; title: string; roles?: string[]; children?: MenuChild[] }
+type MenuItem = {
+  name: string
+  title: string
+  roles?: string[]
+  children?: MenuChild[]
+  /** When set, clicking the parent expands the submenu and navigates here. */
+  defaultChild?: string
+}
 
 const menuGroups: MenuItem[][] = [
   [
@@ -31,9 +39,9 @@ const menuGroups: MenuItem[][] = [
     {
       name: 'splitExpense',
       title: 'Split Expense',
+      defaultChild: 'seFeed',
       children: [
         { name: 'seFeed', title: 'Feed' },
-        { name: 'seBalance', title: 'Balance' },
         { name: 'seConnections', title: 'Connections' }
       ]
     },
@@ -49,6 +57,7 @@ function onNavigate() {
 
 function isActive(menuItem: MenuItem) {
   if (menuItem.children?.length) {
+    if (menuItem.name === 'splitExpense' && route.name === 'seBalance') return true
     return menuItem.children.some((child) => route.name === child.name)
   }
 
@@ -56,6 +65,8 @@ function isActive(menuItem: MenuItem) {
 }
 
 function isChildActive(child: MenuChild) {
+  // Balance is reached from Feed, so keep Feed highlighted there.
+  if (child.name === 'seFeed' && route.name === 'seBalance') return true
   return route.name === child.name
 }
 
@@ -69,16 +80,41 @@ function toggleMenu(name: string) {
   expandedMenus.value = { ...expandedMenus.value, [name]: !isMenuExpanded(name) }
 }
 
+function expandOnly(name: string) {
+  const next: Record<string, boolean> = {}
+  for (const item of menuItems) {
+    if (item.children?.length) {
+      next[item.name] = item.name === name
+    }
+  }
+  expandedMenus.value = next
+}
+
+async function onParentClick(menuItem: MenuItem) {
+  if (!menuItem.defaultChild) {
+    toggleMenu(menuItem.name)
+    return
+  }
+
+  expandOnly(menuItem.name)
+  if (route.name !== menuItem.defaultChild) {
+    await router.push({ name: menuItem.defaultChild })
+  }
+  onNavigate()
+}
+
 watch(
-  () => route.matched,
+  () => route.name,
   () => {
+    const next: Record<string, boolean> = {}
     for (const item of menuItems) {
-      if (item.children && isActive(item)) {
-        expandedMenus.value = { ...expandedMenus.value, [item.name]: true }
+      if (item.children?.length) {
+        next[item.name] = isActive(item)
       }
     }
+    expandedMenus.value = next
   },
-  { immediate: true, deep: true }
+  { immediate: true }
 )
 </script>
 
@@ -104,10 +140,11 @@ watch(
                     'side-nav__link--expanded': isMenuExpanded(menuItem.name)
                   }"
                   :aria-expanded="isMenuExpanded(menuItem.name)"
-                  @click="toggleMenu(menuItem.name)"
+                  @click="onParentClick(menuItem)"
                 >
                   <span class="side-nav__link-label">{{ menuItem.title }}</span>
                   <i
+                    v-if="!menuItem.defaultChild"
                     class="bi side-nav__chevron"
                     :class="isMenuExpanded(menuItem.name) ? 'bi-chevron-down' : 'bi-chevron-left'"
                     aria-hidden="true"

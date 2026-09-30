@@ -9,7 +9,9 @@ import EditAdjustmentModal from '@/modules/splitExpense/components/EditAdjustmen
 import EditExpenseModal from '@/modules/splitExpense/components/EditExpenseModal.vue'
 import ExpenseDetailPanel from '@/modules/splitExpense/components/ExpenseDetailPanel.vue'
 import ExpenseRow from '@/modules/splitExpense/components/ExpenseRow.vue'
+import BalanceTotal from '@/modules/splitExpense/components/BalanceTotal.vue'
 import ShowMorePagination from '@/modules/core/components/pagination/ShowMorePagination.vue'
+import { useBalances } from '@/modules/splitExpense/composables/useBalances'
 import { useFeed } from '@/modules/splitExpense/composables/useFeed'
 import { groupByMonth } from '@/modules/splitExpense/utils/expenseDates'
 import { feedItemDate, feedItemKey } from '@/modules/splitExpense/utils/feed'
@@ -18,6 +20,7 @@ import type { ApiSeAdjustment, ApiSeExpense, ApiSeFeedItem } from '@/modules/spl
 
 const PAGE_SIZE = 25
 const feed = useFeed()
+const balances = useBalances()
 
 const isAddExpenseOpen = ref(false)
 const isEditExpenseOpen = ref(false)
@@ -42,6 +45,12 @@ const emptyText = computed(() => {
   return 'Select what to show'
 })
 
+const showBalanceSpinner = computed(() => balances.isLoading.value || !balances.isLoaded.value)
+
+const showFeedSpinner = computed(
+  () => feed.items.value === null || (feed.isLoading.value && !feed.isLoadingMore.value)
+)
+
 function toggleItem(item: ApiSeFeedItem) {
   const key = feedItemKey(item)
   expandedKey.value = expandedKey.value === key ? null : key
@@ -53,6 +62,7 @@ function isExpanded(item: ApiSeFeedItem) {
 
 function reload() {
   feed.loadInitial(PAGE_SIZE)
+  balances.load()
 }
 
 function requestEditExpense(expense: ApiSeExpense) {
@@ -63,6 +73,7 @@ function requestEditExpense(expense: ApiSeExpense) {
 function onExpenseUpdated(expense: ApiSeExpense) {
   feed.replaceExpense(expense)
   expenseToEdit.value = null
+  balances.load()
 }
 
 function requestDeleteExpense(expense: ApiSeExpense) {
@@ -80,6 +91,7 @@ async function confirmDeleteExpense() {
   if (expandedKey.value === `expense-${expense.id}`) {
     expandedKey.value = null
   }
+  balances.load()
 }
 
 function requestEditAdjustment(adjustment: ApiSeAdjustment) {
@@ -90,6 +102,7 @@ function requestEditAdjustment(adjustment: ApiSeAdjustment) {
 function onAdjustmentUpdated(adjustment: ApiSeAdjustment) {
   feed.replaceAdjustment(adjustment)
   adjustmentToEdit.value = null
+  balances.load()
 }
 
 function requestDeleteAdjustment(adjustment: ApiSeAdjustment) {
@@ -107,6 +120,7 @@ async function confirmDeleteAdjustment() {
   if (expandedKey.value === `adjustment-${adjustment.id}`) {
     expandedKey.value = null
   }
+  balances.load()
 }
 
 onMounted(reload)
@@ -116,13 +130,30 @@ onMounted(reload)
   <div class="ov-center">
     <div class="container se-page d-flex flex-column align-items-center gap-2">
       <div class="se-panel">
+        <div v-if="showBalanceSpinner" class="feed-balance feed-balance--status">
+          <div class="spinner-border spinner-border-sm text-primary" role="status">
+            <span class="visually-hidden">Loading balance…</span>
+          </div>
+        </div>
+
+        <router-link
+          v-else-if="!balances.hasError.value"
+          :to="{ name: 'seBalance' }"
+          class="feed-balance"
+          aria-label="View balance details"
+        >
+          <p v-if="balances.isSettled.value" class="feed-balance__settled">All settled up</p>
+
+          <BalanceTotal v-else :amounts="balances.totalAmounts.value" compact />
+
+          <i class="bi bi-chevron-right feed-balance__chevron" aria-hidden="true" />
+        </router-link>
+
         <div class="feed-actions">
           <button type="button" class="btn btn-outline-primary" @click="isAddExpenseOpen = true">
-            <i class="bi bi-plus-lg" aria-hidden="true"></i>
             Add expense
           </button>
           <button type="button" class="btn btn-outline-primary" @click="isAddAdjustmentOpen = true">
-            <i class="bi bi-plus-lg" aria-hidden="true"></i>
             Add adjustment
           </button>
         </div>
@@ -178,7 +209,7 @@ onMounted(reload)
           @confirm="confirmDeleteAdjustment"
         />
 
-        <div v-if="feed.items.value === null" class="text-center py-3">
+        <div v-if="showFeedSpinner" class="text-center py-3">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading feed…</span>
           </div>
@@ -186,7 +217,7 @@ onMounted(reload)
 
         <div v-else class="feed-list-scroll">
           <div class="feed-list">
-            <p v-if="feed.items.value.length === 0" class="feed-empty">{{ emptyText }}</p>
+            <p v-if="(feed.items.value ?? []).length === 0" class="feed-empty">{{ emptyText }}</p>
 
             <template v-for="group in itemsByMonth" :key="group.month">
               <div class="feed-month-header">{{ group.label }}</div>
@@ -223,7 +254,7 @@ onMounted(reload)
 
           <ShowMorePagination
             :has-more="feed.hasMore.value"
-            :is-loading="feed.isLoading.value"
+            :is-loading="feed.isLoadingMore.value"
             aria-label="Load more records"
             @load-more="feed.loadMore"
           />
@@ -234,6 +265,40 @@ onMounted(reload)
 </template>
 
 <style scoped>
+.feed-balance {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+  color: inherit;
+  text-decoration: none;
+}
+
+.feed-balance--status {
+  justify-content: center;
+  min-height: 2.5rem;
+}
+
+.feed-balance:hover {
+  background-color: rgba(var(--bs-emphasis-color-rgb), 0.04);
+}
+
+.feed-balance--status:hover {
+  background-color: transparent;
+}
+
+.feed-balance__settled {
+  flex: 1 1 auto;
+  margin: 0;
+  color: var(--bs-secondary-color);
+}
+
+.feed-balance__chevron {
+  flex-shrink: 0;
+  color: var(--bs-secondary-color);
+}
+
 .feed-actions {
   display: flex;
   gap: 0.5rem;
