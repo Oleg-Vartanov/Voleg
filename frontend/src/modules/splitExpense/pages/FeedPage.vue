@@ -10,6 +10,7 @@ import EditExpenseModal from '@/modules/splitExpense/components/EditExpenseModal
 import ExpenseDetailPanel from '@/modules/splitExpense/components/ExpenseDetailPanel.vue'
 import ExpenseRow from '@/modules/splitExpense/components/ExpenseRow.vue'
 import BalanceTotal from '@/modules/splitExpense/components/BalanceTotal.vue'
+import SePageNav from '@/modules/splitExpense/components/SePageNav.vue'
 import ShowMorePagination from '@/modules/core/components/pagination/ShowMorePagination.vue'
 import { useBalances } from '@/modules/splitExpense/composables/useBalances'
 import { useFeed } from '@/modules/splitExpense/composables/useFeed'
@@ -129,6 +130,8 @@ onMounted(reload)
 <template>
   <div class="ov-center">
     <div class="container se-page d-flex flex-column align-items-center gap-2">
+      <SePageNav class="se-page-inset" />
+
       <div class="se-panel">
         <div v-if="showBalanceSpinner" class="feed-balance feed-balance--status">
           <div class="spinner-border spinner-border-sm text-primary" role="status">

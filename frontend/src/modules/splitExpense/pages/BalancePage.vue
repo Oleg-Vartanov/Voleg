@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import AppBreadcrumb from '@/modules/core/components/AppBreadcrumb.vue'
 import BalanceTotal from '@/modules/splitExpense/components/BalanceTotal.vue'
+import SePageNav from '@/modules/splitExpense/components/SePageNav.vue'
 import { useBalances } from '@/modules/splitExpense/composables/useBalances'
 import { balanceColor, formatBalance } from '@/modules/splitExpense/utils/balances'
 
@@ -15,10 +15,7 @@ onMounted(() => {
 <template>
   <div class="ov-center">
     <div class="container se-page d-flex flex-column align-items-center gap-2">
-      <AppBreadcrumb
-        class="se-page-inset"
-        :items="[{ label: 'Feed', to: { name: 'seFeed' } }, { label: 'Balance' }]"
-      />
+      <SePageNav class="se-page-inset" />
 
       <div class="se-panel">
         <div v-if="!balances.isLoaded.value" class="text-center py-3">

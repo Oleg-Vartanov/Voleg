@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import PagePagination from '@/modules/core/components/pagination/PagePagination.vue'
 import { usePagePagination } from '@/modules/core/components/pagination/usePagePagination'
 import AddConnectionModal from '@/modules/splitExpense/components/AddConnectionModal.vue'
+import SePageNav from '@/modules/splitExpense/components/SePageNav.vue'
 import { useConnectionRequests } from '@/modules/splitExpense/composables/useConnectionRequests'
 import { useConnections } from '@/modules/splitExpense/composables/useConnections'
 import { getConnectionPartnerName } from '@/modules/splitExpense/utils/connections'
@@ -72,6 +73,8 @@ loadPage(1)
   <div class="ov-center">
     <div class="container se-page d-flex flex-column align-items-center">
       <div class="se-page-inset d-flex flex-column gap-3">
+        <SePageNav />
+
         <div class="se-panel">
           <button
             type="button"
