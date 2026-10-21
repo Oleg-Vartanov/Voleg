@@ -897,7 +897,7 @@ $ink-btn-selectors: ();
   }
 
   .form-select-menu-dropdown,
-  .form-select-icons-options,
+  .form-select-icons-dropdown,
   .form-user-select-input-dropdown {
     @include ink-paper-surface;
     border-color: var(--ov-ink);
