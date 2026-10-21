@@ -98,6 +98,7 @@ function fieldId(name: string): string {
       v-model="paidByUserId"
       label="Paid by"
       :options="paidBySelectOptions"
+      :searchable="false"
       :is-valid="validation.isValid('paidByUserId')"
       :error-text="validation.getError('paidByUserId')"
     />

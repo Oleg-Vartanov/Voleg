@@ -13,13 +13,15 @@ interface Props {
   helpText?: string
   disabled?: boolean
   required?: boolean
+  searchable?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isValid: null,
   errorText: '',
   helpText: '',
-  required: true
+  required: true,
+  searchable: true
 })
 
 const emit = defineEmits<{
@@ -69,7 +71,9 @@ watch(isOpen, async (open) => {
   activeIndex.value = selectedIdx >= 0 ? selectedIdx : filteredOptions.value.length > 0 ? 0 : -1
 
   await nextTick()
-  searchInputEl.value?.focus()
+  if (props.searchable) {
+    searchInputEl.value?.focus()
+  }
   scrollActiveIntoView()
 })
 
@@ -88,6 +92,8 @@ function close(): void {
 }
 
 function onSearchKeydown(event: KeyboardEvent): void {
+  if (!isOpen.value) return
+
   const options = filteredOptions.value
   const count = options.length
 
@@ -102,6 +108,8 @@ function onSearchKeydown(event: KeyboardEvent): void {
     activeIndex.value = (activeIndex.value - 1 + count) % count
     scrollActiveIntoView()
   } else if (event.key === 'Enter') {
+    // When focus is already on an option button, let the native click handle it.
+    if ((event.target as HTMLElement | null)?.closest?.('.form-select-icons-option')) return
     event.preventDefault()
     const option = options[activeIndex.value]
     if (option) select(option)
@@ -132,7 +140,12 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
 
 <template>
   <BaseFormField :id="id" :is-valid="isValid" :error-text="errorText" :help-text="helpText">
-    <div ref="rootEl" class="form-floating form-select-icons" @keydown.esc="close">
+    <div
+      ref="rootEl"
+      class="form-floating form-select-icons"
+      @keydown.esc="close"
+      @keydown="!searchable ? onSearchKeydown($event) : undefined"
+    >
       <button
         :id="id"
         type="button"
@@ -160,14 +173,14 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
       <label :for="id">{{ label }}</label>
 
       <div v-if="isOpen" class="form-select-icons-dropdown">
-        <div class="form-select-icons-search">
+        <div v-if="searchable" class="form-select-icons-search">
           <input
             :id="`${id}-search`"
             ref="searchInputEl"
             v-model="searchQuery"
             type="search"
             class="form-control form-control-sm"
-            :placeholder="'Search'"
+            placeholder="Search"
             autocomplete="off"
             :aria-controls="`${id}-options`"
             @keydown="onSearchKeydown"
