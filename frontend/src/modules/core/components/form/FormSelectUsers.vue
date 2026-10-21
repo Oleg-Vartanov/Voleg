@@ -63,6 +63,9 @@ const hasTags = computed(
   () => props.showTags && (props.lockedUsers.length > 0 || removableTags.value.length > 0)
 )
 
+/** Hide the search hint once a single selection is tagged; keep it when empty or multi. */
+const showSearchPlaceholder = computed(() => !(hasTags.value && !props.multiple))
+
 const isDropdownVisible = computed(() => isOpen.value && searchResults.value.length > 0)
 
 watch(searchResults, (users) => {
@@ -216,7 +219,7 @@ onUnmounted(() => {
       :class="{
         'form-user-select-input--open': isDropdownVisible,
         'form-user-select-input--invalid': isInvalid,
-        'form-user-select-input--filled': hasTags || searchQuery !== ''
+        'form-user-select-input--filled': hasTags || searchQuery !== '' || showSearchPlaceholder
       }"
     >
       <div class="form-floating">
@@ -257,7 +260,7 @@ onUnmounted(() => {
             v-model="searchQuery"
             type="text"
             class="form-user-select-input-field"
-            :placeholder="hasTags ? placeholder : ' '"
+            :placeholder="showSearchPlaceholder ? placeholder : ' '"
             autocomplete="off"
             role="combobox"
             :aria-expanded="isDropdownVisible"

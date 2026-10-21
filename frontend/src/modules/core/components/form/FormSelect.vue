@@ -71,9 +71,6 @@ watch(isOpen, async (open) => {
   activeIndex.value = selectedIdx >= 0 ? selectedIdx : filteredOptions.value.length > 0 ? 0 : -1
 
   await nextTick()
-  if (props.searchable) {
-    searchInputEl.value?.focus()
-  }
   scrollActiveIntoView()
 })
 
@@ -91,7 +88,35 @@ function close(): void {
   isOpen.value = false
 }
 
-function onSearchKeydown(event: KeyboardEvent): void {
+function isSearchFocused(): boolean {
+  return document.activeElement === searchInputEl.value
+}
+
+function isPrintableKey(event: KeyboardEvent): boolean {
+  return event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey
+}
+
+/** Focus search and apply the key when typing while focus is still on the trigger/list. */
+async function typeToFocusSearch(event: KeyboardEvent): Promise<void> {
+  if (!props.searchable || !isOpen.value || isSearchFocused()) return
+
+  if (event.key === 'Backspace') {
+    event.preventDefault()
+    searchQuery.value = searchQuery.value.slice(0, -1)
+    await nextTick()
+    searchInputEl.value?.focus()
+    return
+  }
+
+  if (!isPrintableKey(event)) return
+
+  event.preventDefault()
+  searchQuery.value += event.key
+  await nextTick()
+  searchInputEl.value?.focus()
+}
+
+function onRootKeydown(event: KeyboardEvent): void {
   if (!isOpen.value) return
 
   const options = filteredOptions.value
@@ -116,6 +141,8 @@ function onSearchKeydown(event: KeyboardEvent): void {
   } else if (event.key === 'Escape') {
     event.preventDefault()
     close()
+  } else {
+    void typeToFocusSearch(event)
   }
 }
 
@@ -143,8 +170,8 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
     <div
       ref="rootEl"
       class="form-floating form-select-icons"
-      @keydown.esc="close"
-      @keydown="!searchable ? onSearchKeydown($event) : undefined"
+      :class="{ 'form-select-icons--open': isOpen }"
+      @keydown="onRootKeydown"
     >
       <button
         :id="id"
@@ -179,11 +206,10 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
             ref="searchInputEl"
             v-model="searchQuery"
             type="search"
-            class="form-control form-control-sm"
+            class="form-select-icons-search-input"
             placeholder="Search"
             autocomplete="off"
             :aria-controls="`${id}-options`"
-            @keydown="onSearchKeydown"
             @click.stop
           />
         </div>
@@ -225,8 +251,21 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   position: relative;
 }
 
+/* Raise the whole control when open so sibling field labels don't paint through the list. */
+.form-select-icons--open {
+  z-index: 20;
+}
+
 .form-select-icons-trigger {
+  position: relative;
+  z-index: 2;
   text-align: left;
+}
+
+.form-select-icons--open .form-select-icons-trigger {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
 }
 
 .form-select-icons-value {
@@ -235,25 +274,49 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   gap: 0.5rem;
 }
 
+/*
+ * Overlay below the trigger (no layout shift). In the default theme the top border is
+ * open so it continues the field; ink mode draws one shared outline around both.
+ */
 .form-select-icons-dropdown {
   position: absolute;
   top: calc(100% - var(--bs-border-width));
   left: 0;
-  z-index: 10;
+  z-index: 1;
   width: 100%;
-  background: var(--bs-body-bg);
+  background-color: var(--bs-body-bg);
   border: var(--bs-border-width) solid var(--bs-border-color);
+  border-top: 0;
   border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
   box-shadow: var(--bs-box-shadow);
 }
 
 .form-select-icons-search {
-  padding: 0.4rem 0.5rem;
   border-bottom: var(--bs-border-width) solid var(--bs-border-color);
 }
 
-.form-select-icons-search .form-control {
-  min-height: 2rem;
+.form-select-icons-search-input {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  background: transparent;
+  color: var(--bs-body-color);
+  font: inherit;
+  line-height: 1.5;
+  outline: 0;
+  box-shadow: none;
+}
+
+.form-select-icons-search-input::placeholder {
+  color: var(--bs-secondary-color);
+  opacity: 0.85;
+}
+
+.form-select-icons-search-input::-webkit-search-decoration,
+.form-select-icons-search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
 }
 
 .form-select-icons-options {
