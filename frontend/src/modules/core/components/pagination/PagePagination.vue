@@ -243,17 +243,6 @@ function onPageSizeChange(value: string | number) {
   line-height: 1.25;
 }
 
-.app-pagination-page-size
-  :deep(.form-select-menu--open:not(.form-select-menu--up) .form-select-menu-trigger) {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.app-pagination-page-size :deep(.form-select-menu--up .form-select-menu-trigger) {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
 .app-pagination-page-size :deep(.form-select-menu-trigger:hover),
 .app-pagination-page-size :deep(.form-select-menu-trigger:focus),
 .app-pagination-page-size :deep(.form-select-menu--open .form-select-menu-trigger) {

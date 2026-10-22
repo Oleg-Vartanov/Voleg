@@ -14,6 +14,7 @@ import {
 const DEFAULT_Z_INDEX = 1080
 const DEFAULT_MARGIN_PX = 8
 const DEFAULT_MAX_HEIGHT_PX = 240
+const DEFAULT_OFFSET_PX = 4
 const MIN_HEIGHT_PX = 72
 
 export type FixedDropdownPlacement = 'bottom' | 'top'
@@ -31,6 +32,8 @@ export interface UseFixedDropdownOptions {
   maxHeightPx?: number
   /** Gap from the viewport edge (px). */
   marginPx?: number
+  /** Gap between the anchor and the panel (px). */
+  offsetPx?: number
   zIndex?: number
 }
 
@@ -46,6 +49,7 @@ export function useFixedDropdown(options: UseFixedDropdownOptions) {
     isOpen,
     maxHeightPx = DEFAULT_MAX_HEIGHT_PX,
     marginPx = DEFAULT_MARGIN_PX,
+    offsetPx = DEFAULT_OFFSET_PX,
     zIndex = DEFAULT_Z_INDEX
   } = options
 
@@ -65,9 +69,8 @@ export function useFixedDropdown(options: UseFixedDropdownOptions) {
     if (!anchor) return
 
     const rect = anchor.getBoundingClientRect()
-    const borderWidth = Number.parseFloat(getComputedStyle(anchor).borderBottomWidth) || 1
-    const spaceBelow = window.innerHeight - rect.bottom - marginPx
-    const spaceAbove = rect.top - marginPx
+    const spaceBelow = window.innerHeight - rect.bottom - marginPx - offsetPx
+    const spaceAbove = rect.top - marginPx - offsetPx
     const openUp = spaceBelow < maxHeightPx && spaceAbove > spaceBelow
 
     placement.value = openUp ? 'top' : 'bottom'
@@ -77,7 +80,7 @@ export function useFixedDropdown(options: UseFixedDropdownOptions) {
     if (openUp) {
       dropdownStyle.value = {
         top: 'auto',
-        bottom: `${window.innerHeight - rect.top - borderWidth}px`,
+        bottom: `${window.innerHeight - rect.top + offsetPx}px`,
         left: `${rect.left}px`,
         width: `${rect.width}px`,
         maxHeight: `${clampedMax}px`,
@@ -85,7 +88,7 @@ export function useFixedDropdown(options: UseFixedDropdownOptions) {
       }
     } else {
       dropdownStyle.value = {
-        top: `${rect.bottom - borderWidth}px`,
+        top: `${rect.bottom + offsetPx}px`,
         bottom: 'auto',
         left: `${rect.left}px`,
         width: `${rect.width}px`,

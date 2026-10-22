@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import BaseFormField from '@/modules/core/components/form/BaseFormField.vue'
+import FormSelectDropdown from '@/modules/core/components/form/FormSelectDropdown.vue'
 import { useFixedDropdown } from '@/modules/core/composables/useFixedDropdown'
 import { validationClass, type UserSearchFn } from '@/modules/core/components/form/types'
 import type { ApiUser } from '@/modules/core/apiType'
@@ -270,26 +271,20 @@ onUnmounted(() => {
         <label :for="id">{{ label }}</label>
       </div>
 
-      <Teleport to="body">
-        <ul
-          v-if="isDropdownVisible"
-          :id="`${id}-listbox`"
-          ref="dropdownEl"
-          class="form-user-select-input-dropdown list-unstyled mb-0"
-          :class="{
-            'form-user-select-input-dropdown--invalid': isInvalid,
-            'form-user-select-input-dropdown--up': isOpenUp
-          }"
-          role="listbox"
-          :style="dropdownStyle"
-          @mousedown.prevent
-        >
+      <FormSelectDropdown
+        v-model:el="dropdownEl"
+        :open="isDropdownVisible"
+        :open-up="isOpenUp"
+        :invalid="isInvalid"
+        :panel-style="dropdownStyle"
+      >
+        <ul :id="`${id}-listbox`" class="form-select-dropdown-options list-unstyled mb-0" role="listbox">
           <li
             v-for="(user, index) in searchResults"
             :id="`${id}-option-${user.id}`"
             :key="user.id"
-            class="form-user-select-input-option"
-            :class="{ 'form-user-select-input-option--active': index === activeIndex }"
+            class="form-select-dropdown-option"
+            :class="{ 'is-highlighted': index === activeIndex }"
             role="option"
             :aria-selected="index === activeIndex"
             @click="selectUser(user)"
@@ -298,7 +293,7 @@ onUnmounted(() => {
             @{{ user.username }}
           </li>
         </ul>
-      </Teleport>
+      </FormSelectDropdown>
     </div>
   </BaseFormField>
 </template>
@@ -404,16 +399,6 @@ onUnmounted(() => {
   margin-top: -0.5rem;
 }
 
-.form-user-select-input--open:not(.form-user-select-input--up) .form-user-select-input-control {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.form-user-select-input--up .form-user-select-input-control {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
 .form-user-select-input--open:not(.form-user-select-input--invalid)
   .form-user-select-input-control {
   border-color: var(--bs-primary);
@@ -427,43 +412,5 @@ onUnmounted(() => {
 
 .form-user-select-input--open.form-user-select-input--invalid .form-user-select-input-control {
   border-color: var(--bs-form-invalid-border-color);
-}
-</style>
-
-<style>
-.form-user-select-input-dropdown {
-  position: fixed;
-  overflow-y: auto;
-  background-color: var(--bs-body-bg);
-  border: var(--bs-border-width) solid var(--bs-primary);
-  border-top: none;
-  border-bottom-left-radius: var(--bs-border-radius);
-  border-bottom-right-radius: var(--bs-border-radius);
-  box-shadow: 0 0.375rem 0.75rem rgba(0, 0, 0, 0.08);
-}
-
-.form-user-select-input-dropdown--up {
-  border-top: var(--bs-border-width) solid var(--bs-primary);
-  border-bottom: none;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  border-top-left-radius: var(--bs-border-radius);
-  border-top-right-radius: var(--bs-border-radius);
-  box-shadow: 0 -0.375rem 0.75rem rgba(0, 0, 0, 0.08);
-}
-
-.form-user-select-input-dropdown--invalid {
-  border-color: var(--bs-form-invalid-border-color);
-}
-
-.form-user-select-input-option {
-  padding: 0.5rem 0.75rem;
-  cursor: pointer;
-  color: var(--bs-body-color);
-}
-
-.form-user-select-input-option--active {
-  background-color: var(--bs-primary);
-  color: var(--bs-body-bg);
 }
 </style>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, useId } from 'vue'
+import FormSelectDropdown from '@/modules/core/components/form/FormSelectDropdown.vue'
 import { useFixedDropdown } from '@/modules/core/composables/useFixedDropdown'
 import type { FormSelectOption } from '@/modules/core/components/form/types'
 
@@ -75,22 +76,18 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
       {{ label }}
     </button>
 
-    <Teleport to="body">
-      <ul
-        v-if="isOpen"
-        :id="`${id}-listbox`"
-        ref="listEl"
-        class="form-select-menu-dropdown list-unstyled mb-0"
-        :class="{ 'form-select-menu-dropdown--up': isOpenUp }"
-        :style="dropdownStyle"
-        role="listbox"
-        @mousedown.prevent
-      >
+    <FormSelectDropdown
+      v-model:el="listEl"
+      :open="isOpen"
+      :open-up="isOpenUp"
+      :panel-style="dropdownStyle"
+    >
+      <ul :id="`${id}-listbox`" class="form-select-dropdown-options list-unstyled mb-0" role="listbox">
         <li
           v-for="option in options"
           :key="option.value"
-          class="form-select-menu-option"
-          :class="{ 'form-select-menu-option--active': option.value === modelValue }"
+          class="form-select-dropdown-option"
+          :class="{ 'is-active': option.value === modelValue }"
           role="option"
           :aria-selected="option.value === modelValue"
           @click="select(option)"
@@ -98,7 +95,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
           {{ option.label }}
         </li>
       </ul>
-    </Teleport>
+    </FormSelectDropdown>
   </div>
 </template>
 
@@ -144,51 +141,4 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   z-index: 5;
 }
 
-.form-select-menu--open:not(.form-select-menu--up) .form-select-menu-trigger {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.form-select-menu--up .form-select-menu-trigger {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-</style>
-
-<style>
-.form-select-menu-dropdown {
-  position: fixed;
-  overflow-y: auto;
-  background-color: var(--bs-body-bg);
-  border: var(--bs-border-width) solid var(--bs-primary);
-  border-top: 0;
-  border-bottom-left-radius: var(--bs-border-radius);
-  border-bottom-right-radius: var(--bs-border-radius);
-  box-shadow: 0 0.375rem 0.75rem rgba(0, 0, 0, 0.08);
-}
-
-.form-select-menu-dropdown--up {
-  border-top: var(--bs-border-width) solid var(--bs-primary);
-  border-bottom: 0;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  border-top-left-radius: var(--bs-border-radius);
-  border-top-right-radius: var(--bs-border-radius);
-  box-shadow: 0 -0.375rem 0.75rem rgba(0, 0, 0, 0.08);
-}
-
-.form-select-menu-option {
-  padding: 0.25rem 0.35rem;
-  cursor: pointer;
-  color: var(--bs-body-color);
-  font-size: var(--ov-font-size-md);
-  line-height: 1.5;
-  text-align: center;
-}
-
-.form-select-menu-option:hover,
-.form-select-menu-option--active {
-  background-color: var(--bs-primary);
-  color: var(--bs-body-bg);
-}
 </style>

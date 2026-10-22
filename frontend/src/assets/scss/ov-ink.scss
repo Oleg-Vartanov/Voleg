@@ -896,20 +896,25 @@ $ink-btn-selectors: ();
     box-shadow: none;
   }
 
-  // Teleported fixed popups (escape modal overflow; coords from useFixedDropdown).
-  .form-select-icons-dropdown,
-  .form-user-select-input-dropdown,
-  .form-select-menu-dropdown {
+  // Shared teleported select panel (FormSelectDropdown).
+  .form-select-dropdown {
     @include ink-paper-surface;
     @include ink-drawn-box($behind: false);
-    // Keep fixed coords from the component; ink-drawn-box sets position:relative.
+    // Keep fixed coords from useFixedDropdown; ink-drawn-box sets position:relative.
     position: fixed;
     border-color: transparent;
     border-radius: 0;
     box-shadow: 0.2rem 0.35rem 0.75rem rgba(0, 0, 0, 0.15);
   }
 
-  .form-select-icons-search {
+  // Keep option fills / search inside the ink stroke (band ≈ 8px).
+  .form-select-dropdown-header,
+  .form-select-dropdown-body {
+    margin-inline: math.div($ink-box-band, 2) + 2px;
+  }
+
+  .form-select-dropdown-header {
+    margin-top: math.div($ink-box-band, 2) + 2px;
     border-bottom-color: transparent;
     background-image: var(--ov-ink-line-faint);
     background-repeat: no-repeat;
@@ -917,13 +922,25 @@ $ink-btn-selectors: ();
     background-size: 100% $ink-line-height;
   }
 
-  .form-select-icons-dropdown--up .form-select-icons-search {
-    border-top-color: transparent;
+  .form-select-dropdown-body {
+    margin-bottom: math.div($ink-box-band, 2) + 2px;
+  }
+
+  .form-select-dropdown-body:first-child {
+    margin-top: math.div($ink-box-band, 2) + 2px;
+  }
+
+  .form-select-dropdown--up .form-select-dropdown-header {
+    margin-top: 0;
+    margin-bottom: math.div($ink-box-band, 2) + 2px;
     background-position: left top;
   }
 
-  .form-select-icons-dropdown > .form-select-icons-options:first-child {
-    @include ink-rule(var(--ov-ink-line-faint), top);
+  .form-select-dropdown-option:hover,
+  .form-select-dropdown-option:focus,
+  .form-select-dropdown-option.is-active,
+  .form-select-dropdown-option.is-highlighted {
+    border-radius: $ink-radius-sm-alt;
   }
 
   .form-select-icons--open .form-select-icons-trigger,

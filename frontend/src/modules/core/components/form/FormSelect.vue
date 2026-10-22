@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import BaseFormField from '@/modules/core/components/form/BaseFormField.vue'
+import FormSelectDropdown from '@/modules/core/components/form/FormSelectDropdown.vue'
 import { useFixedDropdown } from '@/modules/core/composables/useFixedDropdown'
 import { validationClass, type FormSelectOption } from '@/modules/core/components/form/types'
 
@@ -48,7 +49,6 @@ const { dropdownStyle, isOpenUp, isEventInside } = useFixedDropdown({
   rootEl,
   panelEl: dropdownEl,
   isOpen,
-  // Search row + options; clamp still keeps the panel in the viewport.
   maxHeightPx: 280
 })
 
@@ -56,7 +56,6 @@ const filteredOptions = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
   if (!query) return props.options
 
-  // Search label text only; option icons are ignored.
   return props.options.filter((option) => option.label.toLowerCase().includes(query))
 })
 
@@ -108,7 +107,6 @@ function isPrintableKey(event: KeyboardEvent): boolean {
   return event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey
 }
 
-/** Focus search and apply the key when typing while focus is still on the trigger/list. */
 async function typeToFocusSearch(event: KeyboardEvent): Promise<void> {
   if (!props.searchable || !isOpen.value || isSearchFocused()) return
 
@@ -145,8 +143,7 @@ function onDropdownKeydown(event: KeyboardEvent): void {
     activeIndex.value = (activeIndex.value - 1 + count) % count
     scrollActiveIntoView()
   } else if (event.key === 'Enter') {
-    // When focus is already on an option button, let the native click handle it.
-    if ((event.target as HTMLElement | null)?.closest?.('.form-select-icons-option')) return
+    if ((event.target as HTMLElement | null)?.closest?.('.form-select-dropdown-option')) return
     event.preventDefault()
     const option = options[activeIndex.value]
     if (option) select(option)
@@ -216,60 +213,56 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
       <label :for="id">{{ label }}</label>
     </div>
 
-    <Teleport to="body">
-      <div
-        v-if="isOpen"
-        ref="dropdownEl"
-        class="form-select-icons-dropdown"
-        :class="{ 'form-select-icons-dropdown--up': isOpenUp }"
-        :style="dropdownStyle"
-        @keydown="onDropdownKeydown"
-        @mousedown.prevent
+    <FormSelectDropdown
+      v-model:el="dropdownEl"
+      :open="isOpen"
+      :open-up="isOpenUp"
+      :panel-style="dropdownStyle"
+      @keydown="onDropdownKeydown"
+    >
+      <template v-if="searchable" #header>
+        <input
+          :id="`${id}-search`"
+          ref="searchInputEl"
+          v-model="searchQuery"
+          type="search"
+          class="form-select-dropdown-search"
+          placeholder="Search"
+          autocomplete="off"
+          :aria-controls="`${id}-options`"
+          @click.stop
+          @mousedown.stop
+        />
+      </template>
+
+      <ul
+        :id="`${id}-options`"
+        ref="optionsListEl"
+        class="form-select-dropdown-options list-unstyled mb-0"
+        role="listbox"
       >
-        <div v-if="searchable" class="form-select-icons-search">
-          <input
-            :id="`${id}-search`"
-            ref="searchInputEl"
-            v-model="searchQuery"
-            type="search"
-            class="form-select-icons-search-input"
-            placeholder="Search"
-            autocomplete="off"
-            :aria-controls="`${id}-options`"
-            @click.stop
-            @mousedown.stop
-          />
-        </div>
+        <li v-if="filteredOptions.length === 0" class="form-select-dropdown-empty">No matches</li>
 
-        <ul
-          :id="`${id}-options`"
-          ref="optionsListEl"
-          class="form-select-icons-options list-unstyled mb-0"
-          role="listbox"
-        >
-          <li v-if="filteredOptions.length === 0" class="form-select-icons-empty">No matches</li>
-
-          <li v-for="(option, index) in filteredOptions" :key="option.value">
-            <button
-              type="button"
-              class="form-select-icons-option"
-              :class="{
-                active: option.value === modelValue,
-                'is-highlighted': index === activeIndex
-              }"
-              :data-option-index="index"
-              role="option"
-              :aria-selected="option.value === modelValue"
-              @click="select(option)"
-              @mouseenter="activeIndex = index"
-            >
-              <i v-if="option.icon" class="bi" :class="option.icon" aria-hidden="true"></i>
-              <span>{{ option.label }}</span>
-            </button>
-          </li>
-        </ul>
-      </div>
-    </Teleport>
+        <li v-for="(option, index) in filteredOptions" :key="option.value">
+          <button
+            type="button"
+            class="form-select-dropdown-option"
+            :class="{
+              'is-active': option.value === modelValue,
+              'is-highlighted': index === activeIndex
+            }"
+            :data-option-index="index"
+            role="option"
+            :aria-selected="option.value === modelValue"
+            @click="select(option)"
+            @mouseenter="activeIndex = index"
+          >
+            <i v-if="option.icon" class="bi" :class="option.icon" aria-hidden="true"></i>
+            <span>{{ option.label }}</span>
+          </button>
+        </li>
+      </ul>
+    </FormSelectDropdown>
   </BaseFormField>
 </template>
 
@@ -284,110 +277,9 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   text-align: left;
 }
 
-.form-select-icons--open:not(.form-select-icons--up) .form-select-icons-trigger {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  border-bottom-color: transparent;
-}
-
-.form-select-icons--up .form-select-icons-trigger {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  border-top-color: transparent;
-}
-
 .form-select-icons-value {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-}
-</style>
-
-<style>
-.form-select-icons-dropdown {
-  position: fixed;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background-color: var(--bs-body-bg);
-  border: var(--bs-border-width) solid var(--bs-border-color);
-  border-top: 0;
-  border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
-  box-shadow: var(--bs-box-shadow);
-}
-
-.form-select-icons-dropdown--up {
-  border-top: var(--bs-border-width) solid var(--bs-border-color);
-  border-bottom: 0;
-  border-radius: var(--bs-border-radius) var(--bs-border-radius) 0 0;
-  box-shadow: var(--bs-box-shadow);
-}
-
-.form-select-icons-search {
-  flex: 0 0 auto;
-  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
-}
-
-.form-select-icons-dropdown--up .form-select-icons-search {
-  border-bottom: 0;
-  border-top: var(--bs-border-width) solid var(--bs-border-color);
-  order: 1;
-}
-
-.form-select-icons-search-input {
-  display: block;
-  width: 100%;
-  margin: 0;
-  padding: 0.5rem 0.75rem;
-  border: 0;
-  background: transparent;
-  color: var(--bs-body-color);
-  font: inherit;
-  line-height: 1.5;
-  outline: 0;
-  box-shadow: none;
-}
-
-.form-select-icons-search-input::placeholder {
-  color: var(--bs-secondary-color);
-  opacity: 0.85;
-}
-
-.form-select-icons-search-input::-webkit-search-decoration,
-.form-select-icons-search-input::-webkit-search-cancel-button {
-  -webkit-appearance: none;
-}
-
-.form-select-icons-options {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.form-select-icons-empty {
-  padding: 0.5rem 0.75rem;
-  color: var(--bs-secondary-color);
-  font-size: var(--ov-font-size-sm);
-}
-
-.form-select-icons-option {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  color: var(--bs-body-color);
-  text-align: left;
-  background: transparent;
-  border: 0;
-}
-
-.form-select-icons-option:hover,
-.form-select-icons-option:focus,
-.form-select-icons-option.active,
-.form-select-icons-option.is-highlighted {
-  color: var(--bs-primary-text-emphasis);
-  background: var(--bs-primary-bg-subtle);
-  outline: 0;
 }
 </style>
