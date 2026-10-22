@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import BaseFormField from '@/modules/core/components/form/BaseFormField.vue'
+import { useFixedDropdown } from '@/modules/core/composables/useFixedDropdown'
 import { validationClass, type FormSelectOption } from '@/modules/core/components/form/types'
 
 interface Props {
@@ -34,11 +35,22 @@ const selectedOption = computed(() =>
 )
 
 const rootEl = ref<HTMLElement | null>(null)
+const triggerEl = ref<HTMLElement | null>(null)
+const dropdownEl = ref<HTMLElement | null>(null)
 const searchInputEl = ref<HTMLInputElement | null>(null)
 const optionsListEl = ref<HTMLElement | null>(null)
 const isOpen = ref(false)
 const searchQuery = ref('')
 const activeIndex = ref(-1)
+
+const { dropdownStyle, isOpenUp, isEventInside } = useFixedDropdown({
+  anchorEl: triggerEl,
+  rootEl,
+  panelEl: dropdownEl,
+  isOpen,
+  // Search row + options; clamp still keeps the panel in the viewport.
+  maxHeightPx: 280
+})
 
 const filteredOptions = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -116,7 +128,7 @@ async function typeToFocusSearch(event: KeyboardEvent): Promise<void> {
   searchInputEl.value?.focus()
 }
 
-function onRootKeydown(event: KeyboardEvent): void {
+function onDropdownKeydown(event: KeyboardEvent): void {
   if (!isOpen.value) return
 
   const options = filteredOptions.value
@@ -156,9 +168,9 @@ function scrollActiveIntoView(): void {
 }
 
 function onDocumentClick(event: MouseEvent): void {
-  if (!rootEl.value?.contains(event.target as Node)) {
-    close()
-  }
+  if (!isOpen.value) return
+  if (isEventInside(event)) return
+  close()
 }
 
 onMounted(() => document.addEventListener('click', onDocumentClick))
@@ -170,11 +182,15 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
     <div
       ref="rootEl"
       class="form-floating form-select-icons"
-      :class="{ 'form-select-icons--open': isOpen }"
-      @keydown="onRootKeydown"
+      :class="{
+        'form-select-icons--open': isOpen,
+        'form-select-icons--up': isOpen && isOpenUp
+      }"
+      @keydown="onDropdownKeydown"
     >
       <button
         :id="id"
+        ref="triggerEl"
         type="button"
         class="form-select form-select-icons-trigger"
         :class="fieldValidationClass"
@@ -198,8 +214,18 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
       </button>
 
       <label :for="id">{{ label }}</label>
+    </div>
 
-      <div v-if="isOpen" class="form-select-icons-dropdown">
+    <Teleport to="body">
+      <div
+        v-if="isOpen"
+        ref="dropdownEl"
+        class="form-select-icons-dropdown"
+        :class="{ 'form-select-icons-dropdown--up': isOpenUp }"
+        :style="dropdownStyle"
+        @keydown="onDropdownKeydown"
+        @mousedown.prevent
+      >
         <div v-if="searchable" class="form-select-icons-search">
           <input
             :id="`${id}-search`"
@@ -211,6 +237,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
             autocomplete="off"
             :aria-controls="`${id}-options`"
             @click.stop
+            @mousedown.stop
           />
         </div>
 
@@ -242,7 +269,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
           </li>
         </ul>
       </div>
-    </div>
+    </Teleport>
   </BaseFormField>
 </template>
 
@@ -251,21 +278,22 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   position: relative;
 }
 
-/* Raise the whole control when open so sibling field labels don't paint through the list. */
-.form-select-icons--open {
-  z-index: 20;
-}
-
 .form-select-icons-trigger {
   position: relative;
   z-index: 2;
   text-align: left;
 }
 
-.form-select-icons--open .form-select-icons-trigger {
+.form-select-icons--open:not(.form-select-icons--up) .form-select-icons-trigger {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   border-bottom-color: transparent;
+}
+
+.form-select-icons--up .form-select-icons-trigger {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top-color: transparent;
 }
 
 .form-select-icons-value {
@@ -273,17 +301,14 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   align-items: center;
   gap: 0.5rem;
 }
+</style>
 
-/*
- * Overlay below the trigger (no layout shift). In the default theme the top border is
- * open so it continues the field; ink mode draws one shared outline around both.
- */
+<style>
 .form-select-icons-dropdown {
-  position: absolute;
-  top: calc(100% - var(--bs-border-width));
-  left: 0;
-  z-index: 1;
-  width: 100%;
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background-color: var(--bs-body-bg);
   border: var(--bs-border-width) solid var(--bs-border-color);
   border-top: 0;
@@ -291,8 +316,22 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   box-shadow: var(--bs-box-shadow);
 }
 
+.form-select-icons-dropdown--up {
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+  border-bottom: 0;
+  border-radius: var(--bs-border-radius) var(--bs-border-radius) 0 0;
+  box-shadow: var(--bs-box-shadow);
+}
+
 .form-select-icons-search {
+  flex: 0 0 auto;
   border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.form-select-icons-dropdown--up .form-select-icons-search {
+  border-bottom: 0;
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+  order: 1;
 }
 
 .form-select-icons-search-input {
@@ -320,7 +359,8 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
 }
 
 .form-select-icons-options {
-  max-height: 15rem;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
 }
 

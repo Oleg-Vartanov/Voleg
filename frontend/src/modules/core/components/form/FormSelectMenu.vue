@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, useId } from 'vue'
+import { computed, onMounted, onUnmounted, ref, useId } from 'vue'
+import { useFixedDropdown } from '@/modules/core/composables/useFixedDropdown'
 import type { FormSelectOption } from '@/modules/core/components/form/types'
 
 const modelValue = defineModel<string | number>({ required: true })
@@ -16,33 +17,25 @@ const props = withDefaults(
 
 const id = useId()
 const rootEl = ref<HTMLElement | null>(null)
+const triggerEl = ref<HTMLElement | null>(null)
 const listEl = ref<HTMLElement | null>(null)
 const isOpen = ref(false)
-const openUp = ref(false)
+
+const { dropdownStyle, isOpenUp, isEventInside } = useFixedDropdown({
+  anchorEl: triggerEl,
+  rootEl,
+  panelEl: listEl,
+  isOpen,
+  maxHeightPx: 200
+})
 
 const label = computed(() => {
   const option = props.options.find((entry) => entry.value === modelValue.value)
   return option?.label ?? String(modelValue.value)
 })
 
-async function toggle() {
-  if (isOpen.value) {
-    isOpen.value = false
-    return
-  }
-
-  isOpen.value = true
-  openUp.value = false
-  await nextTick()
-
-  const root = rootEl.value
-  const list = listEl.value
-  if (!root || !list) return
-
-  const rootRect = root.getBoundingClientRect()
-  const listHeight = list.offsetHeight
-  const spaceBelow = window.innerHeight - rootRect.bottom
-  openUp.value = spaceBelow < listHeight && rootRect.top > spaceBelow
+function toggle() {
+  isOpen.value = !isOpen.value
 }
 
 function select(option: FormSelectOption) {
@@ -52,7 +45,7 @@ function select(option: FormSelectOption) {
 
 function onDocumentClick(event: MouseEvent) {
   if (!isOpen.value) return
-  if (rootEl.value?.contains(event.target as Node)) return
+  if (isEventInside(event)) return
   isOpen.value = false
 }
 
@@ -66,11 +59,12 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
     class="form-select-menu"
     :class="{
       'form-select-menu--open': isOpen,
-      'form-select-menu--up': isOpen && openUp
+      'form-select-menu--up': isOpen && isOpenUp
     }"
   >
     <button
       :id="id"
+      ref="triggerEl"
       type="button"
       class="form-select-menu-trigger"
       :aria-label="ariaLabel"
@@ -81,27 +75,30 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
       {{ label }}
     </button>
 
-    <ul
-      v-if="isOpen"
-      :id="`${id}-listbox`"
-      ref="listEl"
-      class="form-select-menu-dropdown list-unstyled mb-0"
-      :class="{ 'form-select-menu-dropdown--up': openUp }"
-      role="listbox"
-      @mousedown.prevent
-    >
-      <li
-        v-for="option in options"
-        :key="option.value"
-        class="form-select-menu-option"
-        :class="{ 'form-select-menu-option--active': option.value === modelValue }"
-        role="option"
-        :aria-selected="option.value === modelValue"
-        @click="select(option)"
+    <Teleport to="body">
+      <ul
+        v-if="isOpen"
+        :id="`${id}-listbox`"
+        ref="listEl"
+        class="form-select-menu-dropdown list-unstyled mb-0"
+        :class="{ 'form-select-menu-dropdown--up': isOpenUp }"
+        :style="dropdownStyle"
+        role="listbox"
+        @mousedown.prevent
       >
-        {{ option.label }}
-      </li>
-    </ul>
+        <li
+          v-for="option in options"
+          :key="option.value"
+          class="form-select-menu-option"
+          :class="{ 'form-select-menu-option--active': option.value === modelValue }"
+          role="option"
+          :aria-selected="option.value === modelValue"
+          @click="select(option)"
+        >
+          {{ option.label }}
+        </li>
+      </ul>
+    </Teleport>
   </div>
 </template>
 
@@ -156,14 +153,11 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+</style>
 
+<style>
 .form-select-menu-dropdown {
-  position: absolute;
-  top: calc(100% - var(--bs-border-width));
-  left: 0;
-  z-index: 6;
-  width: 100%;
-  max-height: 12.5rem;
+  position: fixed;
   overflow-y: auto;
   background-color: var(--bs-body-bg);
   border: var(--bs-border-width) solid var(--bs-primary);
@@ -174,8 +168,6 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
 }
 
 .form-select-menu-dropdown--up {
-  top: auto;
-  bottom: calc(100% - var(--bs-border-width));
   border-top: var(--bs-border-width) solid var(--bs-primary);
   border-bottom: 0;
   border-bottom-left-radius: 0;

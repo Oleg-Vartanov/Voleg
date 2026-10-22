@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import BaseFormField from '@/modules/core/components/form/BaseFormField.vue'
+import { useFixedDropdown } from '@/modules/core/composables/useFixedDropdown'
 import { validationClass, type UserSearchFn } from '@/modules/core/components/form/types'
 import type { ApiUser } from '@/modules/core/apiType'
 
@@ -39,7 +40,6 @@ const searchResults = ref<ApiUser[]>([])
 const isSearching = ref(false)
 const isOpen = ref(false)
 const activeIndex = ref(-1)
-const dropdownStyle = ref<Record<string, string>>({})
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 let searchId = 0
@@ -68,31 +68,22 @@ const showSearchPlaceholder = computed(() => !(hasTags.value && !props.multiple)
 
 const isDropdownVisible = computed(() => isOpen.value && searchResults.value.length > 0)
 
-watch(searchResults, (users) => {
-  activeIndex.value = users.length > 0 ? 0 : -1
+const { dropdownStyle, isOpenUp, isEventInside } = useFixedDropdown({
+  anchorEl: controlEl,
+  rootEl,
+  panelEl: dropdownEl,
+  isOpen: isDropdownVisible,
+  maxHeightPx: 200
 })
 
-watch(isDropdownVisible, async (visible) => {
-  if (!visible) return
-  await nextTick()
-  updateDropdownPosition()
+watch(searchResults, (users) => {
+  activeIndex.value = users.length > 0 ? 0 : -1
 })
 
 function clearDebounce() {
   if (debounceTimer !== null) {
     clearTimeout(debounceTimer)
     debounceTimer = null
-  }
-}
-
-function updateDropdownPosition() {
-  if (!isDropdownVisible.value || !controlEl.value) return
-
-  const rect = controlEl.value.getBoundingClientRect()
-  dropdownStyle.value = {
-    top: `${rect.bottom - 1}px`,
-    left: `${rect.left}px`,
-    width: `${rect.width}px`
   }
 }
 
@@ -192,20 +183,15 @@ function onKeydown(event: KeyboardEvent) {
 
 function onDocumentClick(event: MouseEvent) {
   if (!isOpen.value) return
-  const target = event.target as Node
-  if (rootEl.value?.contains(target) || dropdownEl.value?.contains(target)) return
+  if (isEventInside(event)) return
   closeDropdown()
 }
 
 onMounted(() => {
   document.addEventListener('click', onDocumentClick)
-  window.addEventListener('resize', updateDropdownPosition)
-  window.addEventListener('scroll', updateDropdownPosition, true)
 })
 onUnmounted(() => {
   document.removeEventListener('click', onDocumentClick)
-  window.removeEventListener('resize', updateDropdownPosition)
-  window.removeEventListener('scroll', updateDropdownPosition, true)
   clearDebounce()
   searchId += 1
 })
@@ -218,6 +204,7 @@ onUnmounted(() => {
       class="form-user-select-input"
       :class="{
         'form-user-select-input--open': isDropdownVisible,
+        'form-user-select-input--up': isDropdownVisible && isOpenUp,
         'form-user-select-input--invalid': isInvalid,
         'form-user-select-input--filled': hasTags || searchQuery !== '' || showSearchPlaceholder
       }"
@@ -282,35 +269,38 @@ onUnmounted(() => {
         </div>
         <label :for="id">{{ label }}</label>
       </div>
+
+      <Teleport to="body">
+        <ul
+          v-if="isDropdownVisible"
+          :id="`${id}-listbox`"
+          ref="dropdownEl"
+          class="form-user-select-input-dropdown list-unstyled mb-0"
+          :class="{
+            'form-user-select-input-dropdown--invalid': isInvalid,
+            'form-user-select-input-dropdown--up': isOpenUp
+          }"
+          role="listbox"
+          :style="dropdownStyle"
+          @mousedown.prevent
+        >
+          <li
+            v-for="(user, index) in searchResults"
+            :id="`${id}-option-${user.id}`"
+            :key="user.id"
+            class="form-user-select-input-option"
+            :class="{ 'form-user-select-input-option--active': index === activeIndex }"
+            role="option"
+            :aria-selected="index === activeIndex"
+            @click="selectUser(user)"
+            @mouseenter="activeIndex = index"
+          >
+            @{{ user.username }}
+          </li>
+        </ul>
+      </Teleport>
     </div>
   </BaseFormField>
-
-  <Teleport to="body">
-    <ul
-      v-if="isDropdownVisible"
-      :id="`${id}-listbox`"
-      ref="dropdownEl"
-      class="form-user-select-input-dropdown list-unstyled mb-0"
-      :class="{ 'form-user-select-input-dropdown--invalid': isInvalid }"
-      role="listbox"
-      :style="dropdownStyle"
-      @mousedown.prevent
-    >
-      <li
-        v-for="(user, index) in searchResults"
-        :id="`${id}-option-${user.id}`"
-        :key="user.id"
-        class="form-user-select-input-option"
-        :class="{ 'form-user-select-input-option--active': index === activeIndex }"
-        role="option"
-        :aria-selected="index === activeIndex"
-        @click="selectUser(user)"
-        @mouseenter="activeIndex = index"
-      >
-        @{{ user.username }}
-      </li>
-    </ul>
-  </Teleport>
 </template>
 
 <style scoped>
@@ -414,9 +404,14 @@ onUnmounted(() => {
   margin-top: -0.5rem;
 }
 
-.form-user-select-input--open .form-user-select-input-control {
+.form-user-select-input--open:not(.form-user-select-input--up) .form-user-select-input-control {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+}
+
+.form-user-select-input--up .form-user-select-input-control {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .form-user-select-input--open:not(.form-user-select-input--invalid)
@@ -438,8 +433,6 @@ onUnmounted(() => {
 <style>
 .form-user-select-input-dropdown {
   position: fixed;
-  z-index: 1080;
-  max-height: 12.5rem;
   overflow-y: auto;
   background-color: var(--bs-body-bg);
   border: var(--bs-border-width) solid var(--bs-primary);
@@ -447,6 +440,16 @@ onUnmounted(() => {
   border-bottom-left-radius: var(--bs-border-radius);
   border-bottom-right-radius: var(--bs-border-radius);
   box-shadow: 0 0.375rem 0.75rem rgba(0, 0, 0, 0.08);
+}
+
+.form-user-select-input-dropdown--up {
+  border-top: var(--bs-border-width) solid var(--bs-primary);
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: var(--bs-border-radius);
+  border-top-right-radius: var(--bs-border-radius);
+  box-shadow: 0 -0.375rem 0.75rem rgba(0, 0, 0, 0.08);
 }
 
 .form-user-select-input-dropdown--invalid {

@@ -896,63 +896,40 @@ $ink-btn-selectors: ();
     box-shadow: none;
   }
 
-  .form-select-menu-dropdown,
-  .form-user-select-input-dropdown {
-    @include ink-paper-surface;
-    // Same hand-drawn stroke as floating inputs (mask cost ≈ a border; no blur/filters).
-    @include ink-drawn-box($behind: false);
-    box-shadow: 0.2rem 0.35rem 0.75rem rgba(0, 0, 0, 0.15);
-  }
-
-  // FormSelect open: one ink outline around trigger + list. The list overlays (absolute)
-  // so fields below do not shift. ink-drawn-box sets position:relative — override it.
-  .form-select-icons--open {
-    z-index: 20;
-
-    // Field-only outline/glow off; the dropdown draws one shared box from the trigger top.
-    &::after,
-    &::before {
-      display: none;
-    }
-  }
-
-  .form-select-icons--open .form-select-icons-dropdown {
-    // Opaque fill first so sibling labels can't show through the paper texture.
-    background-color: var(--ov-paper);
+  // Teleported fixed popups (escape modal overflow; coords from useFixedDropdown).
+  .form-select-icons-dropdown,
+  .form-user-select-input-dropdown,
+  .form-select-menu-dropdown {
     @include ink-paper-surface;
     @include ink-drawn-box($behind: false);
-    // Mixin sets relative (which caused layout shift) — keep overlaying.
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    width: 100%;
-    // Leave room for the floating select trigger so the outline wraps both.
-    // Matches $form-floating-height in bootstrap-overrides.scss.
-    padding-top: 2.875rem;
+    // Keep fixed coords from the component; ink-drawn-box sets position:relative.
+    position: fixed;
     border-color: transparent;
     border-radius: 0;
     box-shadow: 0.2rem 0.35rem 0.75rem rgba(0, 0, 0, 0.15);
   }
 
-  .form-select-icons--open .form-select-icons-trigger {
-    z-index: 2;
-    background-color: transparent;
-  }
-
   .form-select-icons-search {
     border-bottom-color: transparent;
-    // Top joins the trigger; bottom separates search from options.
-    background-image: var(--ov-ink-line-faint), var(--ov-ink-line-faint);
-    background-repeat: no-repeat, no-repeat;
-    background-position: left top, left bottom;
-    background-size:
-      100% $ink-line-height,
-      100% $ink-line-height;
+    background-image: var(--ov-ink-line-faint);
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    background-size: 100% $ink-line-height;
+  }
+
+  .form-select-icons-dropdown--up .form-select-icons-search {
+    border-top-color: transparent;
+    background-position: left top;
   }
 
   .form-select-icons-dropdown > .form-select-icons-options:first-child {
     @include ink-rule(var(--ov-ink-line-faint), top);
+  }
+
+  .form-select-icons--open .form-select-icons-trigger,
+  .form-user-select-input--open .form-user-select-input-control:focus-within {
+    background-color: transparent;
+    box-shadow: none;
   }
 }
 
