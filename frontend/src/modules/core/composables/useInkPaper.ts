@@ -1,7 +1,7 @@
 import { onMounted, onUnmounted } from 'vue'
 
-// The ink design's paper texture (--ov-paper-texture, see ov-ink.scss) is an SVG filter that browsers
-// re-run on every repaint. Render it once per theme into a bitmap and give CSS that instead
+// The paper texture (--ov-paper-texture, see ink/_tokens.scss) is an SVG filter that browsers
+// re-run on every repaint. Render it once per color theme into a bitmap and give CSS that instead
 // (--ov-paper-bitmap); CSS falls back to the SVG until it is ready, or if rendering fails.
 
 const sourceProperty = '--ov-paper-texture'
@@ -53,7 +53,7 @@ function update(): void {
   }
 
   bitmap.then((url) => {
-    // The theme or design may have changed while rendering.
+    // The color theme may have changed while rendering.
     if (getComputedStyle(body).getPropertyValue(sourceProperty).trim() !== texture) return
 
     if (url) body.style.setProperty(bitmapProperty, `url(${url})`)
@@ -61,7 +61,7 @@ function update(): void {
   })
 }
 
-/** Keeps the ink paper texture bitmap in sync with the design and color theme. */
+/** Keeps the ink paper texture bitmap in sync with the color theme. */
 export function useInkPaper() {
   const observer = new MutationObserver(update)
 
@@ -69,7 +69,7 @@ export function useInkPaper() {
     update()
     observer.observe(document.body, {
       attributes: true,
-      attributeFilter: ['data-ov-design', 'data-bs-theme']
+      attributeFilter: ['data-bs-theme']
     })
   })
 

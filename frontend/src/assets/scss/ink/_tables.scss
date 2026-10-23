@@ -1,0 +1,67 @@
+// ---------- Tables and lists ----------
+
+#{$ink} {
+  .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--ov-ink);
+    --bs-table-border-color: transparent;
+    --bs-table-hover-bg: var(--ov-ink-wash);
+    --bs-table-striped-bg: var(--ov-ink-wash);
+  }
+
+  .table > :not(caption) > * > * {
+    @include ink-rule;
+  }
+
+  .table > thead > tr > * {
+    @include ink-rule(var(--ov-ink-line-double));
+  }
+
+  // Football predictions (FixturesTable, LeaderboardTable)
+  .fixtures-row > *,
+  .fixtures-empty-cell,
+  .leaderboard-row > *,
+  .leaderboard-empty-cell {
+    @include ink-rule;
+  }
+
+  .fixtures-row--head > *,
+  .leaderboard-row--head > * {
+    @include ink-rule(var(--ov-ink-line-double));
+  }
+
+  // Split expense (FeedPage, BalancePage, detail panels)
+  .feed-month-header {
+    @include ink-rule(var(--ov-ink-line-double));
+    background-color: transparent;
+    font-family: $ink-font-heading;
+    font-size: 1.45rem;
+  }
+
+  .feed-item:not(.is-expanded) .expense-row,
+  .feed-item:not(.is-expanded) .adjustment-row,
+  .feed-item.is-expanded {
+    @include ink-rule;
+  }
+
+  .expense-detail-content,
+  .adjustment-detail-content {
+    border-inline-end-color: transparent;
+    background-image: var(--ov-ink-vline);
+    background-repeat: no-repeat;
+    background-position: right top;
+    background-size: $ink-line-height 100%;
+
+    @media (max-width: 767.98px) {
+      @include ink-rule;
+    }
+  }
+
+  .balance-total:not(.balance-total--compact) {
+    @include ink-rule(var(--ov-ink-line-double));
+  }
+
+  .feed-balance {
+    @include ink-rule(var(--ov-ink-line-double));
+  }
+}

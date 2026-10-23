@@ -1,0 +1,122 @@
+// ---------- Theme tokens ----------
+
+@mixin ink-theme(
+  $paper,
+  $ink-color,
+  $muted,
+  $red,
+  $green,
+  $ochre,
+  $highlight-alpha,
+  $texture-opacity
+) {
+  --ov-paper: #{$paper};
+  --ov-paper-texture: #{ink-paper-texture($texture-opacity)};
+  --ov-paper-image: var(--ov-paper-bitmap, var(--ov-paper-texture));
+  --ov-ink: #{$ink-color};
+  --ov-ink-rgb: #{to-rgb($ink-color)};
+  --ov-ink-muted: #{$muted};
+  --ov-ink-red: #{$red};
+  --ov-ink-green: #{$green};
+  --ov-ink-ochre: #{$ochre};
+  --ov-ink-wash: #{rgba($ink-color, 0.07)};
+  --ov-ink-highlight: #{rgba($ink-color, $highlight-alpha)};
+  --ov-ink-line: #{ink-hline($ink-color, 1.3)};
+  --ov-ink-line-faint: #{ink-hline($ink-color, 1, 0.4)};
+  --ov-ink-line-double: #{ink-hline-double($ink-color)};
+  --ov-ink-vline: #{ink-vline($ink-color, 1.3)};
+  --ov-ink-vline-bold: #{ink-vline($ink-color, 2.6)};
+  --ov-ink-underline: #{ink-underline($ink-color)};
+  --ov-ink-check: #{ink-check($paper)};
+  --ov-ink-knob: #{ink-knob(rgba($ink-color, 0.55))};
+  --ov-ink-knob-checked: #{ink-knob($paper)};
+
+  // Site tokens
+  --ov-color-primary: #{$ink-color};
+  --ov-text: #{$ink-color};
+  --ov-text-muted: #{$muted};
+  --ov-surface: transparent;
+  --ov-surface-hover: var(--ov-ink-wash);
+  --ov-chrome-bg: transparent;
+  --ov-border: #{rgba($ink-color, 0.3)};
+  --ov-logo-fill-primary: #{$ink-color};
+  --ov-logo-fill-secondary: #{$paper};
+
+  // Bootstrap tokens
+  --bs-body-bg: #{$paper};
+  --bs-body-bg-rgb: #{to-rgb($paper)};
+  --bs-body-color: #{$ink-color};
+  --bs-body-color-rgb: #{to-rgb($ink-color)};
+  --bs-emphasis-color: #{$ink-color};
+  --bs-emphasis-color-rgb: #{to-rgb($ink-color)};
+  --bs-secondary-color: #{$muted};
+  --bs-secondary-color-rgb: #{to-rgb($muted)};
+  --bs-tertiary-color: #{rgba($muted, 0.75)};
+  --bs-secondary-bg: #{rgba($ink-color, 0.06)};
+  --bs-tertiary-bg: #{rgba($ink-color, 0.04)};
+  --bs-border-color: #{rgba($ink-color, 0.35)};
+  --bs-border-color-translucent: #{rgba($ink-color, 0.2)};
+  --bs-link-color: #{$ink-color};
+  --bs-link-color-rgb: #{to-rgb($ink-color)};
+  --bs-link-hover-color: #{$muted};
+  --bs-link-hover-color-rgb: #{to-rgb($muted)};
+  --bs-highlight-bg: var(--ov-ink-highlight);
+  --bs-highlight-color: #{$ink-color};
+  --bs-focus-ring-color: #{rgba($ink-color, 0.25)};
+  --bs-form-valid-color: #{$green};
+  --bs-form-valid-border-color: #{$green};
+  --bs-form-invalid-color: #{$red};
+  --bs-form-invalid-border-color: #{$red};
+  --bs-orange: #{$ochre};
+  --bs-box-shadow: 0 0.5rem 1rem #{rgba($ov-color-black, 0.15)};
+
+  $variants: (
+    primary: $ink-color,
+    secondary: $muted,
+    success: $green,
+    danger: $red,
+    warning: $ochre,
+    info: $ink-color
+  );
+
+  @each $name, $color in $variants {
+    --bs-#{$name}: #{$color};
+    --bs-#{$name}-rgb: #{to-rgb($color)};
+    --bs-#{$name}-text-emphasis: #{$color};
+    --bs-#{$name}-bg-subtle: #{rgba($color, 0.08)};
+    --bs-#{$name}-border-subtle: #{$color};
+  }
+}
+
+#{$ink} {
+  @include ink-theme(
+    $ov-ink-paper-light,
+    $ov-ink-light,
+    $ov-ink-muted-light,
+    $ov-ink-red-light,
+    $ov-ink-green-light,
+    $ov-ink-ochre-light,
+    0.15,
+    $ink-paper-opacity-light
+  );
+
+  --ov-ink-box-mask: #{ink-box-mask()};
+  --bs-body-font-family: #{$ink-font-body};
+  --bs-border-width: #{$ink-stroke};
+
+  background: var(--ov-paper-image) 0 0 / #{$ink-paper-tile}px var(--ov-paper);
+  scrollbar-color: rgba(var(--ov-ink-rgb), 0.45) transparent;
+}
+
+#{$ink-dark} {
+  @include ink-theme(
+    $ov-ink-paper-dark,
+    $ov-ink-dark,
+    $ov-ink-muted-dark,
+    $ov-ink-red-dark,
+    $ov-ink-green-dark,
+    $ov-ink-ochre-dark,
+    0.25,
+    $ink-paper-opacity-dark
+  );
+}

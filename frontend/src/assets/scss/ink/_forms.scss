@@ -1,0 +1,197 @@
+@use 'sass:math';
+
+// ---------- Forms ----------
+
+#{$ink} {
+  // :where() keeps specificity low so Bootstrap's validation states still win.
+  :where(.form-control, .form-select) {
+    background-color: transparent;
+    border-color: rgba(var(--ov-ink-rgb), 0.85);
+    border-radius: $ink-radius-sm-alt;
+  }
+
+  :where(.form-control, .form-select):focus {
+    background-color: transparent;
+    border-color: var(--ov-ink);
+    box-shadow: 0 0 0 0.2rem var(--ov-ink-highlight);
+  }
+
+  // Floating fields and input groups: the wrapper draws the outline, the fields stay borderless.
+  // Not isolated, so dropdowns inside can still overlap the fields below.
+  .form-floating,
+  .input-group {
+    @include ink-drawn-box($behind: false);
+
+    // Focus glow, drawn around the outline.
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      border-radius: 8px;
+      pointer-events: none;
+      transition: box-shadow 0.15s ease-in-out;
+    }
+
+    &:focus-within::before {
+      box-shadow: 0 0 0 0.2rem var(--ov-ink-highlight);
+    }
+  }
+
+  .form-floating {
+    > :is(.form-control, .form-select) {
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    &:has(.is-invalid) {
+      --ov-box-color: var(--bs-form-invalid-border-color);
+    }
+
+    // Read-only fields: a faded outline instead of a grey fill.
+    &:has(> :disabled)::after {
+      opacity: 0.45;
+    }
+
+    > :disabled {
+      background-color: transparent;
+    }
+  }
+
+  // Input groups: a drawn divider after each addon.
+  .input-group {
+    > :is(.form-control, .form-select, .input-group-text, .form-floating) {
+      border-color: transparent;
+      background-color: transparent;
+      box-shadow: none;
+    }
+
+    > .input-group-text {
+      background-image: var(--ov-ink-vline);
+      background-repeat: no-repeat;
+      background-position: right center;
+      background-size: $ink-line-height 80%;
+    }
+  }
+
+  .form-floating > label {
+    color: var(--ov-ink-muted);
+  }
+
+  .form-floating > :is(.form-control, .form-control-plaintext, .form-select) ~ label::after {
+    background-color: transparent;
+  }
+
+  .form-text,
+  .invalid-feedback,
+  .valid-feedback {
+    font-size: var(--ov-font-size-md);
+  }
+
+  .form-check-input {
+    background-color: transparent;
+    border-color: var(--ov-ink);
+
+    &[type='checkbox'] {
+      border-radius: 3px 6px 2px 7px / 6px 2px 7px 3px;
+    }
+
+    &:checked {
+      background-color: var(--ov-ink);
+      border-color: var(--ov-ink);
+    }
+
+    &:checked[type='checkbox'] {
+      --bs-form-check-bg-image: var(--ov-ink-check);
+    }
+
+    &:focus {
+      border-color: var(--ov-ink);
+      box-shadow: 0 0 0 0.2rem var(--ov-ink-highlight);
+    }
+  }
+
+  .form-switch .form-check-input {
+    --bs-form-switch-bg: var(--ov-ink-knob);
+    border-radius: 2em;
+
+    &:checked {
+      --bs-form-switch-bg: var(--ov-ink-knob-checked);
+    }
+  }
+
+  // Custom selects and pickers (FormSelectMenu, FormSelect, FormSelectUsers, pagination).
+  .form-select-menu-trigger,
+  .app-pagination-input,
+  .app-pagination-page-size .form-select-menu-trigger {
+    border-color: var(--ov-ink);
+    border-radius: $ink-radius-sm-alt;
+    background-color: transparent;
+  }
+
+  .app-pagination-control {
+    border-radius: $ink-radius-sm;
+  }
+
+  .form-select-menu-trigger:focus {
+    background-color: transparent;
+    box-shadow: 0 0 0 0.2rem var(--ov-ink-highlight);
+  }
+
+  .form-user-select-input-control:focus-within {
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  // Shared teleported select panel (FormSelectDropdown).
+  .form-select-dropdown {
+    @include ink-paper-surface;
+    @include ink-drawn-box($behind: false);
+    // Keep fixed coords from useFixedDropdown; ink-drawn-box sets position:relative.
+    position: fixed;
+    border-color: transparent;
+    border-radius: 0;
+    box-shadow: 0.2rem 0.35rem 0.75rem rgba(0, 0, 0, 0.15);
+  }
+
+  // Keep option fills / search inside the ink stroke (band ≈ 8px).
+  .form-select-dropdown-header,
+  .form-select-dropdown-body {
+    margin-inline: math.div($ink-box-band, 2) + 2px;
+  }
+
+  .form-select-dropdown-header {
+    margin-top: math.div($ink-box-band, 2) + 2px;
+    border-bottom-color: transparent;
+    background-image: var(--ov-ink-line-faint);
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    background-size: 100% $ink-line-height;
+  }
+
+  .form-select-dropdown-body {
+    margin-bottom: math.div($ink-box-band, 2) + 2px;
+  }
+
+  .form-select-dropdown-body:first-child {
+    margin-top: math.div($ink-box-band, 2) + 2px;
+  }
+
+  .form-select-dropdown--up .form-select-dropdown-header {
+    margin-top: 0;
+    margin-bottom: math.div($ink-box-band, 2) + 2px;
+    background-position: left top;
+  }
+
+  .form-select-dropdown-option:hover,
+  .form-select-dropdown-option:focus,
+  .form-select-dropdown-option.is-active,
+  .form-select-dropdown-option.is-highlighted {
+    border-radius: $ink-radius-sm-alt;
+  }
+
+  .form-select-icons--open .form-select-icons-trigger,
+  .form-user-select-input--open .form-user-select-input-control:focus-within {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}

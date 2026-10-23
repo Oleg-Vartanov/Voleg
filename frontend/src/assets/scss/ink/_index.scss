@@ -1,0 +1,25 @@
+// The site's design: everything drawn in black-and-white ink on textured paper.
+// It is the only design and combines with both color themes (light: black ink on white paper,
+// dark: white ink on black paper).
+//
+// It must stay cheap to paint on phones: no SVG filters and no blurred shadows, as browsers re-run
+// those on every repaint. The paper texture is rendered once into a bitmap by useInkPaper.ts.
+//
+//   variables    selectors, fonts, shape constants
+//   drawing      generators for SVG strokes, the pen outline mask and the paper texture
+//   tokens       CSS custom properties per color theme
+//   mixins       ink-rule, ink-drawn-box, ink-paper-surface
+//   typography, layout, buttons, forms, surfaces, tables
+//                the rules themselves, grouped by what they style
+
+@import '../ov-colors';
+@import 'variables';
+@import 'drawing';
+@import 'tokens';
+@import 'mixins';
+@import 'typography';
+@import 'layout';
+@import 'buttons';
+@import 'forms';
+@import 'surfaces';
+@import 'tables';

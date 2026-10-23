@@ -1,0 +1,85 @@
+// ---------- Typography ----------
+
+// Headings stay at element specificity, so component classes styling a heading still win.
+:where(#{$ink}) {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .h1,
+  .h2,
+  .h3,
+  .h4,
+  .h5,
+  .h6 {
+    font-family: $ink-font-heading;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  // Caveat runs small, so headings get a size bump over Bootstrap's scale.
+  h1,
+  .h1 {
+    font-size: 2.9rem;
+  }
+
+  h2,
+  .h2 {
+    font-size: 2.5rem;
+  }
+
+  h3,
+  .h3 {
+    font-size: 2.2rem;
+  }
+
+  h4,
+  .h4 {
+    font-size: 1.95rem;
+  }
+
+  h5,
+  .h5 {
+    font-size: 1.65rem;
+  }
+
+  h6,
+  .h6 {
+    font-size: 1.35rem;
+  }
+}
+
+#{$ink} {
+  .modal-title {
+    // Overrides Bootstrap's `.fs-5` utility (!important).
+    font-size: 1.75rem !important;
+  }
+
+  a {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  ::selection {
+    background-color: var(--ov-ink-highlight);
+    color: inherit;
+  }
+
+  hr {
+    height: $ink-line-height;
+    border: 0;
+    opacity: 1;
+    background: var(--ov-ink-line) center / 100% $ink-line-height no-repeat;
+  }
+
+  .text-bg-primary,
+  .text-bg-secondary {
+    color: var(--ov-paper) !important;
+  }
+
+  .badge {
+    border-radius: $ink-radius-sm;
+  }
+}

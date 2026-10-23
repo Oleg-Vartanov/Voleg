@@ -1,0 +1,17 @@
+// Shared selectors, fonts and shape constants.
+
+// Every ink rule starts with `body[data-bs-theme]` (the color theme attribute is always set, see
+// index.html and ColorThemeToggle.vue). That outranks component scoped styles loaded later.
+$ink: 'body[data-bs-theme]';
+$ink-dark: "body[data-bs-theme='dark']";
+
+$ink-font-body: 'Kalam', 'Segoe Print', 'Bradley Hand', cursive;
+$ink-font-heading: 'Caveat', 'Kalam', 'Segoe Print', cursive;
+
+// Uneven corners for plain CSS shapes (fields, fills, badges).
+$ink-radius-sm: 10px 4px 12px 5px / 5px 12px 4px 10px;
+$ink-radius-sm-alt: 4px 11px 5px 13px / 12px 4px 10px 5px;
+$ink-radius-round: 48% 52% 45% 55% / 55% 45% 52% 48%;
+
+$ink-stroke: 1.5px;
+$ink-line-height: 8px;

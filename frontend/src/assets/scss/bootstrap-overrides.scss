@@ -3,12 +3,6 @@
 // Bootstrap SCSS variables — must be set before importing bootstrap.
 $primary: $ov-color-black;
 
-// Dark-mode derivatives assume a white primary (overridden at runtime in bootstrap-theme.scss).
-$primary-text-emphasis-dark: $ov-color-white;
-$primary-bg-subtle-dark: shade-color($ov-color-white, 80%);
-$primary-border-subtle-dark: shade-color($ov-color-white, 40%);
-$link-color-dark: $ov-color-white;
-
 $input-padding-y: 0.3125rem;
 $form-floating-height: 2.875rem;
 $form-floating-padding-y: 0.5rem;

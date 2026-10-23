@@ -1,0 +1,78 @@
+// ---------- Layout chrome ----------
+
+#{$ink} {
+  .app-navbar {
+    background-color: transparent;
+  }
+
+  // On desktop the page content draws the side-nav's edge (see .app-main below).
+  .side-nav {
+    background-color: transparent;
+    border-right-color: transparent;
+  }
+
+  .side-nav__divider {
+    margin: 0.35rem 0;
+  }
+
+  .side-nav__link--active,
+  .side-nav__link--active:hover {
+    border-left-color: transparent;
+    background-image: var(--ov-ink-vline-bold);
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 6px 85%;
+  }
+
+  .sidebar-backdrop {
+    background-color: rgba(var(--ov-ink-rgb), 0.3);
+  }
+
+  // The top line and the side-nav's edge are both drawn here, their 1.3px strokes centered 1px inside
+  // the top-left corner. Each starts at the other's outer edge (0.35px in), so the corner closes.
+  // The edge is its own box (a repeating background would also paint above the corner), tiled at a
+  // fixed length as the page's height varies.
+  @media (min-width: 768px) {
+    .app-main {
+      position: relative;
+      border-top-color: transparent;
+      background-image: var(--ov-ink-line);
+      background-repeat: no-repeat;
+      background-position: left 0.35px top -3px;
+      background-size: 100% $ink-line-height;
+    }
+
+    .side-nav:not(.side-nav--collapsed) + .app-main::before {
+      content: '';
+      position: absolute;
+      top: 0.35px;
+      bottom: 0;
+      left: -3px;
+      width: $ink-line-height;
+      background: var(--ov-ink-vline) left top / #{$ink-line-height} 400px repeat-y;
+      pointer-events: none;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    // Pulled onto the bar's bottom edge, so no strip of the bar shows between the line and the page.
+    .app-navbar {
+      @include ink-rule(var(--ov-ink-line), bottom);
+      background-position: left bottom -3px;
+    }
+
+    // Slides over the page, so it needs its own sheet of paper.
+    .side-nav {
+      background-color: var(--ov-paper);
+      background-image: var(--ov-ink-vline), var(--ov-paper-image);
+      background-repeat: repeat-y, repeat;
+      background-position:
+        right -3px top,
+        left top;
+      background-size:
+        $ink-line-height 400px,
+        #{$ink-paper-tile}px;
+      box-shadow: 0.35rem 0 1rem rgba(0, 0, 0, 0.2);
+    }
+  }
+}

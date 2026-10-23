@@ -8,6 +8,20 @@ html {
   }
 }
 
+// Sizing tokens. Colors live in ink/_tokens.scss, where they are set per color theme.
+:root {
+  // Type scale (rem; inherits html root size)
+  --ov-font-size-xs: 0.75rem; // meta (e.g. month abbr)
+  --ov-font-size-sm: 0.8125rem; // compact chrome (pagination, hints)
+  --ov-font-size-md: 0.875rem; // secondary UI (menus, tags)
+  --ov-font-size-label: 0.9375rem; // section / field labels
+  --ov-font-size-lg: 1.25rem; // emphasis (date day, callouts)
+  --ov-font-size-xl: 1.5rem; // highlights (amounts)
+
+  // Page side inset (about, profile, expense actions, connections, …)
+  --ov-page-inset: 15px;
+}
+
 .ov-center {
   padding: var(--ov-page-inset) 0;
   text-align: center;

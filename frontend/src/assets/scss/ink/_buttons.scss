@@ -1,0 +1,122 @@
+// ---------- Buttons ----------
+
+$ink-btn-variants: (
+  primary: var(--ov-ink),
+  secondary: var(--ov-ink-muted),
+  success: var(--ov-ink-green),
+  danger: var(--ov-ink-red),
+  warning: var(--ov-ink-ochre),
+  info: var(--ov-ink),
+  dark: var(--ov-ink),
+  light: var(--ov-paper)
+);
+
+$ink-btn-selectors: ();
+
+@each $name, $color in $ink-btn-variants {
+  $ink-btn-selectors: append($ink-btn-selectors, unquote('.btn-#{$name}'), comma);
+  $ink-btn-selectors: append($ink-btn-selectors, unquote('.btn-outline-#{$name}'), comma);
+}
+
+#{$ink} {
+  #{$ink-btn-selectors} {
+    // Outline look by default: transparent inside, hatched on hover, inked when pressed.
+    --ov-btn-fill: transparent;
+    --ov-btn-hover-fill: repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--ov-btn-ink) 35%, transparent) 0 1px,
+      transparent 1px 5px
+    );
+    --ov-btn-active-fill: var(--ov-btn-ink);
+    --bs-btn-color: var(--ov-btn-ink);
+    --bs-btn-hover-color: var(--ov-btn-ink);
+    --bs-btn-active-color: var(--ov-paper);
+    --bs-btn-disabled-color: var(--ov-btn-ink);
+
+    @include ink-drawn-box(var(--ov-btn-ink), 1.5px);
+
+    // Bootstrap paints fill and border per state with high specificity; the pseudo-elements draw them instead.
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+
+    // The fill; its edge hides under the stroke.
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 1.5px;
+      z-index: -1;
+      border-radius: 7px;
+      background: var(--ov-btn-fill);
+      pointer-events: none;
+    }
+
+    &::before,
+    &::after {
+      transition: transform 0.15s ease-in-out;
+    }
+
+    &:hover::before {
+      background: var(--ov-btn-hover-fill);
+    }
+
+    &:hover::before,
+    &:hover::after {
+      transform: rotate(-0.6deg);
+    }
+
+    &:active::before,
+    &.active::before,
+    &.show::before {
+      background: var(--ov-btn-active-fill);
+    }
+
+    &:focus-visible {
+      outline: $ink-stroke dashed var(--ov-btn-ink);
+      outline-offset: 2px;
+    }
+  }
+
+  .btn-check:checked + :is(#{$ink-btn-selectors})::before {
+    background: var(--ov-btn-active-fill);
+  }
+
+  @each $name, $color in $ink-btn-variants {
+    .btn-#{$name},
+    .btn-outline-#{$name} {
+      --ov-btn-ink: #{$color};
+    }
+
+    // Solid variants: a filled blot of ink.
+    .btn-#{$name} {
+      --ov-btn-fill: var(--ov-btn-ink);
+      --ov-btn-hover-fill: var(--ov-btn-ink);
+      --bs-btn-color: var(--ov-paper);
+      --bs-btn-hover-color: var(--ov-paper);
+      --bs-btn-disabled-color: var(--ov-paper);
+    }
+  }
+
+  .btn-light {
+    --bs-btn-color: var(--ov-ink);
+    --bs-btn-hover-color: var(--ov-ink);
+    --bs-btn-active-color: var(--ov-ink);
+    --bs-btn-disabled-color: var(--ov-ink);
+  }
+
+  .btn-link {
+    --bs-btn-color: var(--bs-link-color);
+    --bs-btn-hover-color: var(--bs-link-hover-color);
+  }
+
+  .btn-group {
+    gap: 0.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #{$ink} :is(#{$ink-btn-selectors}):hover::before,
+  #{$ink} :is(#{$ink-btn-selectors}):hover::after {
+    transform: none;
+  }
+}

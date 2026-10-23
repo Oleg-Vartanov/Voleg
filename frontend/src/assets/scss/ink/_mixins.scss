@@ -1,0 +1,57 @@
+@use 'sass:math';
+
+// ---------- Mixins ----------
+
+// Straight border swapped for a drawn stroke along one side.
+@mixin ink-rule($image: var(--ov-ink-line-faint), $side: bottom) {
+  border-#{$side}-color: transparent;
+  background-image: $image;
+  background-repeat: no-repeat;
+  background-position: left $side;
+  background-size: 100% $ink-line-height;
+}
+
+// Hand-drawn outline (the ink-box-mask strokes) on ::after, so the element's own text is untouched;
+// ::before stays free for a fill. The color can be changed later through --ov-box-color.
+// $inset is how far inside the element's edge the stroke runs.
+// $behind puts it under the element's content, which needs an isolated stacking context;
+// without it the outline paints over the (transparent) edge of in-flow content instead.
+@mixin ink-drawn-box($color: var(--ov-ink), $inset: 1px, $behind: true) {
+  --ov-box-color: #{$color};
+
+  position: relative;
+  border-color: transparent;
+
+  @if $behind {
+    isolation: isolate;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: $inset - math.div($ink-box-band, 2);
+    z-index: if($behind, -1, auto);
+    // Narrows the padding box, which the repeated top and bottom are clipped to: they stop at the corners.
+    border-inline: $ink-box-corner solid transparent;
+    background-color: var(--ov-box-color);
+    pointer-events: none;
+    -webkit-mask-image: var(--ov-ink-box-mask);
+    -webkit-mask-position: $ink-box-mask-positions;
+    -webkit-mask-size: $ink-box-mask-sizes;
+    -webkit-mask-repeat: $ink-box-mask-repeats;
+    -webkit-mask-origin: $ink-box-mask-boxes;
+    -webkit-mask-clip: $ink-box-mask-boxes;
+    mask-image: var(--ov-ink-box-mask);
+    mask-position: $ink-box-mask-positions;
+    mask-size: $ink-box-mask-sizes;
+    mask-repeat: $ink-box-mask-repeats;
+    mask-origin: $ink-box-mask-boxes;
+    mask-clip: $ink-box-mask-boxes;
+  }
+}
+
+@mixin ink-paper-surface {
+  background-color: var(--ov-paper);
+  background-image: var(--ov-paper-image);
+  background-size: #{$ink-paper-tile}px;
+}
