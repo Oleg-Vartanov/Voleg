@@ -1,12 +1,13 @@
-FROM php:8.4-fpm as php
+FROM php:8.5-fpm AS php
 
 WORKDIR /var/www/html/backend
 
 RUN apt-get update \
-    && apt-get install -y zlib1g-dev g++ libicu-dev libzip-dev nano \
-    && docker-php-ext-install intl opcache pdo pdo_mysql zip bcmath \
-    && pecl install apcu xdebug \
-    && docker-php-ext-enable apcu xdebug
+    && apt-get install -y zlib1g-dev g++ libicu-dev libzip-dev nano unzip \
+    && docker-php-ext-install intl pdo pdo_mysql zip bcmath
+
+RUN --mount=type=bind,from=ghcr.io/php/pie:bin,source=/pie,target=/usr/local/bin/pie \
+    pie install apcu/apcu xdebug/xdebug
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
