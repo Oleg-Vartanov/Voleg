@@ -36,7 +36,7 @@ const menuGroups: MenuItem[][] = [
       name: 'splitExpense',
       title: 'Split Expense',
       to: 'seFeed',
-      activeWhen: ['seFeed', 'seBalance', 'seConnections']
+      activeWhen: ['seFeed', 'seBalance', 'seInsights', 'seConnections']
     },
     { name: 'footballPredictions', title: 'Football Predictions' }
   ]

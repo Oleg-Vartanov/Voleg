@@ -223,7 +223,7 @@ onMounted(reload)
             <p v-if="(feed.items.value ?? []).length === 0" class="feed-empty">{{ emptyText }}</p>
 
             <template v-for="group in itemsByMonth" :key="group.month">
-              <div class="feed-month-header">{{ group.label }}</div>
+              <div class="se-month-header">{{ group.label }}</div>
 
               <article
                 v-for="item in group.items"
@@ -338,15 +338,6 @@ onMounted(reload)
   text-align: center;
   color: var(--bs-secondary-color);
   opacity: 0.9;
-}
-
-.feed-month-header {
-  padding: 0.2rem 0.5rem;
-  background-color: var(--bs-secondary-bg);
-  font-weight: 600;
-  font-size: var(--ov-font-size-label);
-  line-height: 1.2;
-  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
 }
 
 .feed-item:not(.is-expanded) :deep(.expense-row),

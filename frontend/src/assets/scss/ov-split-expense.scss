@@ -43,6 +43,21 @@
   color: var(--bs-secondary-color);
 }
 
+.se-month-header {
+  margin: 0;
+  padding: 0.2rem 0.5rem;
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+  background-color: var(--bs-secondary-bg);
+  font-size: var(--ov-font-size-label);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.se-month-header--compact {
+  padding-block: 0.1rem;
+  font-size: var(--ov-font-size-sm);
+}
+
 .se-panel-block {
   padding: 0.75rem;
   border-radius: var(--bs-border-radius);

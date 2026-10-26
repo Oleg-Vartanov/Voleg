@@ -76,9 +76,7 @@ watch(isOpen, async (open) => {
     return
   }
 
-  const selectedIdx = filteredOptions.value.findIndex(
-    (option) => option.value === props.modelValue
-  )
+  const selectedIdx = filteredOptions.value.findIndex((option) => option.value === props.modelValue)
   activeIndex.value = selectedIdx >= 0 ? selectedIdx : filteredOptions.value.length > 0 ? 0 : -1
 
   await nextTick()

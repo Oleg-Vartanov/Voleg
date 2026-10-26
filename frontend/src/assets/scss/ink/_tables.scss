@@ -31,11 +31,15 @@
   }
 
   // Split expense (FeedPage, BalancePage, detail panels)
-  .feed-month-header {
+  .se-month-header {
     @include ink-rule(var(--ov-ink-line-double));
     background-color: transparent;
     font-family: $ink-font-heading;
     font-size: 1.45rem;
+  }
+
+  .se-month-header--compact {
+    font-size: 1.1rem;
   }
 
   .feed-item:not(.is-expanded) .expense-row,

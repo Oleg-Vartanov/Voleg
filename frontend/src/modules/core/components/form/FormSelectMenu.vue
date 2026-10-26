@@ -82,7 +82,11 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
       :open-up="isOpenUp"
       :panel-style="dropdownStyle"
     >
-      <ul :id="`${id}-listbox`" class="form-select-dropdown-options list-unstyled mb-0" role="listbox">
+      <ul
+        :id="`${id}-listbox`"
+        class="form-select-dropdown-options list-unstyled mb-0"
+        role="listbox"
+      >
         <li
           v-for="option in options"
           :key="option.value"
@@ -140,5 +144,4 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   box-shadow: none;
   z-index: 5;
 }
-
 </style>

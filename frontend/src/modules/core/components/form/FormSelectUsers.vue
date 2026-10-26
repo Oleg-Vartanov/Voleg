@@ -278,7 +278,11 @@ onUnmounted(() => {
         :invalid="isInvalid"
         :panel-style="dropdownStyle"
       >
-        <ul :id="`${id}-listbox`" class="form-select-dropdown-options list-unstyled mb-0" role="listbox">
+        <ul
+          :id="`${id}-listbox`"
+          class="form-select-dropdown-options list-unstyled mb-0"
+          role="listbox"
+        >
           <li
             v-for="(user, index) in searchResults"
             :id="`${id}-option-${user.id}`"

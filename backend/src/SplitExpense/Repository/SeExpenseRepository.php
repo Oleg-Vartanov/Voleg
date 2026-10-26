@@ -6,6 +6,7 @@ use App\Core\Repository\AbstractEntityRepository;
 use App\SplitExpense\Entity\SeExpense;
 use App\SplitExpense\Entity\SeExpenseSplit;
 use App\SplitExpense\ValueObject\SeBalanceEntry;
+use App\SplitExpense\ValueObject\SeCategoryTotalEntry;
 use App\User\Entity\User;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -135,6 +136,87 @@ class SeExpenseRepository extends AbstractEntityRepository
             ->setParameter('user', $user);
 
         return $this->toBalanceEntries($qb);
+    }
+
+    /**
+     * The current user's own share of expenses, grouped by month, category and currency.
+     *
+     * @param string[] $months Months in YYYY-MM format.
+     *
+     * @return SeCategoryTotalEntry[]
+     */
+    public function sumUserSplitsByCategory(
+        User $user,
+        array $months,
+        ?int $categoryId = null,
+    ): array {
+        if ($months === []) {
+            return [];
+        }
+
+        $qb = $this->createQueryBuilder('e')
+            ->select(
+                "SUBSTRING(e.expenseDate, 1, 7) AS month",
+                'IDENTITY(e.category) AS categoryId',
+                'IDENTITY(e.currency) AS currencyId',
+                'SUM(s.amount) AS amount',
+            )
+            ->join('e.splits', 's')
+            ->where('s.user = :user')
+            ->andWhere("SUBSTRING(e.expenseDate, 1, 7) IN (:months)")
+            ->groupBy('month')
+            ->addGroupBy('e.category')
+            ->addGroupBy('e.currency')
+            ->orderBy('month', 'DESC')
+            ->setParameter('user', $user)
+            ->setParameter('months', $months);
+
+        if ($categoryId !== null) {
+            $qb->andWhere('e.category = :categoryId')
+                ->setParameter('categoryId', $categoryId);
+        }
+
+        /** @var list<array{
+         *     month: string,
+         *     categoryId: int|string,
+         *     currencyId: int|string,
+         *     amount: int|string
+         * }> $result
+         */
+        $result = $qb->getQuery()->getScalarResult();
+
+        return array_map(
+            static fn (array $row): SeCategoryTotalEntry => new SeCategoryTotalEntry(
+                month: $row['month'],
+                categoryId: (int) $row['categoryId'],
+                currencyId: (int) $row['currencyId'],
+                amount: (int) $row['amount'],
+            ),
+            $result,
+        );
+    }
+
+    /**
+     * @return string[] Months in YYYY-MM format, newest first.
+     */
+    public function listUserSplitMonths(User $user, ?int $categoryId = null): array
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->select("DISTINCT SUBSTRING(e.expenseDate, 1, 7) AS month")
+            ->join('e.splits', 's')
+            ->where('s.user = :user')
+            ->orderBy('month', 'DESC')
+            ->setParameter('user', $user);
+
+        if ($categoryId !== null) {
+            $qb->andWhere('e.category = :categoryId')
+                ->setParameter('categoryId', $categoryId);
+        }
+
+        /** @var string[] $months */
+        $months = $qb->getQuery()->getSingleColumnResult();
+
+        return $months;
     }
 
     public function countForUser(User $user): int

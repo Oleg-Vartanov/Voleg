@@ -49,6 +49,18 @@ export interface ApiSeBalance {
   byUserAmounts: ApiSeUserBalance[]
 }
 
+export interface ApiSeCategoryTotal {
+  month: string
+  category: ApiSeCategory
+  currency: ApiSeCurrency
+  amount: number
+}
+
+export interface ApiSeInsights {
+  categoryTotals: ApiSeCategoryTotal[]
+  totalMonthCount: number
+}
+
 export interface ApiSeConnection {
   id: number
   status: 'accepted' | 'rejected' | 'pending'

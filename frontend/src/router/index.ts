@@ -45,6 +45,13 @@ const index = createRouter({
           component: () => import('@/modules/splitExpense/pages/BalancePage.vue')
         },
         {
+          path: 'split-expense/insights',
+          name: 'seInsights',
+          meta: { title: 'Split Expense' },
+          beforeEnter: [guards.isAuthenticated],
+          component: () => import('@/modules/splitExpense/pages/InsightsPage.vue')
+        },
+        {
           path: 'split-expense/connections',
           name: 'seConnections',
           meta: { title: 'Split Expense' },

@@ -156,6 +156,13 @@ export default {
     })
   },
 
+  getSplitExpenseInsights(offset = 0, limit = 6, categoryId: number | null = null) {
+    return axios.get(`${apiBaseUrl}/split-expense/insights`, {
+      headers: getHeader(),
+      params: { offset, limit, categoryId }
+    })
+  },
+
   listSplitExpenseCategories(offset = 0, limit = 100) {
     return axios.get(`${apiBaseUrl}/split-expense/categories`, {
       headers: getHeader(),
