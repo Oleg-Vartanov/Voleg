@@ -13,6 +13,7 @@ export function useInsights() {
   const isLoaded = ref(false)
   const hasError = ref(false)
   const activeCategoryId = ref<number | null>(null)
+  const activeUserIds = ref<number[]>([])
   let lastRequestId = 0
 
   const isEmpty = computed(() => isLoaded.value && categoryTotals.value.length === 0)
@@ -35,7 +36,12 @@ export function useInsights() {
     }
 
     try {
-      const response = await client.getSplitExpenseInsights(offset, limit, activeCategoryId.value)
+      const response = await client.getSplitExpenseInsights(
+        offset,
+        limit,
+        activeCategoryId.value,
+        activeUserIds.value
+      )
       if (requestId !== lastRequestId) return
 
       const insights = response.data as ApiSeInsights
@@ -61,8 +67,13 @@ export function useInsights() {
     }
   }
 
-  function loadInitial(limit = 6, categoryId: number | null = null): Promise<void> {
+  function loadInitial(
+    limit = 6,
+    categoryId: number | null = null,
+    userIds: number[] = []
+  ): Promise<void> {
     activeCategoryId.value = categoryId
+    activeUserIds.value = userIds
     return load(0, limit, false)
   }
 

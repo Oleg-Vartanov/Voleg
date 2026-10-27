@@ -3,6 +3,7 @@
 namespace App\SplitExpense\Service;
 
 use App\Core\Entity\Currency;
+use App\Core\Exception\UnprocessableException;
 use App\Core\Repository\CurrencyRepository;
 use App\SplitExpense\Entity\SeCategory;
 use App\SplitExpense\Http\V1\Insights\SeCategoryTotal;
@@ -11,6 +12,7 @@ use App\SplitExpense\Repository\SeCategoryRepository;
 use App\SplitExpense\Repository\SeExpenseRepository;
 use App\SplitExpense\ValueObject\SeCategoryTotalEntry;
 use App\User\Entity\User;
+use App\User\Repository\UserRepository;
 
 readonly class SeInsightsService
 {
@@ -18,20 +20,33 @@ readonly class SeInsightsService
         private SeExpenseRepository $expenseRepository,
         private SeCategoryRepository $categoryRepository,
         private CurrencyRepository $currencyRepository,
+        private UserRepository $userRepository,
+        private SeConnectionService $connectionService,
     ) {
     }
 
+    /**
+     * Total expense cost paid by `$user`, plus expenses paid by connected `$userIds` that include
+     * `$user` as a split participant.
+     *
+     * @param int[] $userIds Extra connected payers to include.
+     *
+     * @throws UnprocessableException
+     */
     public function forUser(
         User $user,
         int $offset = 0,
         int $limit = 6,
         ?int $categoryId = null,
+        array $userIds = [],
     ): SeInsightsResponse {
-        $allMonths = $this->expenseRepository->listUserSplitMonths($user, $categoryId);
+        $otherPayers = $this->resolveOtherPayers($user, $userIds);
+        $allMonths = $this->expenseRepository->listPaidExpenseMonths($user, $otherPayers, $categoryId);
         $totalMonthCount = count($allMonths);
         $months = array_slice($allMonths, $offset, $limit);
-        $entries = $this->expenseRepository->sumUserSplitsByCategory(
+        $entries = $this->expenseRepository->sumPaidExpensesByCategory(
             $user,
+            $otherPayers,
             $months,
             $categoryId,
         );
@@ -69,6 +84,38 @@ readonly class SeInsightsService
         });
 
         return new SeInsightsResponse($totals, $totalMonthCount);
+    }
+
+    /**
+     * @param int[] $userIds
+     *
+     * @return User[]
+     *
+     * @throws UnprocessableException
+     */
+    private function resolveOtherPayers(User $user, array $userIds): array
+    {
+        $userIds = array_values(array_unique(array_filter(
+            $userIds,
+            static fn (int $id): bool => $id !== (int) $user->getId(),
+        )));
+        if ($userIds === []) {
+            return [];
+        }
+
+        /** @var User[] $others */
+        $others = $this->userRepository->findBy(['id' => $userIds]);
+        if (count($others) !== count($userIds)) {
+            throw new UnprocessableException('User not found.', 'userIds');
+        }
+
+        foreach ($others as $other) {
+            if (!$this->connectionService->isConnected($user, $other)) {
+                throw new UnprocessableException('Users require a connection.', 'userIds');
+            }
+        }
+
+        return $others;
     }
 
     /**

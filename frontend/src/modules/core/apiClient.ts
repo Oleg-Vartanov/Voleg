@@ -156,10 +156,20 @@ export default {
     })
   },
 
-  getSplitExpenseInsights(offset = 0, limit = 6, categoryId: number | null = null) {
+  getSplitExpenseInsights(
+    offset = 0,
+    limit = 6,
+    categoryId: number | null = null,
+    userIds: number[] = []
+  ) {
     return axios.get(`${apiBaseUrl}/split-expense/insights`, {
       headers: getHeader(),
-      params: { offset, limit, categoryId }
+      params: {
+        offset,
+        limit,
+        categoryId,
+        userIds: userIds.length > 0 ? userIds : undefined
+      }
     })
   },
 

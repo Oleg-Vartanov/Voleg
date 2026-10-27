@@ -3,11 +3,15 @@ import { computed, onMounted, ref, watch } from 'vue'
 import SePageNav from '@/modules/splitExpense/components/SePageNav.vue'
 import ShowMorePagination from '@/modules/core/components/pagination/ShowMorePagination.vue'
 import FormSelect from '@/modules/core/components/form/FormSelect.vue'
+import FormSelectUsers from '@/modules/core/components/form/FormSelectUsers.vue'
 import { useCategories } from '@/modules/splitExpense/composables/useCategories'
 import { useInsights } from '@/modules/splitExpense/composables/useInsights'
+import { searchConnectedUsers } from '@/modules/splitExpense/api/searchConnectedUsers'
 import { categories as categoryIcons, type CategoryKey } from '@/modules/splitExpense/categories'
 import { formatMonthLabel } from '@/modules/splitExpense/utils/expenseDates'
 import moneyUtils from '@/modules/core/utils/moneyUtils'
+import { useAuth } from '@/modules/user/stores/useAuth'
+import type { ApiUser } from '@/modules/core/apiType'
 import type { ApiSeCategory, ApiSeCategoryTotal, ApiSeCurrency } from '@/modules/splitExpense/types'
 
 interface CategoryGroup {
@@ -21,15 +25,25 @@ interface MonthGroup {
   categories: CategoryGroup[]
 }
 
+const auth = useAuth()
 const insights = useInsights()
 const categoryData = useCategories()
 const PAGE_SIZE = 6
 const selectedCategoryId = ref<string | number>(0)
+const selectedUsers = ref<ApiUser[]>([])
+
+const lockedUsers = computed(() => [auth.user])
 
 const categoryOptions = computed(() => [
   { value: 0, label: 'All categories' },
   ...categoryData.categoryOptions.value
 ])
+
+const insightsHint = computed(() =>
+  selectedUsers.value.length > 0
+    ? 'Total cost paid by you and selected users'
+    : 'Total cost of expenses you paid'
+)
 
 const emptyText = computed(() =>
   Number(selectedCategoryId.value) === 0
@@ -81,15 +95,22 @@ function formatTotal(total: ApiSeCategoryTotal | CategoryGroup['totals'][number]
   return `${amount} ${total.currency.code}`
 }
 
+function reloadInsights(): void {
+  const categoryId = Number(selectedCategoryId.value)
+  insights.loadInitial(
+    PAGE_SIZE,
+    categoryId === 0 ? null : categoryId,
+    selectedUsers.value.map((user) => user.id)
+  )
+}
+
 onMounted(() => {
   categoryData.load()
-  insights.loadInitial(PAGE_SIZE)
+  reloadInsights()
 })
 
-watch(selectedCategoryId, (value) => {
-  const categoryId = Number(value)
-  insights.loadInitial(PAGE_SIZE, categoryId === 0 ? null : categoryId)
-})
+watch(selectedCategoryId, reloadInsights)
+watch(selectedUsers, reloadInsights, { deep: true })
 </script>
 
 <template>
@@ -100,7 +121,7 @@ watch(selectedCategoryId, (value) => {
       <section class="se-panel" aria-labelledby="insights-category-title">
         <header class="insights-header">
           <h1 id="insights-category-title" class="se-panel__title">Expenses by category</h1>
-          <p class="insights-hint">Your share of each expense</p>
+          <p class="insights-hint">{{ insightsHint }}</p>
         </header>
 
         <div class="insights-filter">
@@ -110,6 +131,15 @@ watch(selectedCategoryId, (value) => {
             label="Category"
             :options="categoryOptions"
             :disabled="categoryData.categories.value === null"
+          />
+
+          <FormSelectUsers
+            id="se-insights-users"
+            v-model="selectedUsers"
+            multiple
+            label="Include payers"
+            :search="searchConnectedUsers"
+            :locked-users="lockedUsers"
           />
         </div>
 
@@ -125,7 +155,7 @@ watch(selectedCategoryId, (value) => {
             type="button"
             class="btn btn-outline-primary btn-sm"
             :disabled="insights.isLoading.value"
-            @click="insights.loadInitial(PAGE_SIZE)"
+            @click="reloadInsights"
           >
             Try again
           </button>
@@ -195,6 +225,9 @@ watch(selectedCategoryId, (value) => {
 }
 
 .insights-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   padding-inline: var(--ov-page-inset);
 }
 

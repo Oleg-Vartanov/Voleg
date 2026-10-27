@@ -139,14 +139,17 @@ class SeExpenseRepository extends AbstractEntityRepository
     }
 
     /**
-     * The current user's own share of expenses, grouped by month, category and currency.
+     * Total expense cost paid by `$user`, plus expenses paid by `$otherPayers` that include `$user`
+     * as a split participant. Grouped by month, category and currency.
      *
+     * @param User[]   $otherPayers
      * @param string[] $months Months in YYYY-MM format.
      *
      * @return SeCategoryTotalEntry[]
      */
-    public function sumUserSplitsByCategory(
+    public function sumPaidExpensesByCategory(
         User $user,
+        array $otherPayers,
         array $months,
         ?int $categoryId = null,
     ): array {
@@ -154,27 +157,19 @@ class SeExpenseRepository extends AbstractEntityRepository
             return [];
         }
 
-        $qb = $this->createQueryBuilder('e')
+        $qb = $this->createPaidExpensesQueryBuilder($user, $otherPayers, $categoryId)
             ->select(
                 "SUBSTRING(e.expenseDate, 1, 7) AS month",
                 'IDENTITY(e.category) AS categoryId',
                 'IDENTITY(e.currency) AS currencyId',
-                'SUM(s.amount) AS amount',
+                'SUM(e.amount) AS amount',
             )
-            ->join('e.splits', 's')
-            ->where('s.user = :user')
             ->andWhere("SUBSTRING(e.expenseDate, 1, 7) IN (:months)")
             ->groupBy('month')
             ->addGroupBy('e.category')
             ->addGroupBy('e.currency')
             ->orderBy('month', 'DESC')
-            ->setParameter('user', $user)
             ->setParameter('months', $months);
-
-        if ($categoryId !== null) {
-            $qb->andWhere('e.category = :categoryId')
-                ->setParameter('categoryId', $categoryId);
-        }
 
         /** @var list<array{
          *     month: string,
@@ -197,26 +192,57 @@ class SeExpenseRepository extends AbstractEntityRepository
     }
 
     /**
+     * @param User[] $otherPayers
+     *
      * @return string[] Months in YYYY-MM format, newest first.
      */
-    public function listUserSplitMonths(User $user, ?int $categoryId = null): array
-    {
-        $qb = $this->createQueryBuilder('e')
+    public function listPaidExpenseMonths(
+        User $user,
+        array $otherPayers,
+        ?int $categoryId = null,
+    ): array {
+        $qb = $this->createPaidExpensesQueryBuilder($user, $otherPayers, $categoryId)
             ->select("DISTINCT SUBSTRING(e.expenseDate, 1, 7) AS month")
-            ->join('e.splits', 's')
-            ->where('s.user = :user')
-            ->orderBy('month', 'DESC')
+            ->orderBy('month', 'DESC');
+
+        /** @var string[] $months */
+        $months = $qb->getQuery()->getSingleColumnResult();
+
+        return $months;
+    }
+
+    /**
+     * Expenses paid by `$user`, or paid by `$otherPayers` when `$user` is on the split.
+     *
+     * @param User[] $otherPayers
+     */
+    private function createPaidExpensesQueryBuilder(
+        User $user,
+        array $otherPayers,
+        ?int $categoryId = null,
+    ): QueryBuilder {
+        $qb = $this->createQueryBuilder('e')
             ->setParameter('user', $user);
+
+        if ($otherPayers === []) {
+            $qb->where('e.paidByUser = :user');
+        } else {
+            $qb->where(
+                'e.paidByUser = :user OR ('
+                . 'e.paidByUser IN (:otherPayers) AND EXISTS ('
+                . 'SELECT 1 FROM ' . SeExpenseSplit::class . ' s'
+                . ' WHERE s.expense = e AND s.user = :user'
+                . ')'
+                . ')',
+            )->setParameter('otherPayers', $otherPayers);
+        }
 
         if ($categoryId !== null) {
             $qb->andWhere('e.category = :categoryId')
                 ->setParameter('categoryId', $categoryId);
         }
 
-        /** @var string[] $months */
-        $months = $qb->getQuery()->getSingleColumnResult();
-
-        return $months;
+        return $qb;
     }
 
     public function countForUser(User $user): int

@@ -11,7 +11,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 readonly class SeCategoryTotal
 {
     /**
-     * @param int $amount The current user's total split amount in minor units.
+     * @param int $amount Total expense cost paid by the selected payers, in minor units.
      */
     public function __construct(
         /** Month in YYYY-MM format. */
