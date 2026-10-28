@@ -14,14 +14,20 @@ import { useAuth } from '@/modules/user/stores/useAuth'
 import type { ApiUser } from '@/modules/core/apiType'
 import type { ApiSeCategory, ApiSeCategoryTotal, ApiSeCurrency } from '@/modules/splitExpense/types'
 
+interface CurrencyTotal {
+  currency: ApiSeCurrency
+  amount: number
+}
+
 interface CategoryGroup {
   category: ApiSeCategory
-  totals: Array<{ currency: ApiSeCurrency; amount: number }>
+  totals: CurrencyTotal[]
 }
 
 interface MonthGroup {
   month: string
   label: string
+  totals: CurrencyTotal[]
   categories: CategoryGroup[]
 }
 
@@ -33,6 +39,7 @@ const selectedCategoryId = ref<string | number>(0)
 const selectedUsers = ref<ApiUser[]>([])
 
 const lockedUsers = computed(() => [auth.user])
+const isCategoryFiltered = computed(() => Number(selectedCategoryId.value) !== 0)
 
 const categoryOptions = computed(() => [
   { value: 0, label: 'All categories' },
@@ -46,13 +53,20 @@ const insightsHint = computed(() =>
 )
 
 const emptyText = computed(() =>
-  Number(selectedCategoryId.value) === 0
-    ? 'Add an expense to see your spending here.'
-    : 'No expenses in this category.'
+  isCategoryFiltered.value
+    ? 'No expenses in this category.'
+    : 'Add an expense to see your spending here.'
 )
 
 const monthGroups = computed<MonthGroup[]>(() => {
-  const months = new Map<string, { group: MonthGroup; categories: Map<number, CategoryGroup> }>()
+  const months = new Map<
+    string,
+    {
+      group: MonthGroup
+      categories: Map<number, CategoryGroup>
+      totals: Map<number, CurrencyTotal>
+    }
+  >()
 
   for (const total of insights.categoryTotals.value) {
     let month = months.get(total.month)
@@ -61,11 +75,22 @@ const monthGroups = computed<MonthGroup[]>(() => {
         group: {
           month: total.month,
           label: formatMonthLabel(total.month),
+          totals: [],
           categories: []
         },
-        categories: new Map()
+        categories: new Map(),
+        totals: new Map()
       }
       months.set(total.month, month)
+    }
+
+    const monthTotal = month.totals.get(total.currency.id)
+    if (monthTotal) {
+      monthTotal.amount += total.amount
+    } else {
+      const newTotal = { currency: total.currency, amount: total.amount }
+      month.totals.set(total.currency.id, newTotal)
+      month.group.totals.push(newTotal)
     }
 
     const category = month.categories.get(total.category.id)
@@ -90,7 +115,7 @@ function categoryIcon(category: ApiSeCategory): string {
     : categoryIcons.other
 }
 
-function formatTotal(total: ApiSeCategoryTotal | CategoryGroup['totals'][number]): string {
+function formatTotal(total: ApiSeCategoryTotal | CurrencyTotal): string {
   const amount = moneyUtils.fromMinorUnits(total.amount, total.currency.decimalPlaces)
   return `${amount} ${total.currency.code}`
 }
@@ -167,9 +192,19 @@ watch(selectedUsers, reloadInsights, { deep: true })
 
         <div v-else class="insights-list">
           <section v-for="month in monthGroups" :key="month.month">
-            <h2 class="se-month-header se-month-header--compact">{{ month.label }}</h2>
+            <h2 class="se-month-header se-month-header--compact insights-month">
+              <span>{{ month.label }}</span>
+              <span class="insights-month__totals">
+                <span v-for="total in month.totals" :key="total.currency.id">
+                  {{ formatTotal(total) }}
+                </span>
+              </span>
+            </h2>
 
-            <ul class="list-group list-group-flush insights-categories">
+            <ul
+              v-if="!isCategoryFiltered"
+              class="list-group list-group-flush insights-categories"
+            >
               <li
                 v-for="category in month.categories"
                 :key="category.category.id"
@@ -239,6 +274,23 @@ watch(selectedUsers, reloadInsights, { deep: true })
   margin-top: 0.25rem;
 }
 
+.insights-month {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.insights-month__totals,
+.insights-category__totals {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .insights-category {
   display: flex;
   align-items: center;
@@ -257,14 +309,5 @@ watch(selectedUsers, reloadInsights, { deep: true })
   width: 1.25rem;
   flex-shrink: 0;
   text-align: center;
-}
-
-.insights-category__totals {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  flex-shrink: 0;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 </style>
