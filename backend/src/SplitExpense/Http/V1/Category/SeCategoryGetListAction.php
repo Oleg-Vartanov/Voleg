@@ -1,6 +1,6 @@
 <?php
 
-namespace App\SplitExpense\Http\V1;
+namespace App\SplitExpense\Http\V1\Category;
 
 use App\Core\Documentation\Attribute\Response\ArrayResponse;
 use App\Core\Http\ApiController;

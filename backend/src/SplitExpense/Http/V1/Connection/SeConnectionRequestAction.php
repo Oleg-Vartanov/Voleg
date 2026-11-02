@@ -1,6 +1,6 @@
 <?php
 
-namespace App\SplitExpense\Http\V1;
+namespace App\SplitExpense\Http\V1\Connection;
 
 use App\Core\Documentation\Attribute\Response\AccessDeniedResponse;
 use App\Core\Documentation\Attribute\Response\ItemResponse;
@@ -10,14 +10,17 @@ use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
 use App\SplitExpense\Entity\SeConnection;
-use App\SplitExpense\Http\V1\Request\SeConnectionResponseDto;
+use App\SplitExpense\Http\V1\Request\SeConnectionRequestDto;
 use App\SplitExpense\Repository\SeConnectionRepository;
 use App\SplitExpense\Service\SeConnectionService;
 use App\User\Entity\User;
+use App\User\Http\V1\Trait\UserControllerTrait;
+use App\User\Repository\UserRepository;
 use LogicException;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
@@ -28,39 +31,46 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
     responses: [
         new ItemResponse(
             type: SeConnection::class,
-            description: 'Connection response recorded',
-            groups: [Group::public->value],
+            responseCode: Response::HTTP_CREATED,
+            description: 'Connection request created',
+            groups: [Group::public->value]
         ),
-        new MessageResponse(400, 'Invalid data'),
+        new MessageResponse(Response::HTTP_BAD_REQUEST, 'Invalid data'),
         new AccessDeniedResponse(),
-        new NotFoundResponse('Connection not found'),
+        new NotFoundResponse('User not found'),
         new ValidationErrorResponse(),
     ],
 )]
-#[Route('/split-expense/connections/{id}/response', name: 'se_connection_response', methods: [Request::METHOD_POST])]
-class SeConnectionResponseAction extends ApiController
+#[Route('/split-expense/connections/request', name: 'se_connection_request', methods: [Request::METHOD_POST])]
+class SeConnectionRequestAction extends ApiController
 {
+    use UserControllerTrait;
+
     public function __construct(
         private readonly SeConnectionService $service,
         private readonly SeConnectionRepository $connectionRepository,
+        private readonly UserRepository $userRepository,
     ) {
     }
 
     public function __invoke(
         #[CurrentUser] User $user,
-        int $id,
-        #[MapRequestPayload(validationFailedStatusCode: 422)] SeConnectionResponseDto $dto,
+        #[MapRequestPayload(validationFailedStatusCode: 422)] SeConnectionRequestDto $dto,
     ): JsonResponse {
-        $connection = $this->connectionRepository->find($id) ?? $this->notFound();
+        $requestedUser = $this->userRepository->find($dto->connectionUserId) ?? $this->notFound();
 
         try {
-            $this->service->respond($user, $connection, $dto->status);
+            $connection = $this->service->create($user, $requestedUser);
         } catch (LogicException $e) {
             return $this->messageResponse($e->getMessage(), 400);
         }
-
         $this->connectionRepository->save($connection, true);
+        $this->service->requestConnection($connection);
 
-        return $this->json($connection, context: ['groups' => Group::public->value]);
+        return $this->json(
+            $connection,
+            Response::HTTP_CREATED,
+            context: ['groups' => Group::public->value],
+        );
     }
 }

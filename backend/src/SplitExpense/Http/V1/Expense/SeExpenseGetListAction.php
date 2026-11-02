@@ -1,13 +1,13 @@
 <?php
 
-namespace App\SplitExpense\Http\V1;
+namespace App\SplitExpense\Http\V1\Expense;
 
 use App\Core\Documentation\Attribute\Response\ArrayResponse;
 use App\Core\Documentation\Attribute\Response\UnauthorizedResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
-use App\SplitExpense\Entity\SeAdjustment;
-use App\SplitExpense\Repository\SeAdjustmentRepository;
+use App\SplitExpense\Entity\SeExpense;
+use App\SplitExpense\Repository\SeExpenseRepository;
 use App\User\Entity\User;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,21 +18,21 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[OA\Get(
     security: [['Bearer' => []]],
-    tags: ['Split Expense: Adjustment'],
+    tags: ['Split Expense: Expense'],
     responses: [
         new ArrayResponse(
-            type: SeAdjustment::class,
-            description: 'Split expense adjustments',
+            type: SeExpense::class,
+            description: 'Split expenses',
             groups: [Group::public->value],
         ),
         new UnauthorizedResponse(),
     ],
 )]
-#[Route('/split-expense/adjustments', name: 'se_adjustment_get_list', methods: [Request::METHOD_GET])]
-class SeAdjustmentGetListAction extends ApiController
+#[Route('/split-expense/expenses', name: 'se_expense_get_list', methods: [Request::METHOD_GET])]
+class SeExpenseGetListAction extends ApiController
 {
     public function __construct(
-        private readonly SeAdjustmentRepository $adjustmentRepository,
+        private readonly SeExpenseRepository $expenseRepository,
     ) {
     }
 
@@ -41,11 +41,11 @@ class SeAdjustmentGetListAction extends ApiController
         #[MapQueryParameter] int $offset = 0,
         #[MapQueryParameter] int $limit = 100,
     ): JsonResponse {
-        $adjustments = $this->adjustmentRepository->listForUser($user, $offset, $limit);
-        $totalCount = $this->adjustmentRepository->countForUser($user);
+        $expenses = $this->expenseRepository->listForUser($user, $offset, $limit);
+        $totalCount = $this->expenseRepository->countForUser($user);
 
         return $this->json(
-            $adjustments,
+            $expenses,
             headers: ['X-Total-Count' => (string) $totalCount],
             context: ['groups' => Group::public->value],
         );

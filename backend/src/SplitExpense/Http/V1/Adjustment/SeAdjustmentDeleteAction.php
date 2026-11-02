@@ -1,6 +1,6 @@
 <?php
 
-namespace App\SplitExpense\Http\V1;
+namespace App\SplitExpense\Http\V1\Adjustment;
 
 use App\Core\Documentation\Attribute\Response\MessageResponse;
 use App\Core\Documentation\Attribute\Response\NotFoundResponse;

@@ -1,47 +1,37 @@
 <?php
 
-namespace App\SplitExpense\Http\V1;
+namespace App\SplitExpense\Http\V1\Expense;
 
-use App\Core\Documentation\Attribute\Response\ItemResponse;
+use App\Core\Documentation\Attribute\Response\MessageResponse;
 use App\Core\Documentation\Attribute\Response\NotFoundResponse;
-use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
-use App\SplitExpense\Entity\SeExpense;
 use App\SplitExpense\Repository\SeExpenseRepository;
 use App\SplitExpense\Service\SeExpenseService;
 use App\User\Entity\User;
 use OpenApi\Attributes as OA;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
-#[OA\Get(
+#[OA\Delete(
     security: [['Bearer' => []]],
     tags: ['Split Expense: Expense'],
     responses: [
-        new ItemResponse(
-            type: SeExpense::class,
-            description: 'Split expense',
-            groups: [Group::public->value],
-        ),
+        new MessageResponse(Response::HTTP_NO_CONTENT, 'Expense deleted'),
         new NotFoundResponse('Expense not found'),
     ],
 )]
-#[Route(
-    path: '/split-expense/expenses/{id}',
-    name: 'se_expense_get',
-    methods: [Request::METHOD_GET],
-)]
-class SeExpenseGetAction extends ApiController
+#[Route('/split-expense/expenses/{id}', name: 'se_expense_delete', methods: [Request::METHOD_DELETE])]
+class SeExpenseDeleteAction extends ApiController
 {
     public function __construct(
-        private readonly SeExpenseRepository $expenseRepository,
         private readonly SeExpenseService $service,
+        private readonly SeExpenseRepository $expenseRepository,
     ) {
     }
 
-    public function __invoke(#[CurrentUser] User $user, int $id): JsonResponse
+    public function __invoke(#[CurrentUser] User $user, int $id): Response
     {
         $expense = $this->expenseRepository->find($id) ?? $this->notFound();
 
@@ -49,6 +39,8 @@ class SeExpenseGetAction extends ApiController
             $this->accessDenied();
         }
 
-        return $this->json($expense, context: ['groups' => Group::public->value]);
+        $this->service->delete($expense);
+
+        return $this->messageResponse('Expense deleted', Response::HTTP_NO_CONTENT);
     }
 }
