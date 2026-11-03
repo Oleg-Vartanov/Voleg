@@ -2,7 +2,7 @@
 
 namespace App\SplitExpense\Http\V1\Request;
 
-use App\SplitExpense\Validator\Constraints\MaxAmount;
+use App\Core\Validator\Constraints\IntRange;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -21,7 +21,7 @@ class ExpenseDto
     #[OA\Property(description: 'Amount in minor currency units (e.g. cents for USD)', example: 10000)]
     #[Assert\NotBlank]
     #[Assert\Positive]
-    #[MaxAmount]
+    #[IntRange]
     public int $amount;
 
     #[OA\Property(example: 'Dinner')]

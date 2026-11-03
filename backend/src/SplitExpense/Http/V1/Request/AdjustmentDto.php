@@ -2,7 +2,7 @@
 
 namespace App\SplitExpense\Http\V1\Request;
 
-use App\SplitExpense\Validator\Constraints\MaxAmount;
+use App\Core\Validator\Constraints\IntRange;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -19,7 +19,7 @@ class AdjustmentDto
     )]
     #[Assert\NotBlank]
     #[Assert\NotEqualTo(0)]
-    #[MaxAmount]
+    #[IntRange]
     public int $amount;
 
     #[OA\Property(example: 1)]
