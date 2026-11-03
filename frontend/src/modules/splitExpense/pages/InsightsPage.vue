@@ -7,7 +7,6 @@ import FormSelectUsers from '@/modules/core/components/form/FormSelectUsers.vue'
 import { useCategories } from '@/modules/splitExpense/composables/useCategories'
 import { useInsights } from '@/modules/splitExpense/composables/useInsights'
 import { searchConnectedUsers } from '@/modules/splitExpense/api/searchConnectedUsers'
-import { categories as categoryIcons, type CategoryKey } from '@/modules/splitExpense/categories'
 import { formatMonthLabel } from '@/modules/splitExpense/utils/expenseDates'
 import moneyUtils from '@/modules/core/utils/moneyUtils'
 import { useAuth } from '@/modules/user/stores/useAuth'
@@ -109,15 +108,13 @@ const monthGroups = computed<MonthGroup[]>(() => {
   return [...months.values()].map(({ group }) => group)
 })
 
-function categoryIcon(category: ApiSeCategory): string {
-  return category.tag in categoryIcons
-    ? categoryIcons[category.tag as CategoryKey]
-    : categoryIcons.other
-}
-
 function formatTotal(total: ApiSeCategoryTotal | CurrencyTotal): string {
   const amount = moneyUtils.fromMinorUnits(total.amount, total.currency.decimalPlaces)
   return `${amount} ${total.currency.code}`
+}
+
+function formatLine(label: string, totals: CurrencyTotal[]): string {
+  return `${label}: ${totals.map((total) => formatTotal(total)).join(', ')}`
 }
 
 function reloadInsights(): void {
@@ -191,40 +188,17 @@ watch(selectedUsers, reloadInsights, { deep: true })
         </p>
 
         <div v-else class="insights-list">
-          <section v-for="month in monthGroups" :key="month.month">
-            <h2 class="se-month-header se-month-header--compact insights-month">
-              <span>{{ month.label }}</span>
-              <span class="insights-month__totals">
-                <span v-for="total in month.totals" :key="total.currency.id">
-                  {{ formatTotal(total) }}
-                </span>
-              </span>
-            </h2>
+          <section v-for="month in monthGroups" :key="month.month" class="insights-month">
+            <h2 class="insights-month__title">{{ month.label }}</h2>
 
-            <ul
-              v-if="!isCategoryFiltered"
-              class="list-group list-group-flush insights-categories"
-            >
-              <li
-                v-for="category in month.categories"
-                :key="category.category.id"
-                class="list-group-item insights-category"
-              >
-                <span class="insights-category__label">
-                  <i
-                    class="bi insights-category__icon"
-                    :class="categoryIcon(category.category)"
-                    aria-hidden="true"
-                  ></i>
-                  <span>{{ category.category.title }}</span>
-                </span>
+            <ul class="insights-rows">
+              <li>{{ formatLine('Total', month.totals) }}</li>
 
-                <span class="insights-category__totals">
-                  <span v-for="total in category.totals" :key="total.currency.id">
-                    {{ formatTotal(total) }}
-                  </span>
-                </span>
-              </li>
+              <template v-if="!isCategoryFiltered">
+                <li v-for="category in month.categories" :key="category.category.id">
+                  {{ formatLine(category.category.title, category.totals) }}
+                </li>
+              </template>
             </ul>
           </section>
 
@@ -271,43 +245,23 @@ watch(selectedUsers, reloadInsights, { deep: true })
 }
 
 .insights-list {
-  margin-top: 0.25rem;
+  margin-top: 0.35rem;
+  padding-inline: var(--ov-page-inset);
+  line-height: 1.45;
 }
 
-.insights-month {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+.insights-month + .insights-month {
+  margin-top: 0.85rem;
 }
 
-.insights-month__totals,
-.insights-category__totals {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  flex-shrink: 0;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+.insights-month__title {
+  margin: 0;
+  font: inherit;
 }
 
-.insights-category {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.insights-category__label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  min-width: 0;
-}
-
-.insights-category__icon {
-  width: 1.25rem;
-  flex-shrink: 0;
-  text-align: center;
+.insights-rows {
+  margin: 0.1rem 0 0;
+  padding: 0 0 0 1rem;
+  list-style: none;
 }
 </style>
