@@ -7,16 +7,13 @@ use App\Core\Documentation\Attribute\Response\MessageResponse;
 use App\Core\Documentation\Attribute\Response\NotFoundResponse;
 use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Enum\Group;
-use App\Core\Exception\NotFoundException;
+use App\Core\Exception\UnprocessableException;
 use App\Core\Http\ApiController;
-use App\Core\ValueObject\Validator\Violation;
 use App\SplitExpense\Entity\Expense;
-use App\SplitExpense\Exception\ExpenseSplitException;
 use App\SplitExpense\Http\V1\Request\ExpenseDto;
 use App\SplitExpense\Repository\ExpenseRepository;
 use App\SplitExpense\Service\ExpenseService;
 use App\User\Entity\User;
-use DateMalformedStringException;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -62,20 +59,8 @@ class ExpensePutAction extends ApiController
 
         try {
             $expense = $this->service->update($user, $expense, $dto);
-        } catch (DateMalformedStringException $e) {
-            return $this->messageResponse($e->getMessage(), Response::HTTP_BAD_REQUEST);
-        } catch (ExpenseSplitException $e) {
-            return $this->validationErrorResponse(
-                new Violation('splits', $e->getMessage())
-            );
-        } catch (NotFoundException $e) {
-            if ($e->tag === null) {
-                throw $e;
-            }
-
-            return $this->validationErrorResponse(
-                new Violation($e->tag, $e->getMessage())
-            );
+        } catch (UnprocessableException $e) {
+            return $this->validationErrorResponse($e);
         }
 
         $this->expenseRepository->save($expense, true);

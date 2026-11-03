@@ -8,8 +8,13 @@ class UnprocessableException extends Exception
 {
     public function __construct(
         string $message,
-        public string $propertyPath,
+        private readonly string $propertyPath,
     ) {
         parent::__construct($message);
+    }
+
+    public function getPropertyPath(): string
+    {
+        return $this->propertyPath;
     }
 }

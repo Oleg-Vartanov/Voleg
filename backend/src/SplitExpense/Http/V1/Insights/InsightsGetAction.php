@@ -8,7 +8,6 @@ use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Enum\Group;
 use App\Core\Exception\UnprocessableException;
 use App\Core\Http\ApiController;
-use App\Core\ValueObject\Validator\Violation;
 use App\SplitExpense\Service\InsightsService;
 use App\User\Entity\User;
 use OpenApi\Attributes as OA;
@@ -54,9 +53,7 @@ class InsightsGetAction extends ApiController
                 $dto->userIds,
             );
         } catch (UnprocessableException $e) {
-            return $this->validationErrorResponse(
-                new Violation($e->propertyPath, $e->getMessage())
-            );
+            return $this->validationErrorResponse($e);
         }
 
         return $this->json(

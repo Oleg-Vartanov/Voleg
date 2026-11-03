@@ -123,13 +123,11 @@ export function usePredictionsForm(filters: FixtureFilters, tables: Tables) {
       await Client.makePredictions(changed)
       tables.updateLoadedTables()
       topAlerts.add('Updated.', 'success')
-    } catch (err) {
-      switch (err?.response?.status) {
-        case 409:
-          topAlerts.add('Some fixtures have already started. Try to reload the page.', 'danger')
-          break
-        default:
-          topAlerts.add('Error. Try again later or contact support.', 'danger')
+    } catch (axiosError) {
+      if (axiosError.response?.status === 422) {
+        topAlerts.add(axiosError.response.data.message, 'danger')
+      } else {
+        topAlerts.add('Error. Try again later or contact support.', 'danger')
       }
     } finally {
       isSaving.value = false

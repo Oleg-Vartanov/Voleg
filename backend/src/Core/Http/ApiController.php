@@ -2,6 +2,7 @@
 
 namespace App\Core\Http;
 
+use App\Core\Exception\UnprocessableException;
 use App\Core\Http\Response\MessageResponse;
 use App\Core\ValueObject\Validator\ValidationError;
 use App\Core\ValueObject\Validator\Violation;
@@ -21,10 +22,14 @@ abstract class ApiController extends AbstractController
     }
 
     /**
-     * @param Violation[]|Violation $violations
+     * @param Violation[]|Violation|UnprocessableException $violations
      */
-    protected function validationErrorResponse(array|Violation $violations): JsonResponse
+    protected function validationErrorResponse(array|Violation|UnprocessableException $violations): JsonResponse
     {
+        if ($violations instanceof UnprocessableException) {
+            $violations = new Violation($violations->getPropertyPath(), $violations->getMessage());
+        }
+
         if ($violations instanceof Violation) {
             $violations = [$violations];
         }

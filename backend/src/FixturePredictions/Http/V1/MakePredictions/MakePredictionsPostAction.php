@@ -5,8 +5,8 @@ namespace App\FixturePredictions\Http\V1\MakePredictions;
 use App\Core\Documentation\Attribute\Response\MessageResponse;
 use App\Core\Documentation\Attribute\Response\UnauthorizedResponse;
 use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
+use App\Core\Exception\UnprocessableException;
 use App\Core\Http\ApiController;
-use App\FixturePredictions\Exception\FixtureHasStartedException;
 use App\FixturePredictions\Service\PredictionsService;
 use App\User\Entity\User;
 use OpenApi\Attributes as OA;
@@ -49,8 +49,8 @@ class MakePredictionsPostAction extends ApiController
 
         try {
             $this->predictionsService->makePredictions($dtos, $user);
-        } catch (FixtureHasStartedException $e) {
-            return $this->messageResponse('Fixture has already started', Response::HTTP_CONFLICT);
+        } catch (UnprocessableException $e) {
+            return $this->messageResponse($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return $this->messageResponse('Success', Response::HTTP_CREATED);

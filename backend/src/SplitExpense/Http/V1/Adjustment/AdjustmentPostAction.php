@@ -8,7 +8,6 @@ use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Enum\Group;
 use App\Core\Exception\UnprocessableException;
 use App\Core\Http\ApiController;
-use App\Core\ValueObject\Validator\Violation;
 use App\SplitExpense\Entity\Adjustment;
 use App\SplitExpense\Http\V1\Request\AdjustmentDto;
 use App\SplitExpense\Repository\AdjustmentRepository;
@@ -51,9 +50,7 @@ class AdjustmentPostAction extends ApiController
         try {
             $adjustment = $this->service->create($user, $dto);
         } catch (UnprocessableException $e) {
-            return $this->validationErrorResponse(
-                new Violation($e->propertyPath, $e->getMessage())
-            );
+            return $this->validationErrorResponse($e);
         }
 
         $this->adjustmentRepository->save($adjustment, true);

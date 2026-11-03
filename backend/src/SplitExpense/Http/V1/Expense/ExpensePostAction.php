@@ -7,16 +7,14 @@ use App\Core\Documentation\Attribute\Response\MessageResponse;
 use App\Core\Documentation\Attribute\Response\NotFoundResponse;
 use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Enum\Group;
+use App\Core\Exception\UnprocessableException;
 use App\Core\Http\ApiController;
-use App\Core\ValueObject\Validator\Violation;
 use App\SplitExpense\Entity\Expense;
-use App\SplitExpense\Exception\ExpenseSplitException;
 use App\SplitExpense\Http\V1\Request\ExpenseDto;
 use App\SplitExpense\Repository\ExpenseRepository;
 use App\SplitExpense\Service\ExpenseService;
 use App\User\Entity\User;
 use App\User\Http\V1\Trait\UserControllerTrait;
-use DateMalformedStringException;
 use LogicException;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -58,12 +56,8 @@ class ExpensePostAction extends ApiController
     ): JsonResponse {
         try {
             $expense = $this->service->create($user, $dto);
-        } catch (LogicException | DateMalformedStringException $e) {
-            return $this->messageResponse($e->getMessage(), Response::HTTP_BAD_REQUEST);
-        } catch (ExpenseSplitException $e) {
-            return $this->validationErrorResponse(
-                new Violation('splits', $e->getMessage())
-            );
+        } catch (UnprocessableException $e) {
+            return $this->validationErrorResponse($e);
         }
 
         $this->expenseRepository->save($expense, true);

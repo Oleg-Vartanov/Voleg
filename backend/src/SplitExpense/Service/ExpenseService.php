@@ -2,12 +2,11 @@
 
 namespace App\SplitExpense\Service;
 
-use App\Core\Exception\NotFoundException;
+use App\Core\Exception\UnprocessableException;
 use App\Core\Repository\CurrencyRepository;
 use App\SplitExpense\Entity\Category;
 use App\SplitExpense\Entity\Expense;
 use App\SplitExpense\Entity\ExpenseSplit;
-use App\SplitExpense\Exception\ExpenseSplitException;
 use App\SplitExpense\Http\V1\Request\ExpenseDto;
 use App\SplitExpense\Http\V1\Request\ExpenseSplitDto;
 use App\SplitExpense\Repository\CategoryRepository;
@@ -16,7 +15,6 @@ use App\User\Entity\User;
 use App\User\Repository\UserRepository;
 use DateMalformedStringException;
 use DateTimeImmutable;
-use LogicException;
 
 readonly class ExpenseService
 {
@@ -63,16 +61,22 @@ readonly class ExpenseService
     }
 
     /**
-     * @throws DateMalformedStringException|ExpenseSplitException|LogicException
+     * @throws UnprocessableException
      */
     public function create(User $createdBy, ExpenseDto $dto): Expense
     {
         $paidBy = $this->userRepository->find($dto->paidByUserId)
-            ?? throw new LogicException('Payer not found.');
+            ?? throw new UnprocessableException('Payer not found.', 'paidByUserId');
         $category = $this->categoryRepository->find($dto->categoryId ?? Category::DEFAULT_ID)
-            ?? throw new LogicException('Category not found.');
+            ?? throw new UnprocessableException('Category not found.', 'categoryId');
         $currency = $this->currencyRepository->find($dto->currencyId)
-            ?? throw new LogicException('Currency not found.');
+            ?? throw new UnprocessableException('Currency not found.', 'currencyId');
+
+        try {
+            $expenseDate = new DateTimeImmutable($dto->expenseDate);
+        } catch (DateMalformedStringException $e) {
+            throw new UnprocessableException('Invalid date. ' . $e->getMessage(), 'expenseDate');
+        }
 
         $expense = new Expense(
             paidByUser: $paidBy,
@@ -81,7 +85,7 @@ readonly class ExpenseService
             amount: $dto->amount,
             title: $dto->title,
             currency: $currency,
-            expenseDate: new DateTimeImmutable($dto->expenseDate),
+            expenseDate: $expenseDate,
             description: $dto->description,
         );
 
@@ -91,29 +95,31 @@ readonly class ExpenseService
     }
 
     /**
-     * @throws DateMalformedStringException
-     * @throws NotFoundException
-     * @throws ExpenseSplitException
+     * @throws UnprocessableException
      */
     public function update(User $updatedBy, Expense $expense, ExpenseDto $dto): Expense
     {
         if (!$this->canUpdate($updatedBy, $expense)) {
-            throw throw new ExpenseSplitException('Can\'t edit expense with unconnected user.');
+            $this->expenseSplitException("Can't edit expense with unconnected user.");
         }
 
         $paidBy = $this->userRepository->find($dto->paidByUserId)
-            ?? throw new NotFoundException('Payer not found.', tag: 'paidByUserId');
+            ?? throw new UnprocessableException('Payer not found.', 'paidByUserId');
         $category = $this->categoryRepository->find($dto->categoryId)
-            ?? throw new NotFoundException('Category not found.', tag: 'categoryId');
+            ?? throw new UnprocessableException('Category not found.', 'categoryId');
         $currency = $this->currencyRepository->find($dto->currencyId)
-            ?? throw new NotFoundException('Currency not found.', tag: 'currencyId');
+            ?? throw new UnprocessableException('Currency not found.', 'currencyId');
 
         $expense->setPaidByUser($paidBy);
         $expense->setCategory($category);
         $expense->setCurrency($currency);
         $expense->setAmount($dto->amount);
         $expense->setTitle($dto->title);
-        $expense->setExpenseDate(new DateTimeImmutable($dto->expenseDate));
+        try {
+            $expense->setExpenseDate(new DateTimeImmutable($dto->expenseDate));
+        } catch (DateMalformedStringException $e) {
+            throw new UnprocessableException('Invalid date: ' . $e->getMessage(), 'expenseDate');
+        }
         $expense->setDescription($dto->description);
 
         $this->applySplits($updatedBy, $expense, $dto->splits);
@@ -129,7 +135,7 @@ readonly class ExpenseService
     /**
      * @param ExpenseSplitDto[] $dtos
      *
-     * @throws ExpenseSplitException
+     * @throws UnprocessableException
      */
     private function applySplits(User $appliedBy, Expense $expense, array $dtos): void
     {
@@ -147,13 +153,13 @@ readonly class ExpenseService
                 $user = $appliedBy;
             } else {
                 $user = $this->userRepository->findById($dto->userId)
-                    ?? throw new ExpenseSplitException('User not found.');
+                    ?? $this->expenseSplitException('User not found.');
 
                 if (
                     $user->getId() !== $appliedBy->getId()
                     && !$this->connectionService->isConnected($appliedBy, $user)
                 ) {
-                    throw new ExpenseSplitException('Split user require connection.');
+                    $this->expenseSplitException('Split user require connection.');
                 }
             }
 
@@ -174,7 +180,7 @@ readonly class ExpenseService
     }
 
     /**
-     * @throws ExpenseSplitException
+     * @throws UnprocessableException
      */
     private function assertSplit(Expense $expense): void
     {
@@ -193,23 +199,31 @@ readonly class ExpenseService
         }
 
         if (count($expense->getSplits()) < 2) {
-            throw new ExpenseSplitException('Split must include at least 2 users.');
+            $this->expenseSplitException('Split must include at least 2 users.');
         }
 
         if ($total !== $expense->getAmount()) {
-            throw new ExpenseSplitException('Split amounts must sum to the expense amount.');
+            $this->expenseSplitException('Split amounts must sum to the expense amount.');
         }
 
         if (!$splitHasPaidBy) {
-            throw new ExpenseSplitException('Split must include the paidBy user.');
+            $this->expenseSplitException('Split must include the paidBy user.');
         }
 
         if (count($splitsUserIds) !== count(array_unique($splitsUserIds))) {
-            throw new ExpenseSplitException('Split must include unique users.');
+            $this->expenseSplitException('Split must include unique users.');
         }
 
         if (!in_array($expense->getCreatedByUser()->getId(), $splitsUserIds)) {
-            throw new ExpenseSplitException('Split must include who created the expense.');
+            $this->expenseSplitException('Split must include who created the expense.');
         }
+    }
+
+    /**
+     * @throws UnprocessableException
+     */
+    private function expenseSplitException(string $message): never
+    {
+        throw new UnprocessableException($message, 'splits');
     }
 }

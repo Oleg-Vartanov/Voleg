@@ -2,16 +2,15 @@
 
 namespace App\FixturePredictions\Service;
 
+use App\Core\Exception\UnprocessableException;
 use App\FixturePredictions\Entity\Fixture;
 use App\FixturePredictions\Entity\FixturePrediction;
-use App\FixturePredictions\Exception\FixtureHasStartedException;
 use App\FixturePredictions\Http\V1\MakePredictions\MakePredictionsRequest;
 use App\FixturePredictions\Messenger\CalculatePointsMessage;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\FixturePredictions\Repository\FixtureRepository;
 use App\User\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -71,18 +70,30 @@ readonly class PredictionsService
     }
 
     /** @param MakePredictionsRequest[] $dtos
-     * @throws FixtureHasStartedException
+     * @throws UnprocessableException
      */
     public function makePredictions(array $dtos, User $user): void
     {
-        foreach ($dtos as $dto) {
+        foreach ($dtos as $id => $dto) {
             $fixture = $this->fixtureRepository->findOneBy(['id' => $dto->fixtureId]);
 
             if ($fixture === null) {
-                throw new NotFoundHttpException();
+                throw new UnprocessableException(
+                    'Fixture not found (id ' . $dto->fixtureId . ').',
+                    $id.'.fixtureId'
+                );
             }
+
             if ($fixture->hasStarted()) {
-                throw new FixtureHasStartedException();
+                throw new UnprocessableException(
+                    sprintf(
+                        'Fixture has already started. %s - %s (id %d).',
+                        $fixture->getHomeTeam()->getName(),
+                        $fixture->getAwayTeam()->getName(),
+                        (int) $fixture->getId(),
+                    ),
+                    $id.'.fixtureId'
+                );
             }
 
             $prediction = $this->predictionRepository->findOneBy([

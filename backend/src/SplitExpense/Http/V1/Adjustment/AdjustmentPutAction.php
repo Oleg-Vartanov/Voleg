@@ -9,7 +9,6 @@ use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Enum\Group;
 use App\Core\Exception\UnprocessableException;
 use App\Core\Http\ApiController;
-use App\Core\ValueObject\Validator\Violation;
 use App\SplitExpense\Entity\Adjustment;
 use App\SplitExpense\Http\V1\Request\AdjustmentDto;
 use App\SplitExpense\Repository\AdjustmentRepository;
@@ -54,6 +53,7 @@ class AdjustmentPutAction extends ApiController
     ): JsonResponse {
         $adjustment = $this->adjustmentRepository->find($id) ?? $this->notFound();
 
+        // todo: move inside update
         if (!$this->service->canUpdate($user, $adjustment)) {
             $this->accessDenied();
         }
@@ -61,9 +61,7 @@ class AdjustmentPutAction extends ApiController
         try {
             $adjustment = $this->service->update($adjustment, $dto);
         } catch (UnprocessableException $e) {
-            return $this->validationErrorResponse(
-                new Violation($e->propertyPath, $e->getMessage())
-            );
+            return $this->validationErrorResponse($e);
         }
 
         $this->adjustmentRepository->save($adjustment, true);

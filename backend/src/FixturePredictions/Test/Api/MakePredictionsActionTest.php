@@ -47,7 +47,7 @@ class MakePredictionsActionTest extends ApiTestCase
 
         $this->signIn($this->createUser());
         $this->sendRequest([['fixtureId' => $fixture->getId(), 'homeScore' => 1, 'awayScore' => 1]]);
-        self::assertResponseStatusCodeSame(Response::HTTP_CONFLICT);
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     #[TestDox('Make predictions: not found')]
@@ -55,7 +55,7 @@ class MakePredictionsActionTest extends ApiTestCase
     {
         $this->signIn($this->createUser());
         $this->sendRequest([['fixtureId' => 1000, 'homeScore' => 1, 'awayScore' => 1]]);
-        self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     #[TestDox('Make predictions: validation error')]
