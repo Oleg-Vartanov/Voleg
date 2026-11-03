@@ -2,9 +2,9 @@
 
 namespace App\SplitExpense\Test\Trait;
 
-use App\SplitExpense\Entity\SeConnection;
-use App\SplitExpense\Enum\SeConnectionStatusEnum;
-use App\SplitExpense\Repository\SeConnectionRepository;
+use App\SplitExpense\Entity\Connection;
+use App\SplitExpense\Enum\ConnectionStatusEnum;
+use App\SplitExpense\Repository\ConnectionRepository;
 use App\User\Entity\User;
 
 trait SplitExpenseTestTrait
@@ -12,11 +12,11 @@ trait SplitExpenseTestTrait
     protected function createConnection(
         User $userA,
         User $userB,
-        SeConnectionStatusEnum $status = SeConnectionStatusEnum::ACCEPTED,
+        ConnectionStatusEnum $status = ConnectionStatusEnum::ACCEPTED,
         bool $flush = true,
-    ): SeConnection {
-        $connection = new SeConnection($userA, $userB, $status);
-        $this->getService(SeConnectionRepository::class)->save($connection, $flush);
+    ): Connection {
+        $connection = new Connection($userA, $userB, $status);
+        $this->getService(ConnectionRepository::class)->save($connection, $flush);
 
         return $connection;
     }

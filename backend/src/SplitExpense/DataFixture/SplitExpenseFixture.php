@@ -3,10 +3,10 @@
 namespace App\SplitExpense\DataFixture;
 
 use App\Core\Repository\CurrencyRepository;
-use App\SplitExpense\Entity\SeExpense;
-use App\SplitExpense\Entity\SeExpenseSplit;
-use App\SplitExpense\Repository\SeCategoryRepository;
-use App\SplitExpense\Service\Seeder\SeCategorySeeder;
+use App\SplitExpense\Entity\Expense;
+use App\SplitExpense\Entity\ExpenseSplit;
+use App\SplitExpense\Repository\CategoryRepository;
+use App\SplitExpense\Service\Seeder\CategorySeeder;
 use App\User\DataFixture\UserFixture;
 use App\User\Entity\User;
 use App\User\Repository\UserRepository;
@@ -20,7 +20,7 @@ class SplitExpenseFixture extends Fixture implements DependentFixtureInterface
 {
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly SeCategoryRepository $categoryRepository,
+        private readonly CategoryRepository $categoryRepository,
         private readonly CurrencyRepository $currencyRepository,
     ) {
     }
@@ -32,13 +32,13 @@ class SplitExpenseFixture extends Fixture implements DependentFixtureInterface
     {
         return [
             UserFixture::class,
-            SeConnectionFixture::class,
+            ConnectionFixture::class,
         ];
     }
 
     public function load(ObjectManager $manager): void
     {
-        $category = $this->categoryRepository->findOneByTag(SeCategorySeeder::DEFAULT_TAG)
+        $category = $this->categoryRepository->findOneByTag(CategorySeeder::DEFAULT_TAG)
             ?? throw new RuntimeException('Categories must me seeded for fixtures');
 
         $currency = $this->currencyRepository->findOneByCode('USD')
@@ -55,7 +55,7 @@ class SplitExpenseFixture extends Fixture implements DependentFixtureInterface
                 ? [$user1, $user]
                 : [$user, $user1];
 
-            $expense = new SeExpense(
+            $expense = new Expense(
                 paidByUser: $payer,
                 createdByUser: $payer,
                 category: $category,
@@ -66,8 +66,8 @@ class SplitExpenseFixture extends Fixture implements DependentFixtureInterface
                 description: 'Test description ' . $i,
             );
 
-            $expense->addSplit(new SeExpenseSplit(expense: $expense, user: $payer, amount: 3000));
-            $expense->addSplit(new SeExpenseSplit(expense: $expense, user: $splitUser, amount: 3000));
+            $expense->addSplit(new ExpenseSplit(expense: $expense, user: $payer, amount: 3000));
+            $expense->addSplit(new ExpenseSplit(expense: $expense, user: $splitUser, amount: 3000));
 
             $manager->persist($expense);
         }

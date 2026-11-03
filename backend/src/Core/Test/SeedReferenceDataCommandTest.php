@@ -7,7 +7,7 @@ use App\Core\Repository\CountryRepository;
 use App\Core\Repository\CurrencyRepository;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
-use App\SplitExpense\Repository\SeCategoryRepository;
+use App\SplitExpense\Repository\CategoryRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -57,7 +57,7 @@ class SeedReferenceDataCommandTest extends WebTestCase
         self::assertSame(2, $usd?->getDecimalPlaces());
         self::assertCount(109, $container->get(SeasonRepository::class)->findAll());
         self::assertCount(1, $container->get(CompetitionRepository::class)->findAll());
-        self::assertNotNull($container->get(SeCategoryRepository::class)->findOneBy(['tag' => 'groceries']));
-        self::assertNotNull($container->get(SeCategoryRepository::class)->findOneBy(['tag' => 'entertainment']));
+        self::assertNotNull($container->get(CategoryRepository::class)->findOneBy(['tag' => 'groceries']));
+        self::assertNotNull($container->get(CategoryRepository::class)->findOneBy(['tag' => 'entertainment']));
     }
 }

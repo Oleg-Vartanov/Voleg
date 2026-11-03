@@ -4,7 +4,7 @@ namespace App\Core\Service\Seeder;
 
 use App\FixturePredictions\Service\Seeder\CompetitionSeeder;
 use App\FixturePredictions\Service\Seeder\SeasonSeeder;
-use App\SplitExpense\Service\Seeder\SeCategorySeeder;
+use App\SplitExpense\Service\Seeder\CategorySeeder;
 use Exception;
 
 readonly class SeederService
@@ -14,7 +14,7 @@ readonly class SeederService
         private CurrencyCsvSeeder $currencySeeder,
         private SeasonSeeder $seasonSeeder,
         private CompetitionSeeder $competitionSeeder,
-        private SeCategorySeeder $categorySeeder,
+        private CategorySeeder $categorySeeder,
     ) {
     }
 

@@ -1,0 +1,294 @@
+<?php
+
+namespace App\SplitExpense\Repository;
+
+use App\Core\Repository\AbstractEntityRepository;
+use App\SplitExpense\Entity\Expense;
+use App\SplitExpense\Entity\ExpenseSplit;
+use App\SplitExpense\ValueObject\BalanceEntry;
+use App\SplitExpense\ValueObject\CategoryTotalEntry;
+use App\User\Entity\User;
+use Doctrine\ORM\QueryBuilder;
+use Doctrine\Persistence\ManagerRegistry;
+
+/**
+ * @extends AbstractEntityRepository<Expense>
+ *
+ * @method Expense|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Expense|null findOneBy(mixed[] $criteria, mixed[] $orderBy = null)
+ * @method Expense[] findAll()
+ * @method Expense[] findBy(mixed[] $criteria, mixed[] $orderBy = null, $limit = null, $offset = null)
+ */
+class ExpenseRepository extends AbstractEntityRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Expense::class);
+    }
+
+    public function findOneForUser(int $userId, int $expenseId): ?Expense
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->leftJoin('e.splits', 's')
+            ->where('e.id = :expenseId')
+            ->andWhere('e.paidByUser = :userId OR s.user = :userId')
+            ->setParameter('expenseId', $expenseId)
+            ->setParameter('userId', $userId);
+
+        /** @var Expense|null $result */
+        $result = $qb->getQuery()->getOneOrNullResult();
+
+        return $result;
+    }
+
+    /**
+     * @return Expense[]
+     */
+    public function listForUser(
+        User $user,
+        int $offset = 0,
+        int $limit = 100
+    ): array {
+        // Page ids first: with splits fetch-joined, LIMIT would count split rows instead of expenses.
+        /** @var list<int|string> $ids */
+        $ids = $this->createForUserQueryBuilder($user)
+            ->select('e.id')
+            ->orderBy('e.expenseDate', 'DESC')
+            ->addOrderBy('e.id', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getSingleColumnResult();
+
+        return $this->findByIdsWithRelations(array_map(intval(...), $ids));
+    }
+
+    /**
+     * Loads everything the API serializes, so reading the expenses triggers no lazy queries.
+     *
+     * @param int[] $ids
+     *
+     * @return Expense[]
+     */
+    public function findByIdsWithRelations(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $qb = $this->createQueryBuilder('e')
+            ->addSelect('s', 'su', 'pu', 'cu', 'cat', 'c')
+            ->leftJoin('e.splits', 's')
+            ->leftJoin('s.user', 'su')
+            ->join('e.paidByUser', 'pu')
+            ->join('e.createdByUser', 'cu')
+            ->join('e.category', 'cat')
+            ->join('e.currency', 'c')
+            ->where('e.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->orderBy('e.expenseDate', 'DESC')
+            ->addOrderBy('e.id', 'DESC')
+            ->addOrderBy('s.id', 'ASC');
+
+        /** @var Expense[] $rows */
+        $rows = $qb->getQuery()->getResult();
+
+        return $rows;
+    }
+
+    /**
+     * @return BalanceEntry[]
+     */
+    public function sumSplitsOwedToUser(User $user): array
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->select(
+                'IDENTITY(s.user) AS userId',
+                'IDENTITY(e.currency) AS currencyId',
+                'SUM(s.amount) AS amount',
+            )
+            ->join('e.splits', 's')
+            ->where('e.paidByUser = :user')
+            ->andWhere('s.user != :user')
+            ->groupBy('s.user')
+            ->addGroupBy('e.currency')
+            ->setParameter('user', $user);
+
+        return $this->toBalanceEntries($qb);
+    }
+
+    /**
+     * @return BalanceEntry[]
+     */
+    public function sumSplitsOwedByUser(User $user): array
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->select(
+                'IDENTITY(e.paidByUser) AS userId',
+                'IDENTITY(e.currency) AS currencyId',
+                'SUM(s.amount) AS amount',
+            )
+            ->join('e.splits', 's')
+            ->where('s.user = :user')
+            ->andWhere('e.paidByUser != :user')
+            ->groupBy('e.paidByUser')
+            ->addGroupBy('e.currency')
+            ->setParameter('user', $user);
+
+        return $this->toBalanceEntries($qb);
+    }
+
+    /**
+     * Total expense cost paid by `$user`, plus expenses paid by `$otherPayers` that include `$user`
+     * as a split participant. Grouped by month, category and currency.
+     *
+     * @param User[]   $otherPayers
+     * @param string[] $months Months in YYYY-MM format.
+     *
+     * @return CategoryTotalEntry[]
+     */
+    public function sumPaidExpensesByCategory(
+        User $user,
+        array $otherPayers,
+        array $months,
+        ?int $categoryId = null,
+    ): array {
+        if ($months === []) {
+            return [];
+        }
+
+        $qb = $this->createPaidExpensesQueryBuilder($user, $otherPayers, $categoryId)
+            ->select(
+                "SUBSTRING(e.expenseDate, 1, 7) AS month",
+                'IDENTITY(e.category) AS categoryId',
+                'IDENTITY(e.currency) AS currencyId',
+                'SUM(e.amount) AS amount',
+            )
+            ->andWhere("SUBSTRING(e.expenseDate, 1, 7) IN (:months)")
+            ->groupBy('month')
+            ->addGroupBy('e.category')
+            ->addGroupBy('e.currency')
+            ->orderBy('month', 'DESC')
+            ->setParameter('months', $months);
+
+        /** @var list<array{
+         *     month: string,
+         *     categoryId: int|string,
+         *     currencyId: int|string,
+         *     amount: int|string
+         * }> $result
+         */
+        $result = $qb->getQuery()->getScalarResult();
+
+        return array_map(
+            static fn (array $row): CategoryTotalEntry => new CategoryTotalEntry(
+                month: $row['month'],
+                categoryId: (int) $row['categoryId'],
+                currencyId: (int) $row['currencyId'],
+                amount: (int) $row['amount'],
+            ),
+            $result,
+        );
+    }
+
+    /**
+     * @param User[] $otherPayers
+     *
+     * @return string[] Months in YYYY-MM format, newest first.
+     */
+    public function listPaidExpenseMonths(
+        User $user,
+        array $otherPayers,
+        ?int $categoryId = null,
+    ): array {
+        $qb = $this->createPaidExpensesQueryBuilder($user, $otherPayers, $categoryId)
+            ->select("DISTINCT SUBSTRING(e.expenseDate, 1, 7) AS month")
+            ->orderBy('month', 'DESC');
+
+        /** @var string[] $months */
+        $months = $qb->getQuery()->getSingleColumnResult();
+
+        return $months;
+    }
+
+    /**
+     * Expenses paid by `$user`, or paid by `$otherPayers` when `$user` is on the split.
+     *
+     * @param User[] $otherPayers
+     */
+    private function createPaidExpensesQueryBuilder(
+        User $user,
+        array $otherPayers,
+        ?int $categoryId = null,
+    ): QueryBuilder {
+        $qb = $this->createQueryBuilder('e')
+            ->setParameter('user', $user);
+
+        if ($otherPayers === []) {
+            $qb->where('e.paidByUser = :user');
+        } else {
+            $qb->where(
+                'e.paidByUser = :user OR ('
+                . 'e.paidByUser IN (:otherPayers) AND EXISTS ('
+                . 'SELECT 1 FROM ' . ExpenseSplit::class . ' s'
+                . ' WHERE s.expense = e AND s.user = :user'
+                . ')'
+                . ')',
+            )->setParameter('otherPayers', $otherPayers);
+        }
+
+        if ($categoryId !== null) {
+            $qb->andWhere('e.category = :categoryId')
+                ->setParameter('categoryId', $categoryId);
+        }
+
+        return $qb;
+    }
+
+    public function countForUser(User $user): int
+    {
+        $count = $this->createForUserQueryBuilder($user)
+            ->select('COUNT(e.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return (int) $count;
+    }
+
+    /**
+     * Expenses the user paid or has a split in. EXISTS keeps one row per expense and leaves
+     * the splits association free to be fetch-joined in full.
+     */
+    private function createForUserQueryBuilder(User $user): QueryBuilder
+    {
+        $userSplit = $this->getEntityManager()->createQueryBuilder()
+            ->select('us.id')
+            ->from(ExpenseSplit::class, 'us')
+            ->where('us.expense = e')
+            ->andWhere('us.user = :user');
+
+        return $this->createQueryBuilder('e')
+            ->where('e.paidByUser = :user OR EXISTS (' . $userSplit->getDQL() . ')')
+            ->setParameter('user', $user);
+    }
+
+    /**
+     * @return BalanceEntry[]
+     */
+    private function toBalanceEntries(QueryBuilder $qb): array
+    {
+        /** @var list<array{userId: int|string, currencyId: int|string, amount: int|string}> $result */
+        $result = $qb->getQuery()->getScalarResult();
+
+        $entries = [];
+        foreach ($result as $row) {
+            $entries[] = new BalanceEntry(
+                userId: (int) $row['userId'],
+                currencyId: (int) $row['currencyId'],
+                amount: (int) $row['amount'],
+            );
+        }
+
+        return $entries;
+    }
+}
