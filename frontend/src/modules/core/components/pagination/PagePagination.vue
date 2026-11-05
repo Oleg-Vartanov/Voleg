@@ -233,6 +233,8 @@ function onPageSizeChange(value: string | number) {
 }
 
 .app-pagination-page-size :deep(.form-select-menu-trigger) {
+  box-sizing: border-box;
+  width: 100%;
   min-height: 1.625rem;
   padding: 0.125rem 0.35rem;
   border: var(--bs-border-width) solid var(--bs-primary);

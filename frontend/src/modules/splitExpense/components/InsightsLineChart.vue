@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import FormSelectMenu from '@/modules/core/components/form/FormSelectMenu.vue'
 import moneyUtils from '@/modules/core/utils/moneyUtils'
 import type { InsightChartModel } from '@/modules/splitExpense/utils/insightChart'
 
@@ -40,6 +41,7 @@ const yAxisWidths = ref<Record<string, number>>({})
 const tooltip = ref<ChartTooltip | null>(null)
 const selectedCurrencyId = ref<number | null>(null)
 
+const unitEl = ref<HTMLElement | null>(null)
 const axisEls = new Map<number, SVGSVGElement>()
 const scrollEls = new Map<number, HTMLElement>()
 const scrollAnchors = new Map<number, ScrollAnchor>()
@@ -53,6 +55,10 @@ interface ChartView {
   ticks: number[]
   top: number
 }
+
+const currencyOptions = computed(() =>
+  props.charts.map((chart) => ({ value: chart.currencyId, label: chart.currencyCode }))
+)
 
 const activeCurrencyId = computed(() => {
   const charts = props.charts
@@ -192,9 +198,30 @@ function measureAxes() {
           : 0
     max = Math.max(max, length)
   })
-  const width = max > 0 ? Math.ceil(max) + AXIS_LABEL_GAP : DEFAULT_AXIS
+  const labelWidth = max > 0 ? Math.ceil(max) + AXIS_LABEL_GAP : DEFAULT_AXIS
+  const width = Math.max(labelWidth, measureUnit())
   if (yAxisWidths.value[chart.currencyId] === width) return
   yAxisWidths.value = { ...yAxisWidths.value, [chart.currencyId]: width }
+}
+
+function measureUnit(): number {
+  const unit = unitEl.value
+  if (!unit) return 0
+  const menu = unit.querySelector<HTMLElement>('.form-select-menu')
+  const trigger = unit.querySelector<HTMLElement>('.form-select-menu-trigger')
+  if (!menu || !trigger) return Math.ceil(unit.getBoundingClientRect().width)
+
+  const previousMenu = menu.style.width
+  const previousTrigger = trigger.style.width
+  const previousMin = trigger.style.minWidth
+  menu.style.width = 'max-content'
+  trigger.style.width = 'max-content'
+  trigger.style.minWidth = 'max-content'
+  const width = Math.ceil(trigger.getBoundingClientRect().width)
+  trigger.style.minWidth = previousMin
+  menu.style.width = previousMenu
+  trigger.style.width = previousTrigger
+  return width
 }
 
 function rememberAnchor(view: ChartView, el: HTMLElement) {
@@ -275,6 +302,12 @@ function selectCurrency(currencyId: number) {
   selectedCurrencyId.value = currencyId
 }
 
+function onCurrencySelect(value: string | number) {
+  const currencyId = typeof value === 'number' ? value : Number(value)
+  if (!Number.isInteger(currencyId)) return
+  selectCurrency(currencyId)
+}
+
 watch(() => props.charts, relayout, { flush: 'post' })
 watch(outerWidth, relayout, { flush: 'post' })
 watch(activeCurrencyId, relayout, { flush: 'post' })
@@ -309,27 +342,27 @@ onUnmounted(() => {
       horizontally.
     </p>
 
-    <div
-      v-if="props.charts.length > 1"
-      class="insights-chart__currencies"
-      role="group"
-      aria-label="Currency"
-    >
-      <button
-        v-for="chart in props.charts"
-        :key="chart.currencyId"
-        type="button"
-        class="insights-chart__currency"
-        :class="{ 'is-active': chart.currencyId === activeCurrencyId }"
-        :aria-pressed="chart.currencyId === activeCurrencyId"
-        @click="selectCurrency(chart.currencyId)"
-      >
-        {{ chart.currencyCode }}
-      </button>
-    </div>
-
     <div v-if="view" class="insights-chart__block">
-      <p class="insights-chart__unit" :style="{ width: `${view.axis}px` }">
+      <div
+        v-if="props.charts.length > 1"
+        ref="unitEl"
+        class="insights-chart__unit"
+        :style="{ width: `${view.axis}px` }"
+      >
+        <FormSelectMenu
+          v-if="activeCurrencyId != null"
+          :model-value="activeCurrencyId"
+          :options="currencyOptions"
+          aria-label="Currency"
+          :match-anchor-width="false"
+          @update:model-value="onCurrencySelect"
+        />
+      </div>
+      <p
+        v-else
+        class="insights-chart__unit insights-chart__unit-label"
+        :style="{ width: `${view.axis}px` }"
+      >
         {{ view.chart.currencyCode }}
       </p>
 
@@ -479,33 +512,18 @@ onUnmounted(() => {
   margin-top: 1.25rem;
 }
 
-.insights-chart__currencies {
-  display: flex;
-  justify-content: center;
-  gap: 0.35rem;
-  margin: 0 0 0.35rem;
-}
-
-.insights-chart__currency {
-  border: 0;
-  background: transparent;
-  color: var(--bs-secondary-color);
-  font: inherit;
-  font-size: var(--ov-font-size-sm);
-  font-weight: 600;
-  padding: 0.1rem 0.4rem;
-  cursor: pointer;
-}
-
-.insights-chart__currency.is-active {
-  color: var(--ov-text);
-  box-shadow: inset 0 -1px 0 currentColor;
-}
-
 .insights-chart__unit {
   margin: 0 0 0.15rem;
-  padding-right: 8px;
   box-sizing: border-box;
+}
+
+.insights-chart__unit :deep(.form-select-menu) {
+  width: 100%;
+}
+
+.insights-chart__unit-label {
+  display: block;
+  padding: 0 8px 0 0;
   text-align: right;
   font-size: var(--ov-font-size-xs);
   font-weight: 600;

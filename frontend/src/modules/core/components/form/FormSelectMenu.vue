@@ -10,9 +10,12 @@ const props = withDefaults(
   defineProps<{
     options: FormSelectOption[]
     ariaLabel?: string
+    /** Keep the open list as wide as the button. Turn off when the button is narrower than the options. */
+    matchAnchorWidth?: boolean
   }>(),
   {
-    ariaLabel: 'Select'
+    ariaLabel: 'Select',
+    matchAnchorWidth: true
   }
 )
 
@@ -27,7 +30,8 @@ const { dropdownStyle, isOpenUp, isEventInside } = useFixedDropdown({
   rootEl,
   panelEl: listEl,
   isOpen,
-  maxHeightPx: 200
+  maxHeightPx: 200,
+  matchAnchorWidth: () => props.matchAnchorWidth
 })
 
 const label = computed(() => {
@@ -80,6 +84,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
       v-model:el="listEl"
       :open="isOpen"
       :open-up="isOpenUp"
+      :size-to-content="!matchAnchorWidth"
       :panel-style="dropdownStyle"
     >
       <ul
@@ -118,11 +123,12 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   flex: 1 1 auto;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
+  /* content-box keeps this padding outside the label. border-box was swallowing it. */
+  box-sizing: content-box;
+  width: auto;
+  min-width: max-content;
   margin: 0;
-  padding: 0.25rem 0.35rem;
+  padding: 0.2rem 0.6rem;
   border: var(--bs-border-width) solid var(--bs-border-color);
   border-radius: 0;
   background-color: var(--bs-body-bg);

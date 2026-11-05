@@ -8,11 +8,13 @@ const props = withDefaults(
     open: boolean
     openUp?: boolean
     invalid?: boolean
+    sizeToContent?: boolean
     panelStyle?: CSSProperties | Record<string, string>
   }>(),
   {
     openUp: false,
     invalid: false,
+    sizeToContent: false,
     panelStyle: () => ({})
   }
 )
@@ -53,7 +55,8 @@ defineExpose({ rootEl })
       class="form-select-dropdown"
       :class="{
         'form-select-dropdown--up': openUp,
-        'form-select-dropdown--invalid': invalid
+        'form-select-dropdown--invalid': invalid,
+        'form-select-dropdown--content': sizeToContent
       }"
       :style="panelStyle"
       v-bind="attrs"
@@ -143,6 +146,11 @@ defineExpose({ rootEl })
   cursor: pointer;
   font: inherit;
   line-height: 1.5;
+}
+
+.form-select-dropdown--content .form-select-dropdown-option {
+  width: max-content;
+  white-space: nowrap;
 }
 
 .form-select-dropdown-option:hover,

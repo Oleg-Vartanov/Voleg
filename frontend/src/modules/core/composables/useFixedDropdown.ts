@@ -35,6 +35,11 @@ export interface UseFixedDropdownOptions {
   /** Gap between the anchor and the panel (px). */
   offsetPx?: number
   zIndex?: number
+  /**
+   * When true (default), the panel is exactly as wide as the anchor.
+   * When false, the panel grows to its content and stays at least as wide as the anchor.
+   */
+  matchAnchorWidth?: MaybeRefOrGetter<boolean>
 }
 
 /**
@@ -50,7 +55,8 @@ export function useFixedDropdown(options: UseFixedDropdownOptions) {
     maxHeightPx = DEFAULT_MAX_HEIGHT_PX,
     marginPx = DEFAULT_MARGIN_PX,
     offsetPx = DEFAULT_OFFSET_PX,
-    zIndex = DEFAULT_Z_INDEX
+    zIndex = DEFAULT_Z_INDEX,
+    matchAnchorWidth = true
   } = options
 
   const placement = ref<FixedDropdownPlacement>('bottom')
@@ -76,26 +82,44 @@ export function useFixedDropdown(options: UseFixedDropdownOptions) {
     placement.value = openUp ? 'top' : 'bottom'
     const available = openUp ? spaceAbove : spaceBelow
     const clampedMax = Math.max(MIN_HEIGHT_PX, Math.min(maxHeightPx, available))
+    let left = rect.left
+    let width = `${rect.width}px`
+    let minWidth: string | undefined
+    let maxWidth: string | undefined
 
-    if (openUp) {
-      dropdownStyle.value = {
-        top: 'auto',
-        bottom: `${window.innerHeight - rect.top + offsetPx}px`,
-        left: `${rect.left}px`,
-        width: `${rect.width}px`,
-        maxHeight: `${clampedMax}px`,
-        zIndex: String(zIndex)
-      }
-    } else {
-      dropdownStyle.value = {
-        top: `${rect.bottom + offsetPx}px`,
-        bottom: 'auto',
-        left: `${rect.left}px`,
-        width: `${rect.width}px`,
-        maxHeight: `${clampedMax}px`,
-        zIndex: String(zIndex)
+    if (!toValue(matchAnchorWidth)) {
+      const maxPanel = Math.max(rect.width, window.innerWidth - marginPx * 2)
+      width = 'max-content'
+      minWidth = `${Math.min(rect.width, maxPanel)}px`
+      maxWidth = `${maxPanel}px`
+      const panel = panelEl?.value
+      if (panel) {
+        const panelWidth = panel.offsetWidth
+        const maxLeft = window.innerWidth - marginPx - panelWidth
+        if (left > maxLeft) left = Math.max(marginPx, maxLeft)
       }
     }
+
+    const shared = {
+      left: `${left}px`,
+      width,
+      maxHeight: `${clampedMax}px`,
+      zIndex: String(zIndex),
+      ...(minWidth ? { minWidth } : {}),
+      ...(maxWidth ? { maxWidth } : {})
+    }
+
+    dropdownStyle.value = openUp
+      ? {
+          ...shared,
+          top: 'auto',
+          bottom: `${window.innerHeight - rect.top + offsetPx}px`
+        }
+      : {
+          ...shared,
+          top: `${rect.bottom + offsetPx}px`,
+          bottom: 'auto'
+        }
   }
 
   function onReposition(): void {
