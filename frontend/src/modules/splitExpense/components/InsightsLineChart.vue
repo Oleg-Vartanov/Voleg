@@ -28,8 +28,20 @@ interface ScrollAnchor {
   atEnd: boolean
 }
 
-const props = defineProps<{
-  charts: InsightChartModel[]
+const props = withDefaults(
+  defineProps<{
+    charts: InsightChartModel[]
+    hasMore?: boolean
+    isLoadingMore?: boolean
+  }>(),
+  {
+    hasMore: false,
+    isLoadingMore: false
+  }
+)
+
+const emit = defineEmits<{
+  loadMore: []
 }>()
 
 const COLUMN_REM = 26
@@ -224,16 +236,24 @@ function measureUnit(): number {
   return width
 }
 
+/** X of the plot inside the scroll content. The older-months button sits before it. */
+function plotOrigin(el: HTMLElement): number {
+  const plot = el.querySelector('.insights-chart__plot')
+  if (!(plot instanceof Element)) return 0
+  return plot.getBoundingClientRect().left - el.getBoundingClientRect().left + el.scrollLeft
+}
+
 function rememberAnchor(view: ChartView, el: HTMLElement) {
   if (view.chart.months.length === 0 || view.slot <= 0) return
+  const origin = plotOrigin(el)
   const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 2
   const index = Math.min(
     view.chart.months.length - 1,
-    Math.max(0, Math.round((el.scrollLeft - PLOT_PAD_X) / view.slot))
+    Math.max(0, Math.round((el.scrollLeft - origin - PLOT_PAD_X) / view.slot))
   )
   scrollAnchors.set(view.chart.currencyId, {
     key: view.chart.months[index].key,
-    offset: pointX(view, index) - el.scrollLeft,
+    offset: pointX(view, index) + origin - el.scrollLeft,
     atEnd
   })
 }
@@ -245,11 +265,12 @@ function syncScroll() {
   if (!el) return
 
   const anchor = scrollAnchors.get(current.chart.currencyId)
+  const origin = plotOrigin(el)
   if (!anchor || anchor.atEnd) {
     el.scrollLeft = el.scrollWidth
   } else {
     const index = current.chart.months.findIndex((month) => month.key === anchor.key)
-    el.scrollLeft = index >= 0 ? pointX(current, index) - anchor.offset : el.scrollWidth
+    el.scrollLeft = index >= 0 ? pointX(current, index) + origin - anchor.offset : el.scrollWidth
   }
 
   rememberAnchor(current, el)
@@ -409,6 +430,23 @@ onUnmounted(() => {
           :aria-label="`${view.chart.currencyCode} chart. Scroll horizontally to see more months.`"
           @scroll="onChartScroll(view, $event)"
         >
+          <div class="insights-chart__track">
+          <button
+            v-if="props.hasMore"
+            type="button"
+            class="insights-chart__more"
+            :style="{ top: `${PAD_TOP + PLOT_HEIGHT / 2}px` }"
+            :disabled="props.isLoadingMore"
+            aria-label="Load older months"
+            @click="emit('loadMore')"
+          >
+            <span
+              v-if="props.isLoadingMore"
+              class="spinner-border spinner-border-sm me-1"
+              aria-hidden="true"
+            ></span>
+            {{ props.isLoadingMore ? 'Loading…' : 'Show more' }}
+          </button>
           <svg
             class="insights-chart__plot"
             :width="view.width"
@@ -466,6 +504,7 @@ onUnmounted(() => {
               {{ month.yearLabel }}
             </text>
           </svg>
+          </div>
         </div>
       </div>
     </div>
@@ -552,6 +591,44 @@ onUnmounted(() => {
   overscroll-behavior-x: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--bs-border-color) transparent;
+}
+
+.insights-chart__track {
+  position: relative;
+  width: max-content;
+}
+
+.insights-chart__more {
+  position: absolute;
+  left: 0.35rem;
+  z-index: 1;
+  margin: 0;
+  padding: 0.15rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font: inherit;
+  font-size: var(--ov-font-size-sm);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  writing-mode: sideways-lr;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.insights-chart__more:hover:not(:disabled) {
+  color: var(--ov-text);
+}
+
+.insights-chart__more:disabled {
+  cursor: default;
+}
+
+.insights-chart__more:focus-visible {
+  outline: 2px solid var(--bs-focus-ring-color);
+  outline-offset: 2px;
 }
 
 .insights-chart__scroll:focus-visible {

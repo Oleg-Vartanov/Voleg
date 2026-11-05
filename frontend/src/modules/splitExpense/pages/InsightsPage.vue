@@ -205,7 +205,14 @@ watch(selectedUsers, reloadInsights, { deep: true })
       </section>
     </div>
 
-    <InsightsLineChart v-if="showChart" class="insights-page__chart" :charts="insightCharts" />
+    <InsightsLineChart
+      v-if="showChart"
+      class="insights-page__chart"
+      :charts="insightCharts"
+      :has-more="insights.hasMore.value"
+      :is-loading-more="insights.isLoadingMore.value"
+      @load-more="insights.loadMore(PAGE_SIZE)"
+    />
 
     <div v-if="showChart" class="container se-page d-flex flex-column align-items-center">
       <section class="se-panel" aria-label="Monthly totals">
