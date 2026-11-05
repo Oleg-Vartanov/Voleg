@@ -7,7 +7,9 @@ import FormSelectUsers from '@/modules/core/components/form/FormSelectUsers.vue'
 import { useCategories } from '@/modules/splitExpense/composables/useCategories'
 import { useInsights } from '@/modules/splitExpense/composables/useInsights'
 import { searchConnectedUsers } from '@/modules/splitExpense/api/searchConnectedUsers'
+import InsightsLineChart from '@/modules/splitExpense/components/InsightsLineChart.vue'
 import { formatMonthLabel } from '@/modules/splitExpense/utils/expenseDates'
+import { buildInsightCharts } from '@/modules/splitExpense/utils/insightChart'
 import moneyUtils from '@/modules/core/utils/moneyUtils'
 import { useAuth } from '@/modules/user/stores/useAuth'
 import type { ApiUser } from '@/modules/core/apiType'
@@ -108,6 +110,20 @@ const monthGroups = computed<MonthGroup[]>(() => {
   return [...months.values()].map(({ group }) => group)
 })
 
+const showChart = computed(
+  () => insights.isLoaded.value && !insights.hasError.value && !insights.isEmpty.value
+)
+
+const chartLabel = computed(() => {
+  if (!isCategoryFiltered.value) return 'Total'
+  return (
+    monthGroups.value.find((month) => month.categories.length > 0)?.categories[0].category.title ??
+    'Total'
+  )
+})
+
+const insightCharts = computed(() => buildInsightCharts(monthGroups.value, chartLabel.value))
+
 function formatTotal(total: ApiSeCategoryTotal | CurrencyTotal): string {
   const amount = moneyUtils.fromMinorUnits(total.amount, total.currency.decimalPlaces)
   return `${amount} ${total.currency.code}`
@@ -147,14 +163,6 @@ watch(selectedUsers, reloadInsights, { deep: true })
         </header>
 
         <div class="insights-filter">
-          <FormSelect
-            id="se-insights-category"
-            v-model="selectedCategoryId"
-            label="Category"
-            :options="categoryOptions"
-            :disabled="categoryData.categories.value === null"
-          />
-
           <FormSelectUsers
             id="se-insights-users"
             v-model="selectedUsers"
@@ -162,6 +170,14 @@ watch(selectedUsers, reloadInsights, { deep: true })
             label="Include payers"
             :search="searchConnectedUsers"
             :locked-users="lockedUsers"
+          />
+
+          <FormSelect
+            id="se-insights-category"
+            v-model="selectedCategoryId"
+            label="Category"
+            :options="categoryOptions"
+            :disabled="categoryData.categories.value === null"
           />
         </div>
 
@@ -186,8 +202,14 @@ watch(selectedUsers, reloadInsights, { deep: true })
         <p v-else-if="insights.isEmpty.value" class="insights-message">
           {{ emptyText }}
         </p>
+      </section>
+    </div>
 
-        <div v-else class="insights-list">
+    <InsightsLineChart v-if="showChart" class="insights-page__chart" :charts="insightCharts" />
+
+    <div v-if="showChart" class="container se-page d-flex flex-column align-items-center">
+      <section class="se-panel" aria-label="Monthly totals">
+        <div class="insights-list">
           <section v-for="month in monthGroups" :key="month.month" class="insights-month">
             <h2 class="insights-month__title">{{ month.label }}</h2>
 
@@ -215,6 +237,10 @@ watch(selectedUsers, reloadInsights, { deep: true })
 </template>
 
 <style scoped>
+.insights-page__chart {
+  margin-block: 0.85rem 0.75rem;
+}
+
 .insights-header {
   padding-inline: var(--ov-page-inset);
   text-align: center;
