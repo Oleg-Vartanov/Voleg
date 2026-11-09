@@ -1,8 +1,15 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
 
   database:
     container_name: ${PROJECT_NAME}_database
     image: mysql:8.0
+    logging: *default-logging
     ports:
       - ${DATABASE_PORT}:${MYSQL_PORT}
     volumes:
@@ -17,6 +24,7 @@ services:
 
   webserver:
     container_name: ${PROJECT_NAME}_nginx
+    logging: *default-logging
     build:
       context: ./dev/nginx
     ports:
@@ -37,6 +45,7 @@ services:
 
   php:
     container_name: ${PROJECT_NAME}_php
+    logging: *default-logging
     build:
       context: ./common/php
       target: php
@@ -53,6 +62,7 @@ services:
   php_supervisor:
     profiles: [ supervisor ]
     container_name: ${PROJECT_NAME}_php_supervisor
+    logging: *default-logging
     build:
       context: ./common/php
       target: php_supervisor
@@ -68,6 +78,7 @@ services:
 
   node:
     container_name: ${PROJECT_NAME}_node
+    logging: *default-logging
     image: node:latest
     working_dir: /var/www/html/frontend
     volumes:
@@ -78,6 +89,7 @@ services:
 
   mailer:
     container_name: ${PROJECT_NAME}_mailer
+    logging: *default-logging
     image: maildev/maildev
     ports:
       - ${MAILER_UI_PORT}:1080
