@@ -6,14 +6,20 @@ import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts'
 import { jwtDecode, type JwtPayload } from 'jwt-decode'
+import client from '@/modules/core/apiClient'
+import {
+  getAccessToken,
+  isTokenExpired,
+  isTokenValid,
+  setAccessToken,
+  setRefreshHandler
+} from '@/modules/user/accessToken'
 
 interface apiJwtPayload extends JwtPayload {
   id: number
   username: string
   roles: string[]
 }
-
-const localStorageKey = 'voleg-jwt'
 
 const defaultUser: User = {
   isSignedIn: false,
@@ -27,78 +33,97 @@ export const useAuth = defineStore('auth', () => {
   const router: Router = useRouter()
 
   const user = reactive({ ...defaultUser })
+  let refreshing: Promise<boolean> | null = null
+  let sessionPromise: Promise<void> | null = null
 
-  function setUserByToken(): void {
-    const token: string | null = getToken()
-    if (token !== null) {
-      const decodedToken: apiJwtPayload = jwtDecode(token)
-      user.isSignedIn = isTokenValid()
-      user.id = decodedToken['id'] ?? null
-      user.username = decodedToken['username'] ?? null
-      user.roles = decodedToken['roles'] ?? []
+  function reset(): void {
+    setAccessToken(null)
+    Object.assign(user, defaultUser)
+  }
+
+  function applyToken(token: string | null): void {
+    if (token === null || isTokenExpired(token)) {
+      reset()
+      return
     }
-  }
 
-  function getToken(): string | null {
-    return window.localStorage.getItem(localStorageKey)
-  }
-
-  function setToken(token: string): void {
-    window.localStorage.setItem(localStorageKey, token)
-  }
-
-  function resetToken(): void {
-    window.localStorage.removeItem(localStorageKey)
-  }
-
-  function isTokenValid(): boolean {
-    const token: string | null = getToken()
-    return token !== null && !isTokenExpired(token)
-  }
-
-  function isTokenExpired(jwtToken: string) {
     try {
-      const decodedToken: apiJwtPayload = jwtDecode(jwtToken)
-      const currentTime = Date.now() / 1000
-      return decodedToken.exp < currentTime
-    } catch (error) {
-      console.error('Error decoding token:', error)
-      return true
+      const decodedToken: apiJwtPayload = jwtDecode(token)
+      setAccessToken(token)
+      user.isSignedIn = true
+      user.id = decodedToken.id ?? null
+      user.username = decodedToken.username ?? null
+      user.roles = decodedToken.roles ?? []
+    } catch {
+      reset()
     }
+  }
+
+  function refreshSession(): Promise<boolean> {
+    if (refreshing === null) {
+      refreshing = client
+        .refresh()
+        .then((response) => {
+          applyToken(response.data.token)
+          return user.isSignedIn
+        })
+        .catch(() => {
+          reset()
+          return false
+        })
+        .finally(() => {
+          refreshing = null
+        })
+    }
+
+    return refreshing
+  }
+
+  function ensureSession(): Promise<void> {
+    if (sessionPromise === null) {
+      sessionPromise = (async () => {
+        window.localStorage.removeItem('voleg-jwt')
+        await refreshSession()
+      })()
+    }
+
+    return sessionPromise
   }
 
   function signIn(token: string): void {
-    setToken(token)
-    setUserByToken()
+    applyToken(token)
     topAlerts.add('Successfully signed in. Welcome!', 'success')
     router.push({ name: 'home' })
   }
 
-  function signOut(): void {
+  async function signOut(): Promise<void> {
+    try {
+      await client.signOut()
+    } catch {
+      // The local session is dropped either way.
+    }
     reset()
     topAlerts.add('Signed out.', 'success', 5)
     router.push({ name: 'signIn' })
-  }
-
-  function reset(): void {
-    Object.assign(user, defaultUser)
-    resetToken()
   }
 
   function hasRole(roles: string[]): boolean {
     return arrayUtils.intersects(user.roles, roles)
   }
 
-  // init on first use
-  setUserByToken()
+  setRefreshHandler(async () => {
+    const restored = await refreshSession()
+    return restored ? getAccessToken() : null
+  })
 
   return {
     user,
     hasRole,
     signIn,
     signOut,
+    applyToken,
     reset,
-    getToken,
-    isTokenValid
+    isTokenValid,
+    ensureSession
   }
 })

@@ -6,9 +6,11 @@ import FormInput from '@/modules/core/components/form/FormInput.vue'
 import FormButton from '@/modules/core/components/form/FormButton.vue'
 import { useRouter } from 'vue-router'
 import { useTopAlerts } from '@/modules/core/stores/useTopAlerts.ts'
+import { useAuth } from '@/modules/user/stores/useAuth'
 
 const topAlerts = useTopAlerts()
 const router = useRouter()
+const auth = useAuth()
 const validation = useApiValidation()
 
 const isLoading = ref(false)
@@ -28,7 +30,10 @@ const changePassword = () => {
 
   client
     .passwordChange({ ...model })
-    .then(() => {
+    .then((response) => {
+      if (typeof response.data.token === 'string') {
+        auth.applyToken(response.data.token)
+      }
       resetForm()
       router.push({ name: 'profileInfo' })
       topAlerts.add('Password changed successfully.', 'success', 5)

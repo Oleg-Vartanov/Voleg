@@ -163,8 +163,11 @@ const index = createRouter({
   ]
 })
 
-// Add the beforeEach guard for updating document title and description
-index.beforeEach((to) => {
+// Restore the session before route guards, then set the document title.
+index.beforeEach(async (to) => {
+  const { useAuth } = await import('@/modules/user/stores/useAuth')
+  await useAuth().ensureSession()
+
   const { title } = to.meta
   const defaultTitle = 'voleg'
   document.title = title || defaultTitle

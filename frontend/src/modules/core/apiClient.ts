@@ -1,25 +1,61 @@
-import axios from 'axios'
-import { useAuth } from '@/modules/user/stores/useAuth'
+import axios, { type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
+import { getAccessToken, refreshAccessToken } from '@/modules/user/accessToken'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL + '/v1'
-const authType: string = 'Bearer'
+
+const api = axios.create({ withCredentials: true })
+
+type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean }
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const config = error.config as RetryConfig | undefined
+    const url = config?.url ?? ''
+    const skipsRefresh =
+      url.includes('/auth/refresh') ||
+      url.includes('/auth/sign-in') ||
+      url.includes('/auth/sign-out')
+
+    if (!config || error.response?.status !== 401 || config._retry || skipsRefresh) {
+      return Promise.reject(error)
+    }
+
+    config._retry = true
+    const token = await refreshAccessToken()
+    if (token === null) {
+      return Promise.reject(error)
+    }
+
+    config.headers.Authorization = `Bearer ${token}`
+    return api(config)
+  }
+)
 
 const getHeader = () => {
-  const auth = useAuth()
-  return auth.user.isSignedIn ? { Authorization: `${authType} ${auth.getToken()}` } : {}
+  const token = getAccessToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
 export default {
-  signIn(params: object): Promise<axios.AxiosResponse> {
-    return axios.post(`${apiBaseUrl}/auth/sign-in`, params)
+  signIn(params: object): Promise<AxiosResponse> {
+    return api.post(`${apiBaseUrl}/auth/sign-in`, params)
+  },
+
+  refresh() {
+    return api.post(`${apiBaseUrl}/auth/refresh`)
+  },
+
+  signOut() {
+    return api.post(`${apiBaseUrl}/auth/sign-out`)
   },
 
   signUp(params: object) {
-    return axios.post(`${apiBaseUrl}/auth/sign-up`, params)
+    return api.post(`${apiBaseUrl}/auth/sign-up`, params)
   },
 
   syncFixtures(competitionCode: string, seasonYear: number, from: string, to: string) {
-    return axios.post(
+    return api.post(
       `${apiBaseUrl}/fixtures/sync`,
       { competitionCode, seasonYear, from, to },
       { headers: getHeader() }
@@ -36,7 +72,7 @@ export default {
     limit: number = 20,
     upcomingOnly: boolean = false
   ) {
-    return axios.get(`${apiBaseUrl}/fixtures/predictions`, {
+    return api.get(`${apiBaseUrl}/fixtures/predictions`, {
       headers: getHeader(),
       params: {
         start: start,
@@ -61,7 +97,7 @@ export default {
     offset: number = 0,
     limit: number = 20
   ) {
-    return axios.get(`${apiBaseUrl}/fixtures/leaderboard`, {
+    return api.get(`${apiBaseUrl}/fixtures/leaderboard`, {
       headers: getHeader(),
       params: {
         start: start,
@@ -77,51 +113,51 @@ export default {
   },
 
   listUsers(username: null | string = null, offset = 0, limit = 100) {
-    return axios.get(`${apiBaseUrl}/users`, {
+    return api.get(`${apiBaseUrl}/users`, {
       headers: getHeader(),
       params: { username, offset, limit }
     })
   },
 
   getUser(id: number) {
-    return axios.get(`${apiBaseUrl}/users/${id}`, {
+    return api.get(`${apiBaseUrl}/users/${id}`, {
       headers: getHeader()
     })
   },
 
   patchUser(id: number, params: object) {
-    return axios.patch(`${apiBaseUrl}/users/${id}`, params, {
+    return api.patch(`${apiBaseUrl}/users/${id}`, params, {
       headers: getHeader()
     })
   },
 
   listContacts(userId: number, offset = 0, limit = 100) {
-    return axios.get(`${apiBaseUrl}/users/${userId}/contacts`, {
+    return api.get(`${apiBaseUrl}/users/${userId}/contacts`, {
       headers: getHeader(),
       params: { offset, limit }
     })
   },
 
   addContact(userId: number, contactId: number) {
-    return axios.post(`${apiBaseUrl}/users/${userId}/contacts/${contactId}`, null, {
+    return api.post(`${apiBaseUrl}/users/${userId}/contacts/${contactId}`, null, {
       headers: getHeader()
     })
   },
 
   deleteContact(userId: number, contactId: number) {
-    return axios.delete(`${apiBaseUrl}/users/${userId}/contacts/${contactId}`, {
+    return api.delete(`${apiBaseUrl}/users/${userId}/contacts/${contactId}`, {
       headers: getHeader()
     })
   },
 
   passwordChange(params: object) {
-    return axios.post(`${apiBaseUrl}/auth/password-change`, params, {
+    return api.post(`${apiBaseUrl}/auth/password-change`, params, {
       headers: getHeader()
     })
   },
 
   passwordForgot(email: string) {
-    return axios.post(
+    return api.post(
       `${apiBaseUrl}/auth/password-forgot`,
       { email },
       {
@@ -132,26 +168,26 @@ export default {
 
   passwordReset(selector: string, secret: string, password: string) {
     const params = { selector, secret, password }
-    return axios.post(`${apiBaseUrl}/auth/password-reset`, params, {
+    return api.post(`${apiBaseUrl}/auth/password-reset`, params, {
       headers: getHeader()
     })
   },
 
   makePredictions(params: object) {
-    return axios.post(`${apiBaseUrl}/fixtures/make-predictions`, params, {
+    return api.post(`${apiBaseUrl}/fixtures/make-predictions`, params, {
       headers: getHeader()
     })
   },
 
   listSplitExpenses(offset = 0, limit = 100) {
-    return axios.get(`${apiBaseUrl}/split-expense/expenses`, {
+    return api.get(`${apiBaseUrl}/split-expense/expenses`, {
       headers: getHeader(),
       params: { offset, limit }
     })
   },
 
   getSplitExpenseBalances() {
-    return axios.get(`${apiBaseUrl}/split-expense/balances`, {
+    return api.get(`${apiBaseUrl}/split-expense/balances`, {
       headers: getHeader()
     })
   },
@@ -162,7 +198,7 @@ export default {
     categoryId: number | null = null,
     userIds: number[] = []
   ) {
-    return axios.get(`${apiBaseUrl}/split-expense/insights`, {
+    return api.get(`${apiBaseUrl}/split-expense/insights`, {
       headers: getHeader(),
       params: {
         offset,
@@ -174,7 +210,7 @@ export default {
   },
 
   listSplitExpenseCategories(offset = 0, limit = 100) {
-    return axios.get(`${apiBaseUrl}/split-expense/categories`, {
+    return api.get(`${apiBaseUrl}/split-expense/categories`, {
       headers: getHeader(),
       params: { offset, limit }
     })
@@ -188,14 +224,14 @@ export default {
     username: string | null = null,
     direction: 'incoming' | 'outgoing' | null = null
   ) {
-    return axios.get(`${apiBaseUrl}/split-expense/connections`, {
+    return api.get(`${apiBaseUrl}/split-expense/connections`, {
       headers: getHeader(),
       params: { offset, limit, status, usersOnly, username, direction }
     })
   },
 
   requestSplitExpenseConnection(connectionUserId: number) {
-    return axios.post(
+    return api.post(
       `${apiBaseUrl}/split-expense/connections/request`,
       { connectionUserId },
       { headers: getHeader() }
@@ -203,7 +239,7 @@ export default {
   },
 
   respondSplitExpenseConnection(id: number, status: 'accepted' | 'rejected') {
-    return axios.post(
+    return api.post(
       `${apiBaseUrl}/split-expense/connections/${id}/response`,
       { status },
       { headers: getHeader() }
@@ -211,63 +247,63 @@ export default {
   },
 
   deleteSplitExpenseConnection(id: number) {
-    return axios.delete(`${apiBaseUrl}/split-expense/connections/${id}`, {
+    return api.delete(`${apiBaseUrl}/split-expense/connections/${id}`, {
       headers: getHeader()
     })
   },
 
   listCurrencies(offset = 0, limit = 200) {
-    return axios.get(`${apiBaseUrl}/currencies`, {
+    return api.get(`${apiBaseUrl}/currencies`, {
       headers: getHeader(),
       params: { offset, limit }
     })
   },
 
   createSplitExpense(payload: object) {
-    return axios.post(`${apiBaseUrl}/split-expense/expenses/0`, payload, {
+    return api.post(`${apiBaseUrl}/split-expense/expenses/0`, payload, {
       headers: getHeader()
     })
   },
 
   updateSplitExpense(id: number, payload: object) {
-    return axios.put(`${apiBaseUrl}/split-expense/expenses/${id}`, payload, {
+    return api.put(`${apiBaseUrl}/split-expense/expenses/${id}`, payload, {
       headers: getHeader()
     })
   },
 
   deleteSplitExpense(id: number) {
-    return axios.delete(`${apiBaseUrl}/split-expense/expenses/${id}`, {
+    return api.delete(`${apiBaseUrl}/split-expense/expenses/${id}`, {
       headers: getHeader()
     })
   },
 
   listSplitExpenseAdjustments(offset = 0, limit = 100) {
-    return axios.get(`${apiBaseUrl}/split-expense/adjustments`, {
+    return api.get(`${apiBaseUrl}/split-expense/adjustments`, {
       headers: getHeader(),
       params: { offset, limit }
     })
   },
 
   createSplitExpenseAdjustment(payload: object) {
-    return axios.post(`${apiBaseUrl}/split-expense/adjustments`, payload, {
+    return api.post(`${apiBaseUrl}/split-expense/adjustments`, payload, {
       headers: getHeader()
     })
   },
 
   updateSplitExpenseAdjustment(id: number, payload: object) {
-    return axios.put(`${apiBaseUrl}/split-expense/adjustments/${id}`, payload, {
+    return api.put(`${apiBaseUrl}/split-expense/adjustments/${id}`, payload, {
       headers: getHeader()
     })
   },
 
   deleteSplitExpenseAdjustment(id: number) {
-    return axios.delete(`${apiBaseUrl}/split-expense/adjustments/${id}`, {
+    return api.delete(`${apiBaseUrl}/split-expense/adjustments/${id}`, {
       headers: getHeader()
     })
   },
 
   listSplitExpenseFeed(offset = 0, limit = 100, types: string[] = []) {
-    return axios.get(`${apiBaseUrl}/split-expense/feed`, {
+    return api.get(`${apiBaseUrl}/split-expense/feed`, {
       headers: getHeader(),
       params: { offset, limit, types }
     })
