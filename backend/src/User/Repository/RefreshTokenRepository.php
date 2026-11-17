@@ -5,6 +5,7 @@ namespace App\User\Repository;
 use App\Core\Repository\AbstractEntityRepository;
 use App\User\Entity\RefreshToken;
 use App\User\Entity\User;
+use DateTimeImmutable;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -33,6 +34,19 @@ class RefreshTokenRepository extends AbstractEntityRepository
             ->delete()
             ->andWhere('refreshToken.user = :user')
             ->setParameter('user', $user)
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
+     * Expired rows are rejected anyway, so reuse detection no longer needs them.
+     */
+    public function removeExpired(): void
+    {
+        $this->createQueryBuilder('refreshToken')
+            ->delete()
+            ->andWhere('refreshToken.expiresAt < :now')
+            ->setParameter('now', new DateTimeImmutable())
             ->getQuery()
             ->execute();
     }

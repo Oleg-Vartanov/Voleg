@@ -45,7 +45,7 @@ migrations-generate:
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:diff
 
 consumer:
-	$(PHP_CONTAINER) php bin/console messenger:consume default scheduler_fixture_predictions -vv
+	$(PHP_CONTAINER) php bin/console messenger:consume default scheduler_fixture_predictions scheduler_user -vv
 
 cache:
 	$(PHP_CONTAINER) php bin/console cache:clear

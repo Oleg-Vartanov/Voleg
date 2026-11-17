@@ -2,26 +2,28 @@
 
 namespace App\FixturePredictions\Scheduler;
 
+use App\Core\Scheduler\AbstractScheduleProvider;
 use App\FixturePredictions\Messenger\SyncMessage;
+use Symfony\Component\Messenger\Message\RedispatchMessage;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
-use Symfony\Component\Scheduler\ScheduleProviderInterface;
 
 /**
  * @codeCoverageIgnore
  */
 #[AsSchedule('fixture_predictions')]
-final class ScheduleProvider implements ScheduleProviderInterface
+final class ScheduleProvider extends AbstractScheduleProvider
 {
-    private Schedule $schedule;
-
-    public function getSchedule(): Schedule
+    protected function createSchedule(): Schedule
     {
-        return $this->schedule ??= (new Schedule())
+        return new Schedule()
             ->with(
                 // At every 10th minute.
-                RecurringMessage::cron('*/10 * * * *', new SyncMessage())
+                RecurringMessage::cron(
+                    '*/10 * * * *',
+                    new RedispatchMessage(new SyncMessage(), 'fixture_predictions'),
+                )
             );
     }
 }

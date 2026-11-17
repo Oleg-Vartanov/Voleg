@@ -6,7 +6,7 @@ use App\FixturePredictions\Enum\CompetitionCodeEnum;
 use DateTimeImmutable;
 use Symfony\Component\Messenger\Attribute\AsMessage;
 
-#[AsMessage('default')]
+#[AsMessage('fixture_predictions')]
 readonly class SyncMessage
 {
     public function __construct(
