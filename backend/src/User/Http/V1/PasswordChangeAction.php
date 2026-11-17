@@ -11,7 +11,9 @@ use App\Core\ValueObject\Validator\Violation;
 use App\User\Entity\User;
 use App\User\Http\V1\Request\PasswordChangeDto;
 use App\User\Repository\UserRepository;
+use App\User\Service\RefreshTokenService;
 use App\User\Service\UserService;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,12 +39,15 @@ class PasswordChangeAction extends ApiController
         private readonly UserRepository $userRepository,
         private readonly UserService $userService,
         private readonly AntiEnumerationLimiter $limiter,
+        private readonly RefreshTokenService $refreshTokens,
+        private readonly JWTTokenManagerInterface $jwtManager,
     ) {
     }
 
     public function __invoke(
         #[CurrentUser] User $user,
-        #[MapRequestPayload] PasswordChangeDto $dto
+        #[MapRequestPayload] PasswordChangeDto $dto,
+        Request $request,
     ): Response {
         if ($this->limiter->limit('passwordChange' . $user->getId())) {
             return $this->limitResponse();
@@ -62,7 +67,14 @@ class PasswordChangeAction extends ApiController
 
         $this->userService->setHashedPassword($user, $dto->newPassword);
         $this->userRepository->save($user, true);
+        $this->refreshTokens->revokeAll($user);
 
-        return $this->messageResponse(self::MESSAGE);
+        $response = $this->json([
+            'message' => self::MESSAGE,
+            'token' => $this->jwtManager->create($user),
+        ]);
+        $this->refreshTokens->start($user, $response, $request);
+
+        return $response;
     }
 }

@@ -22,12 +22,6 @@ services:
             - '../src/**/Entity/'
             - '../src/**/Test/**'
 
-    #<<< Listeners
-    App\User\EventListener\JWTCreatedListener:
-        tags:
-            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
-    #>>> Listeners
-
     #<<< Interfaces
     App\FixturePredictions\Service\FixtureProvider: '@App\FixturePredictions\Service\FootballDataOrgFixtureProvider'
     #>>> Interfaces

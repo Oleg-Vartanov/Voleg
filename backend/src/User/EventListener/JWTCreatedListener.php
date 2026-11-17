@@ -4,17 +4,15 @@ namespace App\User\EventListener;
 
 use App\User\Entity\User;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
-use Symfony\Bundle\SecurityBundle\Security;
+use Lexik\Bundle\JWTAuthenticationBundle\Events;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 readonly class JWTCreatedListener
 {
-    public function __construct(private Security $security)
-    {
-    }
-
+    #[AsEventListener(event: Events::JWT_CREATED)]
     public function onJWTCreated(JWTCreatedEvent $event): void
     {
-        $user = $this->security->getUser();
+        $user = $event->getUser();
 
         if (!$user instanceof User) {
             return;

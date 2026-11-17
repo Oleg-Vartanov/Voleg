@@ -6,10 +6,9 @@ security:
       entity:
         class: App\User\Entity\User
         property: email
-    app_user_provider_id:
-      entity:
-        class: App\User\Entity\User
-        property: id
+    jwt:
+      lexik_jwt:
+        class: App\User\Security\JwtUser
   role_hierarchy:
     ROLE_ADMIN: ROLE_USER
     ROLE_GOD: ROLE_ADMIN
@@ -20,6 +19,8 @@ security:
     public:
       pattern:
         - ^/v1/auth/sign-up
+        - ^/v1/auth/refresh
+        - ^/v1/auth/sign-out
       security: false
     login:
       pattern:
@@ -39,7 +40,7 @@ security:
     secured:
       lazy: true
       stateless: true
-      provider: app_user_provider_id
+      provider: jwt
       jwt: ~
   access_control:
     - { path: ^/v1/fixtures/sync, roles: ROLE_ADMIN }

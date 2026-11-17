@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[OA\Post(
     security: [['Bearer' => []]],
@@ -42,11 +43,9 @@ class MakePredictionsPostAction extends ApiController
      * @param array<MakePredictionsRequest> $dtos
      */
     public function __invoke(
-        #[MapRequestPayload(type: MakePredictionsRequest::class)] array $dtos
+        #[MapRequestPayload(type: MakePredictionsRequest::class)] array $dtos,
+        #[CurrentUser] User $user,
     ): JsonResponse {
-        /** @var User $user */
-        $user = $this->getUser();
-
         try {
             $this->predictionsService->makePredictions($dtos, $user);
         } catch (UnprocessableException $e) {

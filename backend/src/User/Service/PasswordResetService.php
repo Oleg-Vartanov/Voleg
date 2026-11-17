@@ -19,6 +19,7 @@ readonly class PasswordResetService
         private UserService $userService,
         private UserTokenRepository $tokenRepository,
         private UserTokenService $tokenService,
+        private RefreshTokenService $refreshTokens,
         private Mailer $mailer,
         private ParameterBagInterface $parameterBag,
     ) {
@@ -74,6 +75,7 @@ readonly class PasswordResetService
         $user = $token->getUser();
         $this->userService->setHashedPassword($user, $newPassword);
         $this->tokenRepository->remove($token);
+        $this->refreshTokens->revokeAll($user);
         $this->userRepository->save($user, true);
 
         return true;
