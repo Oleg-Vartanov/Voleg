@@ -3,14 +3,18 @@
 namespace App\User\Service;
 
 use App\Core\Service\Mailer;
+use App\Core\Service\TokenHasher;
 use App\User\Entity\User;
-use App\User\Entity\UserToken;
-use App\User\Enum\UserTokenTypeEnum;
+use App\User\Entity\VerificationToken;
 use App\User\Http\V1\Request\SignUpDto;
 use App\User\Repository\UserRepository;
-use App\User\Repository\UserTokenRepository;
+use App\User\Repository\VerificationTokenRepository;
+use DateMalformedStringException;
+use DateTimeImmutable;
+use InvalidArgumentException;
 use LogicException;
 use Random\RandomException;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -22,31 +26,46 @@ readonly class AuthService
         private RouterInterface $router,
         private UserService $userService,
         private UserRepository $userRepository,
-        private UserTokenService $tokenService,
-        private UserTokenRepository $tokenRepository,
+        private TokenHasher $hasher,
+        private VerificationTokenRepository $tokenRepository,
+        #[Autowire(param: 'verification_token.ttl')]
+        private int $tokenTtl,
     ) {
+        if ($tokenTtl <= 0) {
+            throw new InvalidArgumentException('VERIFICATION_TOKEN_TTL must be a positive number of seconds.');
+        }
     }
 
-    /** @throws TransportExceptionInterface|RandomException */
+    /** @throws TransportExceptionInterface|RandomException|DateMalformedStringException */
     public function signUp(SignUpDto $dto): void
     {
         $user = $this->userService->createByDto($dto);
-        $this->userRepository->save($user);
-
+        $this->userRepository->save($user, true);
         $this->sendVerificationEmail($user);
     }
 
-    public function verifyUser(UserToken $token, string $secret): bool
+    /**
+     * The token is deleted on any match, so a link works only once.
+     */
+    public function verifyUser(string $token): bool
     {
-        if (
-            $token->isExpired()
-            || $token->getType() !== UserTokenTypeEnum::VERIFICATION
-            || !$this->tokenService->verifySecret($secret, $token->getSecret())
-        ) {
+        if ($token === '') {
             return false;
         }
 
-        $user = $token->getUser();
+        $verificationToken = $this->tokenRepository->findByTokenHash($this->hasher->hash($token));
+        if ($verificationToken === null) {
+            return false;
+        }
+
+        $this->tokenRepository->remove($verificationToken);
+        if ($verificationToken->isExpired()) {
+            $this->tokenRepository->flush();
+
+            return false;
+        }
+
+        $user = $verificationToken->getUser();
         $user->setVerified(true);
         $this->userRepository->save($user, true);
 
@@ -54,7 +73,9 @@ readonly class AuthService
     }
 
     /**
-     * @throws TransportExceptionInterface|RandomException
+     * Replaces any earlier verification token of the user.
+     *
+     * @throws TransportExceptionInterface|RandomException|DateMalformedStringException
      */
     public function sendVerificationEmail(User $user): void
     {
@@ -62,16 +83,16 @@ readonly class AuthService
             throw new LogicException('User is already verified.');
         }
 
-        [$token, $secret] = $this->tokenService->createToken(
-            type: UserTokenTypeEnum::VERIFICATION,
+        $secret = $this->hasher->generate();
+        $this->tokenRepository->removeForUser($user);
+        $this->tokenRepository->save(new VerificationToken(
             user: $user,
-        );
-
-        $this->tokenRepository->save($token, true);
+            tokenHash: $secret->hash,
+            expiresAt: new DateTimeImmutable(sprintf('+%d seconds', $this->tokenTtl)),
+        ), true);
 
         $verifyLink = $this->router->generate('sign_up_verify', [
-            'selector' => $token->getSelector(),
-            'secret' => $secret->plain,
+            'token' => $secret->plain,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $this->mailer->send(

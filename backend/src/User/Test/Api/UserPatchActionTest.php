@@ -4,9 +4,8 @@ namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
 use App\Core\Test\Trait\ContainerTestTrait;
-use App\User\Enum\UserTokenTypeEnum;
+use App\User\Repository\EmailChangeTokenRepository;
 use App\User\Repository\UserRepository;
-use App\User\Repository\UserTokenRepository;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,13 +26,11 @@ class UserPatchActionTest extends ApiTestCase
         ]);
         $patchedUser = $this->getService(UserRepository::class)->findById($user->getId());
 
-        /** @var UserTokenRepository $tokenRepository */
-        $tokenRepository = static::getContainer()->get(UserTokenRepository::class);
-        $emailChangeToken = $tokenRepository->findOneByUser($user, UserTokenTypeEnum::EMAIL_CHANGE);
+        $emailChangeToken = $this->getService(EmailChangeTokenRepository::class)->findByUser($user);
 
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
         self::assertSame($user->getEmail(), $patchedUser->getEmail());
-        self::assertSame('patched-email@mail.com', $emailChangeToken->getEmailChange());
+        self::assertSame('patched-email@mail.com', $emailChangeToken?->getNewEmail());
         self::assertSame('patched-username', $patchedUser->getUsername());
     }
 

@@ -17,6 +17,11 @@ parameters:
     refresh_token.path: '%env(REFRESH_TOKEN_PATH)%'
     refresh_token.ttl: '%env(int:REFRESH_TOKEN_TTL)%'
 
+    # Emailed tokens
+    verification_token.ttl: '%env(int:VERIFICATION_TOKEN_TTL)%'
+    email_change_token.ttl: '%env(int:EMAIL_CHANGE_TOKEN_TTL)%'
+    password_reset_token.ttl: '%env(int:PASSWORD_RESET_TOKEN_TTL)%'
+
     # Fixtures
     fixtures.football-data-org.api.url: '%env(FOOTBALL_DATA_ORG_URL)%'
     fixtures.football-data-org.api.key: '%env(FOOTBALL_DATA_ORG_KEY)%'

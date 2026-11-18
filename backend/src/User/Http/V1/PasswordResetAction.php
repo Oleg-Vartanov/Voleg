@@ -7,7 +7,6 @@ use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Http\ApiController;
 use App\Core\Service\AntiEnumerationLimiter;
 use App\User\Http\V1\Request\PasswordResetDto;
-use App\User\Repository\UserTokenRepository;
 use App\User\Service\PasswordResetService;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,28 +30,21 @@ class PasswordResetAction extends ApiController
     public const string MESSAGE_INVALID = 'Invalid token.';
 
     public function __construct(
-        private readonly UserTokenRepository $tokenRepository,
         private readonly PasswordResetService $service,
         private readonly AntiEnumerationLimiter $limiter,
     ) {
     }
 
     public function __invoke(
-        #[MapRequestPayload] PasswordResetDto $dto
+        Request $request,
+        #[MapRequestPayload] PasswordResetDto $dto,
     ): Response {
-        if ($this->limiter->limit('passwordReset' . $dto->selector)) {
+        if ($this->limiter->limit('passwordReset' . $request->getClientIp())) {
             return $this->limitResponse();
         }
 
-        $token = $this->tokenRepository->findBySelector($dto->selector);
-
-        if ($token === null) {
-            return $this->messageResponse(self::MESSAGE_INVALID, Response::HTTP_FORBIDDEN);
-        }
-
         $result = $this->service->resetPassword(
-            token: $token,
-            secret: $dto->secret,
+            token: $dto->token,
             newPassword: $dto->password,
         );
 

@@ -26,6 +26,14 @@ abstract class ApiTestCase extends WebTestCase
     {
         $this->client = static::createClient();
         $this->router = $this->getService(RouterInterface::class);
+
+        // Rate limiters are keyed by IP, so each test gets its own.
+        $this->client->setServerParameter('REMOTE_ADDR', sprintf(
+            '10.%d.%d.%d',
+            random_int(0, 255),
+            random_int(0, 255),
+            random_int(1, 254),
+        ));
     }
 
     protected function createUser(

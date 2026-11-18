@@ -3,7 +3,7 @@
 namespace App\User\Scheduler;
 
 use App\Core\Scheduler\AbstractScheduleProvider;
-use App\User\Messenger\PurgeExpiredRefreshTokensMessage;
+use App\User\Messenger\PurgeExpiredTokensMessage;
 use Symfony\Component\Messenger\Message\RedispatchMessage;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
@@ -22,7 +22,7 @@ final class ScheduleProvider extends AbstractScheduleProvider
                 // Every day at 04:00.
                 RecurringMessage::cron(
                     '0 4 * * *',
-                    new RedispatchMessage(new PurgeExpiredRefreshTokensMessage(), 'default'),
+                    new RedispatchMessage(new PurgeExpiredTokensMessage(), 'default'),
                 )
             );
     }

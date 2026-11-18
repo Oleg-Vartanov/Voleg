@@ -2,8 +2,10 @@
 
 namespace App\User\Test\Api;
 
+use App\Core\Service\TokenHasher;
 use App\Core\Test\ApiTestCase;
-use App\User\Test\Trait\UserTokenTestTrait;
+use App\User\Repository\PasswordResetTokenRepository;
+use App\User\Test\Trait\EmailedTokenTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,24 +13,17 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Auth')]
 class PasswordForgotActionTest extends ApiTestCase
 {
-    use UserTokenTestTrait;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->tokenSetUp();
-    }
+    use EmailedTokenTestTrait;
 
     #[TestDox('Password forgot: success request')]
     public function testSuccess(): void
     {
         $user = $this->createUser();
-        $this->mockToken('selector' . $user->getId(), 'secret' . $user->getId());
         $this->sendRequest(['email' => $user->getEmail()]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
-        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'selector' . $user->getId());
-        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'secret' . $user->getId());
+        $hash = $this->getService(TokenHasher::class)->hash(self::lastEmailedToken());
+        self::assertNotNull($this->getService(PasswordResetTokenRepository::class)->findByTokenHash($hash));
     }
 
     #[TestDox('Password forgot: user not found')]

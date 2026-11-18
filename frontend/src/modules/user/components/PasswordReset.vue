@@ -19,7 +19,7 @@ const submit = () => {
   isLoading.value = true
 
   client
-    .passwordReset(route.query.selector as string, route.query.secret as string, password.value)
+    .passwordReset(route.query.token as string, password.value)
     .then(() => {
       router.push({ name: 'signIn' })
       topAlerts.add('Password updated successfully.', 'success', 5)

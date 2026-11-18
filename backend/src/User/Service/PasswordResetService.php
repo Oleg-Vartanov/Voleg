@@ -3,12 +3,16 @@
 namespace App\User\Service;
 
 use App\Core\Service\Mailer;
+use App\Core\Service\TokenHasher;
+use App\User\Entity\PasswordResetToken;
 use App\User\Entity\User;
-use App\User\Entity\UserToken;
-use App\User\Enum\UserTokenTypeEnum;
+use App\User\Repository\PasswordResetTokenRepository;
 use App\User\Repository\UserRepository;
-use App\User\Repository\UserTokenRepository;
+use DateMalformedStringException;
+use DateTimeImmutable;
+use InvalidArgumentException;
 use Random\RandomException;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
@@ -17,35 +21,37 @@ readonly class PasswordResetService
     public function __construct(
         private UserRepository $userRepository,
         private UserService $userService,
-        private UserTokenRepository $tokenRepository,
-        private UserTokenService $tokenService,
+        private TokenHasher $hasher,
+        private PasswordResetTokenRepository $tokenRepository,
         private RefreshTokenService $refreshTokens,
         private Mailer $mailer,
         private ParameterBagInterface $parameterBag,
+        #[Autowire(param: 'password_reset_token.ttl')]
+        private int $tokenTtl,
     ) {
+        if ($tokenTtl <= 0) {
+            throw new InvalidArgumentException('PASSWORD_RESET_TOKEN_TTL must be a positive number of seconds.');
+        }
     }
 
-
     /**
-     * @throws RandomException
-     * @throws TransportExceptionInterface
+     * Replaces any earlier reset request of the user.
+     *
+     * @throws RandomException|TransportExceptionInterface|DateMalformedStringException
      */
     public function requestReset(User $user): void
     {
-        // Remove older tokens.
-        $this->tokenRepository->removeByUser($user, UserTokenTypeEnum::PASSWORD_RESET);
-
-        [$token, $secret] = $this->tokenService->createToken(
-            type: UserTokenTypeEnum::PASSWORD_RESET,
+        $secret = $this->hasher->generate();
+        $this->tokenRepository->removeForUser($user);
+        $this->tokenRepository->save(new PasswordResetToken(
             user: $user,
-        );
-
-        $this->tokenRepository->save($token, true);
+            tokenHash: $secret->hash,
+            expiresAt: new DateTimeImmutable(sprintf('+%d seconds', $this->tokenTtl)),
+        ), true);
 
         $baseUrl = $this->parameterBag->get('client.url.auth-password-reset');
         $resetLink = $baseUrl . '?' . http_build_query([
-            'selector' => $token->getSelector(),
-            'secret' => $secret->plain,
+            'token' => $secret->plain,
         ]);
 
         $this->mailer->send(
@@ -59,22 +65,26 @@ readonly class PasswordResetService
         );
     }
 
-    public function resetPassword(
-        UserToken $token,
-        string $secret,
-        string $newPassword
-    ): bool {
-        if (
-            $token->isExpired()
-            || $token->getType() !== UserTokenTypeEnum::PASSWORD_RESET
-            || !$this->tokenService->verifySecret($secret, $token->getSecret())
-        ) {
+    /**
+     * The token is deleted on any match, so a link works only once. Signs the
+     * user out everywhere by revoking all refresh tokens.
+     */
+    public function resetPassword(string $token, string $newPassword): bool
+    {
+        $resetToken = $this->tokenRepository->findByTokenHash($this->hasher->hash($token));
+        if ($resetToken === null) {
             return false;
         }
 
-        $user = $token->getUser();
+        $this->tokenRepository->remove($resetToken);
+        if ($resetToken->isExpired()) {
+            $this->tokenRepository->flush();
+
+            return false;
+        }
+
+        $user = $resetToken->getUser();
         $this->userService->setHashedPassword($user, $newPassword);
-        $this->tokenRepository->remove($token);
         $this->refreshTokens->revokeAll($user);
         $this->userRepository->save($user, true);
 

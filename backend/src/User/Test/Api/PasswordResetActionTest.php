@@ -2,12 +2,14 @@
 
 namespace App\User\Test\Api;
 
+use App\Core\Service\TokenHasher;
 use App\Core\Test\ApiTestCase;
-use App\User\Enum\UserTokenTypeEnum;
-use App\User\Repository\UserTokenRepository;
+use App\User\Entity\PasswordResetToken;
+use App\User\Repository\PasswordResetTokenRepository;
+use App\User\Service\AuthService;
 use App\User\Service\PasswordResetService;
 use App\User\Service\UserService;
-use App\User\Test\Trait\UserTokenTestTrait;
+use App\User\Test\Trait\EmailedTokenTestTrait;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,55 +18,39 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Auth')]
 class PasswordResetActionTest extends ApiTestCase
 {
-    use UserTokenTestTrait;
+    use EmailedTokenTestTrait;
 
     private PasswordResetService $passwordResetService;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->tokenSetUp();
-        $this->passwordResetService = static::getContainer()->get(
-            PasswordResetService::class
-        );
+        $this->passwordResetService = static::getContainer()->get(PasswordResetService::class);
     }
 
-    #[TestDox('Password reset: success request')]
+    #[TestDox('Password reset: success removes the token')]
     public function testSuccess(): void
     {
         $user = $this->createUser();
-        $this->mockToken('selector' . $user->getId(), 'secret' . $user->getId());
         $this->passwordResetService->requestReset($user);
 
         $this->sendRequest([
-            'selector' => 'selector' . $user->getId(),
-            'secret' => 'secret' . $user->getId(),
+            'token' => self::lastEmailedToken(),
             'password' => self::DEFAULT_PASSWORD . 'new',
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_OK);
         self::assertTrue(
-            static::getContainer()->get(UserService::class)->isPasswordValid(
-                $user,
-                self::DEFAULT_PASSWORD . 'new'
-            )
+            $this->getService(UserService::class)->isPasswordValid($user, self::DEFAULT_PASSWORD . 'new')
         );
-
-        $token = $this->getService(UserTokenRepository::class)
-                      ->findOneByUser($user, UserTokenTypeEnum::PASSWORD_RESET);
-        self::assertNull($token);
+        self::assertNull($this->getService(PasswordResetTokenRepository::class)->findByUser($user));
     }
 
-    #[TestDox('Password reset: wrong secret')]
-    public function testWrongSecret(): void
+    #[TestDox('Password reset: unknown token')]
+    public function testUnknownToken(): void
     {
-        $user = $this->createUser();
-        $this->mockToken('selector' . $user->getId(), 'secret' . $user->getId());
-        $this->passwordResetService->requestReset($user);
-
         $this->sendRequest([
-            'selector' => 'selector' . $user->getId(),
-            'secret' => 'wrong-secret',
+            'token' => str_repeat('a', 64),
             'password' => self::DEFAULT_PASSWORD,
         ]);
 
@@ -75,32 +61,41 @@ class PasswordResetActionTest extends ApiTestCase
     public function testExpiredToken(): void
     {
         $user = $this->createUser();
-        $this->mockToken(
-            'selector' . $user->getId(),
-            'secret' . $user->getId(),
-            new DateTimeImmutable('-1 day'),
+        $secret = $this->getService(TokenHasher::class)->generate();
+        $this->getService(PasswordResetTokenRepository::class)->save(
+            new PasswordResetToken($user, $secret->hash, new DateTimeImmutable('-1 second')),
+            true,
         );
-        $this->passwordResetService->requestReset($user);
 
         $this->sendRequest([
-            'selector' => 'selector' . $user->getId(),
-            'secret' => 'secret' . $user->getId(),
-            'password' => self::DEFAULT_PASSWORD,
+            'token' => $secret->plain,
+            'password' => self::DEFAULT_PASSWORD . 'new',
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
-    #[TestDox('Password reset: no token')]
-    public function testNoToken(): void
+    #[TestDox('Password reset: a verification token is not accepted')]
+    public function testOtherTokenTypeRejected(): void
     {
+        $user = $this->createUser(verified: false);
+        $this->getService(AuthService::class)->sendVerificationEmail($user);
+
         $this->sendRequest([
-            'selector' => 'non-existent-selector',
-            'secret' => 'test',
-            'password' => self::DEFAULT_PASSWORD,
+            'token' => self::lastEmailedToken(),
+            'password' => self::DEFAULT_PASSWORD . 'new',
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+        self::assertTrue($this->getService(UserService::class)->isPasswordValid($user, self::DEFAULT_PASSWORD));
+    }
+
+    #[TestDox('Password reset: missing token')]
+    public function testMissingToken(): void
+    {
+        $this->sendRequest(['password' => self::DEFAULT_PASSWORD]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     #[TestDox('Password reset: rate limit')]
@@ -108,8 +103,7 @@ class PasswordResetActionTest extends ApiTestCase
     {
         foreach (range(1, 4) as $i) {
             $this->sendRequest([
-                'selector' => 'passwordResetRateLimitTest',
-                'secret' => 'test',
+                'token' => str_repeat('b', 64),
                 'password' => self::DEFAULT_PASSWORD,
             ]);
             if ($i === 4) {

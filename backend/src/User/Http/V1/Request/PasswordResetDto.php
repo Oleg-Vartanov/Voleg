@@ -7,8 +7,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(title: 'Password Reset Dto')]
-class PasswordResetDto extends UserTokenDto
+class PasswordResetDto
 {
+    #[Assert\NotBlank]
+    public string $token;
+
     #[Assert\NotBlank, CustomAssert\StrongPassword]
     public string $password;
 }

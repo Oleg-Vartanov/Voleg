@@ -166,8 +166,8 @@ export default {
     )
   },
 
-  passwordReset(selector: string, secret: string, password: string) {
-    const params = { selector, secret, password }
+  passwordReset(token: string, password: string) {
+    const params = { token, password }
     return api.post(`${apiBaseUrl}/auth/password-reset`, params, {
       headers: getHeader()
     })

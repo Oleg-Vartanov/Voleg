@@ -3,11 +3,11 @@
 namespace App\User\Test\Unit;
 
 use App\Core\Service\Mailer;
+use App\Core\Service\TokenHasher;
 use App\User\Entity\User;
+use App\User\Repository\EmailChangeTokenRepository;
 use App\User\Repository\UserRepository;
-use App\User\Repository\UserTokenRepository;
 use App\User\Service\EmailChangeService;
-use App\User\Service\UserTokenService;
 use LogicException;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
@@ -25,9 +25,10 @@ class UserServiceTest extends TestCase
         $this->emailChangeService = new EmailChangeService(
             self::createStub(Mailer::class),
             self::createStub(RouterInterface::class),
-            self::createStub(UserTokenService::class),
-            self::createStub(UserTokenRepository::class),
+            new TokenHasher('test-key'),
+            self::createStub(EmailChangeTokenRepository::class),
             self::createStub(UserRepository::class),
+            3600,
         );
     }
 

@@ -3,13 +3,17 @@
 namespace App\User\Service;
 
 use App\Core\Service\Mailer;
+use App\Core\Service\TokenHasher;
+use App\User\Entity\EmailChangeToken;
 use App\User\Entity\User;
-use App\User\Entity\UserToken;
-use App\User\Enum\UserTokenTypeEnum;
+use App\User\Repository\EmailChangeTokenRepository;
 use App\User\Repository\UserRepository;
-use App\User\Repository\UserTokenRepository;
+use DateMalformedStringException;
+use DateTimeImmutable;
+use InvalidArgumentException;
 use LogicException;
 use Random\RandomException;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -19,40 +23,44 @@ readonly class EmailChangeService
     public function __construct(
         private Mailer $mailer,
         private RouterInterface $router,
-        private UserTokenService $tokenService,
-        private UserTokenRepository $tokenRepository,
+        private TokenHasher $hasher,
+        private EmailChangeTokenRepository $tokenRepository,
         private UserRepository $userRepository,
+        #[Autowire(param: 'email_change_token.ttl')]
+        private int $tokenTtl,
     ) {
+        if ($tokenTtl <= 0) {
+            throw new InvalidArgumentException('EMAIL_CHANGE_TOKEN_TTL must be a positive number of seconds.');
+        }
     }
 
     /**
-     * @throws TransportExceptionInterface|RandomException
+     * Replaces any earlier email change request of the user.
+     *
+     * @throws TransportExceptionInterface|RandomException|DateMalformedStringException
      */
-    public function requestEmailChange(User $user, string $emailChange): void
+    public function requestEmailChange(User $user, string $newEmail): void
     {
-        if ($user->getEmail() === $emailChange) {
+        if ($user->getEmail() === $newEmail) {
             throw new LogicException('New email is the same as the current one.');
         }
 
-        // Remove older tokens.
-        $this->tokenRepository->removeByUser($user, UserTokenTypeEnum::EMAIL_CHANGE);
-
-        [$token, $secret] = $this->tokenService->createToken(
-            type: UserTokenTypeEnum::EMAIL_CHANGE,
+        $secret = $this->hasher->generate();
+        $this->tokenRepository->removeForUser($user);
+        $this->tokenRepository->save(new EmailChangeToken(
             user: $user,
-            payload: ['emailChange' => $emailChange],
-        );
-
-        $this->tokenRepository->save($token, true);
+            tokenHash: $secret->hash,
+            newEmail: $newEmail,
+            expiresAt: new DateTimeImmutable(sprintf('+%d seconds', $this->tokenTtl)),
+        ), true);
 
         $verifyLink = $this->router->generate('email_change_verify', [
-            'selector' => $token->getSelector(),
-            'secret' => $secret->plain,
+            'token' => $secret->plain,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $this->mailer->send(
             template: 'email/emailChange.html.twig',
-            to: $emailChange,
+            to: $newEmail,
             subject: 'Verify Email Change',
             context: [
                 'verifyLink' => $verifyLink,
@@ -61,19 +69,31 @@ readonly class EmailChangeService
         );
     }
 
-    public function emailChange(UserToken $token, string $secret): bool
+    /**
+     * The token is deleted on any match, so a link works only once. Fails when
+     * the new email was taken by another account after the request.
+     */
+    public function emailChange(string $token): bool
     {
-        if (
-            $token->isExpired()
-            || $token->getType() !== UserTokenTypeEnum::EMAIL_CHANGE
-            || !$this->tokenService->verifySecret($secret, $token->getSecret())
-        ) {
+        if ($token === '') {
             return false;
         }
 
-        $user = $token->getUser();
-        $user->setEmail($token->getEmailChange());
-        $this->tokenRepository->remove($token);
+        $emailChangeToken = $this->tokenRepository->findByTokenHash($this->hasher->hash($token));
+        if ($emailChangeToken === null) {
+            return false;
+        }
+
+        $this->tokenRepository->remove($emailChangeToken);
+        $newEmail = $emailChangeToken->getNewEmail();
+        if ($emailChangeToken->isExpired() || $this->userRepository->findByEmail($newEmail) !== null) {
+            $this->tokenRepository->flush();
+
+            return false;
+        }
+
+        $user = $emailChangeToken->getUser();
+        $user->setEmail($newEmail);
         $this->userRepository->save($user, true);
 
         return true;

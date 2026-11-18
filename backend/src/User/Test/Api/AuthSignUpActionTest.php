@@ -2,8 +2,10 @@
 
 namespace App\User\Test\Api;
 
+use App\Core\Service\TokenHasher;
 use App\Core\Test\ApiTestCase;
-use App\User\Test\Trait\UserTokenTestTrait;
+use App\User\Repository\VerificationTokenRepository;
+use App\User\Test\Trait\EmailedTokenTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,31 +13,22 @@ use Symfony\Component\HttpFoundation\Response;
 #[TestDox('Auth')]
 class AuthSignUpActionTest extends ApiTestCase
 {
-    use UserTokenTestTrait;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->tokenSetUp();
-    }
+    use EmailedTokenTestTrait;
 
     #[TestDox('Sign up action: success')]
     public function testSuccess(): void
     {
-        $testUser = [
-            'email' => 'user-auth-test@example.com',
+        $index = bin2hex(random_bytes(6));
+        $this->signUpRequest([
+            'email' => 'user-auth-test-' . $index . '@example.com',
             'password' => '!Qwerty1',
-            'username' => 'user-auth-test',
+            'username' => 'user-auth-test-' . $index,
             'code' => 'sign-up-code',
-        ];
-
-        $this->mockToken('selector-auth-test', 'secret-auth-test');
-        $this->signUpRequest($testUser);
+        ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
-        ;
-        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'selector-auth-test');
-        self::assertEmailHtmlBodyContains(self::getMailerMessage(), 'secret-auth-test');
+        $hash = $this->getService(TokenHasher::class)->hash(self::lastEmailedToken());
+        self::assertNotNull($this->getService(VerificationTokenRepository::class)->findByTokenHash($hash));
     }
 
     #[TestDox('Sign up action: validation error')]
@@ -48,7 +41,6 @@ class AuthSignUpActionTest extends ApiTestCase
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
-        ;
     }
 
     private function signUpRequest(array $params): void

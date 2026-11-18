@@ -3,10 +3,9 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\User\Enum\UserTokenTypeEnum;
-use App\User\Repository\UserTokenRepository;
+use App\User\Repository\EmailChangeTokenRepository;
 use App\User\Service\EmailChangeService;
-use App\User\Test\Trait\UserTokenTestTrait;
+use App\User\Test\Trait\EmailedTokenTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
 use Random\RandomException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -17,7 +16,7 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 #[TestDox('Auth')]
 class AuthVerifyEmailChangeActionTest extends ApiTestCase
 {
-    use UserTokenTestTrait;
+    use EmailedTokenTestTrait;
 
     private EmailChangeService $emailChangeService;
 
@@ -27,71 +26,57 @@ class AuthVerifyEmailChangeActionTest extends ApiTestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->tokenSetUp();
         $this->emailChangeService = static::getContainer()->get(EmailChangeService::class);
     }
 
     /**
      * @throws TransportExceptionInterface|RandomException
      */
-    #[TestDox('Verify email change: success')]
+    #[TestDox('Verify email change: success removes the token')]
     public function testVerifyEmailChangeSuccess(): void
     {
         $user = $this->createUser();
-        $this->mockToken('selector' . $user->getId(), 'secret' . $user->getId());
-        $this->emailChangeService->requestEmailChange($user, 'new-email@mail.com');
+        $newEmail = 'new-' . bin2hex(random_bytes(6)) . '@mail.com';
+        $this->emailChangeService->requestEmailChange($user, $newEmail);
 
-        $this->sendRequest([
-            'selector' => 'selector' . $user->getId(),
-            'secret' => 'secret' . $user->getId(),
-        ]);
+        $this->sendRequest(['token' => self::lastEmailedToken()]);
 
-        self::assertSame('new-email@mail.com', $user->getEmail());
-        self::assertResponseStatusCodeSame(Response::HTTP_SEE_OTHER);
-        self::assertResponseHeaderSame(
-            'Location',
-            $this->getParameter('client.url.email-change-success'),
-        );
-
-        $token = $this->getService(UserTokenRepository::class)
-                      ->findOneByUser($user, UserTokenTypeEnum::EMAIL_CHANGE);
-        self::assertNull($token);
+        self::assertResponseRedirects($this->getParameter('client.url.email-change-success'));
+        self::assertSame($newEmail, $user->getEmail());
+        self::assertNull($this->getService(EmailChangeTokenRepository::class)->findByUser($user));
     }
 
-    #[TestDox('Verify email change: wrong secret')]
-    public function testWrongSecret(): void
+    /**
+     * @throws TransportExceptionInterface|RandomException
+     */
+    #[TestDox('Verify email change: fails when the new email was taken meanwhile')]
+    public function testNewEmailTakenMeanwhile(): void
     {
         $user = $this->createUser();
         $oldEmail = $user->getEmail();
-        $this->mockToken('selector' . $user->getId());
-        $this->emailChangeService->requestEmailChange($user, 'new-email@mail.com');
+        $newEmail = 'taken-' . bin2hex(random_bytes(6)) . '@mail.com';
+        $this->emailChangeService->requestEmailChange($user, $newEmail);
+        $token = self::lastEmailedToken();
+        $this->createUser(['email' => $newEmail]);
 
-        $this->sendRequest(['selector' => 'selector' . $user->getId(), 'secret' => 'wrong-secret']);
+        $this->sendRequest(['token' => $token]);
 
+        self::assertResponseRedirects($this->getParameter('client.url.email-change-fail'));
         self::assertSame($oldEmail, $user->getEmail());
-        self::assertResponseStatusCodeSame(Response::HTTP_SEE_OTHER);
-        self::assertResponseHeaderSame(
-            'Location',
-            $this->getParameter('client.url.email-change-fail'),
-        );
     }
 
-    #[TestDox('Verify email change: wrong selector')]
-    public function testWrongSelector(): void
+    #[TestDox('Verify email change: unknown token')]
+    public function testUnknownToken(): void
     {
-        $this->sendRequest(['selector' => 'wrong-selector', 'secret' => 'test-secret']);
+        $this->sendRequest(['token' => str_repeat('a', 64)]);
 
-        self::assertResponseStatusCodeSame(Response::HTTP_SEE_OTHER);
-        self::assertResponseHeaderSame(
-            'Location',
-            $this->getParameter('client.url.email-change-fail'),
-        );
+        self::assertResponseRedirects($this->getParameter('client.url.email-change-fail'));
     }
 
     #[TestDox('Verify email change: invalid link')]
     public function testInvalidLink(): void
     {
-        $this->sendRequest(['selector' => [], 'secret' => []]);
+        $this->sendRequest(['token' => []]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
@@ -99,12 +84,8 @@ class AuthVerifyEmailChangeActionTest extends ApiTestCase
     #[TestDox('Verify email change: rate limit')]
     public function testRateLimit(): void
     {
-        $user = $this->createUser();
-        $this->mockToken();
-        $this->emailChangeService->requestEmailChange($user, 'new-email@mail.com');
-
         foreach (range(1, 4) as $i) {
-            $this->sendRequest(['selector' => 'test', 'secret' => 'wrong-secret']);
+            $this->sendRequest(['token' => str_repeat('b', 64)]);
             if ($i === 4) {
                 self::assertResponseStatusCodeSame(Response::HTTP_TOO_MANY_REQUESTS);
             } else {

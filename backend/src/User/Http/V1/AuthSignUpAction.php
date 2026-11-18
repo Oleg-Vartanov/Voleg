@@ -8,6 +8,7 @@ use App\Core\Http\ApiController;
 use App\User\Http\V1\Request\SignUpDto;
 use App\User\Http\V1\Request\UserDto;
 use App\User\Service\AuthService;
+use DateMalformedStringException;
 use OpenApi\Attributes as OA;
 use Random\RandomException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -38,7 +39,7 @@ class AuthSignUpAction extends ApiController
     }
 
     /**
-     * @throws TransportExceptionInterface|RandomException
+     * @throws TransportExceptionInterface|RandomException|DateMalformedStringException
      */
     public function __invoke(
         #[MapRequestPayload(validationGroups: [UserDto::SIGN_UP])] SignUpDto $dto,

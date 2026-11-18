@@ -3,12 +3,12 @@
 namespace App\User\Test\Unit;
 
 use App\Core\Service\Mailer;
+use App\Core\Service\TokenHasher;
 use App\User\Entity\User;
 use App\User\Repository\UserRepository;
-use App\User\Repository\UserTokenRepository;
+use App\User\Repository\VerificationTokenRepository;
 use App\User\Service\AuthService;
 use App\User\Service\UserService;
-use App\User\Service\UserTokenService;
 use LogicException;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
@@ -28,8 +28,9 @@ class AuthServiceTest extends TestCase
             self::createStub(RouterInterface::class),
             self::createStub(UserService::class),
             self::createStub(UserRepository::class),
-            self::createStub(UserTokenService::class),
-            self::createStub(UserTokenRepository::class),
+            new TokenHasher('test-key'),
+            self::createStub(VerificationTokenRepository::class),
+            3600,
         );
     }
 

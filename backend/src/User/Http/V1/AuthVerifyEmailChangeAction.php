@@ -4,14 +4,12 @@ namespace App\User\Http\V1;
 
 use App\Core\Http\ApiController;
 use App\Core\Service\AntiEnumerationLimiter;
-use App\User\Http\V1\Request\UserTokenDto;
-use App\User\Repository\UserTokenRepository;
 use App\User\Service\EmailChangeService;
 use OpenApi\Attributes as OA;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Get(
@@ -33,24 +31,19 @@ class AuthVerifyEmailChangeAction extends ApiController
     public function __construct(
         private readonly EmailChangeService $emailChangeService,
         private readonly ParameterBagInterface $parameterBag,
-        private readonly UserTokenRepository $tokenRepository,
-        private readonly AntiEnumerationLimiter $limiter
+        private readonly AntiEnumerationLimiter $limiter,
     ) {
     }
 
     public function __invoke(
-        #[MapQueryString] UserTokenDto $dto,
+        Request $request,
+        #[MapQueryParameter] string $token,
     ): Response {
-        if ($this->limiter->limit('emailChange' . $dto->selector)) {
+        if ($this->limiter->limit('emailChange' . $request->getClientIp())) {
             return $this->limitResponse();
         }
 
-        $token = $this->tokenRepository->findBySelector($dto->selector);
-
-        $changed = $token !== null
-            && $this->emailChangeService->emailChange($token, $dto->secret);
-
-        $urlParameter = $changed
+        $urlParameter = $this->emailChangeService->emailChange($token)
             ? 'client.url.email-change-success'
             : 'client.url.email-change-fail';
 

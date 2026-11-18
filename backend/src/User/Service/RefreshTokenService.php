@@ -2,6 +2,7 @@
 
 namespace App\User\Service;
 
+use App\Core\Service\TokenHasher;
 use App\User\Entity\RefreshToken;
 use App\User\Entity\User;
 use App\User\Exception\RefreshTokenRejected;
@@ -18,26 +19,21 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * The refresh token is a single 256-bit random value sent in an HttpOnly
- * cookie. Only its keyed hash (HMAC-SHA256) is stored, and every lookup hashes
- * the presented value first, so a leaked hash is not usable as a token. A fast
- * hash is safe here only because the token is long and random.
+ * The refresh token is sent in an HttpOnly cookie and stored only as its hash
+ * (see {@see TokenHasher}).
  */
-class RefreshTokenService
+readonly class RefreshTokenService
 {
-    private const string TOKEN_FORMAT = '/^[a-f0-9]{64}$/';
-
     public function __construct(
-        private readonly RefreshTokenRepository $repository,
-        private readonly EntityManagerInterface $entityManager,
-        #[Autowire(env: 'TOKEN_HASH_KEY')]
-        private readonly string $hashKey,
+        private RefreshTokenRepository $repository,
+        private EntityManagerInterface $entityManager,
+        private TokenHasher $hasher,
         #[Autowire(param: 'refresh_token.cookie')]
-        private readonly string $cookieName,
+        private string $cookieName,
         #[Autowire(param: 'refresh_token.path')]
-        private readonly string $cookiePath,
+        private string $cookiePath,
         #[Autowire(param: 'refresh_token.ttl')]
-        private readonly int $ttl,
+        private int $ttl,
     ) {
         if ($ttl <= 0) {
             throw new InvalidArgumentException('REFRESH_TOKEN_TTL must be a positive number of seconds.');
@@ -57,7 +53,7 @@ class RefreshTokenService
      */
     public function rotate(Request $request, Response $response): User
     {
-        $hash = $this->hash($this->readToken($request));
+        $hash = $this->hasher->hash($this->readToken($request));
 
         /** @var IssuedRefreshToken|null $issued null when the token is rejected */
         $issued = $this->entityManager->wrapInTransaction(function () use ($hash): ?IssuedRefreshToken {
@@ -99,7 +95,7 @@ class RefreshTokenService
     public function revokeCurrent(Request $request): void
     {
         try {
-            $hash = $this->hash($this->readToken($request));
+            $hash = $this->hasher->hash($this->readToken($request));
         } catch (RefreshTokenRejected) {
             return;
         }
@@ -122,18 +118,18 @@ class RefreshTokenService
      */
     private function issue(User $user): IssuedRefreshToken
     {
-        $value = bin2hex(random_bytes(32));
+        $secret = $this->hasher->generate();
         $expiresAt = new DateTimeImmutable(sprintf('+%d seconds', $this->ttl));
 
         $this->repository->save(new RefreshToken(
             user: $user,
-            tokenHash: $this->hash($value),
+            tokenHash: $secret->hash,
             expiresAt: $expiresAt,
         ));
 
         return new IssuedRefreshToken(
             user: $user,
-            value: $value,
+            value: $secret->plain,
             expiresAt: $expiresAt,
         );
     }
@@ -144,19 +140,11 @@ class RefreshTokenService
     private function readToken(Request $request): string
     {
         $token = $request->cookies->getString($this->cookieName);
-        if (preg_match(self::TOKEN_FORMAT, $token) !== 1) {
+        if (preg_match(TokenHasher::FORMAT, $token) !== 1) {
             throw new RefreshTokenRejected();
         }
 
         return $token;
-    }
-
-    /**
-     * @return non-empty-string 64 hex characters
-     */
-    private function hash(string $token): string
-    {
-        return hash_hmac('sha256', $token, $this->hashKey);
     }
 
     private function makeCookie(Request $request, string $value, DateTimeImmutable $expiresAt): Cookie
