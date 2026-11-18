@@ -36,10 +36,26 @@ final class Version20241117201015 extends AbstractMigration
                 PRIMARY KEY(id)
             ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         ');
-        $this->addSql('ALTER TABLE fixture ADD CONSTRAINT FK_5E540EE7B39D312 FOREIGN KEY (competition_id) REFERENCES competition (id)');
-        $this->addSql('ALTER TABLE fixture ADD CONSTRAINT FK_5E540EE4EC001D1 FOREIGN KEY (season_id) REFERENCES season (id)');
-        $this->addSql('ALTER TABLE fixture ADD CONSTRAINT FK_5E540EE9C4C13F6 FOREIGN KEY (home_team_id) REFERENCES team (id)');
-        $this->addSql('ALTER TABLE fixture ADD CONSTRAINT FK_5E540EE45185D02 FOREIGN KEY (away_team_id) REFERENCES team (id)');
+        $this->addSql('
+            ALTER TABLE fixture
+            ADD CONSTRAINT FK_5E540EE7B39D312
+            FOREIGN KEY (competition_id) REFERENCES competition (id)
+        ');
+        $this->addSql('
+            ALTER TABLE fixture
+            ADD CONSTRAINT FK_5E540EE4EC001D1
+            FOREIGN KEY (season_id) REFERENCES season (id)
+        ');
+        $this->addSql('
+            ALTER TABLE fixture
+            ADD CONSTRAINT FK_5E540EE9C4C13F6
+            FOREIGN KEY (home_team_id) REFERENCES team (id)
+        ');
+        $this->addSql('
+            ALTER TABLE fixture
+            ADD CONSTRAINT FK_5E540EE45185D02
+            FOREIGN KEY (away_team_id) REFERENCES team (id)
+        ');
         $this->addSql('DROP INDEX provider_team_id ON team');
     }
 

@@ -26,8 +26,16 @@ final class Version20241120184023 extends AbstractMigration
             INDEX IDX_86CADA71A76ED395 (user_id),
             PRIMARY KEY(id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
-        $this->addSql('ALTER TABLE fixture_prediction ADD CONSTRAINT FK_86CADA71E524616D FOREIGN KEY (fixture_id) REFERENCES fixture (id)');
-        $this->addSql('ALTER TABLE fixture_prediction ADD CONSTRAINT FK_86CADA71A76ED395 FOREIGN KEY (user_id) REFERENCES `user` (id)');
+        $this->addSql('
+            ALTER TABLE fixture_prediction
+            ADD CONSTRAINT FK_86CADA71E524616D
+            FOREIGN KEY (fixture_id) REFERENCES fixture (id)
+        ');
+        $this->addSql('
+            ALTER TABLE fixture_prediction
+            ADD CONSTRAINT FK_86CADA71A76ED395
+            FOREIGN KEY (user_id) REFERENCES `user` (id)
+        ');
     }
 
     public function down(Schema $schema): void

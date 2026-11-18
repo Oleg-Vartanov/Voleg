@@ -18,7 +18,11 @@ final class Version20260805212400 extends AbstractMigration
     {
         $this->addSql('ALTER TABLE currency ADD name VARCHAR(255) DEFAULT NULL');
         $this->addSql('UPDATE currency SET name = code');
-        $this->addSql('ALTER TABLE currency MODIFY name VARCHAR(255) NOT NULL, DROP symbol');
+        $this->addSql('
+            ALTER TABLE currency
+            MODIFY name VARCHAR(255) NOT NULL,
+            DROP symbol
+        ');
     }
 
     public function down(Schema $schema): void

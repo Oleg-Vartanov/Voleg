@@ -83,14 +83,46 @@ final class Version20260529072146 extends AbstractMigration
             ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
         ');
 
-        $this->addSql('ALTER TABLE se_connection ADD CONSTRAINT FK_99807F224DA1E751 FOREIGN KEY (requested_by_id) REFERENCES user (id)');
-        $this->addSql('ALTER TABLE se_connection ADD CONSTRAINT FK_99807F22415F1F91 FOREIGN KEY (user_a_id) REFERENCES user (id) ON DELETE CASCADE');
-        $this->addSql('ALTER TABLE se_connection ADD CONSTRAINT FK_99807F2253EAB07F FOREIGN KEY (user_b_id) REFERENCES user (id) ON DELETE CASCADE');
-        $this->addSql('ALTER TABLE se_expense ADD CONSTRAINT FK_D45021B4B63F5575 FOREIGN KEY (paid_by_user_id) REFERENCES user (id) ON DELETE CASCADE');
-        $this->addSql('ALTER TABLE se_expense ADD CONSTRAINT FK_D45021B412469DE2 FOREIGN KEY (category_id) REFERENCES se_category (id)');
-        $this->addSql('ALTER TABLE se_expense ADD CONSTRAINT FK_D45021B438248176 FOREIGN KEY (currency_id) REFERENCES currency (id)');
-        $this->addSql('ALTER TABLE se_expense_split ADD CONSTRAINT FK_7BAB314F395DB7B FOREIGN KEY (expense_id) REFERENCES se_expense (id) ON DELETE CASCADE');
-        $this->addSql('ALTER TABLE se_expense_split ADD CONSTRAINT FK_7BAB314A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('
+            ALTER TABLE se_connection
+            ADD CONSTRAINT FK_99807F224DA1E751
+            FOREIGN KEY (requested_by_id) REFERENCES user (id)
+        ');
+        $this->addSql('
+            ALTER TABLE se_connection
+            ADD CONSTRAINT FK_99807F22415F1F91
+            FOREIGN KEY (user_a_id) REFERENCES user (id) ON DELETE CASCADE
+        ');
+        $this->addSql('
+            ALTER TABLE se_connection
+            ADD CONSTRAINT FK_99807F2253EAB07F
+            FOREIGN KEY (user_b_id) REFERENCES user (id) ON DELETE CASCADE
+        ');
+        $this->addSql('
+            ALTER TABLE se_expense
+            ADD CONSTRAINT FK_D45021B4B63F5575
+            FOREIGN KEY (paid_by_user_id) REFERENCES user (id) ON DELETE CASCADE
+        ');
+        $this->addSql('
+            ALTER TABLE se_expense
+            ADD CONSTRAINT FK_D45021B412469DE2
+            FOREIGN KEY (category_id) REFERENCES se_category (id)
+        ');
+        $this->addSql('
+            ALTER TABLE se_expense
+            ADD CONSTRAINT FK_D45021B438248176
+            FOREIGN KEY (currency_id) REFERENCES currency (id)
+        ');
+        $this->addSql('
+            ALTER TABLE se_expense_split
+            ADD CONSTRAINT FK_7BAB314F395DB7B
+            FOREIGN KEY (expense_id) REFERENCES se_expense (id) ON DELETE CASCADE
+        ');
+        $this->addSql('
+            ALTER TABLE se_expense_split
+            ADD CONSTRAINT FK_7BAB314A76ED395
+            FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
+        ');
     }
 
     public function down(Schema $schema): void

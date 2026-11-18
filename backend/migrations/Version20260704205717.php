@@ -17,7 +17,11 @@ final class Version20260704205717 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $this->addSql('ALTER TABLE se_expense ADD created_by_user_id INT NOT NULL');
-        $this->addSql('ALTER TABLE se_expense ADD CONSTRAINT FK_D45021B47D182D95 FOREIGN KEY (created_by_user_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('
+            ALTER TABLE se_expense
+            ADD CONSTRAINT FK_D45021B47D182D95
+            FOREIGN KEY (created_by_user_id) REFERENCES user (id) ON DELETE CASCADE
+        ');
         $this->addSql('CREATE INDEX IDX_D45021B47D182D95 ON se_expense (created_by_user_id)');
     }
 

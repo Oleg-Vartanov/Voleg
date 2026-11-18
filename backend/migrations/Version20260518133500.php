@@ -28,8 +28,16 @@ final class Version20260518133500 extends AbstractMigration
                 PRIMARY KEY (id)
             ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
         ');
-        $this->addSql('ALTER TABLE user_contact ADD CONSTRAINT FK_USER_CONTACT_USER FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
-        $this->addSql('ALTER TABLE user_contact ADD CONSTRAINT FK_USER_CONTACT_CONTACT FOREIGN KEY (contact_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('
+            ALTER TABLE user_contact
+            ADD CONSTRAINT FK_USER_CONTACT_USER
+            FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
+        ');
+        $this->addSql('
+            ALTER TABLE user_contact
+            ADD CONSTRAINT FK_USER_CONTACT_CONTACT
+            FOREIGN KEY (contact_id) REFERENCES user (id) ON DELETE CASCADE
+        ');
     }
 
     public function down(Schema $schema): void

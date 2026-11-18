@@ -26,7 +26,11 @@ final class Version20241116091008 extends AbstractMigration
                 PRIMARY KEY(id)
             ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         ');
-        $this->addSql('ALTER TABLE competition ADD CONSTRAINT FK_B50A2CB1F92F3E70 FOREIGN KEY (country_id) REFERENCES country (id)');
+        $this->addSql('
+            ALTER TABLE competition
+            ADD CONSTRAINT FK_B50A2CB1F92F3E70
+            FOREIGN KEY (country_id) REFERENCES country (id)
+        ');
     }
 
     public function down(Schema $schema): void
