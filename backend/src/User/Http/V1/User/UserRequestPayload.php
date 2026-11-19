@@ -1,0 +1,52 @@
+<?php
+
+namespace App\User\Http\V1\User;
+
+use App\Core\Validator\Constraints as CustomAssert;
+use App\User\Entity\User;
+use OpenApi\Attributes as OA;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+
+class UserRequestPayload
+{
+    public const string SIGN_UP = 'SignUp';
+    public const string UPDATE = 'Update';
+    /** @var string[] */
+    public const array ALL = [self::SIGN_UP, self::UPDATE];
+
+    #[Groups(self::ALL)]
+    #[OA\Property(example: 'name@mail.com')]
+    #[
+        Assert\NotBlank(groups: [self::SIGN_UP]),
+        Assert\Email(groups: self::ALL),
+        Assert\Length(max: 180, groups: self::ALL),
+        CustomAssert\UniqueEntityField(entityClass: User::class, field: 'email', groups: self::ALL),
+    ]
+    public string $email;
+
+    #[Groups([self::SIGN_UP])]
+    #[
+        Assert\NotBlank(groups: [self::SIGN_UP]),
+        CustomAssert\StrongPassword(groups: [self::SIGN_UP]),
+    ]
+    public string $password;
+
+    #[Groups(self::ALL)]
+    #[OA\Property(example: 'cool-name')]
+    #[
+        Assert\NotBlank(groups: [self::SIGN_UP]),
+        Assert\Type('string', groups: self::ALL),
+        Assert\Length(min: 1, groups: self::ALL),
+        Assert\Length(max: 255, groups: self::ALL),
+        Assert\Regex(pattern: '/^\S+$/', message: 'The value can\'t contain spaces.', groups: self::ALL),
+        Assert\Regex(pattern: '/^[^A-Z]*$/', message: 'All the letters must be lowercase.', groups: self::ALL),
+        Assert\Regex(
+            pattern: '/[a-z0-9]/',
+            message: 'The value must contain at least one letter or number.',
+            groups: self::ALL,
+        ),
+        CustomAssert\UniqueEntityField(entityClass: User::class, field: 'username', groups: self::ALL),
+    ]
+    public string $username;
+}

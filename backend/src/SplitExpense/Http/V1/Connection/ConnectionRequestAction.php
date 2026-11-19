@@ -14,7 +14,7 @@ use App\SplitExpense\Http\V1\Request\ConnectionRequestDto;
 use App\SplitExpense\Repository\ConnectionRepository;
 use App\SplitExpense\Service\ConnectionService;
 use App\User\Entity\User;
-use App\User\Http\V1\Trait\UserControllerTrait;
+use App\User\Http\V1\UserControllerTrait;
 use App\User\Repository\UserRepository;
 use LogicException;
 use OpenApi\Attributes as OA;

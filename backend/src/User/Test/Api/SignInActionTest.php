@@ -1,0 +1,64 @@
+<?php
+
+namespace App\User\Test\Api;
+
+use App\Core\Test\ApiTestCase;
+use App\User\Http\V1\Auth\SignInAction;
+use LogicException;
+use PHPUnit\Framework\Attributes\TestDox;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+#[TestDox('Auth')]
+class SignInActionTest extends ApiTestCase
+{
+    #[TestDox('Sign in action: success')]
+    public function testSignInSuccess(): void
+    {
+        $user = $this->createUser();
+
+        $this->sendRequest([
+            'email' => $user->getEmail(),
+            'password' => self::DEFAULT_PASSWORD,
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
+        self::assertNotEmpty($this->getResponseData()['token']);
+    }
+
+    #[TestDox('Sign in action: invalid credentials')]
+    public function testSignInInvalidCredentials(): void
+    {
+        $this->sendRequest(['email' => 'fail', 'password' => 'fail']);
+        self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
+    }
+
+    #[TestDox('Sign in action: unverified')]
+    public function testSignInUnverified(): void
+    {
+        $user = $this->createUser(verified: false);
+        $this->sendRequest([
+            'email' => $user->getEmail(),
+            'password' => self::DEFAULT_PASSWORD,
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
+    }
+
+    #[TestDox('Sign in action: logic exception')]
+    public function testSignInLogicException(): void
+    {
+        $controller = new SignInAction();
+        self::expectException(LogicException::class);
+        $controller->__invoke();
+    }
+
+    private function sendRequest(array $params): void
+    {
+        $this->client->jsonRequest(
+            method: Request::METHOD_POST,
+            uri: $this->router->generate('sign_in'),
+            parameters: $params
+        );
+    }
+}

@@ -1,0 +1,80 @@
+<?php
+
+namespace App\User\Http\V1\Auth;
+
+use App\Core\Documentation\Attribute\Response\MessageResponse;
+use App\Core\Documentation\Attribute\Response\UnauthorizedResponse;
+use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
+use App\Core\Http\ApiController;
+use App\Core\Service\AntiEnumerationLimiter;
+use App\Core\ValueObject\Validator\Violation;
+use App\User\Entity\User;
+use App\User\Http\V1\Auth\PasswordChangeRequestPayload;
+use App\User\Repository\UserRepository;
+use App\User\Service\RefreshTokenService;
+use App\User\Service\UserService;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
+
+#[OA\Post(
+    security: [['Bearer' => []]],
+    tags: ['User: Auth'],
+    responses: [
+        new MessageResponse(Response::HTTP_OK, PasswordChangeAction::MESSAGE),
+        new ValidationErrorResponse(),
+        new UnauthorizedResponse(),
+    ],
+)]
+#[Route('/auth/password-change', name: 'password_change', methods: [Request::METHOD_POST])]
+class PasswordChangeAction extends ApiController
+{
+    public const string MESSAGE = 'Password changed';
+
+    public function __construct(
+        private readonly UserRepository $userRepository,
+        private readonly UserService $userService,
+        private readonly AntiEnumerationLimiter $limiter,
+        private readonly RefreshTokenService $refreshTokens,
+        private readonly JWTTokenManagerInterface $jwtManager,
+    ) {
+    }
+
+    public function __invoke(
+        #[CurrentUser] User $user,
+        #[MapRequestPayload] PasswordChangeRequestPayload $payload,
+        Request $request,
+    ): Response {
+        if ($this->limiter->limit('passwordChange' . $user->getId())) {
+            return $this->limitResponse();
+        }
+
+        if (!$this->userService->isPasswordValid($user, $payload->currentPassword)) {
+            return $this->validationErrorResponse(
+                new Violation('currentPassword', 'Invalid current password')
+            );
+        }
+
+        if ($payload->newPassword === $payload->currentPassword) {
+            return $this->validationErrorResponse(
+                new Violation('newPassword', 'New password must be different from the current password')
+            );
+        }
+
+        $this->userService->setHashedPassword($user, $payload->newPassword);
+        $this->userRepository->save($user, true);
+        $this->refreshTokens->revokeAll($user);
+
+        $response = $this->json([
+            'message' => self::MESSAGE,
+            'token' => $this->jwtManager->create($user),
+        ]);
+        $this->refreshTokens->start($user, $response, $request);
+
+        return $response;
+    }
+}

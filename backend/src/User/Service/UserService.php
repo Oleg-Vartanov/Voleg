@@ -4,7 +4,8 @@ namespace App\User\Service;
 
 use App\Core\Util\PropertyAccessor;
 use App\User\Entity\User;
-use App\User\Http\V1\Request\UserDto;
+use App\User\Http\V1\User\UserRequestPayload;
+use DateMalformedStringException;
 use Random\RandomException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -36,27 +37,27 @@ readonly class UserService
         return $user;
     }
 
-    public function createByDto(UserDto $dto): User
+    public function createByPayload(UserRequestPayload $payload): User
     {
         return $this->create(
-            email: $dto->email,
-            plaintextPassword: $dto->password,
-            username: $dto->username,
+            email: $payload->email,
+            plaintextPassword: $payload->password,
+            username: $payload->username,
         );
     }
 
     /**
-     * @throws TransportExceptionInterface|RandomException
+     * @throws TransportExceptionInterface|RandomException|DateMalformedStringException
      */
-    public function patch(User $user, UserDto $dto): User
+    public function patch(User $user, UserRequestPayload $payload): User
     {
-        $props = array_flip(PropertyAccessor::getInitializedProperties($dto));
+        $props = array_flip(PropertyAccessor::getInitializedProperties($payload));
 
-        if (isset($props['email']) && $dto->email !== $user->getEmail()) {
-            $this->emailChangeService->requestEmailChange($user, $dto->email);
+        if (isset($props['email']) && $payload->email !== $user->getEmail()) {
+            $this->emailChangeService->requestEmailChange($user, $payload->email);
         }
         if (isset($props['username'])) {
-            $user->setUsername($dto->username);
+            $user->setUsername($payload->username);
         }
 
         return $user;

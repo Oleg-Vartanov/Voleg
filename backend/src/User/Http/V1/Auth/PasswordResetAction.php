@@ -1,0 +1,56 @@
+<?php
+
+namespace App\User\Http\V1\Auth;
+
+use App\Core\Documentation\Attribute\Response\MessageResponse;
+use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
+use App\Core\Http\ApiController;
+use App\Core\Service\AntiEnumerationLimiter;
+use App\User\Service\PasswordResetService;
+use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[OA\Post(
+    security: [['Bearer' => []]],
+    tags: ['User: Auth'],
+    responses: [
+        new MessageResponse(Response::HTTP_OK, PasswordResetAction::MESSAGE),
+        new MessageResponse(Response::HTTP_FORBIDDEN, PasswordResetAction::MESSAGE_INVALID),
+        new ValidationErrorResponse(),
+    ],
+)]
+#[Route('/auth/password-reset', name: 'password_reset', methods: [Request::METHOD_POST])]
+class PasswordResetAction extends ApiController
+{
+    public const string MESSAGE = 'Password reset was requested. Check your email.';
+    public const string MESSAGE_INVALID = 'Invalid token.';
+
+    public function __construct(
+        private readonly PasswordResetService $service,
+        private readonly AntiEnumerationLimiter $limiter,
+    ) {
+    }
+
+    public function __invoke(
+        Request $request,
+        #[MapRequestPayload] PasswordResetRequestPayload $payload,
+    ): Response {
+        if ($this->limiter->limit('passwordReset' . $request->getClientIp())) {
+            return $this->limitResponse();
+        }
+
+        $result = $this->service->resetPassword(
+            token: $payload->token,
+            newPassword: $payload->password,
+        );
+
+        if ($result === false) {
+            return $this->messageResponse(self::MESSAGE_INVALID, Response::HTTP_FORBIDDEN);
+        }
+
+        return $this->messageResponse(self::MESSAGE);
+    }
+}

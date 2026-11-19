@@ -6,7 +6,7 @@ use App\Core\Service\Mailer;
 use App\Core\Service\TokenHasher;
 use App\User\Entity\User;
 use App\User\Entity\VerificationToken;
-use App\User\Http\V1\Request\SignUpDto;
+use App\User\Http\V1\Auth\SignUpRequestPayload;
 use App\User\Repository\UserRepository;
 use App\User\Repository\VerificationTokenRepository;
 use DateMalformedStringException;
@@ -37,9 +37,9 @@ readonly class AuthService
     }
 
     /** @throws TransportExceptionInterface|RandomException|DateMalformedStringException */
-    public function signUp(SignUpDto $dto): void
+    public function signUp(SignUpRequestPayload $payload): void
     {
-        $user = $this->userService->createByDto($dto);
+        $user = $this->userService->createByPayload($payload);
         $this->userRepository->save($user, true);
         $this->sendVerificationEmail($user);
     }
