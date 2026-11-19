@@ -2,8 +2,9 @@
 
 namespace App\Core\Service;
 
-use App\Core\ValueObject\Secret;
+use App\Core\Model\ValueObject\Secret;
 use Random\RandomException;
+use SensitiveParameter;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
@@ -18,7 +19,7 @@ readonly class TokenHasher
     public const string FORMAT = '/^[a-f0-9]{64}$/';
 
     public function __construct(
-        #[Autowire(env: 'TOKEN_HASH_KEY')]
+        #[Autowire(env: 'TOKEN_HASH_KEY'), SensitiveParameter]
         private string $key,
     ) {
     }
@@ -39,7 +40,7 @@ readonly class TokenHasher
     /**
      * @return non-empty-string 64 hex characters
      */
-    public function hash(string $token): string
+    public function hash(#[SensitiveParameter] string $token): string
     {
         return hash_hmac('sha256', $token, $this->key);
     }

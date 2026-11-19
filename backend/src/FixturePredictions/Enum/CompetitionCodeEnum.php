@@ -2,7 +2,7 @@
 
 namespace App\FixturePredictions\Enum;
 
-use App\Core\Trait\EnumExtender;
+use App\Core\Enum\EnumExtender;
 
 enum CompetitionCodeEnum: string
 {

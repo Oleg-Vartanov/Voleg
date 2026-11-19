@@ -4,7 +4,7 @@ namespace App\User\Test\Api;
 
 use App\Core\Service\TokenHasher;
 use App\Core\Test\ApiTestCase;
-use App\User\Entity\PasswordResetToken;
+use App\User\Model\Entity\PasswordResetToken;
 use App\User\Repository\PasswordResetTokenRepository;
 use App\User\Service\AuthService;
 use App\User\Service\PasswordResetService;

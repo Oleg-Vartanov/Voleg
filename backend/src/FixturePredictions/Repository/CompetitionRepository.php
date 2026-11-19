@@ -3,7 +3,7 @@
 namespace App\FixturePredictions\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
-use App\FixturePredictions\Entity\Competition;
+use App\FixturePredictions\Model\Entity\Competition;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**

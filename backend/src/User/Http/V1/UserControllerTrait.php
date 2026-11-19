@@ -3,7 +3,7 @@
 namespace App\User\Http\V1;
 
 use App\Core\Enum\Group;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Enum\RoleEnum;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 

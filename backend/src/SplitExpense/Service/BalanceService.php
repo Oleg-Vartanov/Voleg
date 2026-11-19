@@ -2,15 +2,15 @@
 
 namespace App\SplitExpense\Service;
 
-use App\Core\Entity\Currency;
+use App\Core\Model\Entity\Currency;
 use App\Core\Repository\CurrencyRepository;
 use App\SplitExpense\Http\V1\Balance\BalanceAmount;
 use App\SplitExpense\Http\V1\Balance\BalanceResponse;
 use App\SplitExpense\Http\V1\Balance\UserBalance;
+use App\SplitExpense\Model\ReadModel\BalanceEntry;
 use App\SplitExpense\Repository\AdjustmentRepository;
 use App\SplitExpense\Repository\ExpenseRepository;
-use App\SplitExpense\ValueObject\BalanceEntry;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Repository\UserRepository;
 
 readonly class BalanceService

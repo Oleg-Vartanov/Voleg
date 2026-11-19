@@ -2,10 +2,10 @@
 
 namespace App\SplitExpense\DataFixture;
 
-use App\SplitExpense\Entity\Connection;
+use App\SplitExpense\Model\Entity\Connection;
 use App\SplitExpense\Enum\ConnectionStatusEnum;
 use App\User\DataFixture\UserFixture;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Repository\UserRepository;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;

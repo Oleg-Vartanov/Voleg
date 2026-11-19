@@ -2,8 +2,6 @@
 
 namespace App\Core\Enum;
 
-use App\Core\Trait\EnumExtender;
-
 /**
  * Serialization/Validation group.
  */

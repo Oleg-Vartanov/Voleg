@@ -3,7 +3,7 @@
 namespace App\User\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;

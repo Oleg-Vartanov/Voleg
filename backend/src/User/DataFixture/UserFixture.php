@@ -2,7 +2,7 @@
 
 namespace App\User\DataFixture;
 
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Enum\RoleEnum;
 use App\User\Service\UserService;
 use Doctrine\Bundle\FixturesBundle\Fixture;

@@ -2,10 +2,10 @@
 
 namespace App\SplitExpense\Service;
 
-use App\SplitExpense\Entity\Connection;
+use App\SplitExpense\Model\Entity\Connection;
 use App\SplitExpense\Enum\ConnectionStatusEnum;
 use App\SplitExpense\Repository\ConnectionRepository;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use LogicException;
 
 readonly class ConnectionService

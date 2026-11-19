@@ -4,7 +4,7 @@ namespace App\SplitExpense\Http\V1\Category;
 
 use App\Core\Documentation\Attribute\Response\ArrayResponse;
 use App\Core\Http\ApiController;
-use App\SplitExpense\Entity\Category;
+use App\SplitExpense\Model\Entity\Category;
 use App\SplitExpense\Repository\CategoryRepository;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;

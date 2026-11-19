@@ -2,7 +2,7 @@
 
 namespace App\User\EventListener;
 
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;

@@ -9,7 +9,7 @@ use App\Core\Enum\Group;
 use App\Core\Exception\UnprocessableException;
 use App\Core\Http\ApiController;
 use App\SplitExpense\Service\InsightsService;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

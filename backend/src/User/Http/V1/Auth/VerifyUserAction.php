@@ -6,6 +6,7 @@ use App\Core\Http\ApiController;
 use App\Core\Service\AntiEnumerationLimiter;
 use App\User\Service\AuthService;
 use OpenApi\Attributes as OA;
+use SensitiveParameter;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,7 +38,7 @@ class VerifyUserAction extends ApiController
 
     public function __invoke(
         Request $request,
-        #[MapQueryParameter] string $token,
+        #[MapQueryParameter, SensitiveParameter] string $token,
     ): Response {
         if ($this->limiter->limit('verifyUser' . $request->getClientIp())) {
             return $this->limitResponse();

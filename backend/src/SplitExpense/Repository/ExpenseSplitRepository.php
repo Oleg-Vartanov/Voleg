@@ -3,7 +3,7 @@
 namespace App\SplitExpense\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
-use App\SplitExpense\Entity\ExpenseSplit;
+use App\SplitExpense\Model\Entity\ExpenseSplit;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**

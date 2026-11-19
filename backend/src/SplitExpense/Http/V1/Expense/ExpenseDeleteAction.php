@@ -7,7 +7,7 @@ use App\Core\Documentation\Attribute\Response\NotFoundResponse;
 use App\Core\Http\ApiController;
 use App\SplitExpense\Repository\ExpenseRepository;
 use App\SplitExpense\Service\ExpenseService;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

@@ -8,7 +8,7 @@ use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
 use App\SplitExpense\Service\FeedService;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use Doctrine\DBAL\Exception;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;

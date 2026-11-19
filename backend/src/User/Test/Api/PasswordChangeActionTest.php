@@ -4,7 +4,7 @@ namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
 use App\Core\Test\Trait\ContainerTestTrait;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Repository\UserRepository;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;

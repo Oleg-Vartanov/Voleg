@@ -3,10 +3,11 @@
 namespace App\User\Service;
 
 use App\Core\Util\PropertyAccessor;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Http\V1\User\UserRequestPayload;
 use DateMalformedStringException;
 use Random\RandomException;
+use SensitiveParameter;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -23,7 +24,7 @@ readonly class UserService
      */
     public function create(
         string $email,
-        string $plaintextPassword,
+        #[SensitiveParameter] string $plaintextPassword,
         string $username,
         array $roles = [],
     ): User {
@@ -63,17 +64,17 @@ readonly class UserService
         return $user;
     }
 
-    public function hashPassword(User $user, string $plaintextPassword): string
+    public function hashPassword(User $user, #[SensitiveParameter] string $plaintextPassword): string
     {
         return $this->passwordHasher->hashPassword($user, $plaintextPassword);
     }
 
-    public function setHashedPassword(User $user, string $plaintextPassword): void
+    public function setHashedPassword(User $user, #[SensitiveParameter] string $plaintextPassword): void
     {
         $user->setPassword($this->hashPassword($user, $plaintextPassword));
     }
 
-    public function isPasswordValid(User $user, string $plainPassword): bool
+    public function isPasswordValid(User $user, #[SensitiveParameter] string $plainPassword): bool
     {
         return $this->passwordHasher->isPasswordValid($user, $plainPassword);
     }

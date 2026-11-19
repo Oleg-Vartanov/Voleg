@@ -2,7 +2,7 @@
 
 namespace App\FixturePredictions\DataFixture;
 
-use App\FixturePredictions\Entity\Team;
+use App\FixturePredictions\Model\Entity\Team;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 

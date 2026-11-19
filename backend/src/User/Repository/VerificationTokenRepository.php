@@ -3,8 +3,8 @@
 namespace App\User\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
-use App\User\Entity\User;
-use App\User\Entity\VerificationToken;
+use App\User\Model\Entity\User;
+use App\User\Model\Entity\VerificationToken;
 use DateTimeImmutable;
 use Doctrine\Persistence\ManagerRegistry;
 

@@ -3,13 +3,13 @@
 namespace App\FixturePredictions\Service;
 
 use App\Core\Exception\UnprocessableException;
-use App\FixturePredictions\Entity\Fixture;
-use App\FixturePredictions\Entity\FixturePrediction;
+use App\FixturePredictions\Model\Entity\Fixture;
+use App\FixturePredictions\Model\Entity\FixturePrediction;
 use App\FixturePredictions\Http\V1\MakePredictions\MakePredictionsRequest;
 use App\FixturePredictions\Messenger\CalculatePointsMessage;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\FixturePredictions\Repository\FixtureRepository;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;

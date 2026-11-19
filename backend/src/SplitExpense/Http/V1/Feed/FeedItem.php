@@ -3,8 +3,8 @@
 namespace App\SplitExpense\Http\V1\Feed;
 
 use App\Core\Enum\Group;
-use App\SplitExpense\Entity\Adjustment;
-use App\SplitExpense\Entity\Expense;
+use App\SplitExpense\Model\Entity\Adjustment;
+use App\SplitExpense\Model\Entity\Expense;
 use App\SplitExpense\Enum\FeedTypeEnum;
 use Symfony\Component\Serializer\Attribute\Groups;
 

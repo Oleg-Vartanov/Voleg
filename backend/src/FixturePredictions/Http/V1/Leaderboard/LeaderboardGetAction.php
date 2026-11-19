@@ -9,7 +9,7 @@ use App\Core\Http\ApiController;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;

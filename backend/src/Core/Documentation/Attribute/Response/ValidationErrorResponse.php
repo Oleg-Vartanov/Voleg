@@ -2,7 +2,7 @@
 
 namespace App\Core\Documentation\Attribute\Response;
 
-use App\Core\ValueObject\Validator\ValidationError;
+use App\Core\Validator\Model\ValidationError;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes\Response;
 

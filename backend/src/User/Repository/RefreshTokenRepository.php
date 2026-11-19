@@ -3,8 +3,8 @@
 namespace App\User\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
-use App\User\Entity\RefreshToken;
-use App\User\Entity\User;
+use App\User\Model\Entity\RefreshToken;
+use App\User\Model\Entity\User;
 use DateTimeImmutable;
 use Doctrine\Persistence\ManagerRegistry;
 

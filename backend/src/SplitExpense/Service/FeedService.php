@@ -2,14 +2,14 @@
 
 namespace App\SplitExpense\Service;
 
-use App\SplitExpense\Entity\Adjustment;
-use App\SplitExpense\Entity\Expense;
+use App\SplitExpense\Model\Entity\Adjustment;
+use App\SplitExpense\Model\Entity\Expense;
 use App\SplitExpense\Enum\FeedTypeEnum;
 use App\SplitExpense\Http\V1\Feed\FeedItem;
 use App\SplitExpense\Repository\AdjustmentRepository;
 use App\SplitExpense\Repository\ExpenseRepository;
 use App\SplitExpense\Repository\FeedRepository;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use Doctrine\DBAL\Exception;
 
 readonly class FeedService

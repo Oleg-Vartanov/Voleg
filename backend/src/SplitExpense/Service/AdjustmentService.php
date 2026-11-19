@@ -2,13 +2,13 @@
 
 namespace App\SplitExpense\Service;
 
-use App\Core\Entity\Currency;
+use App\Core\Model\Entity\Currency;
 use App\Core\Exception\UnprocessableException;
 use App\Core\Repository\CurrencyRepository;
-use App\SplitExpense\Entity\Adjustment;
+use App\SplitExpense\Model\Entity\Adjustment;
 use App\SplitExpense\Http\V1\Request\AdjustmentDto;
 use App\SplitExpense\Repository\AdjustmentRepository;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Repository\UserRepository;
 use DateMalformedStringException;
 use DateTimeImmutable;

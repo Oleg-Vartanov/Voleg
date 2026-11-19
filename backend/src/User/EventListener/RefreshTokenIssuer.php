@@ -2,7 +2,7 @@
 
 namespace App\User\EventListener;
 
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Service\RefreshTokenService;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;

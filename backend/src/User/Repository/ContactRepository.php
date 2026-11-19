@@ -3,8 +3,8 @@
 namespace App\User\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
-use App\User\Entity\User;
-use App\User\Entity\Contact;
+use App\User\Model\Entity\User;
+use App\User\Model\Entity\Contact;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**

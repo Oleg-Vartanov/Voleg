@@ -2,7 +2,7 @@
 
 namespace App\FixturePredictions\Service\Seeder;
 
-use App\FixturePredictions\Entity\Season;
+use App\FixturePredictions\Model\Entity\Season;
 use App\FixturePredictions\Repository\SeasonRepository;
 use Doctrine\ORM\EntityManagerInterface;
 

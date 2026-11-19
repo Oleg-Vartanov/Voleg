@@ -3,7 +3,7 @@
 namespace App\FixturePredictions\Service\Seeder;
 
 use App\Core\Repository\CountryRepository;
-use App\FixturePredictions\Entity\Competition;
+use App\FixturePredictions\Model\Entity\Competition;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;

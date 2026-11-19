@@ -4,11 +4,11 @@ namespace App\User\Test\Functional;
 
 use App\Core\Repository\AbstractEntityRepository;
 use App\Core\Test\ApiTestCase;
-use App\User\Entity\EmailChangeToken;
-use App\User\Entity\PasswordResetToken;
-use App\User\Entity\RefreshToken;
-use App\User\Entity\User;
-use App\User\Entity\VerificationToken;
+use App\User\Model\Entity\EmailChangeToken;
+use App\User\Model\Entity\PasswordResetToken;
+use App\User\Model\Entity\RefreshToken;
+use App\User\Model\Entity\User;
+use App\User\Model\Entity\VerificationToken;
 use App\User\Messenger\PurgeExpiredTokensMessage;
 use App\User\Repository\EmailChangeTokenRepository;
 use App\User\Repository\PasswordResetTokenRepository;

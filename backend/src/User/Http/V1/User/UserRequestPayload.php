@@ -3,7 +3,7 @@
 namespace App\User\Http\V1\User;
 
 use App\Core\Validator\Constraints as CustomAssert;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;

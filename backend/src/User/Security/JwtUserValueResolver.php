@@ -2,7 +2,7 @@
 
 namespace App\User\Security;
 
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
 use Symfony\Component\DependencyInjection\Attribute\AutowireDecorated;

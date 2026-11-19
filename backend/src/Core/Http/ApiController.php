@@ -4,8 +4,8 @@ namespace App\Core\Http;
 
 use App\Core\Exception\UnprocessableException;
 use App\Core\Http\Response\MessageResponse;
-use App\Core\ValueObject\Validator\ValidationError;
-use App\Core\ValueObject\Validator\Violation;
+use App\Core\Validator\Model\ValidationError;
+use App\Core\Validator\Model\Violation;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;

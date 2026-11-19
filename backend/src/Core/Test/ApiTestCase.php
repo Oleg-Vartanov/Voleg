@@ -3,7 +3,7 @@
 namespace App\Core\Test;
 
 use App\Core\Test\Trait\ContainerTestTrait;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Enum\RoleEnum;
 use App\User\Repository\UserRepository;
 use App\User\Service\UserService;

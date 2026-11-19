@@ -3,7 +3,7 @@
 namespace App\SplitExpense\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\SplitExpense\Entity\Connection;
+use App\SplitExpense\Model\Entity\Connection;
 use App\SplitExpense\Enum\ConnectionStatusEnum;
 use App\SplitExpense\Repository\ConnectionRepository;
 use App\SplitExpense\Test\Trait\SplitExpenseTestTrait;

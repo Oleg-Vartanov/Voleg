@@ -3,12 +3,12 @@
 namespace App\SplitExpense\DataFixture;
 
 use App\Core\Repository\CurrencyRepository;
-use App\SplitExpense\Entity\Expense;
-use App\SplitExpense\Entity\ExpenseSplit;
+use App\SplitExpense\Model\Entity\Expense;
+use App\SplitExpense\Model\Entity\ExpenseSplit;
 use App\SplitExpense\Repository\CategoryRepository;
 use App\SplitExpense\Service\Seeder\CategorySeeder;
 use App\User\DataFixture\UserFixture;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;

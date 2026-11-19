@@ -2,14 +2,14 @@
 
 namespace App\FixturePredictions\Service;
 
+use App\Core\Model\ValueObject\Period;
 use App\Core\Util\DateTimeUtil;
-use App\Core\ValueObject\Period;
-use App\FixturePredictions\DTO\Provider\FixtureDto;
-use App\FixturePredictions\DTO\Provider\SeasonDto;
-use App\FixturePredictions\DTO\Provider\TeamDto;
-use App\FixturePredictions\Entity\Competition;
-use App\FixturePredictions\Entity\Season;
 use App\FixturePredictions\Enum\FixtureStatusEnum;
+use App\FixturePredictions\Model\DTO\Provider\FixtureDto;
+use App\FixturePredictions\Model\DTO\Provider\SeasonDto;
+use App\FixturePredictions\Model\DTO\Provider\TeamDto;
+use App\FixturePredictions\Model\Entity\Competition;
+use App\FixturePredictions\Model\Entity\Season;
 use App\FixturePredictions\Repository\FixtureRepository;
 use App\FixturePredictions\Repository\TeamRepository;
 use DateTimeImmutable;

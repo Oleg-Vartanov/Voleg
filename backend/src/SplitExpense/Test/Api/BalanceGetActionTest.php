@@ -2,17 +2,17 @@
 
 namespace App\SplitExpense\Test\Api;
 
-use App\Core\Entity\Currency;
+use App\Core\Model\Entity\Currency;
 use App\Core\Repository\CurrencyRepository;
 use App\Core\Test\ApiTestCase;
-use App\SplitExpense\Entity\Adjustment;
-use App\SplitExpense\Entity\Category;
-use App\SplitExpense\Entity\Expense;
-use App\SplitExpense\Entity\ExpenseSplit;
+use App\SplitExpense\Model\Entity\Adjustment;
+use App\SplitExpense\Model\Entity\Category;
+use App\SplitExpense\Model\Entity\Expense;
+use App\SplitExpense\Model\Entity\ExpenseSplit;
 use App\SplitExpense\Repository\AdjustmentRepository;
 use App\SplitExpense\Repository\CategoryRepository;
 use App\SplitExpense\Repository\ExpenseRepository;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;

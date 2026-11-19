@@ -3,8 +3,8 @@
 namespace App\FixturePredictions\Http\V1\Leaderboard;
 
 use App\Core\Enum\Group;
-use App\FixturePredictions\Entity\Competition;
-use App\FixturePredictions\Entity\Season;
+use App\FixturePredictions\Model\Entity\Competition;
+use App\FixturePredictions\Model\Entity\Season;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
 use DateTimeImmutable;
 use OpenApi\Attributes as OA;

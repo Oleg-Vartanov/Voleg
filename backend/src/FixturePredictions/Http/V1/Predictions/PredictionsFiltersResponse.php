@@ -3,10 +3,10 @@
 namespace App\FixturePredictions\Http\V1\Predictions;
 
 use App\Core\Enum\Group;
-use App\FixturePredictions\Entity\Competition;
-use App\FixturePredictions\Entity\Season;
+use App\FixturePredictions\Model\Entity\Competition;
+use App\FixturePredictions\Model\Entity\Season;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use DateTimeImmutable;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Serializer\Attribute\Groups;

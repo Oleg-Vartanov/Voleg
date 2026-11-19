@@ -3,9 +3,9 @@
 namespace App\SplitExpense\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
-use App\SplitExpense\Entity\Adjustment;
-use App\SplitExpense\ValueObject\BalanceEntry;
-use App\User\Entity\User;
+use App\SplitExpense\Model\Entity\Adjustment;
+use App\SplitExpense\Model\ReadModel\BalanceEntry;
+use App\User\Model\Entity\User;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 

@@ -2,7 +2,7 @@
 
 namespace App\Core\Repository;
 
-use App\Core\Entity\Currency;
+use App\Core\Model\Entity\Currency;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**

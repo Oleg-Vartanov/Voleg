@@ -5,7 +5,7 @@ namespace App\User\Http\V1\User;
 use App\Core\Documentation\Attribute\Response\ArrayResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Http\V1\UserControllerTrait;
 use App\User\Repository\UserRepository;
 use OpenApi\Attributes as OA;

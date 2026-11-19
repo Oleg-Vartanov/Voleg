@@ -3,7 +3,7 @@
 namespace App\SplitExpense\Http\V1\Balance;
 
 use App\Core\Enum\Group;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[Groups([Group::public->value])]

@@ -2,7 +2,7 @@
 
 namespace App\User\Test\Unit;
 
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Security\UserChecker;
 use Error;
 use PHPUnit\Framework\Attributes\TestDox;

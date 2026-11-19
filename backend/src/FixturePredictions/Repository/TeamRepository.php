@@ -2,7 +2,7 @@
 
 namespace App\FixturePredictions\Repository;
 
-use App\FixturePredictions\Entity\Team;
+use App\FixturePredictions\Model\Entity\Team;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

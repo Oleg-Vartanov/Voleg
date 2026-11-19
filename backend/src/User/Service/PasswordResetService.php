@@ -4,14 +4,15 @@ namespace App\User\Service;
 
 use App\Core\Service\Mailer;
 use App\Core\Service\TokenHasher;
-use App\User\Entity\PasswordResetToken;
-use App\User\Entity\User;
+use App\User\Model\Entity\PasswordResetToken;
+use App\User\Model\Entity\User;
 use App\User\Repository\PasswordResetTokenRepository;
 use App\User\Repository\UserRepository;
 use DateMalformedStringException;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use Random\RandomException;
+use SensitiveParameter;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -69,8 +70,10 @@ readonly class PasswordResetService
      * The token is deleted on any match, so a link works only once. Signs the
      * user out everywhere by revoking all refresh tokens.
      */
-    public function resetPassword(string $token, string $newPassword): bool
-    {
+    public function resetPassword(
+        #[SensitiveParameter] string $token,
+        #[SensitiveParameter] string $newPassword,
+    ): bool {
         $resetToken = $this->tokenRepository->findByTokenHash($this->hasher->hash($token));
         if ($resetToken === null) {
             return false;

@@ -9,23 +9,23 @@ doctrine:
       Core:
         is_bundle: false
         type: attribute
-        dir: '%kernel.project_dir%/src/Core/Entity'
-        prefix: 'App\Core\Entity'
+        dir: '%kernel.project_dir%/src/Core/Model/Entity'
+        prefix: 'App\Core\Model\Entity'
       FixturePredictions:
         is_bundle: false
         type: attribute
-        dir: '%kernel.project_dir%/src/FixturePredictions/Entity'
-        prefix: 'App\FixturePredictions\Entity'
+        dir: '%kernel.project_dir%/src/FixturePredictions/Model/Entity'
+        prefix: 'App\FixturePredictions\Model\Entity'
       User:
         is_bundle: false
         type: attribute
-        dir: '%kernel.project_dir%/src/User/Entity'
-        prefix: 'App\User\Entity'
+        dir: '%kernel.project_dir%/src/User/Model/Entity'
+        prefix: 'App\User\Model\Entity'
       SplitExpense:
         is_bundle: false
         type: attribute
-        dir: '%kernel.project_dir%/src/SplitExpense/Entity'
-        prefix: 'App\SplitExpense\Entity'
+        dir: '%kernel.project_dir%/src/SplitExpense/Model/Entity'
+        prefix: 'App\SplitExpense\Model\Entity'
     dql:
       string_functions:
         regexp: DoctrineExtensions\Query\Mysql\Regexp

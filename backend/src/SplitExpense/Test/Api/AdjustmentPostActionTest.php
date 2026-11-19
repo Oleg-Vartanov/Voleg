@@ -2,12 +2,12 @@
 
 namespace App\SplitExpense\Test\Api;
 
-use App\Core\Entity\Currency;
+use App\Core\Model\Entity\Currency;
 use App\Core\Repository\CurrencyRepository;
 use App\Core\Test\ApiTestCase;
 use App\SplitExpense\Repository\AdjustmentRepository;
 use App\SplitExpense\Test\Trait\SplitExpenseTestTrait;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

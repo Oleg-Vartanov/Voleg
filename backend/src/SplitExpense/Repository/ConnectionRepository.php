@@ -3,10 +3,10 @@
 namespace App\SplitExpense\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
-use App\SplitExpense\Entity\Connection;
+use App\SplitExpense\Model\Entity\Connection;
 use App\SplitExpense\Enum\ConnectionDirectionEnum;
 use App\SplitExpense\Enum\ConnectionStatusEnum;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 

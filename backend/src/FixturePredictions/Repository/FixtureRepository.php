@@ -3,10 +3,10 @@
 namespace App\FixturePredictions\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
-use App\FixturePredictions\Entity\Competition;
-use App\FixturePredictions\Entity\Fixture;
-use App\FixturePredictions\Entity\Season;
-use App\User\Entity\User;
+use App\FixturePredictions\Model\Entity\Competition;
+use App\FixturePredictions\Model\Entity\Fixture;
+use App\FixturePredictions\Model\Entity\Season;
+use App\User\Model\Entity\User;
 use DateTimeImmutable;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;

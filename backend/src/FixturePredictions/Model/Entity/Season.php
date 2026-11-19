@@ -1,0 +1,38 @@
+<?php
+
+namespace App\FixturePredictions\Model\Entity;
+
+use App\FixturePredictions\Repository\SeasonRepository;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: SeasonRepository::class)]
+#[ORM\UniqueConstraint(name: 'UNIQ_FP_SEASON_YEAR', fields: ['year'])]
+#[ORM\Table(name: "fp_season")]
+class Season
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(type: Types::SMALLINT)]
+    private int $year;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getYear(): int
+    {
+        return $this->year;
+    }
+
+    public function setYear(int $year): static
+    {
+        $this->year = $year;
+
+        return $this;
+    }
+}

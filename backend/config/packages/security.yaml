@@ -4,7 +4,7 @@ security:
   providers:
     app_user_provider_email:
       entity:
-        class: App\User\Entity\User
+        class: App\User\Model\Entity\User
         property: email
     jwt:
       lexik_jwt:

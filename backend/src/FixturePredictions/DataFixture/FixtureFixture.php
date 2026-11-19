@@ -2,8 +2,8 @@
 
 namespace App\FixturePredictions\DataFixture;
 
-use App\FixturePredictions\Entity\Fixture as FpFixture;
-use App\FixturePredictions\Entity\Team;
+use App\FixturePredictions\Model\Entity\Fixture as FpFixture;
+use App\FixturePredictions\Model\Entity\Team;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
 use App\FixturePredictions\Enum\FixtureStatusEnum;
 use App\FixturePredictions\Repository\CompetitionRepository;

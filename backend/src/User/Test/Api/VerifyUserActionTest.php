@@ -4,7 +4,7 @@ namespace App\User\Test\Api;
 
 use App\Core\Service\TokenHasher;
 use App\Core\Test\ApiTestCase;
-use App\User\Entity\VerificationToken;
+use App\User\Model\Entity\VerificationToken;
 use App\User\Repository\VerificationTokenRepository;
 use App\User\Service\AuthService;
 use App\User\Test\Trait\EmailedTokenTestTrait;

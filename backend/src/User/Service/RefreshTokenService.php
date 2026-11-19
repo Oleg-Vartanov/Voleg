@@ -3,11 +3,11 @@
 namespace App\User\Service;
 
 use App\Core\Service\TokenHasher;
-use App\User\Entity\RefreshToken;
-use App\User\Entity\User;
 use App\User\Exception\RefreshTokenRejected;
+use App\User\Model\Entity\RefreshToken;
+use App\User\Model\Entity\User;
+use App\User\Model\IssuedRefreshToken;
 use App\User\Repository\RefreshTokenRepository;
-use App\User\ValueObject\IssuedRefreshToken;
 use DateMalformedStringException;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;

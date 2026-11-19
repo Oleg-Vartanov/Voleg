@@ -3,7 +3,7 @@
 namespace App\User\Test\Api;
 
 use App\Core\Test\ApiTestCase;
-use App\User\Entity\Contact;
+use App\User\Model\Entity\Contact;
 use App\User\Repository\ContactRepository;
 use PHPUnit\Framework\Attributes\TestDox;
 use Symfony\Component\HttpFoundation\Request;

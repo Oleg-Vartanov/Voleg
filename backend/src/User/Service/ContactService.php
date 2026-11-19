@@ -2,8 +2,8 @@
 
 namespace App\User\Service;
 
-use App\User\Entity\User;
-use App\User\Entity\Contact;
+use App\User\Model\Entity\User;
+use App\User\Model\Entity\Contact;
 use App\User\Repository\ContactRepository;
 use LogicException;
 

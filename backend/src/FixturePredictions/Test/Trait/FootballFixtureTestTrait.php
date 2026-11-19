@@ -2,17 +2,17 @@
 
 namespace App\FixturePredictions\Test\Trait;
 
-use App\FixturePredictions\Entity\Competition;
-use App\FixturePredictions\Entity\Fixture;
-use App\FixturePredictions\Entity\FixturePrediction;
-use App\FixturePredictions\Entity\Season;
-use App\FixturePredictions\Entity\Team;
+use App\FixturePredictions\Model\Entity\Competition;
+use App\FixturePredictions\Model\Entity\Fixture;
+use App\FixturePredictions\Model\Entity\FixturePrediction;
+use App\FixturePredictions\Model\Entity\Season;
+use App\FixturePredictions\Model\Entity\Team;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
 use App\FixturePredictions\Enum\FixtureStatusEnum;
 use App\FixturePredictions\Repository\CompetitionRepository;
 use App\FixturePredictions\Repository\SeasonRepository;
 use App\FixturePredictions\Service\Seeder\SeasonSeeder;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;

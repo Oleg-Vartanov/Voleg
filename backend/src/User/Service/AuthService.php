@@ -4,8 +4,8 @@ namespace App\User\Service;
 
 use App\Core\Service\Mailer;
 use App\Core\Service\TokenHasher;
-use App\User\Entity\User;
-use App\User\Entity\VerificationToken;
+use App\User\Model\Entity\User;
+use App\User\Model\Entity\VerificationToken;
 use App\User\Http\V1\Auth\SignUpRequestPayload;
 use App\User\Repository\UserRepository;
 use App\User\Repository\VerificationTokenRepository;
@@ -14,6 +14,7 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 use LogicException;
 use Random\RandomException;
+use SensitiveParameter;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -47,7 +48,7 @@ readonly class AuthService
     /**
      * The token is deleted on any match, so a link works only once.
      */
-    public function verifyUser(string $token): bool
+    public function verifyUser(#[SensitiveParameter] string $token): bool
     {
         if ($token === '') {
             return false;

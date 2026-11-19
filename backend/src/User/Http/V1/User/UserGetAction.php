@@ -6,7 +6,7 @@ use App\Core\Documentation\Attribute\Response\ItemResponse;
 use App\Core\Documentation\Attribute\Response\NotFoundResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Http\V1\UserControllerTrait;
 use App\User\Repository\UserRepository;
 use OpenApi\Attributes as OA;

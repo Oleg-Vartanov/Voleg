@@ -2,8 +2,8 @@
 
 namespace App\FixturePredictions\Service;
 
-use App\FixturePredictions\Entity\Competition;
-use App\FixturePredictions\Entity\Season;
+use App\FixturePredictions\Model\Entity\Competition;
+use App\FixturePredictions\Model\Entity\Season;
 use App\FixturePredictions\Exception\FixtureProviderClientException;
 use DateTimeImmutable;
 use DateTimeZone;

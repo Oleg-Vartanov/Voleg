@@ -2,9 +2,9 @@
 
 namespace App\SplitExpense\Http\V1\Insights;
 
-use App\Core\Entity\Currency;
+use App\Core\Model\Entity\Currency;
 use App\Core\Enum\Group;
-use App\SplitExpense\Entity\Category;
+use App\SplitExpense\Model\Entity\Category;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[Groups([Group::public->value])]

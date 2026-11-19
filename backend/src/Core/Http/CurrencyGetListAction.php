@@ -4,7 +4,7 @@ namespace App\Core\Http;
 
 use App\Core\Documentation\Attribute\Response\ArrayResponse;
 use App\Core\Documentation\Attribute\Response\UnauthorizedResponse;
-use App\Core\Entity\Currency;
+use App\Core\Model\Entity\Currency;
 use App\Core\Repository\CurrencyRepository;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;

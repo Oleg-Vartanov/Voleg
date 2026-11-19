@@ -2,7 +2,7 @@
 
 namespace App\Core\Util;
 
-use App\Core\ValueObject\Period;
+use App\Core\Model\ValueObject\Period;
 use DateInterval;
 use DatePeriod;
 use DateTimeImmutable;

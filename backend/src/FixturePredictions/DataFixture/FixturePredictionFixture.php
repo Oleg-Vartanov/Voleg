@@ -2,7 +2,7 @@
 
 namespace App\FixturePredictions\DataFixture;
 
-use App\FixturePredictions\Entity\FixturePrediction;
+use App\FixturePredictions\Model\Entity\FixturePrediction;
 use App\FixturePredictions\Repository\FixtureRepository;
 use App\FixturePredictions\Service\PredictionsService;
 use App\User\DataFixture\UserFixture;

@@ -3,8 +3,8 @@
 namespace App\SplitExpense\Repository;
 
 use App\SplitExpense\Enum\FeedTypeEnum;
-use App\SplitExpense\ValueObject\FeedRow;
-use App\User\Entity\User;
+use App\SplitExpense\Model\ReadModel\FeedRow;
+use App\User\Model\Entity\User;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;

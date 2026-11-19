@@ -2,16 +2,16 @@
 
 namespace App\SplitExpense\Service;
 
-use App\Core\Entity\Currency;
 use App\Core\Exception\UnprocessableException;
+use App\Core\Model\Entity\Currency;
 use App\Core\Repository\CurrencyRepository;
-use App\SplitExpense\Entity\Category;
 use App\SplitExpense\Http\V1\Insights\CategoryTotal;
 use App\SplitExpense\Http\V1\Insights\InsightsResponse;
+use App\SplitExpense\Model\Entity\Category;
+use App\SplitExpense\Model\ReadModel\CategoryTotalEntry;
 use App\SplitExpense\Repository\CategoryRepository;
 use App\SplitExpense\Repository\ExpenseRepository;
-use App\SplitExpense\ValueObject\CategoryTotalEntry;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Repository\UserRepository;
 
 readonly class InsightsService

@@ -2,7 +2,7 @@
 
 namespace App\User\Test\Unit;
 
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\EventListener\JWTCreatedListener;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 use PHPUnit\Framework\Attributes\TestDox;

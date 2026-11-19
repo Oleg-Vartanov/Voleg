@@ -4,7 +4,7 @@ namespace App\User\Test\Unit;
 
 use App\Core\Service\Mailer;
 use App\Core\Service\TokenHasher;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Repository\EmailChangeTokenRepository;
 use App\User\Repository\UserRepository;
 use App\User\Service\EmailChangeService;

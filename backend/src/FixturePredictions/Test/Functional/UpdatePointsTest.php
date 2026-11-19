@@ -3,12 +3,12 @@
 namespace App\FixturePredictions\Test\Functional;
 
 use App\Core\Test\Trait\ContainerTestTrait;
-use App\FixturePredictions\Entity\Fixture;
-use App\FixturePredictions\Entity\FixturePrediction;
+use App\FixturePredictions\Model\Entity\Fixture;
+use App\FixturePredictions\Model\Entity\FixturePrediction;
 use App\FixturePredictions\Repository\FixturePredictionRepository;
 use App\FixturePredictions\Service\PredictionsService;
 use App\FixturePredictions\Test\Trait\FootballFixtureTestTrait;
-use App\User\Entity\User;
+use App\User\Model\Entity\User;
 use App\User\Repository\UserRepository;
 use App\User\Service\UserService;
 use DateTimeImmutable;

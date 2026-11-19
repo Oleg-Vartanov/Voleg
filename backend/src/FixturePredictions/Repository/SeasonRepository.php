@@ -2,8 +2,8 @@
 
 namespace App\FixturePredictions\Repository;
 
-use App\FixturePredictions\Entity\Competition;
-use App\FixturePredictions\Entity\Season;
+use App\FixturePredictions\Model\Entity\Competition;
+use App\FixturePredictions\Model\Entity\Season;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

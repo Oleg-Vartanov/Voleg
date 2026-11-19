@@ -3,11 +3,11 @@
 namespace App\SplitExpense\Repository;
 
 use App\Core\Repository\AbstractEntityRepository;
-use App\SplitExpense\Entity\Expense;
-use App\SplitExpense\Entity\ExpenseSplit;
-use App\SplitExpense\ValueObject\BalanceEntry;
-use App\SplitExpense\ValueObject\CategoryTotalEntry;
-use App\User\Entity\User;
+use App\SplitExpense\Model\Entity\Expense;
+use App\SplitExpense\Model\Entity\ExpenseSplit;
+use App\SplitExpense\Model\ReadModel\BalanceEntry;
+use App\SplitExpense\Model\ReadModel\CategoryTotalEntry;
+use App\User\Model\Entity\User;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 

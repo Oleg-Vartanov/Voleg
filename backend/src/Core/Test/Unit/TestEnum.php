@@ -2,7 +2,7 @@
 
 namespace App\Core\Test\Unit;
 
-use App\Core\Trait\EnumExtender;
+use App\Core\Enum\EnumExtender;
 
 enum TestEnum: string
 {

@@ -4,8 +4,8 @@ namespace App\User\Service;
 
 use App\Core\Service\Mailer;
 use App\Core\Service\TokenHasher;
-use App\User\Entity\EmailChangeToken;
-use App\User\Entity\User;
+use App\User\Model\Entity\EmailChangeToken;
+use App\User\Model\Entity\User;
 use App\User\Repository\EmailChangeTokenRepository;
 use App\User\Repository\UserRepository;
 use DateMalformedStringException;
@@ -13,6 +13,7 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 use LogicException;
 use Random\RandomException;
+use SensitiveParameter;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -73,7 +74,7 @@ readonly class EmailChangeService
      * The token is deleted on any match, so a link works only once. Fails when
      * the new email was taken by another account after the request.
      */
-    public function emailChange(string $token): bool
+    public function emailChange(#[SensitiveParameter] string $token): bool
     {
         if ($token === '') {
             return false;

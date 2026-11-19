@@ -2,7 +2,7 @@
 
 namespace App\Core\Service\Seeder;
 
-use App\Core\Entity\Country;
+use App\Core\Model\Entity\Country;
 use App\Core\Repository\CountryRepository;
 use App\Core\Service\CsvReader;
 use Doctrine\ORM\EntityManagerInterface;

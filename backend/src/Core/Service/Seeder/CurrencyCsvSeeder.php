@@ -2,7 +2,7 @@
 
 namespace App\Core\Service\Seeder;
 
-use App\Core\Entity\Currency;
+use App\Core\Model\Entity\Currency;
 use App\Core\Repository\CurrencyRepository;
 use App\Core\Service\CsvReader;
 use Doctrine\ORM\EntityManagerInterface;

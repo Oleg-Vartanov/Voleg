@@ -2,7 +2,7 @@
 
 namespace App\SplitExpense\Service\Seeder;
 
-use App\SplitExpense\Entity\Category;
+use App\SplitExpense\Model\Entity\Category;
 use App\SplitExpense\Repository\CategoryRepository;
 
 readonly class CategorySeeder
