@@ -1,12 +1,12 @@
 <?php
 
-namespace App\SplitExpense\Http\V1\Request;
+namespace App\SplitExpense\Http\V1\Adjustment;
 
 use App\Core\Validator\Constraints\IntRange;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class AdjustmentDto
+class AdjustmentRequestPayload
 {
     #[OA\Property(example: 2)]
     #[Assert\NotBlank]

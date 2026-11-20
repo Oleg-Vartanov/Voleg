@@ -10,7 +10,6 @@ use App\Core\Enum\Group;
 use App\Core\Exception\UnprocessableException;
 use App\Core\Http\ApiController;
 use App\SplitExpense\Model\Entity\Expense;
-use App\SplitExpense\Http\V1\Request\ExpenseDto;
 use App\SplitExpense\Repository\ExpenseRepository;
 use App\SplitExpense\Service\ExpenseService;
 use App\User\Model\Entity\User;
@@ -49,7 +48,7 @@ class ExpensePutAction extends ApiController
     public function __invoke(
         #[CurrentUser] User $user,
         int $id,
-        #[MapRequestPayload] ExpenseDto $dto,
+        #[MapRequestPayload] ExpenseRequestPayload $payload,
     ): JsonResponse {
         $expense = $this->expenseRepository->find($id) ?? $this->notFound();
 
@@ -58,7 +57,7 @@ class ExpensePutAction extends ApiController
         }
 
         try {
-            $expense = $this->service->update($user, $expense, $dto);
+            $expense = $this->service->update($user, $expense, $payload);
         } catch (UnprocessableException $e) {
             return $this->validationErrorResponse($e);
         }

@@ -45,7 +45,7 @@ class FeedGetListAction extends ApiController
     public function __invoke(
         #[CurrentUser] User $user,
         #[MapQueryString(validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY)]
-        FeedRequest $dto = new FeedRequest(),
+        FeedRequestPayload $dto = new FeedRequestPayload(),
     ): JsonResponse {
         $types = $dto->selectedTypes();
         $items = $this->feedService->listForUser($user, $types, $dto->offset, $dto->limit);

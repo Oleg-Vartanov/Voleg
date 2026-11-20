@@ -10,7 +10,6 @@ use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Enum\Group;
 use App\Core\Http\ApiController;
 use App\SplitExpense\Model\Entity\Connection;
-use App\SplitExpense\Http\V1\Request\ConnectionResponseDto;
 use App\SplitExpense\Repository\ConnectionRepository;
 use App\SplitExpense\Service\ConnectionService;
 use App\User\Model\Entity\User;
@@ -49,12 +48,12 @@ class ConnectionResponseAction extends ApiController
     public function __invoke(
         #[CurrentUser] User $user,
         int $id,
-        #[MapRequestPayload(validationFailedStatusCode: 422)] ConnectionResponseDto $dto,
+        #[MapRequestPayload(validationFailedStatusCode: 422)] ConnectionResponseRequestPayload $payload,
     ): JsonResponse {
         $connection = $this->connectionRepository->find($id) ?? $this->notFound();
 
         try {
-            $this->service->respond($user, $connection, $dto->status);
+            $this->service->respond($user, $connection, $payload->status);
         } catch (LogicException $e) {
             return $this->messageResponse($e->getMessage(), 400);
         }

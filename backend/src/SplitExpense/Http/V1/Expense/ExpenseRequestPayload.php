@@ -1,13 +1,13 @@
 <?php
 
-namespace App\SplitExpense\Http\V1\Request;
+namespace App\SplitExpense\Http\V1\Expense;
 
 use App\Core\Validator\Constraints\IntRange;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class ExpenseDto
+class ExpenseRequestPayload
 {
     #[OA\Property(example: 1)]
     #[Assert\NotBlank]
@@ -43,10 +43,10 @@ class ExpenseDto
     #[Assert\Date]
     public string $expenseDate;
 
-    /** @var ExpenseSplitDto[] */
+    /** @var ExpenseSplitRequestPayload[] */
     #[OA\Property(
         type: 'array',
-        items: new OA\Items(ref: new Model(type: ExpenseSplitDto::class))
+        items: new OA\Items(ref: new Model(type: ExpenseSplitRequestPayload::class))
     )]
     #[Assert\NotBlank]
     #[Assert\Count(min: 1)]

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\SplitExpense\Http\V1\Request;
+namespace App\SplitExpense\Http\V1\Expense;
 
 use App\Core\Validator\Constraints\IntRange;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class ExpenseSplitDto
+class ExpenseSplitRequestPayload
 {
     #[OA\Property(example: 1)]
     #[Assert\NotBlank]

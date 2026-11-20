@@ -6,7 +6,7 @@ use App\Core\Enum\Group;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[Groups([Group::public->value])]
-readonly class BalanceResponse
+readonly class BalanceResponsePayload
 {
     /**
      * @param BalanceAmount[] $totalAmounts Net balance per currency across every counterparty.

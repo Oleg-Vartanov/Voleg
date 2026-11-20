@@ -6,7 +6,7 @@ use App\Core\Enum\Group;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[Groups([Group::public->value])]
-readonly class InsightsResponse
+readonly class InsightsResponsePayload
 {
     /**
      * @param CategoryTotal[] $categoryTotals Current user's expense share by month, category and

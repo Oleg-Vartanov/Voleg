@@ -7,10 +7,10 @@ use App\Core\Documentation\Attribute\Response\MessageResponse;
 use App\Core\Documentation\Attribute\Response\NotFoundResponse;
 use App\Core\Documentation\Attribute\Response\ValidationErrorResponse;
 use App\Core\Enum\Group;
+use App\Core\Exception\AccessDeniedException;
 use App\Core\Exception\UnprocessableException;
 use App\Core\Http\ApiController;
 use App\SplitExpense\Model\Entity\Adjustment;
-use App\SplitExpense\Http\V1\Request\AdjustmentDto;
 use App\SplitExpense\Repository\AdjustmentRepository;
 use App\SplitExpense\Service\AdjustmentService;
 use App\User\Model\Entity\User;
@@ -49,19 +49,16 @@ class AdjustmentPutAction extends ApiController
     public function __invoke(
         #[CurrentUser] User $user,
         int $id,
-        #[MapRequestPayload] AdjustmentDto $dto,
+        #[MapRequestPayload] AdjustmentRequestPayload $payload,
     ): JsonResponse {
         $adjustment = $this->adjustmentRepository->find($id) ?? $this->notFound();
 
-        // todo: move inside update
-        if (!$this->service->canUpdate($user, $adjustment)) {
-            $this->accessDenied();
-        }
-
         try {
-            $adjustment = $this->service->update($adjustment, $dto);
+            $adjustment = $this->service->update($user, $adjustment, $payload);
         } catch (UnprocessableException $e) {
             return $this->validationErrorResponse($e);
+        } catch (AccessDeniedException $e) {
+            $this->accessDenied();
         }
 
         $this->adjustmentRepository->save($adjustment, true);

@@ -23,7 +23,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
     tags: ['Split Expense: Insights'],
     responses: [
         new ItemResponse(
-            type: InsightsResponse::class,
+            type: InsightsResponsePayload::class,
             description: 'Total expense cost paid by the current user and optional connected payers',
             groups: [Group::public->value],
         ),
@@ -42,7 +42,7 @@ class InsightsGetAction extends ApiController
     public function __invoke(
         #[CurrentUser] User $user,
         #[MapQueryString(validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY)]
-        InsightsRequest $dto = new InsightsRequest(),
+        InsightsRequestPayload $dto = new InsightsRequestPayload(),
     ): JsonResponse {
         try {
             $insights = $this->insightsService->forUser(

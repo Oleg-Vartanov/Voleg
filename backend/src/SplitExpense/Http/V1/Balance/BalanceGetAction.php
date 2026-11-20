@@ -19,7 +19,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
     tags: ['Split Expense: Balance'],
     responses: [
         new ItemResponse(
-            type: BalanceResponse::class,
+            type: BalanceResponsePayload::class,
             description: 'Split expense balances of the current user',
             groups: [Group::public->value],
         ),

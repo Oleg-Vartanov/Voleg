@@ -5,7 +5,7 @@ namespace App\SplitExpense\Service;
 use App\Core\Model\Entity\Currency;
 use App\Core\Repository\CurrencyRepository;
 use App\SplitExpense\Http\V1\Balance\BalanceAmount;
-use App\SplitExpense\Http\V1\Balance\BalanceResponse;
+use App\SplitExpense\Http\V1\Balance\BalanceResponsePayload;
 use App\SplitExpense\Http\V1\Balance\UserBalance;
 use App\SplitExpense\Model\ReadModel\BalanceEntry;
 use App\SplitExpense\Repository\AdjustmentRepository;
@@ -23,12 +23,12 @@ readonly class BalanceService
     ) {
     }
 
-    public function forUser(User $user): BalanceResponse
+    public function forUser(User $user): BalanceResponsePayload
     {
         $entries = $this->netEntries($user);
 
         if ($entries === []) {
-            return new BalanceResponse();
+            return new BalanceResponsePayload();
         }
 
         $users = $this->usersById($entries);
@@ -81,7 +81,7 @@ readonly class BalanceService
             $totals[] = new BalanceAmount($currency, $amount);
         }
 
-        return new BalanceResponse($this->sortByCurrency($totals), $userBalances);
+        return new BalanceResponsePayload($this->sortByCurrency($totals), $userBalances);
     }
 
     /**

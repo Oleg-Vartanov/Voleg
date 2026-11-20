@@ -2,11 +2,12 @@
 
 namespace App\SplitExpense\Service;
 
+use App\Core\Exception\AccessDeniedException;
 use App\Core\Model\Entity\Currency;
 use App\Core\Exception\UnprocessableException;
 use App\Core\Repository\CurrencyRepository;
 use App\SplitExpense\Model\Entity\Adjustment;
-use App\SplitExpense\Http\V1\Request\AdjustmentDto;
+use App\SplitExpense\Http\V1\Adjustment\AdjustmentRequestPayload;
 use App\SplitExpense\Repository\AdjustmentRepository;
 use App\User\Model\Entity\User;
 use App\User\Repository\UserRepository;
@@ -45,29 +46,39 @@ readonly class AdjustmentService
     /**
      * @throws UnprocessableException
      */
-    public function create(User $createdBy, AdjustmentDto $dto): Adjustment
-    {
-        $otherUser = $this->resolveOtherUser($createdBy, $dto->otherUserId);
+    public function create(
+        User $createdBy,
+        AdjustmentRequestPayload $payload,
+    ): Adjustment {
+        $otherUser = $this->resolveOtherUser($createdBy, $payload->otherUserId);
 
         return new Adjustment(
             createdByUser: $createdBy,
             otherUser: $otherUser,
-            amount: $dto->amount,
-            currency: $this->resolveCurrency($dto->currencyId),
-            adjustmentDate: $this->resolveDate($dto->adjustmentDate),
-            description: $dto->description,
+            amount: $payload->amount,
+            currency: $this->resolveCurrency($payload->currencyId),
+            adjustmentDate: $this->resolveDate($payload->adjustmentDate),
+            description: $payload->description,
         );
     }
 
     /**
      * @throws UnprocessableException
+     * @throws AccessDeniedException
      */
-    public function update(Adjustment $adjustment, AdjustmentDto $dto): Adjustment
-    {
-        $adjustment->setCurrency($this->resolveCurrency($dto->currencyId));
-        $adjustment->setAmount($dto->amount);
-        $adjustment->setAdjustmentDate($this->resolveDate($dto->adjustmentDate));
-        $adjustment->setDescription($dto->description);
+    public function update(
+        User $updatedBy,
+        Adjustment $adjustment,
+        AdjustmentRequestPayload $payload,
+    ): Adjustment {
+        if (!$this->canUpdate($updatedBy, $adjustment)) {
+            throw new AccessDeniedException();
+        }
+
+        $adjustment->setCurrency($this->resolveCurrency($payload->currencyId));
+        $adjustment->setAmount($payload->amount);
+        $adjustment->setAdjustmentDate($this->resolveDate($payload->adjustmentDate));
+        $adjustment->setDescription($payload->description);
 
         return $adjustment;
     }

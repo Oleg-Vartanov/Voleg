@@ -7,7 +7,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[OA\Schema(title: 'Split Expense Feed Request')]
-class FeedRequest
+class FeedRequestPayload
 {
     private const int MAX_LIMIT = 100;
 

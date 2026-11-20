@@ -6,7 +6,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[OA\Schema(title: 'Insights Request')]
-class InsightsRequest
+class InsightsRequestPayload
 {
     /**
      * @param int[] $userIds Extra payers whose expense totals are included when the current user is on the split.

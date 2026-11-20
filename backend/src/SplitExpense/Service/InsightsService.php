@@ -6,7 +6,7 @@ use App\Core\Exception\UnprocessableException;
 use App\Core\Model\Entity\Currency;
 use App\Core\Repository\CurrencyRepository;
 use App\SplitExpense\Http\V1\Insights\CategoryTotal;
-use App\SplitExpense\Http\V1\Insights\InsightsResponse;
+use App\SplitExpense\Http\V1\Insights\InsightsResponsePayload;
 use App\SplitExpense\Model\Entity\Category;
 use App\SplitExpense\Model\ReadModel\CategoryTotalEntry;
 use App\SplitExpense\Repository\CategoryRepository;
@@ -39,7 +39,7 @@ readonly class InsightsService
         int $limit = 6,
         ?int $categoryId = null,
         array $userIds = [],
-    ): InsightsResponse {
+    ): InsightsResponsePayload {
         $otherPayers = $this->resolveOtherPayers($user, $userIds);
         $allMonths = $this->expenseRepository->listPaidExpenseMonths($user, $otherPayers, $categoryId);
         $totalMonthCount = count($allMonths);
@@ -51,7 +51,7 @@ readonly class InsightsService
             $categoryId,
         );
         if ($entries === []) {
-            return new InsightsResponse(totalMonthCount: $totalMonthCount);
+            return new InsightsResponsePayload(totalMonthCount: $totalMonthCount);
         }
 
         $categories = $this->categoriesById($entries);
@@ -83,7 +83,7 @@ readonly class InsightsService
                 <=> [$b->category->getTitle(), $b->currency->getCode()];
         });
 
-        return new InsightsResponse($totals, $totalMonthCount);
+        return new InsightsResponsePayload($totals, $totalMonthCount);
     }
 
     /**

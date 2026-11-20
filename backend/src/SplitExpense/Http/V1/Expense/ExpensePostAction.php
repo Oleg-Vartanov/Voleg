@@ -10,7 +10,6 @@ use App\Core\Enum\Group;
 use App\Core\Exception\UnprocessableException;
 use App\Core\Http\ApiController;
 use App\SplitExpense\Model\Entity\Expense;
-use App\SplitExpense\Http\V1\Request\ExpenseDto;
 use App\SplitExpense\Repository\ExpenseRepository;
 use App\SplitExpense\Service\ExpenseService;
 use App\User\Model\Entity\User;
@@ -51,10 +50,10 @@ class ExpensePostAction extends ApiController
     public function __invoke(
         #[CurrentUser] User $user,
         int $id,
-        #[MapRequestPayload] ExpenseDto $dto,
+        #[MapRequestPayload] ExpenseRequestPayload $payload,
     ): JsonResponse {
         try {
-            $expense = $this->service->create($user, $dto);
+            $expense = $this->service->create($user, $payload);
         } catch (UnprocessableException $e) {
             return $this->validationErrorResponse($e);
         }
