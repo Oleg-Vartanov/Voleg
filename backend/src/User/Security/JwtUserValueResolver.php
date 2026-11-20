@@ -4,6 +4,7 @@ namespace App\User\Security;
 
 use App\User\Model\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
 use Symfony\Component\DependencyInjection\Attribute\AutowireDecorated;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,6 +31,10 @@ readonly class JwtUserValueResolver implements ValueResolverInterface
     ) {
     }
 
+    /**
+     * @return mixed[]
+     * @throws ORMException
+     */
     public function resolve(Request $request, ArgumentMetadata $argument): array
     {
         $user = $this->tokenStorage->getToken()?->getUser();

@@ -15,6 +15,7 @@ use App\User\Model\Entity\User;
 use App\User\Repository\UserRepository;
 use DateMalformedStringException;
 use DateTimeImmutable;
+use LogicException;
 
 readonly class ExpenseService
 {
@@ -143,7 +144,8 @@ readonly class ExpenseService
         $appliedSplitsUsersIds = [];
 
         foreach ($expense->getSplits() as $split) {
-            $currentSplits[$split->getUser()->getId()] = $split;
+            $userId = $split->getUser()->getId() ?? throw new LogicException('Split user is not persisted.');
+            $currentSplits[$userId] = $split;
         }
 
         foreach ($dtos as $dto) {
@@ -163,8 +165,8 @@ readonly class ExpenseService
                 }
             }
 
-            if (isset($currentSplits[$user->getId()])) {
-                $currentSplits[$user->getId()]->setAmount($dto->amount);
+            if (isset($currentSplits[$dto->userId])) {
+                $currentSplits[$dto->userId]->setAmount($dto->amount);
             } else {
                 $expense->addSplit(new ExpenseSplit($expense, $user, $dto->amount));
             }

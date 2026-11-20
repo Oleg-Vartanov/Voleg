@@ -2,8 +2,8 @@
 
 namespace App\FixturePredictions\Http\V1\Predictions;
 
-use App\Core\Util\ArrayUtil;
 use App\FixturePredictions\Enum\CompetitionCodeEnum;
+use DateMalformedStringException;
 use DateTimeImmutable;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -12,7 +12,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 class PredictionsRequest
 {
     /**
-     * @param mixed[] $userIds
+     * @param int[] $userIds
+     *
+     * @throws DateMalformedStringException
      */
     public function __construct(
         #[OA\Property(example: '2024-12-31')]
@@ -34,7 +36,6 @@ class PredictionsRequest
         #[Assert\All([new Assert\Type('int'), new Assert\Positive()])]
         public array $userIds = [],
     ) {
-        $this->userIds = ArrayUtil::castItemsToIntIfPossible($userIds);
         $this->start ??= new DateTimeImmutable()->modify('-5 days');
         $this->end ??= new DateTimeImmutable()->modify('+5 days');
         $this->start = $this->start->setTime(0, 0, 0);

@@ -80,7 +80,7 @@ readonly class PredictionsService
             if ($fixture === null) {
                 throw new UnprocessableException(
                     'Fixture not found (id ' . $dto->fixtureId . ').',
-                    $id.'.fixtureId'
+                    $id . '.fixtureId'
                 );
             }
 
@@ -92,7 +92,7 @@ readonly class PredictionsService
                         $fixture->getAwayTeam()->getName(),
                         (int) $fixture->getId(),
                     ),
-                    $id.'.fixtureId'
+                    $id . '.fixtureId'
                 );
             }
 

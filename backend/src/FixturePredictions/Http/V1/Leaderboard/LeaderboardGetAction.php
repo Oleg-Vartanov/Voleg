@@ -67,10 +67,8 @@ class LeaderboardGetAction extends ApiController
         #[MapQueryString(validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY)]
         LeaderboardRequest $dto = new LeaderboardRequest(),
     ): JsonResponse {
-        /** @var int[] $userIds */
-        $userIds = $dto->userIds;
         // Versus mode: compare the current user with the selected users only.
-        $userIds = empty($userIds) ? null : array_values(array_unique([(int) $user->getId(), ...$userIds]));
+        $userIds = empty($dto->userIds) ? null : array_values(array_unique([(int) $user->getId(), ...$dto->userIds]));
 
         $competition = $this->competitionRepository->findOneByCode($dto->competitionCode);
         $season = $this->seasonRepository->findByYearOrCompetition(
