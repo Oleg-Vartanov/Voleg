@@ -10,7 +10,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class UserFixture extends Fixture
 {
-    public const string DEFAULT_PASSWORD = 'Qwerty1!';
+    public const string DEFAULT_PASSWORD = 'password';
 
     public function __construct(
         private readonly UserService $userService,

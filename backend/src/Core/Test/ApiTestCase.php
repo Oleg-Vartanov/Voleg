@@ -17,7 +17,7 @@ abstract class ApiTestCase extends WebTestCase
 {
     use ContainerTestTrait;
 
-    public const string DEFAULT_PASSWORD = 'Qwerty1!';
+    public const string DEFAULT_PASSWORD = 'password';
 
     protected KernelBrowser $client;
     protected RouterInterface $router;

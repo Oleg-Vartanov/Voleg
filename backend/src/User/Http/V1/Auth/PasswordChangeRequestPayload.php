@@ -12,6 +12,6 @@ class PasswordChangeRequestPayload
     #[Assert\NotBlank]
     public string $currentPassword;
 
-    #[Assert\NotBlank, CustomAssert\StrongPassword]
+    #[Assert\NotBlank, CustomAssert\Password]
     public string $newPassword;
 }

@@ -66,7 +66,7 @@ class PasswordChangeActionTest extends ApiTestCase
         $this->signIn($user);
         $this->sendRequest([
             'currentPassword' => self::DEFAULT_PASSWORD,
-            'newPassword' => 'invalid-password',
+            'newPassword' => 'short',
         ]);
         self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
     }

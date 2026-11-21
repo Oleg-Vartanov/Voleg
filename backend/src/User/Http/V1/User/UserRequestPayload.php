@@ -28,7 +28,7 @@ class UserRequestPayload
     #[Groups([self::SIGN_UP])]
     #[
         Assert\NotBlank(groups: [self::SIGN_UP]),
-        CustomAssert\StrongPassword(groups: [self::SIGN_UP]),
+        CustomAssert\Password(groups: [self::SIGN_UP]),
     ]
     public string $password;
 

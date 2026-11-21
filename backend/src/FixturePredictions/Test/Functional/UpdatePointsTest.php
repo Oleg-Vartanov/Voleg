@@ -112,7 +112,7 @@ class UpdatePointsTest extends KernelTestCase
         $index = bin2hex(random_bytes(6));
         $user = $this->getService(UserService::class)->create(
             "predictions-{$index}@example.com",
-            'Qwerty1!',
+            'password',
             "predictions-{$index}",
         );
         $user->setVerified(true);

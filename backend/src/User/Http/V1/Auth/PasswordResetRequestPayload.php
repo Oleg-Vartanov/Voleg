@@ -12,6 +12,6 @@ class PasswordResetRequestPayload
     #[Assert\NotBlank]
     public string $token;
 
-    #[Assert\NotBlank, CustomAssert\StrongPassword]
+    #[Assert\NotBlank, CustomAssert\Password]
     public string $password;
 }

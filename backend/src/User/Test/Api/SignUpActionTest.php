@@ -7,6 +7,7 @@ use App\Core\Test\ApiTestCase;
 use App\User\Repository\VerificationTokenRepository;
 use App\User\Test\Trait\EmailedTokenTestTrait;
 use PHPUnit\Framework\Attributes\TestDox;
+use Random\RandomException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -15,13 +16,16 @@ class SignUpActionTest extends ApiTestCase
 {
     use EmailedTokenTestTrait;
 
+    /**
+     * @throws RandomException
+     */
     #[TestDox('Sign up action: success')]
     public function testSuccess(): void
     {
         $index = bin2hex(random_bytes(6));
         $this->signUpRequest([
             'email' => 'user-auth-test-' . $index . '@example.com',
-            'password' => '!Qwerty1',
+            'password' => self::DEFAULT_PASSWORD,
             'username' => 'user-auth-test-' . $index,
             'code' => 'sign-up-code',
         ]);
