@@ -39,4 +39,7 @@ if [ ! -f /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ]; then
   done
 fi;
 
+# Cronie silently ignores cron.d files unless mode is 644 (e.g. an exec bit breaks it).
+find /etc/cron.d -type f -exec chmod 644 {} +
+
 crond -f & exec /docker-entrypoint.sh "$@"
