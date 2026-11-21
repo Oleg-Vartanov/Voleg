@@ -1,4 +1,4 @@
-FROM php:8.5-fpm AS php
+FROM php:8.5-fpm AS php_base
 
 WORKDIR /var/www/html/backend
 
@@ -7,14 +7,30 @@ RUN apt-get update \
     && docker-php-ext-install intl pdo pdo_mysql zip bcmath
 
 RUN --mount=type=bind,from=ghcr.io/php/pie:bin,source=/pie,target=/usr/local/bin/pie \
-    pie install apcu/apcu xdebug/xdebug
+    pie install apcu/apcu
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-FROM php AS php_supervisor
+# ---------- Prod ----------
+
+FROM php_base AS php
+
+FROM php_base AS php_supervisor
 
 RUN apt-get update \
     && apt-get install -y supervisor;
 
 # https://symfony.com/doc/current/messenger.html#graceful-shutdown
 RUN docker-php-ext-install pcntl
+
+# ---------- Dev ----------
+
+FROM php AS php_dev
+
+RUN --mount=type=bind,from=ghcr.io/php/pie:bin,source=/pie,target=/usr/local/bin/pie \
+    pie install xdebug/xdebug
+
+FROM php_supervisor AS php_supervisor_dev
+
+RUN --mount=type=bind,from=ghcr.io/php/pie:bin,source=/pie,target=/usr/local/bin/pie \
+    pie install xdebug/xdebug

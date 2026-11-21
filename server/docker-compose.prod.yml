@@ -7,11 +7,12 @@ x-logging: &default-logging
 services:
 
   database:
+    restart: unless-stopped
     container_name: ${PROJECT_NAME}_database
     image: mysql:8.0
     logging: *default-logging
     ports:
-      - ${DATABASE_PORT}:${MYSQL_PORT}
+      - 127.0.0.1:${DATABASE_PORT}:${MYSQL_PORT}
     volumes:
       - ./common/database/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - ./common/database/mysql:/var/lib/mysql
@@ -23,6 +24,7 @@ services:
       retries: 10
 
   webserver:
+    restart: unless-stopped
     container_name: ${PROJECT_NAME}_nginx
     logging: *default-logging
     build:
@@ -48,6 +50,7 @@ services:
     command: [ "nginx", "-g", "daemon off;" ]
 
   php:
+    restart: unless-stopped
     container_name: ${PROJECT_NAME}_php
     logging: *default-logging
     build:
@@ -56,12 +59,14 @@ services:
     volumes:
       - ../backend:/var/www/html/backend
       - ./common/php/php.ini:/usr/local/etc/php/php.ini
+      - ./prod/php/prod.ini:/usr/local/etc/php/conf.d/zz-prod.ini
     depends_on:
       database:
         condition: service_healthy
     env_file: [ ./.env, ./.env.prod, ./.env.local ]
 
   php_supervisor:
+    restart: unless-stopped
     container_name: ${PROJECT_NAME}_php_supervisor
     logging: *default-logging
     build:
@@ -71,11 +76,13 @@ services:
     volumes:
       - ../backend:/var/www/html/backend
       - ./common/php/php.ini:/usr/local/etc/php/php.ini
+      - ./prod/php/prod.ini:/usr/local/etc/php/conf.d/zz-prod.ini
       - ./common/php/supervisor:/etc/supervisor/conf.d
     depends_on: [ database ]
     env_file: [ ./.env, ./.env.prod, ./.env.local ]
 
   node:
+    restart: unless-stopped
     container_name: ${PROJECT_NAME}_node
     logging: *default-logging
     image: node:latest

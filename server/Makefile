@@ -23,9 +23,10 @@ init:
 	$(DOCKER_COMPOSE) build
 	$(DOCKER_COMPOSE) down
 	$(DOCKER_COMPOSE) up -d
-	$(PHP_CONTAINER) composer install --no-interaction
+	$(PHP_CONTAINER) composer install --no-interaction $(if $(filter prod,$(SERVER_ENV)),--no-dev --optimize-autoloader)
 	$(PHP_CONTAINER) php bin/console lexik:jwt:generate-keypair --skip-if-exists # Generate JWT keys.
-	$(PHP_CONTAINER) chmod -R 777 var
+	$(PHP_CONTAINER) chown -R www-data:www-data var
+	$(PHP_CONTAINER) chmod -R u=rwX,g=rwX,o= var
 	$(PHP_CONTAINER) php bin/console asset-map:compile
 	$(PHP_CONTAINER) php bin/console doctrine:migrations:migrate --no-interaction
 	$(PHP_CONTAINER) php bin/console app:seed-reference-data --no-interaction
