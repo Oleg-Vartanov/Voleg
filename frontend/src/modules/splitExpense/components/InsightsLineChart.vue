@@ -431,79 +431,79 @@ onUnmounted(() => {
           @scroll="onChartScroll(view, $event)"
         >
           <div class="insights-chart__track">
-          <button
-            v-if="props.hasMore"
-            type="button"
-            class="insights-chart__more"
-            :style="{ top: `${PAD_TOP + PLOT_HEIGHT / 2}px` }"
-            :disabled="props.isLoadingMore"
-            aria-label="Load older months"
-            @click="emit('loadMore')"
-          >
-            <span
-              v-if="props.isLoadingMore"
-              class="spinner-border spinner-border-sm me-1"
+            <button
+              v-if="props.hasMore"
+              type="button"
+              class="insights-chart__more"
+              :style="{ top: `${PAD_TOP + PLOT_HEIGHT / 2}px` }"
+              :disabled="props.isLoadingMore"
+              aria-label="Load older months"
+              @click="emit('loadMore')"
+            >
+              <span
+                v-if="props.isLoadingMore"
+                class="spinner-border spinner-border-sm me-1"
+                aria-hidden="true"
+              ></span>
+              {{ props.isLoadingMore ? 'Loading…' : 'Show more' }}
+            </button>
+            <svg
+              class="insights-chart__plot"
+              :width="view.width"
+              :height="SVG_HEIGHT"
               aria-hidden="true"
-            ></span>
-            {{ props.isLoadingMore ? 'Loading…' : 'Show more' }}
-          </button>
-          <svg
-            class="insights-chart__plot"
-            :width="view.width"
-            :height="SVG_HEIGHT"
-            aria-hidden="true"
-            @pointermove="onPointerMove(view, $event)"
-            @pointerleave="clearTooltip"
-          >
-            <line
-              v-for="tick in view.ticks"
-              :key="`grid-${tick}`"
-              :class="tick === 0 ? 'insights-chart__axis' : 'insights-chart__grid'"
-              x1="0"
-              :x2="view.width"
-              :y1="yOf(tick, view.top)"
-              :y2="yOf(tick, view.top)"
-            />
-
-            <line
-              v-if="tooltip?.currencyId === view.chart.currencyId"
-              class="insights-chart__guide"
-              :x1="pointX(view, tooltip.monthIndex)"
-              :x2="pointX(view, tooltip.monthIndex)"
-              :y1="PAD_TOP"
-              :y2="BASELINE_Y"
-            />
-
-            <polyline class="insights-chart__series" :points="linePoints(view)" />
-            <circle
-              v-for="(amount, index) in view.chart.amounts"
-              :key="view.chart.months[index].key"
-              :cx="pointX(view, index)"
-              :cy="yOf(amount, view.top)"
-              :r="pointRadius(view, index)"
-            />
-
-            <text
-              v-for="(month, index) in view.chart.months"
-              :key="`month-${month.key}`"
-              class="insights-chart__label"
-              :x="pointX(view, index)"
-              :y="BASELINE_Y + X_MONTH_Y"
-              text-anchor="middle"
+              @pointermove="onPointerMove(view, $event)"
+              @pointerleave="clearTooltip"
             >
-              {{ month.monthLabel }}
-            </text>
-            <text
-              v-for="(month, index) in view.chart.months"
-              :key="`year-${month.key}`"
-              class="insights-chart__year"
-              :x="pointX(view, index)"
-              :y="BASELINE_Y + X_YEAR_Y"
-              text-anchor="middle"
-            >
-              {{ month.yearLabel }}
-            </text>
-          </svg>
+              <line
+                v-for="tick in view.ticks"
+                :key="`grid-${tick}`"
+                :class="tick === 0 ? 'insights-chart__axis' : 'insights-chart__grid'"
+                x1="0"
+                :x2="view.width"
+                :y1="yOf(tick, view.top)"
+                :y2="yOf(tick, view.top)"
+              />
+
+              <line
+                v-if="tooltip?.currencyId === view.chart.currencyId"
+                class="insights-chart__guide"
+                :x1="pointX(view, tooltip.monthIndex)"
+                :x2="pointX(view, tooltip.monthIndex)"
+                :y1="PAD_TOP"
+                :y2="BASELINE_Y"
+              />
+
+              <polyline class="insights-chart__series" :points="linePoints(view)" />
+              <circle
+                v-for="(amount, index) in view.chart.amounts"
+                :key="view.chart.months[index].key"
+                :cx="pointX(view, index)"
+                :cy="yOf(amount, view.top)"
+                :r="pointRadius(view, index)"
+              />
+
+              <text
+                v-for="(month, index) in view.chart.months"
+                :key="`month-${month.key}`"
+                class="insights-chart__label"
+                :x="pointX(view, index)"
+                :y="BASELINE_Y + X_MONTH_Y"
+                text-anchor="middle"
+              >
+                {{ month.monthLabel }}
+              </text>
+              <text
+                v-for="(month, index) in view.chart.months"
+                :key="`year-${month.key}`"
+                class="insights-chart__year"
+                :x="pointX(view, index)"
+                :y="BASELINE_Y + X_YEAR_Y"
+                text-anchor="middle"
+              >
+                {{ month.yearLabel }}
+              </text>
+            </svg>
           </div>
         </div>
       </div>

@@ -44,7 +44,10 @@ const date = computed(() => formatShortDate(props.adjustment.adjustmentDate))
   --adjustments-col-type: 2.75rem;
 
   display: grid;
-  grid-template-columns: var(--adjustments-col-date) var(--adjustments-col-type) minmax(0, 1fr) auto;
+  grid-template-columns: var(--adjustments-col-date) var(--adjustments-col-type) minmax(
+      0,
+      1fr
+    ) auto;
   width: 100%;
   cursor: pointer;
   user-select: none;
