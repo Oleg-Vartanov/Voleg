@@ -130,7 +130,7 @@ loadPage(1)
                   :key="connection.id"
                   class="list-group-item d-flex justify-content-between align-items-center gap-2"
                 >
-                  <span class="text-truncate">{{ partnerName(connection) }}</span>
+                  <span class="text-break" style="min-width: 0">{{ partnerName(connection) }}</span>
 
                   <div
                     v-if="requests.activeTab.value === 'incoming'"
@@ -208,7 +208,7 @@ loadPage(1)
                   :key="connection.id"
                   class="list-group-item d-flex justify-content-between align-items-center gap-2"
                 >
-                  <span class="text-truncate">{{ partnerName(connection) }}</span>
+                  <span class="text-break" style="min-width: 0">{{ partnerName(connection) }}</span>
                   <button
                     type="button"
                     class="btn btn-outline-danger btn-sm flex-shrink-0 se-action-btn"

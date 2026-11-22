@@ -52,7 +52,7 @@ onMounted(() => {
               :key="userBalance.user.id"
               class="list-group-item balance-user"
             >
-              <span class="balance-user__name text-truncate">@{{ userBalance.user.username }}</span>
+              <span class="balance-user__name">@{{ userBalance.user.username }}</span>
 
               <span class="balance-user__amounts">
                 <span
@@ -97,6 +97,7 @@ onMounted(() => {
 
 .balance-user__name {
   min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .balance-user__amounts {
