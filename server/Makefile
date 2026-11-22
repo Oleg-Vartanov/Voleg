@@ -90,6 +90,21 @@ watch:
 front-build:
 	$(NODE_CONTAINER) npm run build-only
 
+# make front-test filter="keyboard" runs only tests whose name contains that text.
+front-test:
+	docker exec -e FORCE_COLOR=1 $(PROJECT_NAME)_node \
+		npm run test:unit -- --run $(if $(filter),-t "$(filter)")
+
+# Same tests, once per timezone. Date bugs hide in UTC (the container default) and only show where
+# the local day differs from the UTC day. Override: make front-test-tz FRONT_TEST_TZ="UTC Asia/Tokyo"
+FRONT_TEST_TZ ?= America/Los_Angeles Asia/Tokyo Europe/Berlin
+front-test-tz:
+	@for tz in $(FRONT_TEST_TZ); do \
+		echo "==== TZ=$$tz"; \
+		docker exec -e FORCE_COLOR=1 -e TZ=$$tz $(PROJECT_NAME)_node \
+			npm run test:unit -- --run $(if $(filter),-t "$(filter)") || exit 1; \
+	done
+
 front-linter:
 	$(NODE_CONTAINER) npm run lint
 front-linter-fix:

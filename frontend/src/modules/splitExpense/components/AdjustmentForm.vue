@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import FormInput from '@/modules/core/components/form/FormInput.vue'
+import FormInputDate from '@/modules/core/components/form/FormInputDate.vue'
 import FormInputAmount from '@/modules/core/components/form/FormInputAmount.vue'
 import FormSelect from '@/modules/core/components/form/FormSelect.vue'
 import FormTextarea from '@/modules/core/components/form/FormTextarea.vue'
@@ -77,10 +78,9 @@ function fieldId(name: string): string {
       :error-text="validation.getError('amount')"
     />
 
-    <FormInput
+    <FormInputDate
       :id="fieldId('date')"
       v-model="fields.adjustmentDate"
-      type="date"
       label="Date"
       :is-valid="validation.isValid('adjustmentDate')"
       :error-text="validation.getError('adjustmentDate')"

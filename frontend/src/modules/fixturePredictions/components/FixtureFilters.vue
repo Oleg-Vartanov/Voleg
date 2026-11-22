@@ -2,7 +2,7 @@
 import { computed, inject } from 'vue'
 import arrayUtils from '@/modules/core/utils/arrayUtils'
 import AppModal from '@/modules/core/components/AppModal.vue'
-import FormInput from '@/modules/core/components/form/FormInput.vue'
+import FormInputDate from '@/modules/core/components/form/FormInputDate.vue'
 import FormSelect from '@/modules/core/components/form/FormSelect.vue'
 import type { FormSelectOption } from '@/modules/core/components/form/types'
 import { type FixtureFilters } from '@/modules/fixturePredictions/composables/useFilters'
@@ -49,8 +49,8 @@ function applyFilters(close: () => void) {
 <template>
   <AppModal v-model:open="open" title="Filters">
     <div class="modal-body">
-      <FormInput id="filter-start" v-model="start" type="date" label="Start" :required="false" />
-      <FormInput id="filter-end" v-model="end" type="date" label="End" :required="false" />
+      <FormInputDate id="filter-start" v-model="start" label="Start" :required="false" />
+      <FormInputDate id="filter-end" v-model="end" label="End" :required="false" />
       <FormSelect
         id="filter-competition"
         v-model="filters.competition.value"

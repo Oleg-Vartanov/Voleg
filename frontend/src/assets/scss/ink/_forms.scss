@@ -19,7 +19,8 @@
   // Floating fields and input groups: the wrapper draws the outline, the fields stay borderless.
   // Not isolated, so dropdowns inside can still overlap the fields below.
   .form-floating,
-  .input-group {
+  .input-group,
+  .form-date {
     @include ink-drawn-box($behind: false);
 
     // Focus glow, drawn around the outline.
@@ -55,6 +56,15 @@
     > :disabled {
       background-color: transparent;
     }
+  }
+
+  // Date field (FormInputDate): same outline as above, tinted when invalid or disabled.
+  .form-date--invalid {
+    --ov-box-color: var(--bs-form-invalid-border-color);
+  }
+
+  .form-date--disabled::after {
+    opacity: 0.45;
   }
 
   // Input groups: a drawn divider after each addon.

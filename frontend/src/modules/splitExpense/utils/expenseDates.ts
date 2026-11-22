@@ -1,7 +1,12 @@
 export type MonthGroup<T> = { month: string; label: string; items: T[] }
 
+// An expense date is a calendar day, not a moment in time: "2026-12-01T00:00:00+00:00" means 1 Dec
+// everywhere. new Date(value) would read it as a UTC instant and, in timezones west of UTC, the
+// getters below would then report 30 Nov. So the Date is built from the digits, in local time, and
+// any time or offset in the text is ignored.
 export function parseExpenseDate(value: string): Date | null {
-  const date = new Date(value)
+  const day = /^(\d{4})-(\d{2})-(\d{2})/.exec(value)
+  const date = day ? new Date(Number(day[1]), Number(day[2]) - 1, Number(day[3])) : new Date(value)
   return Number.isNaN(date.getTime()) ? null : date
 }
 

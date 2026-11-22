@@ -1,3 +1,5 @@
+import { todayIso } from '@/modules/core/utils/dateCalendar'
+
 export default {
   format(date, format = 'YYYY-MM-DDThh:mm:ss') {
     const pad = (n) => n.toString().padStart(2, '0')
@@ -24,7 +26,9 @@ export default {
 
     return `${offsetSign}${offsetHours}:${offsetMins}`
   },
+  // The user's own calendar day. toISOString() would give the UTC day, which differs from the
+  // local day for part of every day outside UTC (evening in the Americas, early morning in Asia).
   todayIsoDate(): string {
-    return new Date().toISOString().slice(0, 10)
+    return todayIso()
   }
 }
