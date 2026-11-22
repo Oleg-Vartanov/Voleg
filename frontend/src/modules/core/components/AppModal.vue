@@ -24,8 +24,26 @@ function onKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') close()
 }
 
+// Bootstrap's JS normally locks the page scroll; its CSS class alone does not, so do it here.
+// The scrollbar width is compensated so the page doesn't jump sideways.
+let scrollLocked = false
+
 function setBodyScrollLocked(locked: boolean) {
-  document.body.classList.toggle('modal-open', locked)
+  if (locked === scrollLocked) return
+  scrollLocked = locked
+
+  const { body, documentElement } = document
+  body.classList.toggle('modal-open', locked)
+
+  if (locked) {
+    const scrollbar = window.innerWidth - documentElement.clientWidth
+    body.style.overflow = 'hidden'
+    if (scrollbar > 0) body.style.paddingRight = `${scrollbar}px`
+    return
+  }
+
+  body.style.overflow = ''
+  body.style.paddingRight = ''
 }
 
 watch(
