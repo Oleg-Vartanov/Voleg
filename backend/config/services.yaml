@@ -21,6 +21,7 @@ services:
             - '../src/Kernel.php'
             - '../src/**/Entity/'
             - '../src/**/Test/**'
+            - '../src/**/DataFixture/**'
 
     #<<< Interfaces
     App\FixturePredictions\Service\FixtureProvider: '@App\FixturePredictions\Service\FootballDataOrgFixtureProvider'
