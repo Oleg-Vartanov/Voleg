@@ -1,6 +1,7 @@
 api:
   resource: ../src/
   type: attribute
+  exclude: '../src/**/Test/'
 
 api.v1.FixturePredictions:
   resource: ../src/FixturePredictions/Http/V1/
